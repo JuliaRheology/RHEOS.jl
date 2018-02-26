@@ -8,8 +8,7 @@ data_raw = fileload(filedir, ["time","stress","strain"])
 
 data.insight = true
 
-data1=fixed_resample!(data_raw, [1,450],[8],["up"])
-data2=fixed_resample!(data_raw, [1,450],[8],["left"])
+data_ressampled = fixed_resample!(data_raw, [1,450],[8],["up"])
 # downsample!(data, [1,450], [2])
 # var_resample!(data, :σᵦ, 0.1, _mapback = true)
 
