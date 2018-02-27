@@ -306,8 +306,8 @@ end
 """
     mapback(xᵦ::Array{Float64,1},x::Array{Float64,1})
 
-Match a variable downsampled array to its closest possible elements in original
-array. Returns the array of unique indices corresponding to these matched elements.
+Match a variable downsampled array xᵦ to its closest possible elements in original
+array x. Returns the array of unique indices corresponding to these matched elements.
 
 Can be used after variable resampling to maintain resampling priorities whilst
 not interfering with data of the fidelity by use of interpolations. Can also be
@@ -316,15 +316,13 @@ indices are deleted.
 """
 function mapback(xᵦ::Array{Float64,1},x::Array{Float64,1})
 
-    @assert length(xᵦ)<length(x) "xᵦ must be downsampled from x, i.e. have less elements."
-
-    # array to store indices, do not know length a-priori so must mutate in place.
-    indices = zeros(Int32,0)
+    # array to store indices
+    indices = zeros(Int32, length(xᵦ))
 
     # loop through all values in resampled array, finding closest index in original array
     for i in 1:length(xᵦ)
         @inbounds iClosest = closestindex(x, xᵦ[i])
-        append!(indices, iClosest)
+        @inbounds indices[i] = iClosest
     end
 
     # remove duplicates

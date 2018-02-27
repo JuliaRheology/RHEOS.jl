@@ -170,3 +170,87 @@ function fixed_resample(self::RheologyData, boundaries::Array{Int64,1}, elPeriod
     RheologyData(self.insight, _sampling, self.test_type, σᵦ, ϵᵦ, tᵦ, dσᵦ, dϵᵦ)
 
 end
+
+"""
+    smooth(self::RheologyData, τ::Float64; to_smooth = "all")
+
+Smooth data using a Gaussian Kernel to time scale τ (approximately half power).
+
+to_smooth can be an array of symbols so for example if you want to smooth ϵ and dϵ
+then to_smooth = [:ϵ, :dϵ]
+"""
+function smooth(self::RheologyData, τ::Float64; to_smooth = "all")
+
+    @assert self.sampling=="constant" "Sample rate must be constant for Gaussian smoothing kernel to function properly"
+
+    # check what to smooth
+    if to_smooth == "all"
+        tosmooth = [:σ, :ϵ, :dσ, :dϵ]
+    else
+        tosmooth = to_smooth
+    end
+
+    # copy self
+    self_copy = deepcopy(self)
+
+    # get constant sample period
+    dt = self.t[2] - self.t[1]
+
+    # sample rate
+    samplerate = 1.0/dt
+
+    # loop through fields to smooth
+    for i in tosmooth
+        # set iteratively
+        setfield!(self_copy, i, smoothgauss(getfield(self, i), τ, samplerate))
+    end
+
+    # plot if insight required
+    if self.insight
+        # loop through symbols in tosmooth and plot
+        for i in tosmooth
+            plot(self.t, getfield(self, i))
+            plot(self_copy.t, getfield(self_copy, i), "--")
+            title(String(i))
+            show()
+        end
+    end
+
+    self_copy
+end
+
+"""
+    function mapbackdata(self_new::RheologyData, self_original::RheologyData)
+
+Map back elements (WRT closest time elements) of all data from self_new to
+self_original. See mapback help docstring for more info on how algorithm works.
+"""
+function mapbackdata(self_new::RheologyData, self_original::RheologyData)
+
+    # get copy
+    self_out = deepcopy(self_original)
+
+    # symbols of data
+    to_map = [:t, :σ, :ϵ, :dσ, :dϵ]
+
+    # get mapped back indices
+    indices = mapback(self_new.t, self_original.t)
+
+    # loop through to set variables
+    for i in to_map
+        setfield!(self_out, i, getfield(self_original, i)[indices])
+    end
+
+    # plot if insight required
+    if self_new.insight
+        # loop through symbols in tosmooth and plot
+        for i in to_map
+            plot(self_original.t, getfield(self_original, i), "o")
+            plot(self_out.t, getfield(self_out, i), "x")
+            title(String(i))
+            show()
+        end
+    end
+
+    self_out
+end

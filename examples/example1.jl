@@ -7,13 +7,20 @@ filedir = "../data/rheologyData1.csv"
 
 data_raw = fileload(filedir, ["time","stress","strain"], "strlx")
 
-# data_raw.insight = true
+"""resampling examples"""
 
-# data_resampled = var_resample(data_raw, :σ, 0.1, _mapback = true)
-# data_resampled = downsample(data_raw, [1,450,500], [2,1])
-data_resampled = fixed_resample(data_raw, [1,450],[8],["up"])
-
+data_resampled = fixed_resample(data_raw, [1,450],[20],["up"])
 data_resampled.insight = true
+
+# data_smoothed = smooth(data_resampled, 5.0)
+# data_varresampled = var_resample(data_smoothed, :σ, 0.1, _mapback = false)
+#
+# data_varresampled.insight = true
+#
+# data_mappedback = mapbackdata(data_varresampled, data_resampled)
+# data_mappedback2 = mapbackdata(data_varresampled, data_raw)
+
+"""fitting examples"""
 
 # SLS fit
 lb = [0.0, 0.0, 0.0]

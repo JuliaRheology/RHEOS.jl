@@ -44,7 +44,7 @@ export RheologyData, fileload, RheologyModel
 
 ######################################################
 # hilevel_preproc.jl
-export var_resample, downsample, fixed_resample #, smooth!
+export var_resample, downsample, fixed_resample, smooth, mapbackdata
 
 ######################################################
 # hilevel_proc.jl
