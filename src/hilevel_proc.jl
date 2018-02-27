@@ -1,14 +1,13 @@
 #!/usr/bin/env julia
 
 """
-    modelfit!(self::RheologyData, test_type::String, model::String, params_init::Array{Float64,1}, low_bounds::Array{Float64,1}, hi_bounds::Array{Float64,1}; singularity = false)
+    modelfit!(self::RheologyData, model::String, params_init::Array{Float64,1}, low_bounds::Array{Float64,1}, hi_bounds::Array{Float64,1}; singularity = false)
 
 Fit RheologyData struct to model and store fitted parameters in self.fittedmodels.
 
 # Arguments
 
 - `self`: RheologyData struct containing all data
-- `test_type`: Either "creep" or "strlx"
 - `model`: E.g. "SLS", "springpot", "burgers" etc. See models.jl for full list
 - `params_init`: Initial parameters to use in fit
 - `low_bounds`: Lower bounds for parameters
@@ -16,7 +15,6 @@ Fit RheologyData struct to model and store fitted parameters in self.fittedmodel
 - `singularity`: Declare whether there is a singularity in viscoelastic modulus at t=0, true or false
 """
 function modelfit!(self::RheologyData,
-                  test_type::String,
                   model::String,
                   params_init::Array{Float64,1},
                   low_bounds::Array{Float64,1},
@@ -32,24 +30,24 @@ function modelfit!(self::RheologyData,
     xtol_rel!(opt,1e-4)
 
     # generate time series difference array (for convolution)
-    dt_series = deriv(self.tᵦ)
+    dt_series = deriv(self.t)
 
     # measured and prescribed_dot depend on test type
-    if test_type == "strlx"
-        measured = self.σᵦ
-        prescribed_dot = self.dϵᵦ
-    elseif test_type == "creep"
-        measured = self.ϵᵦ
-        prescribed_dot = self.dσᵦ
+    if self.test_type == "strlx"
+        measured = self.σ
+        prescribed_dot = self.dϵ
+    elseif self.test_type == "creep"
+        measured = self.ϵ
+        prescribed_dot = self.dσ
     end
 
     # get modulus function
-    modulus = moduli(model, test_type)
+    modulus = moduli(model, self.test_type)
 
     # set Opt object as a minimisation objective. Use a closure for additional
     # arguments sent to object objectivefunc
     min_objective!(opt, (params, grad) -> objectivefunc(params, grad, modulus,
-                                                        self.tᵦ, dt_series,
+                                                        self.t, dt_series,
                                                         prescribed_dot, measured;
                                                         _singularity = singularity,
                                                         _insight = self.insight,
@@ -58,6 +56,6 @@ function modelfit!(self::RheologyData,
     # minimise objective func, minx are the parameters resulting in minimum
     (minf, minx, ret) = optimize(opt, params_init)
 
-    # store fit results in RheologyData struct
+    # store fit results in RheologyData struct's fittedmodels dictionary
     self.fittedmodels[model] = minx
 end
