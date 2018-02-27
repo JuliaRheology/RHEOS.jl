@@ -20,22 +20,18 @@ mutable struct RheologyData
     # overrides to "variable".
     sampling::String
 
+    # test type is either "strlx" (stress relaxation, strain controlled)
+    # or "creep" (creep, stress controlled).
+    test_type::String
+
     # original data
     σ::Array{Float64,1}
     ϵ::Array{Float64,1}
     t::Array{Float64,1}
 
-    # data for modification (e.g. resampling, smoothing)
-    σᵦ::Array{Float64,1}
-    ϵᵦ::Array{Float64,1}
-    tᵦ::Array{Float64,1}
-
     # stress and strain numerically differentiated WRT to time
     dσ::Array{Float64,1}
-    dσᵦ::Array{Float64,1}
-
     dϵ::Array{Float64,1}
-    dϵᵦ::Array{Float64,1}
 
     # models
     fittedmodels::Dict
@@ -44,7 +40,11 @@ mutable struct RheologyData
     # to duplicates so comparisons can be made between preprocessed and original.
     # If not processing then original data remains preserved ready for use
     # without reptitive coding requirements.
-    RheologyData(σ, ϵ, t) = derivconstruct!(new(false, "constant", σ, ϵ, t, σ, ϵ, t), σ, ϵ, t)
+    RheologyData(σ, ϵ, t, test_type) = derivconstruct!(new(false, "constant", test_type, σ, ϵ, t), σ, ϵ, t)
+
+    # inner constructor for resampled data
+    RheologyData(_insight, _sampling, _test_type, _σ, _ϵ, _t, _dσ, _dϵ) =
+                new(_insight, _sampling, _test_type, _σ, _ϵ, _t, _dσ, _dϵ, Dict())
 end
 
 """
@@ -68,24 +68,21 @@ function derivconstruct!(self::RheologyData, σ::Array{Float64,1}, ϵ::Array{Flo
     end
 
     # adjust starting point accordingly to remove NaNs in σ, ϵ
-    initfields = [:σ, :σᵦ, :ϵ, :ϵᵦ, :t, :tᵦ]
+    initfields = [:σ, :ϵ, :t]
     for n in initfields
         setfield!(self, n, getfield(self, n)[newstartingval:end])
     end
 
     # derivative of strain WRT time
     self.dσ = deriv(self.σ, self.t)
-    self.dσᵦ = deriv(self.σ, self.t)
 
     # derivative of stress WRT time
     self.dϵ = deriv(self.ϵ, self.t)
-    self.dϵᵦ = deriv(self.ϵ, self.t)
 
     # readjust time to account for NaN movement and/or negative time values
     self.t = self.t - minimum(self.t)
-    self.tᵦ = self.tᵦ - minimum(self.tᵦ)
 
-    # init empty dictionary for model fit results
+    # initialise empty dictionary for model fit results
     self.fittedmodels = Dict()
 
     # return class with all fields initialised
@@ -93,13 +90,15 @@ function derivconstruct!(self::RheologyData, σ::Array{Float64,1}, ϵ::Array{Flo
 end
 
 """
-    fileload(filedir::String, colnames::Array{String,1})
+    fileload(filedir::String, colnames::Array{String,1}, test_type::String)
 
 Load data from a CSV file (three columns, comma seperated). Columns must
 be identified by providing an array of strings which tell the function
 which data (stress, strain or time) is contained in each column. This is
 used to construct a RheologyData struct, which provides the basis for
-subsequent high level operations within RHEOS.
+subsequent high level operations within RHEOS. test_type is either "strlx"
+for a stress-relaxation test (strain controlled) or "creep" for a creep
+test (stress controlled).
 
 # Example
 
@@ -108,10 +107,10 @@ subsequent high level operations within RHEOS.
 fileDir = "../data/rheologyData1.csv"
 
 # load the data into RheologyData struct
-dataforprocessing = fileload(fileDir, ["time","stress","strain"])
+dataforprocessing = fileload(fileDir, ["time","stress","strain"], "strlx")
 ```
 """
-function fileload(filedir::String, colnames::Array{String,1})::RheologyData
+function fileload(filedir::String, colnames::Array{String,1}, test_type::String)::RheologyData
 
     # check colnames length is correct
     @assert length(colnames) == 3 "Only three column names required, 'stress', 'strain' and 'time'."
@@ -135,25 +134,5 @@ function fileload(filedir::String, colnames::Array{String,1})::RheologyData
     end
 
     # generate RheologyData struct and output
-    data = RheologyData(data[cols[1]], data[cols[2]], data[cols[3]])
-end
-
-"""
-    resetdata(self::RheologyData)
-
-Reset data back to initially loaded state.
-
-Useful if working from the REPL. Note: does not restore insight to default.
-"""
-function resetdata!(self::RheologyData)
-
-    # original data
-    self.σᵦ = self.σ
-    self.ϵᵦ = self.ϵ
-    self.tᵦ = self.t
-
-    # differentiated data
-    self.dσᵦ = self.dσ
-    self.dϵᵦ = self.dϵ
-
+    data = RheologyData(data[cols[1]], data[cols[2]], data[cols[3]], test_type)
 end

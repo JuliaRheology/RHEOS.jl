@@ -36,11 +36,11 @@ export J_SLS, J_SLS2, J_burgers,
 
 ######################################################
 # hilevel_init.jl
-export RheologyData, fileload, resetdata!
+export RheologyData, fileload
 
 ######################################################
 # hilevel_preproc.jl
-export var_resample!, downsample!, fixed_resample! #, smooth!
+export var_resample, downsample, fixed_resample #, smooth!
 
 ######################################################
 # hilevel_proc.jl
