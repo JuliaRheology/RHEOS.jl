@@ -215,24 +215,24 @@ Additional models can be added at any time by the user by defining the model as
 a function in "RHEOS/src/models.jl" and appending it the appropriate dictionary
 within the `moduli` function which is in that same file.
 """
-function moduli(model::String, test_type::String)::Function
+function moduli(model::String, test_type::String)::RheologyModel
 
-    creepmoduli = Dict( "SLS"=>J_SLS,
-                        "SLS2"=>J_SLS2,
-                        "burgers"=>J_burgers,
-                        "springpot"=>J_springpot,
-                        "fractKV"=>J_fractKV,
-                        "fractmaxwell"=>J_fractmaxwell,
-                        "fractzener"=>J_fractzener)
+    creepmoduli = Dict( "SLS" => RheologyModel(J_SLS, false, test_type),
+                        "SLS2" => RheologyModel(J_SLS2, false, test_type),
+                        "burgers" => RheologyModel(J_burgers, false, test_type),
+                        "springpot" => RheologyModel(J_springpot, false, test_type),
+                        "fractKV" => RheologyModel(J_fractKV, false, test_type),
+                        "fractmaxwell" => RheologyModel(J_fractmaxwell, false, test_type),
+                        "fractzener" => RheologyModel(J_fractzener, false, test_type) )
 
-    relaxmoduli = Dict( "SLS"=>G_SLS,
-                        "SLS2"=>G_SLS2,
-                        "burgers"=>G_burgers,
-                        "springpot"=>G_springpot,
-                        "fractKV"=>G_fractKV,
-                        "fractmaxwell"=>G_fractmaxwell,
-                        "fractzener"=>G_fractzener,
-                        "fractspecial"=>G_fractspecial)
+    relaxmoduli = Dict( "SLS" => RheologyModel(G_SLS, false, test_type),
+                        "SLS2" => RheologyModel(G_SLS2, false, test_type),
+                        "burgers" => RheologyModel(G_burgers, false, test_type),
+                        "springpot" => RheologyModel(G_springpot, true, test_type),
+                        "fractKV" => RheologyModel(G_fractKV, true, test_type),
+                        "fractmaxwell" => RheologyModel(G_fractmaxwell, false, test_type),
+                        "fractzener" => RheologyModel(G_fractzener, false, test_type),
+                        "fractspecial" => RheologyModel(G_fractspecial, true, test_type) )
 
     if test_type=="creep"
         return creepmoduli[model]

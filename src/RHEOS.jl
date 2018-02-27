@@ -36,7 +36,7 @@ export J_SLS, J_SLS2, J_burgers,
 
 ######################################################
 # hilevel_init.jl
-export RheologyData, fileload
+export RheologyData, fileload, RheologyModel
 
 ######################################################
 # hilevel_preproc.jl
@@ -53,9 +53,9 @@ export fiteval
 ######################################################
 # code
 include("preproc.jl")
+include("hilevel_init.jl")
 include("proc.jl")
 include("models.jl")
-include("hilevel_init.jl")
 include("hilevel_preproc.jl")
 include("hilevel_proc.jl")
 include("hilevel_postproc.jl")

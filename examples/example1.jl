@@ -25,7 +25,7 @@ modelfit!(data_resampled, "SLS", p0, lb, ub)
 lb = [0.0, 0.0]
 ub = [1e5, 1.0]
 p0 = [1000.0, 0.5]
-modelfit!(data_resampled, "springpot", p0, lb, ub; singularity = true)
+modelfit!(data_resampled, "springpot", p0, lb, ub)
 
 fiteval(data_resampled, "SLS")
-fiteval(data_resampled, "springpot"; singularity = true)
+fiteval(data_resampled, "springpot")

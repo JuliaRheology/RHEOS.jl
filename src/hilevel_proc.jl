@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 """
-    modelfit!(self::RheologyData, model::String, params_init::Array{Float64,1}, low_bounds::Array{Float64,1}, hi_bounds::Array{Float64,1}; singularity = false)
+    modelfit!(self::RheologyData, model::String, params_init::Array{Float64,1}, low_bounds::Array{Float64,1}, hi_bounds::Array{Float64,1})
 
 Fit RheologyData struct to model and store fitted parameters in self.fittedmodels.
 
@@ -12,7 +12,6 @@ Fit RheologyData struct to model and store fitted parameters in self.fittedmodel
 - `params_init`: Initial parameters to use in fit
 - `low_bounds`: Lower bounds for parameters
 - `hi_bounds`: Higher bounds for parameters
-- `singularity`: Declare whether there is a singularity in viscoelastic modulus at t=0, true or false
 """
 function modelfit!(self::RheologyData,
                   model::String,
@@ -49,7 +48,6 @@ function modelfit!(self::RheologyData,
     min_objective!(opt, (params, grad) -> objectivefunc(params, grad, modulus,
                                                         self.t, dt_series,
                                                         prescribed_dot, measured;
-                                                        _singularity = singularity,
                                                         _insight = self.insight,
                                                         _sampling = self.sampling))
 

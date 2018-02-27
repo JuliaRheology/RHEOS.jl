@@ -5,7 +5,7 @@
 
 Show plot of data vs. fitted data for specified model.
 """
-function fiteval(self::RheologyData, modelname::String; singularity = false)
+function fiteval(self::RheologyData, modelname::String)
 
     # params
     params = self.fittedmodels[modelname]
@@ -23,13 +23,13 @@ function fiteval(self::RheologyData, modelname::String; singularity = false)
     end
 
     # get fit
-    fitted = boltzconvolve(model, self.t, deriv(self.t), params, prescribed_dot; singularity = singularity)
+    fitted = boltzconvolve(model, self.t, deriv(self.t), params, prescribed_dot)
 
     # print params
     println(modelname, " fit: ", self.fittedmodels[modelname])
 
     # stress subplot
-    if singularity
+    if model.singularity
         plot(self.t[1:end], measured)
         plot(self.t[2:end], fitted, "--")
         show()
