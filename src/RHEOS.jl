@@ -14,8 +14,12 @@ using PyPlot
 # using Plots; gr() # add support for different plotting backends
 
 ######################################################
+# utility.jl
+export deriv, trapz
+
+######################################################
 # preproc.jl
-export deriv, var_resample, downsample, fixed_resample
+export var_resample, downsample, fixed_resample
 
 ######################################################
 # proc.jl
@@ -52,8 +56,9 @@ export fiteval
 
 ######################################################
 # code
-include("preproc.jl")
+include("utility.jl")
 include("hilevel_init.jl")
+include("preproc.jl")
 include("proc.jl")
 include("models.jl")
 include("hilevel_preproc.jl")

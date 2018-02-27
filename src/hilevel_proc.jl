@@ -17,8 +17,7 @@ function modelfit!(self::RheologyData,
                   model::String,
                   params_init::Array{Float64,1},
                   low_bounds::Array{Float64,1},
-                  hi_bounds::Array{Float64,1};
-                  singularity = false)
+                  hi_bounds::Array{Float64,1};)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(:LN_SBPLX, length(params_init))

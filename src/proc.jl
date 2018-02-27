@@ -1,30 +1,6 @@
 #!/usr/bin/env julia
 
 """
-    trapz(y::Array{Float64,1}, x::Array{Float64,1}[; init::Float64 = 0.0])
-
-Array based trapezoidal integration of y with respect to x.
-
-Limits of integration defined by the start and end points of the arrays. 'init'
-keyword argument is used for setting an initial condition.
-"""
-function trapz(y::Array{Float64,1}, x::Array{Float64,1}; init::Float64=0.0)::Float64
-
-    @assert length(x)==length(y) "X and Y array length must match."
-
-    # init*2 to simplify final division by 2
-    r = 2.0*init
-
-    # trapezoidal rule
-    for i in 2:length(x)
-        @inbounds r += (y[i-1] + y[i])*(x[i] - x[i-1])
-    end
-
-    # return summation
-    r/2.0
-end
-
-"""
     boltzintegral(model::Function, time_series::Array{Float64,1}, params::Array{Float64,1}, prescribed_dot::Array{Float64,1})
 
 Calculate Boltzmann Superposition integral using direct integration method.
