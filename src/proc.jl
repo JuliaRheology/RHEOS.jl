@@ -171,7 +171,7 @@ function leastsquares_init(params_init, low_bounds, hi_bounds,
     lower_bounds!(opt, low_bounds)
     upper_bounds!(opt, hi_bounds)
     # set relative tolerance
-    xtol_rel!(opt,1e-5)
+    xtol_rel!(opt,1e-4)
 
     # set Opt object as a minimisation objective. Use a closure for additional
     # arguments sent to object objectivefunc
@@ -184,6 +184,6 @@ function leastsquares_init(params_init, low_bounds, hi_bounds,
     # minimise objective func, minx are the parameters resulting in minimum
     (minf,minx,ret) = optimize(opt, params_init)
 
-    # return minimised cost function parameters
-    minx
+    # return all
+    (minf,minx,ret)
 end

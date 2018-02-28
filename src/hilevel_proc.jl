@@ -19,14 +19,6 @@ function modelfit!(self::RheologyData,
                   low_bounds::Array{Float64,1},
                   hi_bounds::Array{Float64,1};)
 
-    # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
-    opt = Opt(:LN_SBPLX, length(params_init))
-    # set lower bounds and upper bounds
-    lower_bounds!(opt, low_bounds)
-    upper_bounds!(opt, hi_bounds)
-    # set relative tolerance
-    xtol_rel!(opt,1e-4)
-
     # generate time series difference array (for convolution)
     dt_series = deriv(self.t)
 
@@ -39,19 +31,14 @@ function modelfit!(self::RheologyData,
         prescribed_dot = self.dσ
     end
 
-    # get modulus function
+    # get appropriate RheologyModel struct
     modulus = moduli(model, self.test_type)
 
-    # set Opt object as a minimisation objective. Use a closure for additional
-    # arguments sent to object objectivefunc
-    min_objective!(opt, (params, grad) -> objectivefunc(params, grad, modulus,
-                                                        self.t, dt_series,
-                                                        prescribed_dot, measured;
-                                                        _insight = self.insight,
-                                                        _sampling = self.sampling))
-
-    # minimise objective func, minx are the parameters resulting in minimum
-    (minf, minx, ret) = optimize(opt, params_init)
+    # start fit
+    (minf, minx, ret) = leastsquares_init(params_init, low_bounds, hi_bounds,
+                                          modulus, self.t, dt_series, prescribed_dot,
+                                          measured; sampling = self.sampling,
+                                          insight = self.insight)
 
     # store fit results in RheologyData struct's fittedmodels dictionary
     self.fittedmodels[model] = minx
