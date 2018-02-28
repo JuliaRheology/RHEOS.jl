@@ -1,4 +1,6 @@
 #!/usr/bin/env julia
+__precompile__()
+
 push!(LOAD_PATH, "../deps")
 
 module RHEOS
