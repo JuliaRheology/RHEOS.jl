@@ -48,7 +48,7 @@ export var_resample, downsample, fixed_resample, smooth, mapbackdata
 
 ######################################################
 # hilevel_proc.jl
-export modelfit!
+export modelfit!, modelcomplete!
 
 ######################################################
 # hilevel_postproc.jl

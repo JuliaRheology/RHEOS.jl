@@ -45,6 +45,11 @@ mutable struct RheologyData
     # inner constructor for resampled data
     RheologyData(_insight, _sampling, _test_type, _σ, _ϵ, _t, _dσ, _dϵ) =
                 new(_insight, _sampling, _test_type, _σ, _ϵ, _t, _dσ, _dϵ, Dict())
+
+    # inner constructor for incomplete data; data_part should generally
+    # be controlled variable (stress for creep, strain for strlx).
+    RheologyData(data_part, t, test_type) = partialconstruct!(new(false, "constant", test_type), data_part, t, test_type)
+
 end
 
 """
@@ -88,6 +93,54 @@ function derivconstruct!(self::RheologyData, σ::Array{Float64,1}, ϵ::Array{Flo
     # return class with all fields initialised
     self
 end
+
+"""
+Inner constructor completion function for case when only partial data is provided.
+"""
+function partialconstruct!(self::RheologyData, data_part::Array{Float64,1}, t::Array{Float64,1}, test_type::String)
+
+    # define as local so it can be accessed in subsequent scopes
+    local newstartingval::T where T<:Integer
+
+    # test for NaNs
+    for i in 1:length(data_part)
+        if !isnan(data_part[i])
+            newstartingval = i
+            break
+        end
+    end
+
+    # adjust starting point accordingly to remove NaNs
+    data_part = data_part[newstartingval:end]
+    t = t[newstartingval:end]
+
+    # readjust time to account for NaN movement and/or negative time values
+    t = t - minimum(t)
+
+    # set time
+    self.t = t
+
+    # test dependent
+    if test_type=="strlx"
+        # set controlled variable as strain
+        self.ϵ = data_part
+        # derivative of stress WRT time
+        self.dϵ = deriv(self.ϵ, self.t)
+
+    elseif test_type=="creep"
+        # set controlled variable as stress
+        self.σ = data_part
+        # derivative of strain WRT time
+        self.dσ = deriv(self.σ, self.t)
+    end
+
+    # initialise empty dictionary for model fit results
+    self.fittedmodels = Dict()
+
+    # return class with all fields initialised
+    self
+end
+
 
 """
     fileload(filedir::String, colnames::Array{String,1}, test_type::String)
