@@ -21,8 +21,7 @@ when fitting.
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
 function boltzintegral(model::RheologyModel, time_series::Array{Float64,1}, params::Array{Float64,1},
-                    prescribed_dot::Array{Float64,1};
-                    singularity = false)::Array{Float64,1}
+                    prescribed_dot::Array{Float64,1})::Array{Float64,1}
 
     # check whether using model with t -> 0, model -> ∞
     if model.singularity

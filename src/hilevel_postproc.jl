@@ -23,7 +23,11 @@ function fiteval(self::RheologyData, modelname::String)
     end
 
     # get fit
-    fitted = boltzconvolve(model, self.t, deriv(self.t), params, prescribed_dot)
+    if self.sampling == "constant"
+        fitted = boltzconvolve(model, self.t, deriv(self.t), params, prescribed_dot)
+    elseif self.sampling == "variable"
+        fitted = boltzintegral(model, self.t, params, prescribed_dot)
+    end
 
     # print params
     println(modelname, " fit: ", self.fittedmodels[modelname])
