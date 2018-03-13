@@ -17,7 +17,7 @@ function modelfit!(self::RheologyData,
                   model::String,
                   params_init::Array{Float64,1},
                   low_bounds::Array{Float64,1},
-                  hi_bounds::Array{Float64,1};)
+                  hi_bounds::Array{Float64,1})
 
     # generate time series difference array (for convolution)
     dt_series = deriv(self.t)

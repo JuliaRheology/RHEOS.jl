@@ -1,25 +1,5 @@
 #!/usr/bin/env julia
 
-######################
-#~ mittleff wrapper ~#
-######################
-
-"""
-    mittleff(α::Float64[, β::Float64], x::Array{Float64,1})
-
-Convience wrapper around MittagLeffler.mittleff for array arguments. X array is
-limited to float type in accordance with the requirements of RHEOS.
-"""
-function mittleff(α::Float64, xList::Array{Float64,1})::Array{Float64,1}
-    # call mittagleffler within an array comprehension
-    y = [MittagLeffler.mittleff(α, x) for x in xList]
-end
-
-function mittleff(α::Float64, β::Float64, xList::Array{Float64,1})::Array{Float64,1}
-    # call mittagleffler within an array comprehension
-    y = [MittagLeffler.mittleff(α, β, x) for x in xList]
-end
-
 #########################
 #~ G Relaxation Moduli ~#
 #########################

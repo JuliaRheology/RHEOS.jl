@@ -13,11 +13,13 @@ using ImageFiltering
 using Interpolations
 using NLopt
 using PyPlot
+# included but experimental dependency
+using Base.Threads
 # using Plots; gr() # add support for different plotting backends
 
 ######################################################
 # utility.jl
-export deriv, trapz
+export deriv, trapz, mittleff
 
 ######################################################
 # preproc.jl
@@ -29,7 +31,7 @@ export leastsquares_init, objectivefunc, boltzconvolve, boltzintegral
 
 ######################################################
 # models.jl
-export mittleff, moduli
+export moduli
 
 export G_SLS, G_SLS2, G_burgers,
         G_springpot, G_fractKV,
