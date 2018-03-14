@@ -26,21 +26,21 @@ fitting examples
 =#
 
 # SLS fit
+p0 = [1000.0, 1000.0, 100.0]
 lb = [0.0, 0.0, 0.0]
 ub = [1e5, 1e5, 1e5]
-p0 = [1000.0, 1000.0, 100.0]
 modelfit!(data_resampled, "SLS", p0, lb, ub)
 
 # Spring-pot fit
+p0 = [1000.0, 0.5]
 lb = [0.0, 0.0]
 ub = [1e5, 1.0]
-p0 = [1000.0, 0.5]
 modelfit!(data_resampled, "springpot", p0, lb, ub)
 
 # Fract Special fit
+p0 = [247.0, 6.48e2, 0.25, 4.26e3]
 lb = [0.0, 0.0, 0.02, 0.0]
 ub = [1e3, 1e3, 0.98, 1e5]
-p0 = [247.0, 6.48e2, 0.25, 4.26e3]
 modelfit!(data_resampled, "fractspecial", p0, lb, ub)
 
 fiteval(data_resampled, "SLS")

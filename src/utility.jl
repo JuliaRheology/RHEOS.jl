@@ -50,41 +50,41 @@ function deriv(y::Array{Float64,1}, x::Array{Float64,1})::Array{Float64,1}
     @assert length(y)==length(x) "X and Y Array lengths must match."
 
     # initialise zero array of length y
-    yDot = zeros(Float64, length(y))
+    ydot = zeros(Float64, length(y))
     for i in 1:length(y)
         if i==1
             # right handed difference for lower boundary
-            @inbounds yDot[i] = (y[i+1] - y[i])/(x[i+1] - x[i])
+            @inbounds ydot[i] = (y[i+1] - y[i])/(x[i+1] - x[i])
         elseif i==length(y)
             # left handed difference for upper boundary
-            @inbounds yDot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
+            @inbounds ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
         else
             # central difference with uneven spacing
             @inbounds Δx₁ = x[i] - x[i-1]
             @inbounds Δx₂ = x[i+1] - x[i]
-            @inbounds yDot[i] = (y[i+1]*Δx₁^2 + (Δx₂^2 - Δx₁^2)*y[i] - y[i-1]*Δx₂^2)/(Δx₁*Δx₂*(Δx₁ + Δx₂))
+            @inbounds ydot[i] = (y[i+1]*Δx₁^2 + (Δx₂^2 - Δx₁^2)*y[i] - y[i-1]*Δx₂^2)/(Δx₁*Δx₂*(Δx₁ + Δx₂))
         end
     end
-    yDot
+    ydot
 end
 
 function deriv(y::Array{Float64,1})::Array{Float64,1}
 
     # initialise zero array of length y
-    yDot = zeros(Float64, length(y))
+    ydot = zeros(Float64, length(y))
     for i in 1:length(y)
         if i==1
             # right handed difference for lower boundary
-            @inbounds yDot[i] = (y[i+1] - y[i])
+            @inbounds ydot[i] = (y[i+1] - y[i])
         elseif i==length(y)
             # left handed difference for upper boundary
-            @inbounds yDot[i] = (y[i] - y[i-1])
+            @inbounds ydot[i] = (y[i] - y[i-1])
         else
             # central difference with even unit 1 spacing
-            @inbounds yDot[i] = (y[i+1] - y[i-1])/2.0
+            @inbounds ydot[i] = (y[i+1] - y[i-1])/2.0
         end
     end
-    yDot
+    ydot
 end
 
 """
@@ -94,6 +94,7 @@ Threaded convience wrapper around MittagLeffler.mittleff for array arguments. X
 array is limited to float type in accordance with the requirements of RHEOS.
 """
 function mittleff(α::Float64, x_array::Array{Float64,1})::Array{Float64,1}
+
     # initialise array
     y = Array{Float64}(length(x_array))
     # do static scheduled threaded loop with no bounds checking
@@ -105,6 +106,7 @@ function mittleff(α::Float64, x_array::Array{Float64,1})::Array{Float64,1}
 end
 
 function mittleff(α::Float64, β::Float64, x_array::Array{Float64,1})::Array{Float64,1}
+
     # initialise array
     y = Array{Float64}(length(x_array))
     # do static scheduled threaded loop with no bounds checking

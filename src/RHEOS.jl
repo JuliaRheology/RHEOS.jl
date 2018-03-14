@@ -16,7 +16,7 @@ using PyPlot
 # included but experimental dependency
 using Base.Threads
 # using Plots; gr() # add support for different plotting backends
-
+println("Number of threads in use: ", nthreads())
 ######################################################
 # utility.jl
 export deriv, trapz, mittleff
