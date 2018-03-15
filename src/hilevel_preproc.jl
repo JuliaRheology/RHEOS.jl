@@ -64,23 +64,26 @@ function var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float6
         show()
     end
 
+    # add record of operation applied
+    appliedops = vcat(self.appliedops, "var_resample - refvar: $refvar, pcntdownsample: $pcntdownsample, _mapback: $_mapback")
+
     # construct new RheologyData struct with resampled members
-    RheologyData(self.insight, "variable", self.test_type, σᵦ, ϵᵦ, tᵦ, dσᵦ, dϵᵦ)
+    RheologyData(self.filedir, self.insight, "variable", self.test_type, σᵦ, ϵᵦ, tᵦ, dσᵦ, dϵᵦ, appliedops)
 
 end
 
 """
-    downsample(self::RheologyData, boundaries::Array{Int64,1}, elPeriods::Array{Int64,1})
+    downsample(self::RheologyData, boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
 
 Use indices from `downsample` to downsample all data in the RheologyData struct.
 
-See help docstring for `downsample` for more info on use of boundaries and elPeriods
+See help docstring for `downsample` for more info on use of boundaries and elperiods
 arguments.
 """
-function downsample(self::RheologyData, boundaries::Array{Int64,1}, elPeriods::Array{Int64,1})
+function downsample(self::RheologyData, boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
 
     # get downsampled indices
-    indices = downsample(boundaries::Array{Int64,1}, elPeriods::Array{Int64,1})
+    indices = downsample(boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
 
     # downsample data
     tᵦ = self.t[indices]
@@ -106,20 +109,23 @@ function downsample(self::RheologyData, boundaries::Array{Int64,1}, elPeriods::A
     end
 
     # change to variable sampling rate if more than one section
-    if length(elPeriods) > 1
+    if length(elperiods) > 1
         _sampling = "variable"
     # otherwise, remain as before
     else
         _sampling = self.sampling
     end
 
+    # add record of operation applied
+    appliedops = vcat(self.appliedops, "downsample - boundaries: $boundaries, elperiods: $elperiods")
+
     # construct new RheologyData struct with resampled members
-    RheologyData(self.insight, _sampling, self.test_type, σᵦ, ϵᵦ, tᵦ, dσᵦ, dϵᵦ)
+    RheologyData(self.filedir, self.insight, _sampling, self.test_type, σᵦ, ϵᵦ, tᵦ, dσᵦ, dϵᵦ, self.appliedops)
 
 end
 
 """
-    fixed_resample(self::RheologyData, boundaries::Array{Int64,1}, elPeriods::Array{Int64,1}, direction::Array{String,1})
+    fixed_resample(self::RheologyData, boundaries::Array{Int64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
 
 Resample three (or two) arrays with new sample rate(s).
 
@@ -129,18 +135,18 @@ sections will be interpolated versions of the original data.
 
 See docstring for `fixed_resample` for more info and example on calling signature.
 """
-function fixed_resample(self::RheologyData, boundaries::Array{Int64,1}, elPeriods::Array{Int64,1}, direction::Array{String,1})
+function fixed_resample(self::RheologyData, boundaries::Array{Int64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
 
     # resample main data
     (tᵦ, σᵦ, ϵᵦ) = fixed_resample(self.t, self.σ, self.ϵ,
-                                                 boundaries, elPeriods, direction)
+                                                 boundaries, elperiods, direction)
 
     # resample derivatives
     (tᵦ, dϵᵦ) = fixed_resample(self.t, self.dϵ, boundaries,
-                                          elPeriods, direction)
+                                          elperiods, direction)
 
     (tᵦ, dσᵦ) = fixed_resample(self.t, self.dσ, boundaries,
-                                          elPeriods, direction)
+                                          elperiods, direction)
 
     # plot if insight required
     if self.insight
@@ -159,15 +165,18 @@ function fixed_resample(self::RheologyData, boundaries::Array{Int64,1}, elPeriod
     end
 
     # change to variable sampling rate if more than one section
-    if length(elPeriods) > 1
+    if length(elperiods) > 1
         _sampling = "variable"
     # otherwise, remain as before
     else
         _sampling = self.sampling
     end
 
+    # add record of operation applied
+    appliedops = vcat(self.appliedops, "fixed_resample - boundaries: $boundaries, elperiods: $elperiods, direction: $direction")
+
     # construct new RheologyData struct with resampled members
-    RheologyData(self.insight, _sampling, self.test_type, σᵦ, ϵᵦ, tᵦ, dσᵦ, dϵᵦ)
+    RheologyData(self.filedir, self.insight, _sampling, self.test_type, σᵦ, ϵᵦ, tᵦ, dσᵦ, dϵᵦ, appliedops)
 
 end
 
@@ -216,6 +225,10 @@ function smooth(self::RheologyData, τ::Float64; to_smooth = "all")
         end
     end
 
+    # add record of operation applied
+    self_copy.appliedops = vcat(self.appliedops, "smooth - τ: $τ, to_smooth: $to_smooth")
+
+    # return
     self_copy
 end
 
@@ -228,7 +241,7 @@ self_original. See mapback help docstring for more info on how algorithm works.
 function mapbackdata(self_new::RheologyData, self_original::RheologyData)
 
     # get copy
-    self_out = deepcopy(self_original)
+    self_out = deepcopy(self_new)
 
     # symbols of data
     to_map = [:t, :σ, :ϵ, :dσ, :dϵ]
@@ -252,5 +265,9 @@ function mapbackdata(self_new::RheologyData, self_original::RheologyData)
         end
     end
 
+    # add record of operation applied
+    self_out.appliedops = vcat(self_new.appliedops, "mapped back")
+
+    # return
     self_out
 end

@@ -11,7 +11,7 @@ resampling examples
 =#
 
 data_resampled = fixed_resample(data_raw, [1,450],[8],["up"])
-data_resampled.insight = true
+# data_resampled.insight = true
 
 # data_smoothed = smooth(data_resampled, 5.0)
 # data_varresampled = var_resample(data_smoothed, :σ, 0.1, _mapback = false)
@@ -40,9 +40,12 @@ modelfit!(data_resampled, "springpot", p0, lb, ub)
 # Fract Special fit
 p0 = [247.0, 6.48e2, 0.25, 4.26e3]
 lb = [0.0, 0.0, 0.02, 0.0]
-ub = [1e3, 1e3, 0.98, 1e5]
+ub = [1e3, 1e4, 0.98, 1e5]
 modelfit!(data_resampled, "fractspecial", p0, lb, ub)
-
+#
 fiteval(data_resampled, "SLS")
 fiteval(data_resampled, "springpot")
 fiteval(data_resampled, "fractspecial")
+
+println(data_resampled.filedir)
+println(data_resampled.appliedops)

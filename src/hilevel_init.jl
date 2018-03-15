@@ -11,6 +11,9 @@ If not, load data in according to format and call RheologyData constructor.
 """
 mutable struct RheologyData
 
+    # filedir is location of file on disk, for reference and saving
+    filedir::String
+
     # insight parameter, tells functions whether to plot result or not
     # during preprocessing. False by default.
     insight::Bool
@@ -36,19 +39,23 @@ mutable struct RheologyData
     # models
     fittedmodels::Dict
 
-    # inner constructor forms duplicates of data. All processing is done
-    # to duplicates so comparisons can be made between preprocessed and original.
-    # If not processing then original data remains preserved ready for use
-    # without reptitive coding requirements.
-    RheologyData(σ, ϵ, t, test_type) = derivconstruct!(new(false, "constant", test_type, σ, ϵ, t), σ, ϵ, t)
+    # operations applied, stores history of which functions (including arguments)
+    appliedops::Array{String,1}
+
+    # for initial loading of full dataset (measured + prescribed)
+    RheologyData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) = derivconstruct!(new(filedir, false, "constant", test_type, σ, ϵ, t), σ, ϵ, t)
 
     # inner constructor for resampled data
-    RheologyData(_insight, _sampling, _test_type, _σ, _ϵ, _t, _dσ, _dϵ) =
-                new(_insight, _sampling, _test_type, _σ, _ϵ, _t, _dσ, _dϵ, Dict())
+    RheologyData(_filedir::String, _insight::Bool, _sampling::String, _test_type::String,
+                 _σ::Array{Float64,1}, _ϵ::Array{Float64,1}, _t::Array{Float64,1},
+                 _dσ::Array{Float64,1}, _dϵ::Array{Float64,1}, _appliedops::Array{String,1}) =
+                 new(_filedir, _insight, _sampling, _test_type,
+                 _σ, _ϵ, _t, _dσ, _dϵ, Dict(), _appliedops)
 
     # inner constructor for incomplete data; data_part should generally
     # be controlled variable (stress for creep, strain for strlx).
-    RheologyData(data_part, t, test_type) = partialconstruct!(new(false, "constant", test_type), data_part, t, test_type)
+    RheologyData(data_part::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) =
+                partialconstruct!(new(filedir, false, "constant", test_type), data_part, t, test_type)
 
 end
 
@@ -89,6 +96,9 @@ function derivconstruct!(self::RheologyData, σ::Array{Float64,1}, ϵ::Array{Flo
 
     # initialise empty dictionary for model fit results
     self.fittedmodels = Dict()
+
+    # initialise empty array to record operations applied during preprocessing
+    self.appliedops = []
 
     # return class with all fields initialised
     self
@@ -136,6 +146,9 @@ function partialconstruct!(self::RheologyData, data_part::Array{Float64,1}, t::A
 
     # initialise empty dictionary for model fit results
     self.fittedmodels = Dict()
+
+    # initialise empty array for operations applied
+    self.appliedops = []
 
     # return class with all fields initialised
     self
@@ -187,7 +200,7 @@ function fileload(filedir::String, colnames::Array{String,1}, test_type::String)
     end
 
     # generate RheologyData struct and output
-    data = RheologyData(data[cols[1]], data[cols[2]], data[cols[3]], test_type)
+    data = RheologyData(data[cols[1]], data[cols[2]], data[cols[3]], test_type, filedir)
 end
 
 """

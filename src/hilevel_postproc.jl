@@ -45,6 +45,9 @@ function fiteval(self::RheologyData, modelname::String)
 
 end
 
-# function that saves data to file
+"""
 
-# add legends to plot
+"""
+function saveresult()
+
+end
