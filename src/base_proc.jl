@@ -117,8 +117,10 @@ convolution integral of the selected `model` and `prescribed_dot`.
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
 function objectivefunc(params::Array{Float64,1}, grad::Array{Float64,1},
-                            model, time_series, dt_series, prescribed_dot,
-                            measured; _insight = false, _sampling = "constant")
+                            model::RheologyModel, time_series::Array{Float64,1},
+                            dt_series::Array{Float64,1}, prescribed_dot::Array{Float64,1},
+                            measured::Array{Float64,1}; _insight::Bool = false,
+                            _sampling::String = "constant")::Float64
 
     # convolution if constant, brute force integration if variable
     if _sampling == "constant"
@@ -160,10 +162,12 @@ Initialise then begin a least squares fitting of the supplied data.
 - `sampling`: Declare whether sample rate is `constant` or `variable` so that convolution or integration is used respectively
 - `insight`: Declare whether insight info should be shown when this function is called, true or false
 """
-function leastsquares_init(params_init, low_bounds, hi_bounds,
-                            model, time_series, dt_series, prescribed_dot,
-                            measured; sampling = "constant",
-                            insight = false)
+function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Float64,1},
+                           hi_bounds::Array{Float64,1}, model::RheologyModel,
+                           time_series::Array{Float64,1}, dt_series::Array{Float64,1},
+                           prescribed_dot::Array{Float64,1}, measured::Array{Float64,1};
+                           insight::Bool = false,
+                           sampling::String = "constant")
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(:LN_SBPLX, length(params_init))

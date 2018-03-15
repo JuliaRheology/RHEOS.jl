@@ -16,21 +16,23 @@ using PyPlot
 # included but experimental dependency
 using Base.Threads
 # using Plots; gr() # add support for different plotting backends
+println("\n===========================")
 println("Number of threads in use: ", nthreads())
+println("===========================\n")
 ######################################################
-# utility.jl
-export deriv, trapz, mittleff
+# base_utility.jl
+export deriv, trapz, mittleff, RheologyModel
 
 ######################################################
-# preproc.jl
+# base_preproc.jl
 export var_resample, downsample, fixed_resample
 
 ######################################################
-# proc.jl
+# base_proc.jl
 export leastsquares_init, objectivefunc, boltzconvolve, boltzintegral
 
 ######################################################
-# models.jl
+# base_models.jl
 export moduli
 
 export G_SLS, G_SLS2, G_burgers,
@@ -43,30 +45,35 @@ export J_SLS, J_SLS2, J_burgers,
         J_fractmaxwell, J_fractzener
 
 ######################################################
-# hilevel_init.jl
-export RheologyData, fileload, RheologyModel
+# rheology_utility.jl
+export RheologyData, fileload
 
 ######################################################
-# hilevel_preproc.jl
+# rheology_preproc.jl
 export var_resample, downsample, fixed_resample, smooth, mapbackdata
 
 ######################################################
-# hilevel_proc.jl
+# rheology_proc.jl
 export modelfit!, modelcomplete!
 
 ######################################################
-# hilevel_postproc.jl
+# rheology_postproc.jl
 export fiteval
 
 ######################################################
-# code
-include("utility.jl")
-include("hilevel_init.jl")
-include("preproc.jl")
-include("proc.jl")
-include("models.jl")
-include("hilevel_preproc.jl")
-include("hilevel_proc.jl")
-include("hilevel_postproc.jl")
+# Main functionality
+include("base_utility.jl")
+include("base_preproc.jl")
+include("base_proc.jl")
+include("base_models.jl")
+
+# High level rheology interface
+include("rheology_utility.jl")
+include("rheology_preproc.jl")
+include("rheology_proc.jl")
+include("rheology_postproc.jl")
+
+# High level AFM/contact mechanics
+
 ######################################################
 end
