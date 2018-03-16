@@ -13,6 +13,7 @@ using ImageFiltering
 using Interpolations
 using NLopt
 using PyPlot
+using JLD
 # included but experimental dependency
 using Base.Threads
 # using Plots; gr() # add support for different plotting backends
@@ -58,7 +59,7 @@ export modelfit!, modelcomplete!
 
 ######################################################
 # rheology_postproc.jl
-export fiteval
+export fiteval, saveresult, loadresult
 
 ######################################################
 # Main functionality

@@ -1,15 +1,15 @@
 #!/usr/bin/env julia
 
 """
-    RheologyData(stress::Array{Float64,1}, strain::Array{Float64,1}, time::Array{Float64,1}, test_type::String)
+    AFMData(stress::Array{Float64,1}, strain::Array{Float64,1}, time::Array{Float64,1}, test_type::String)
 
-RheologyData mutable struct used for high level interaction with RHEOS
+AFMData mutable struct used for high level interaction with RHEOS
 preprocessing and fitting functions. Initialise an instance directly or
 indirectly. If data is in three column, comma seperated CSV file then
-fileload function can be used, which calls the RheologyData constructor.
-If not, load data in according to format and call RheologyData constructor.
+fileload function can be used, which calls the AFMData constructor.
+If not, load data in according to format and call AFMData constructor.
 """
-mutable struct RheologyData
+mutable struct AFMData
 
     # filedir is location of file on disk, for reference and saving
     filedir::String
@@ -43,10 +43,10 @@ mutable struct RheologyData
     appliedops::Array{String,1}
 
     # for initial loading of full dataset (measured + prescribed)
-    RheologyData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) = derivconstruct!(new(filedir, false, "constant", test_type, σ, ϵ, t), σ, ϵ, t)
+    AFMData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) = derivconstruct!(new(filedir, false, "constant", test_type, σ, ϵ, t), σ, ϵ, t)
 
     # inner constructor for resampled data
-    RheologyData(_filedir::String, _insight::Bool, _sampling::String, _test_type::String,
+    AFMData(_filedir::String, _insight::Bool, _sampling::String, _test_type::String,
                  _σ::Array{Float64,1}, _ϵ::Array{Float64,1}, _t::Array{Float64,1},
                  _dσ::Array{Float64,1}, _dϵ::Array{Float64,1}, _appliedops::Array{String,1}) =
                  new(_filedir, _insight, _sampling, _test_type,
@@ -54,19 +54,19 @@ mutable struct RheologyData
 
     # inner constructor for incomplete data; data_part should generally
     # be controlled variable (stress for creep, strain for strlx).
-    RheologyData(data_part::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) =
+    AFMData(data_part::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) =
                 partialconstruct!(new(filedir, false, "constant", test_type), data_part, t, test_type)
 
 end
 
 """
-Inner constructor for RheologyData struct, providing gradients of stress
+Inner constructor for AFMData struct, providing gradients of stress
 and strain. If stress/strain arrays have NaN values at the beginning (some datasets
 have 1 or 2 samples of NaN at beginning) then deletes these and starts at the first
 non-NaN sample, also readjusts time start to t = 0 to account for NaNs and and
 negative time values at beginning of data recording.
 """
-function derivconstruct!(self::RheologyData, σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1})
+function derivconstruct!(self::AFMData, σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1})
 
     # define as local so it can be accessed in subsequent scopes
     local newstartingval::T where T<:Integer
@@ -107,7 +107,7 @@ end
 """
 Inner constructor completion function for case when only partial data is provided.
 """
-function partialconstruct!(self::RheologyData, data_part::Array{Float64,1}, t::Array{Float64,1}, test_type::String)
+function partialconstruct!(self::AFMData, data_part::Array{Float64,1}, t::Array{Float64,1}, test_type::String)
 
     # define as local so it can be accessed in subsequent scopes
     local newstartingval::T where T<:Integer
@@ -122,7 +122,7 @@ function partialconstruct!(self::RheologyData, data_part::Array{Float64,1}, t::A
 
     # adjust starting point accordingly to remove NaNs
     data_part = data_part[newstartingval:end]
-    t = t[newstartingval:end] 
+    t = t[newstartingval:end]
 
     # readjust time to account for NaN movement and/or negative time values
     t = t - minimum(t)
@@ -161,7 +161,7 @@ end
 Load data from a CSV file (three columns, comma seperated). Columns must
 be identified by providing an array of strings which tell the function
 which data (stress, strain or time) is contained in each column. This is
-used to construct a RheologyData struct, which provides the basis for
+used to construct a AFMData struct, which provides the basis for
 subsequent high level operations within RHEOS. test_type is either "strlx"
 for a stress-relaxation test (strain controlled) or "creep" for a creep
 test (stress controlled).
@@ -172,11 +172,11 @@ test (stress controlled).
 # directory path to the file
 fileDir = "../data/rheologyData1.csv"
 
-# load the data into RheologyData struct
+# load the data into AFMData struct
 dataforprocessing = fileload(fileDir, ["time","stress","strain"], "strlx")
 ```
 """
-function fileload(filedir::String, colnames::Array{String,1}, test_type::String)::RheologyData
+function fileload(filedir::String, colnames::Array{String,1}, test_type::String)::AFMData
 
     # check colnames length is correct
     @assert length(colnames) == 3 "Only three column names required, 'stress', 'strain' and 'time'."
@@ -185,7 +185,7 @@ function fileload(filedir::String, colnames::Array{String,1}, test_type::String)
     (data, head_out) = uCSV.read(filedir; delim=',',
                                  types=[Float64,Float64,Float64])
 
-    # get column numbers in order of RheologyData struct
+    # get column numbers in order of AFMData struct
     cols = zeros(Int8, 3)
     for (i, v) in enumerate(colnames)
         if v == "stress"
@@ -199,6 +199,6 @@ function fileload(filedir::String, colnames::Array{String,1}, test_type::String)
         end
     end
 
-    # generate RheologyData struct and output
-    data = RheologyData(data[cols[1]], data[cols[2]], data[cols[3]], test_type, filedir)
+    # generate AFMData struct and output
+    data = AFMData(data[cols[1]], data[cols[2]], data[cols[3]], test_type, filedir)
 end

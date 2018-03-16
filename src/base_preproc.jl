@@ -333,7 +333,7 @@ function mapback(xᵦ::Array{Float64,1},x::Array{Float64,1})
 end
 
 """
-    downsample(boundaries::Array{Int64,1}, elPeriods::Array{Int64,1})
+    downsample(boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
 
 Reduce indices.
 
@@ -355,10 +355,10 @@ julia> println(x[newIndices])
 [1.0, 3.0, 5.0, 8.0, 11.0, 12.0, 13.0, 14.0, 15.0]
 ```
 """
-function downsample(boundaries::Array{Int64,1}, elPeriods::Array{Int64,1})
+function downsample(boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
 
     # assert correct function signature
-    @assert length(elPeriods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
+    @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
 
     # initialise indices array
     indices = zeros(Int64,0)
@@ -367,7 +367,7 @@ function downsample(boundaries::Array{Int64,1}, elPeriods::Array{Int64,1})
     for i in 1:length(boundaries)-1
 
         # get indices for this 'section'
-        indicesCur = boundaries[i]:elPeriods[i]:boundaries[i+1]
+        indicesCur = boundaries[i]:elperiods[i]:boundaries[i+1]
 
         # append
         append!(indices, collect(indicesCur))
@@ -378,7 +378,7 @@ function downsample(boundaries::Array{Int64,1}, elPeriods::Array{Int64,1})
 end
 
 """
-    fixed_resample(x::Array{Float64,1}, y::Array{Float64,1}[, z::Array{Float64,1}], boundaries::Array{Int64,1}, elPeriods::Array{Int64,1}, direction::Array{String,1})
+    fixed_resample(x::Array{Float64,1}, y::Array{Float64,1}[, z::Array{Float64,1}], boundaries::Array{Int64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
 
 Resample three (or two) arrays with new sample rate(s).
 
@@ -401,14 +401,14 @@ julia> println(x1)
 ```
 """
 function fixed_resample(x::Array{Float64,1}, y::Array{Float64,1}, z::Array{Float64,1},
-                        boundaries::Array{Int64,1}, elPeriods::Array{Int64,1},
+                        boundaries::Array{Int64,1}, elperiods::Array{Int64,1},
                         direction::Array{String,1})
 
     # assert correct function signature
     @assert length(x)==length(y) "X and Y arrays must have same length."
     @assert length(x)==length(z) "X and Z arrays must have same length."
-    @assert length(elPeriods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
-    @assert length(elPeriods)==length(direction) "Number of sections must equal number of up/down regions"
+    @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
+    @assert length(elperiods)==length(direction) "Number of sections must equal number of up/down regions"
 
     # y and z as callable interpolations, used for upsampled regions
     yInterp = Interpolations.interpolate((x,), y, Interpolations.Gridded(Interpolations.Linear()))
@@ -431,8 +431,8 @@ function fixed_resample(x::Array{Float64,1}, y::Array{Float64,1}, z::Array{Float
                 append!(zᵦ,zInterp[x[k]])
 
                 # dx increment up
-                Δ = (x[k+1]-x[k])/elPeriods[i]
-                for N in 1:(elPeriods[i]-1)
+                Δ = (x[k+1]-x[k])/elperiods[i]
+                for N in 1:(elperiods[i]-1)
                     # add N increments to starting element
                     append!(xᵦ,x[k]+N*Δ)
                     append!(yᵦ,yInterp[x[k]+N*Δ])
@@ -442,9 +442,9 @@ function fixed_resample(x::Array{Float64,1}, y::Array{Float64,1}, z::Array{Float
 
         # downsampling, simply takes every N element as in downsample function
         elseif direction[i]=="down" #under/sampling
-            append!(xᵦ,x[boundaries[i]:elPeriods[i]:(boundaries[i+1]-1)])
-            append!(yᵦ,y[boundaries[i]:elPeriods[i]:(boundaries[i+1]-1)])
-            append!(zᵦ,z[boundaries[i]:elPeriods[i]:(boundaries[i+1]-1)])
+            append!(xᵦ,x[boundaries[i]:elperiods[i]:(boundaries[i+1]-1)])
+            append!(yᵦ,y[boundaries[i]:elperiods[i]:(boundaries[i+1]-1)])
+            append!(zᵦ,z[boundaries[i]:elperiods[i]:(boundaries[i+1]-1)])
         end
     end
 
@@ -461,12 +461,12 @@ function fixed_resample(x::Array{Float64,1}, y::Array{Float64,1}, z::Array{Float
 end
 
 function fixed_resample(x::Array{Float64,1}, y::Array{Float64,1},
-                        boundaries::Array{Int64,1}, elPeriods::Array{Int64,1},
+                        boundaries::Array{Int64,1}, elperiods::Array{Int64,1},
                         direction::Array{String,1})
 
     # assert correct function signature
     @assert length(x)==length(y) "X and Y arrays must have same length."
-    @assert length(elPeriods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
+    @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
 
     # y as callable interpolations, used for upsampled regions
     yInterp = Interpolations.interpolate((x,), y, Interpolations.Gridded(Interpolations.Linear()))
@@ -486,8 +486,8 @@ function fixed_resample(x::Array{Float64,1}, y::Array{Float64,1},
                 append!(yᵦ,yInterp[x[k]])
 
                 # dx increment up
-                Δ = (x[k+1]-x[k])/elPeriods[i]
-                for N in 1:(elPeriods[i]-1)
+                Δ = (x[k+1]-x[k])/elperiods[i]
+                for N in 1:(elperiods[i]-1)
                     # add N increments to starting element
                     append!(xᵦ,x[k]+N*Δ)
                     append!(yᵦ,yInterp[x[k]+N*Δ])
@@ -496,8 +496,8 @@ function fixed_resample(x::Array{Float64,1}, y::Array{Float64,1},
 
         # downsampling, simply takes every N element as in downsample function
         elseif direction[i]=="down" #under/sampling
-            append!(xᵦ,x[boundaries[i]:elPeriods[i]:(boundaries[i+1]-1)])
-            append!(yᵦ,y[boundaries[i]:elPeriods[i]:(boundaries[i+1]-1)])
+            append!(xᵦ,x[boundaries[i]:elperiods[i]:(boundaries[i+1]-1)])
+            append!(yᵦ,y[boundaries[i]:elperiods[i]:(boundaries[i+1]-1)])
         end
     end
 
