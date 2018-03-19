@@ -154,26 +154,11 @@ end
 
 
 """
-    AFMfileload(filedir::String, test_type::String)
+    AFMfileinspect(filedir::String, test_type::String)
 
-Load data from a JPK AFM (plaintext) file format into an AFMData struct. 
-AFMData struct provides the basis fors ubsequent high level operations 
-within RHEOS. test_type is either "strlx" for a stress-relaxation test 
-(strain controlled) or "creep" for a creep test (stress controlled).
-Only approach and hold sections are included, retraction portion of data 
-is ignored.
 
-# Example
-
-```jldoctest
-# directory path to the file
-filedir = "../data/afmData1.txt"
-
-# load the data into AFMData struct
-dataforprocessing = AFMfileload(filedir, "strlx")
-```
 """
-function AFMfileload(filedir::String, test_type::String)::AFMData
+function AFMgetlines(filedir::String, test_type::String)::AFMData
     #function identifies beginning and end of AFM data sections,
     #returns fancy names line,
     #and version number of JPK data processing software.
@@ -182,8 +167,8 @@ function AFMfileload(filedir::String, test_type::String)::AFMData
     sectionBreaks = Int32[]
 
     #initialise other local variables
-    local fancyNamesRaw::String
-    local verNumRaw::String
+    local fancynamesraw::String
+    local vernumraw::String
     local lastLineNum::Int32
 
     #iterate through lines
@@ -198,11 +183,11 @@ function AFMfileload(filedir::String, test_type::String)::AFMData
 
             elseif startswith(line, "# fancyNames:")
                 #Get names of columns
-                fancyNamesRaw = line
+                fancynamesraw = line
 
             elseif startswith(line, "# data-description.modification-software:")
                 #get software version number
-                verNumRaw = line
+                vernumraw = line
 
             elseif eof(filJ)
                 lastLineNum = i+1
@@ -241,17 +226,17 @@ function AFMfileload(filedir::String, test_type::String)::AFMData
         sectionArray[i] = sectionBreaksProc[i]:(sectionBreaksProc[i+1]-1)
     end
 
-    return sectionArray, fancyNamesRaw, verNumRaw
+    return sectionArray, fancynamesraw, vernumraw
 end
 
-function versionNumStrip(verNumRaw::String)
+function versionNumStrip(vernumraw::String)
     #clean up version number line
-    return split(verNumRaw)[3]
+    return split(vernumraw)[3]
 end
 
-function fancyNameStrip(fancyNamesRaw::String, verNum::SubString{String})
+function fancynamestrip(fancynamesraw::String, vernum::SubString{String})
     #clean up fancy names string so column titles are in array format
-    fancyNamesSplit = split(fancyNamesRaw,"\"")
+    fancyNamesSplit = split(fancynamesraw,"\"")
 
     fancyNames1 = deleteat!(fancyNamesSplit, 1)
 
@@ -261,28 +246,28 @@ function fancyNameStrip(fancyNamesRaw::String, verNum::SubString{String})
     local timeCol::Int64
     local dispCol::Int64
 
-    #use fancyNames and verNum to get column numbers of relevant data
+    #use fancyNames and vernum to get column numbers of relevant data
     forceCol = find(fancyNames .== "Vertical Deflection")[1]
 
     timeCol = find(fancyNames .== "Series Time")[1]
 
-    if Int(verNum[5]) < 6
+    if Int(vernum[5]) < 6
         dispCol = find(fancyNames .== "Tip-Sample Separation")[1]
-    elseif Int(verNum[5]) >= 6
+    elseif Int(vernum[5]) >= 6
         dispCol = find(fancyNames .== "Vertical Tip Position")[1]
     end
     return forceCol, dispCol, timeCol
 end
 
-function afmDataProcess(filedir::String)
+function AFMdataprocess(filedir::String)
     #function calls other functions to get column + version info, and data.
 
     #get section break line numbers, column names and version info
-    (sectionArray, fancyNamesRaw, verNumRaw) = afmGetLines(filedir)
+    (sectionArray, fancynamesraw, vernumraw) = AFMgetlines(filedir)
 
-    verNum = versionNumStrip(verNumRaw)
+    vernum = versionNumStrip(vernumraw)
 
-    (forceCol, dispCol, timeCol) = fancyNameStrip(fancyNamesRaw, verNum)
+    (forceCol, dispCol, timeCol) = fancynamestrip(fancynamesraw, vernum)
 
     #get sectioned data with correct column names
     (data, header) = uCSV.read(filedir; delim=' ', comment='#', types=[Float64,Float64,Float64])
@@ -290,4 +275,51 @@ function afmDataProcess(filedir::String)
     data = hcat(data...)
 
     return data, sectionArray, forceCol, dispCol, timeCol
+end
+
+"""
+    AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpfind::String = "hertz", cpthresh::Float64 = NaN64)
+
+Load data from a JPK AFM (plaintext) file format into an AFMData struct. 
+AFMData struct provides the basis for subsequent high level operations 
+within RHEOS. test_type is either "strlx" for a stress-relaxation test 
+(strain controlled) or "creep" for a creep test (stress controlled).
+If `visco = true`, only approach and hold sections are included. If
+`visco = false` then only approach seciton included, which may be useful
+for elastic analysis only. Retraction portion of data is always discarded.
+
+`cpfind` determines contact point detection method used, if any. Options are:
+
+- `hertz`: Used by default, fits the approach section of the data to an elastic
+           Hertz model and then infers the contact point. 
+
+- `threshold`: Takes contact point as element after force exceeds `cpthresh`.
+
+- `none`: No contact point detection algortihm is used.
+
+# Example
+
+```jldoctest
+# directory path to the file
+filedir = "../data/afmData1.txt"
+
+# load the data into AFMData struct
+dataforprocessing = AFMfileload(filedir, "strlx")
+```
+
+"""
+function AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpfind::String = "hertz", cpthresh::Float64 = NaN64)
+
+    # check that cpthresh provided
+    if cpfind=="threshold"
+        @assert !isnan(cpthresh) "If force threshold method is used, a cpthresh must be provided."
+    end
+
+    # call to get data from file using functions built above
+
+    # add calls to cp methods
+    # using only approach section
+
+    # concat sections if visco, don't if not and send data to constructor
+
 end

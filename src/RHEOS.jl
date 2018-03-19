@@ -79,7 +79,7 @@ include("rheology_proc.jl")
 include("rheology_postproc.jl")
 
 # High level AFM/contact mechanics
-include("afm_utility")
+include("afm_utility.jl")
 
 ######################################################
 end
