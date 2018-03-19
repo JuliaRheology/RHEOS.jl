@@ -62,6 +62,10 @@ export modelfit!, modelcomplete!
 export fiteval, saveresult, loadresult
 
 ######################################################
+# afm_utility.jl
+export AFMfileload
+
+######################################################
 # Main functionality
 include("base_utility.jl")
 include("base_preproc.jl")
@@ -75,6 +79,7 @@ include("rheology_proc.jl")
 include("rheology_postproc.jl")
 
 # High level AFM/contact mechanics
+include("afm_utility")
 
 ######################################################
 end

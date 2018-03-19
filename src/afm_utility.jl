@@ -3,11 +3,9 @@
 """
     AFMData(stress::Array{Float64,1}, strain::Array{Float64,1}, time::Array{Float64,1}, test_type::String)
 
-AFMData mutable struct used for high level interaction with RHEOS
-preprocessing and fitting functions. Initialise an instance directly or
-indirectly. If data is in three column, comma seperated CSV file then
-fileload function can be used, which calls the AFMData constructor.
-If not, load data in according to format and call AFMData constructor.
+AFMData mutable struct used for high level interaction with RHEOS. 
+Initialise an instance directly or indirectly using the AFMfileload
+function. 
 """
 mutable struct AFMData
 
@@ -23,18 +21,19 @@ mutable struct AFMData
     # overrides to "variable".
     sampling::String
 
-    # test type is either "strlx" (stress relaxation, strain controlled)
-    # or "creep" (creep, stress controlled).
+    # test type is either "strlx" (stress relaxation, displacement controlled)
+    # or "creep" (creep, force controlled).
     test_type::String
 
     # original data
-    σ::Array{Float64,1}
-    ϵ::Array{Float64,1}
+    f::Array{Float64,1}
+    δ::Array{Float64,1}
     t::Array{Float64,1}
 
-    # stress and strain numerically differentiated WRT to time
-    dσ::Array{Float64,1}
-    dϵ::Array{Float64,1}
+    # force and displacement to appropriate power and multiplied by prefactor,
+    # numerically differentiated WRT to time
+    dfᵩ::Array{Float64,1}
+    dδᵩ::Array{Float64,1}
 
     # models
     fittedmodels::Dict
@@ -43,30 +42,29 @@ mutable struct AFMData
     appliedops::Array{String,1}
 
     # for initial loading of full dataset (measured + prescribed)
-    AFMData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) = derivconstruct!(new(filedir, false, "constant", test_type, σ, ϵ, t), σ, ϵ, t)
+    AFMData(f::Array{Float64,1}, δ::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String; visco::Bool = true) 
+            = AFMconstruct!(new(filedir, false, "constant", test_type, f, δ, t), f, δ, t, visco)
 
-    # inner constructor for resampled data
-    AFMData(_filedir::String, _insight::Bool, _sampling::String, _test_type::String,
-                 _σ::Array{Float64,1}, _ϵ::Array{Float64,1}, _t::Array{Float64,1},
-                 _dσ::Array{Float64,1}, _dϵ::Array{Float64,1}, _appliedops::Array{String,1}) =
-                 new(_filedir, _insight, _sampling, _test_type,
-                 _σ, _ϵ, _t, _dσ, _dϵ, Dict(), _appliedops)
+    # # inner constructor for resampled data
+    # AFMData(_filedir::String, _insight::Bool, _sampling::String, _test_type::String,
+    #              _f::Array{Float64,1}, _δ::Array{Float64,1}, _t::Array{Float64,1},
+    #              _df::Array{Float64,1}, _dδ::Array{Float64,1}, _appliedops::Array{String,1}) =
+    #              new(_filedir, _insight, _sampling, _test_type,
+    #              _f, _δ, _t, _df, _dδ, Dict(), _appliedops)
 
-    # inner constructor for incomplete data; data_part should generally
-    # be controlled variable (stress for creep, strain for strlx).
-    AFMData(data_part::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) =
-                partialconstruct!(new(filedir, false, "constant", test_type), data_part, t, test_type)
+    # # inner constructor for incomplete data; data_part should generally
+    # # be controlled variable (stress for creep, strain for strlx).
+    # AFMData(data_part::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) =
+    #             partialconstruct!(new(filedir, false, "constant", test_type), data_part, t, test_type)
 
 end
 
 """
-Inner constructor for AFMData struct, providing gradients of stress
-and strain. If stress/strain arrays have NaN values at the beginning (some datasets
-have 1 or 2 samples of NaN at beginning) then deletes these and starts at the first
-non-NaN sample, also readjusts time start to t = 0 to account for NaNs and and
-negative time values at beginning of data recording.
+Inner constructor for AFMData struct, providing gradients of stress and strain. `visco` argument
+determines whether approach and hold regions are used (`visco=true`) or just approach (`visco=false`).
+The second case is useful if only elastic analysis is required.
 """
-function derivconstruct!(self::AFMData, σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1})
+function AFMconstruct!(self::AFMData, f::Array{Float64,1}, δ::Array{Float64,1}, t::Array{Float64,1}, visco)
 
     # define as local so it can be accessed in subsequent scopes
     local newstartingval::T where T<:Integer
@@ -156,49 +154,140 @@ end
 
 
 """
-    fileload(filedir::String, colnames::Array{String,1}, test_type::String)
+    AFMfileload(filedir::String, test_type::String)
 
-Load data from a CSV file (three columns, comma seperated). Columns must
-be identified by providing an array of strings which tell the function
-which data (stress, strain or time) is contained in each column. This is
-used to construct a AFMData struct, which provides the basis for
-subsequent high level operations within RHEOS. test_type is either "strlx"
-for a stress-relaxation test (strain controlled) or "creep" for a creep
-test (stress controlled).
+Load data from a JPK AFM (plaintext) file format into an AFMData struct. 
+AFMData struct provides the basis fors ubsequent high level operations 
+within RHEOS. test_type is either "strlx" for a stress-relaxation test 
+(strain controlled) or "creep" for a creep test (stress controlled).
+Only approach and hold sections are included, retraction portion of data 
+is ignored.
 
 # Example
 
 ```jldoctest
 # directory path to the file
-fileDir = "../data/rheologyData1.csv"
+filedir = "../data/afmData1.txt"
 
 # load the data into AFMData struct
-dataforprocessing = fileload(fileDir, ["time","stress","strain"], "strlx")
+dataforprocessing = AFMfileload(filedir, "strlx")
 ```
 """
-function fileload(filedir::String, colnames::Array{String,1}, test_type::String)::AFMData
+function AFMfileload(filedir::String, test_type::String)::AFMData
+    #function identifies beginning and end of AFM data sections,
+    #returns fancy names line,
+    #and version number of JPK data processing software.
 
-    # check colnames length is correct
-    @assert length(colnames) == 3 "Only three column names required, 'stress', 'strain' and 'time'."
+    #initialise array for storing line numbers of section beginnings and endings
+    sectionBreaks = Int32[]
 
-    # read data from file
-    (data, head_out) = uCSV.read(filedir; delim=',',
-                                 types=[Float64,Float64,Float64])
+    #initialise other local variables
+    local fancyNamesRaw::String
+    local verNumRaw::String
+    local lastLineNum::Int32
 
-    # get column numbers in order of AFMData struct
-    cols = zeros(Int8, 3)
-    for (i, v) in enumerate(colnames)
-        if v == "stress"
-            cols[1] = i
-        elseif v == "strain"
-            cols[2] = i
-        elseif v == "time"
-            cols[3] = i
-        else
-            @assert false "Incorrect Column Names"
+    #iterate through lines
+    open(filedir) do filJ
+        for (i, line) in enumerate(eachline(filJ))
+
+            if startswith(line, "# units")
+                append!(sectionBreaks, i+1)
+
+            elseif line == ""
+                append!(sectionBreaks, i)
+
+            elseif startswith(line, "# fancyNames:")
+                #Get names of columns
+                fancyNamesRaw = line
+
+            elseif startswith(line, "# data-description.modification-software:")
+                #get software version number
+                verNumRaw = line
+
+            elseif eof(filJ)
+                lastLineNum = i+1
+
+            end
         end
+        #append last line
+        append!(sectionBreaks, lastLineNum)
     end
 
-    # generate AFMData struct and output
-    data = AFMData(data[cols[1]], data[cols[2]], data[cols[3]], test_type, filedir)
+    #get section starts and stops, i.e. shift section break line numbers to account comment lines not read by readtable
+    numSections = Int(length(sectionBreaks)/2)
+
+    local blockLen = [0 for i in 1:numSections]
+    local blockMod = [0 for i in 1:numSections]
+    local blockCount = 0
+
+    for num in (1:numSections)
+        #get lengths of each section
+        blockLen[num] = sectionBreaks[2:2:end][num] - sectionBreaks[1:2:end][num]
+        #accumulate lengths
+        blockCount += blockLen[num]
+        #store and account for extra values from boundaries
+        blockMod[num] = blockCount - num + 1
+    end
+
+    #add first line
+    sectionBreaksProc = prepend!(blockMod, [1])
+
+    # println(sectionBreaksProc)
+
+    #get sections as unit ranges for ease of use
+    local sectionArray  = [0:1 for i in 1:(length(sectionBreaksProc)-1)]
+
+    for i in 1:(length(sectionBreaksProc)-1)
+        sectionArray[i] = sectionBreaksProc[i]:(sectionBreaksProc[i+1]-1)
+    end
+
+    return sectionArray, fancyNamesRaw, verNumRaw
+end
+
+function versionNumStrip(verNumRaw::String)
+    #clean up version number line
+    return split(verNumRaw)[3]
+end
+
+function fancyNameStrip(fancyNamesRaw::String, verNum::SubString{String})
+    #clean up fancy names string so column titles are in array format
+    fancyNamesSplit = split(fancyNamesRaw,"\"")
+
+    fancyNames1 = deleteat!(fancyNamesSplit, 1)
+
+    fancyNames = fancyNames1[1:2:end]
+
+    local forceCol::Int64
+    local timeCol::Int64
+    local dispCol::Int64
+
+    #use fancyNames and verNum to get column numbers of relevant data
+    forceCol = find(fancyNames .== "Vertical Deflection")[1]
+
+    timeCol = find(fancyNames .== "Series Time")[1]
+
+    if Int(verNum[5]) < 6
+        dispCol = find(fancyNames .== "Tip-Sample Separation")[1]
+    elseif Int(verNum[5]) >= 6
+        dispCol = find(fancyNames .== "Vertical Tip Position")[1]
+    end
+    return forceCol, dispCol, timeCol
+end
+
+function afmDataProcess(filedir::String)
+    #function calls other functions to get column + version info, and data.
+
+    #get section break line numbers, column names and version info
+    (sectionArray, fancyNamesRaw, verNumRaw) = afmGetLines(filedir)
+
+    verNum = versionNumStrip(verNumRaw)
+
+    (forceCol, dispCol, timeCol) = fancyNameStrip(fancyNamesRaw, verNum)
+
+    #get sectioned data with correct column names
+    (data, header) = uCSV.read(filedir; delim=' ', comment='#', types=[Float64,Float64,Float64])
+
+    data = hcat(data...)
+
+    return data, sectionArray, forceCol, dispCol, timeCol
 end
