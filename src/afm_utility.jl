@@ -1,105 +1,74 @@
 #!/usr/bin/env julia
 
-# """
-#     AFMData(stress::Array{Float64,1}, strain::Array{Float64,1}, time::Array{Float64,1}, test_type::String)
+"""
+    AFMData(stress::Array{Float64,1}, strain::Array{Float64,1}, time::Array{Float64,1}, test_type::String)
 
-# AFMData mutable struct used for high level interaction with RHEOS. 
-# Initialise an instance directly or indirectly using the AFMfileload
-# function. 
-# """
-# mutable struct AFMData
+AFMData mutable struct used for high level interaction with RHEOS. 
+Initialise an instance directly or indirectly using the AFMfileload
+function. 
+"""
+mutable struct AFMData
 
-#     # filedir is location of file on disk, for reference and saving
-#     filedir::String
+    # filedir is location of file on disk, for reference and saving
+    filedir::String
 
-#     # insight parameter, tells functions whether to plot result or not
-#     # during preprocessing. False by default.
-#     insight::Bool
+    # insight parameter, tells functions whether to plot result or not
+    # during preprocessing. False by default.
+    insight::Bool
 
-#     # sampling type. "constant" by default. Use of `var_resample`, `downsample`
-#     # with more than one section or `fixed_resample` with more than one section
-#     # overrides to "variable".
-#     sampling::String
+    # sampling type. "constant" by default. Use of `var_resample`, `downsample`
+    # with more than one section or `fixed_resample` with more than one section
+    # overrides to "variable".
+    sampling::String
 
-#     # test type is either "strlx" (stress relaxation, displacement controlled)
-#     # or "creep" (creep, force controlled).
-#     test_type::String
+    # test type is either "strlx" (stress relaxation, displacement controlled)
+    # or "creep" (creep, force controlled).
+    test_type::String
 
-#     # original data
-#     f::Array{Float64,1}
-#     δ::Array{Float64,1}
-#     t::Array{Float64,1}
+    # original data
+    f::Array{Float64,1}
+    δ::Array{Float64,1}
+    t::Array{Float64,1}
 
-#     # force and displacement to appropriate power and multiplied by prefactor,
-#     # numerically differentiated WRT to time
-#     dfᵩ::Array{Float64,1}
-#     dδᵩ::Array{Float64,1}
+    # measured variable to appropriate power
+    measuredᵩ::Array{Float64,1}
 
-#     # models
-#     fittedmodels::Dict
+    # controlled variable to appropriate power and multiplied by prefactor,
+    # numerically differentiated WRT to time
+    dcontrolledᵩ ::Array{Float64,1}
 
-#     # operations applied, stores history of which functions (including arguments)
-#     appliedops::Array{String,1}
+    # models
+    fittedmodels::Dict
 
-#     # for initial loading of full dataset (measured + prescribed)
-#     AFMData(f::Array{Float64,1}, δ::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String; visco::Bool = true) = AFMconstruct!(new(filedir, false, "constant", test_type, f, δ, t), f, δ, t, visco)
+    # operations applied, stores history of which functions (including arguments)
+    appliedops::Array{String,1}
 
-#     # # inner constructor for resampled data
-#     # AFMData(_filedir::String, _insight::Bool, _sampling::String, _test_type::String,
-#     #              _f::Array{Float64,1}, _δ::Array{Float64,1}, _t::Array{Float64,1},
-#     #              _df::Array{Float64,1}, _dδ::Array{Float64,1}, _appliedops::Array{String,1}) =
-#     #              new(_filedir, _insight, _sampling, _test_type,
-#     #              _f, _δ, _t, _df, _dδ, Dict(), _appliedops)
+    # for initial loading of full dataset (measured + prescribed)
+    AFMData(f::Array{Float64,1}, δ::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) = AFMconstruct!(new(filedir, false, "constant", test_type, f, δ, t))
 
-#     # # inner constructor for incomplete data; data_part should generally
-#     # # be controlled variable (stress for creep, strain for strlx).
-#     # AFMData(data_part::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) =
-#     #             partialconstruct!(new(filedir, false, "constant", test_type), data_part, t, test_type)
+    # inner constructor for resampled data TODO
 
-# end
+    # inner constructor for incomplete data; data_part should generally
+    # be controlled variable (stress for creep, strain for strlx) TODO
+    
+end
 
-# """
-# Inner constructor for AFMData struct, providing gradients of stress and strain. `visco` argument
-# determines whether approach and hold regions are used (`visco=true`) or just approach (`visco=false`).
-# The second case is useful if only elastic analysis is required.
-# """
-# function AFMconstruct!(self::AFMData, f::Array{Float64,1}, δ::Array{Float64,1}, t::Array{Float64,1}, visco)
+"""
+Inner constructor for AFMData struct, providing gradients of stress and strain. `visco` argument
+determines whether approach and hold regions are used (`visco=true`) or just approach (`visco=false`).
+The second case is useful if only elastic analysis is required.
+"""
+function AFMconstruct!(self::AFMData)
 
-#     # define as local so it can be accessed in subsequent scopes
-#     local newstartingval::T where T<:Integer
+    # initialise empty dictionary for model fit results
+    self.fittedmodels = Dict()
 
-#     # test for NaNs
-#     for i in 1:length(self.σ)
-#         if !isnan(self.σ[i]) && !isnan(self.ϵ[i])
-#             newstartingval = i
-#             break
-#         end
-#     end
+    # initialise empty array to record operations applied during preprocessing
+    self.appliedops = String[]
 
-#     # adjust starting point accordingly to remove NaNs in σ, ϵ
-#     initfields = [:σ, :ϵ, :t]
-#     for n in initfields
-#         setfield!(self, n, getfield(self, n)[newstartingval:end])
-#     end
-
-#     # derivative of strain WRT time
-#     self.dσ = deriv(self.σ, self.t)
-
-#     # derivative of stress WRT time
-#     self.dϵ = deriv(self.ϵ, self.t)
-
-#     # readjust time to account for NaN movement and/or negative time values
-#     self.t = self.t - minimum(self.t)
-
-#     # initialise empty dictionary for model fit results
-#     self.fittedmodels = Dict()
-
-#     # initialise empty array to record operations applied during preprocessing
-#     self.appliedops = []
-
-#     # return class with all fields initialised
-#     self
-# end
+    # return class with appropriate fields initialised
+    self
+end
 
 # """
 # Inner constructor completion function for case when only partial data is provided.
@@ -326,28 +295,31 @@ function AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpf
     # add ability to parse other formats in future
     (data, sec, fcol, δcol, tcol) = AFMdataget(filedir)
 
+    # get contact contact point info using only approach section
+    cp_index = contactmodels[cpfind](data[sec[1], fcol], data[sec[1], δcol]; param = cp_param)
+
+    # get data
+    if visco
+        f = vcat(data[sec[1], fcol][cp_index:end], data[sec[2], fcol])
+        δ = vcat(data[sec[1], δcol][cp_index:end], data[sec[2], δcol])
+        t = vcat(data[sec[1], tcol][cp_index:end], data[sec[2], tcol])
+    else
+        f = data[sec[1], fcol][cp_index:end]
+        δ = data[sec[1], δcol][cp_index:end]
+        t = data[sec[1], tcol][cp_index:end]
+    end
+
+    # regularise data
+    f = f
+    δ = -δ - minimum(-δ)
+    t = t - minimum(t)
+
+    # send to constructor and return
+    AFMData(f, δ, t, test_type, filedir)
+
+    # for cp debug, delete after other cpfind algos are implemented
     # plot(data[sec[1], tcol], data[sec[1], fcol])
     # plot(data[sec[2], tcol], data[sec[2], fcol])
+    # plot(t[1], f[1], "o")
     # show()
-
-    # plot(data[sec[1], tcol], data[sec[1], δcol])
-    # plot(data[sec[2], tcol], data[sec[2], δcol])
-    # show()
-
-    println("\n", data[sec[1], δcol][1], "\n", data[sec[1], fcol][1], "\n", data[sec[1], tcol][1],"\n")
-    println("\n", data[sec[1], δcol][end], "\n", data[sec[1], fcol][end], "\n", data[sec[1], tcol][end],"\n")
-
-    println("\n", data[sec[2], δcol][1], "\n", data[sec[2], fcol][1], "\n", data[sec[2], tcol][1],"\n")
-    println("\n", data[sec[2], δcol][end], "\n", data[sec[2], fcol][end], "\n", data[sec[2], tcol][end],"\n")
-
-    println("\n", data[sec[3], δcol][1], "\n", data[sec[3], fcol][1], "\n", data[sec[3], tcol][1],"\n")
-    println("\n", data[sec[3], δcol][end], "\n", data[sec[3], fcol][end], "\n", data[sec[3], tcol][end],"\n")
-
-    # get contact model info, Young's Modulus and contact point
-    # using only approach section
-    # (E, cp, cp_index) = contactmodels[cpfind](data[sec[1], fcol], data[sec[1], δcol]; param = cp_param)
-
-    # concat sections if visco, don't if not and send data to constructor
-    # if visco
-
 end
