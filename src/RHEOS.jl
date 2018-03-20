@@ -14,12 +14,14 @@ using Interpolations
 using NLopt
 using PyPlot
 using JLD
-# included but experimental dependency
+# experimental dependency not automatically imported from base.jl
 using Base.Threads
 # using Plots; gr() # add support for different plotting backends
+
 println("\n===========================")
 println("Number of threads in use: ", nthreads())
 println("===========================\n")
+
 ######################################################
 # base_utility.jl
 export deriv, trapz, mittleff, RheologyModel
@@ -62,6 +64,10 @@ export modelfit!, modelcomplete!
 export fiteval, saveresult, loadresult
 
 ######################################################
+# afm_contactmodels.jl
+export contact_hertz, contact_threshold, contact_none
+
+######################################################
 # afm_utility.jl
 export AFMfileload
 
@@ -79,6 +85,7 @@ include("rheology_proc.jl")
 include("rheology_postproc.jl")
 
 # High level AFM/contact mechanics
+include("afm_contactmodels.jl")
 include("afm_utility.jl")
 
 ######################################################
