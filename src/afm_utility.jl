@@ -54,9 +54,7 @@ mutable struct AFMData
 end
 
 """
-Inner constructor for AFMData struct, providing gradients of stress and strain. `visco` argument
-determines whether approach and hold regions are used (`visco=true`) or just approach (`visco=false`).
-The second case is useful if only elastic analysis is required.
+Inner constructor for AFMData struct, fills in fields as appropriate.
 """
 function AFMconstruct!(self::AFMData)
 
