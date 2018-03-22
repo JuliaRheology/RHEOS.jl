@@ -248,7 +248,7 @@ function AFMdataget(filedir::String)
 end
 
 """
-    AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpfind::String = "hertz", cpthresh::Float64 = NaN64)
+    AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpfind::String = "hertz", param::Float64 = NaN64)
 
 Load data from a JPK AFM (plaintext) file format into an AFMData struct. 
 AFMData struct provides the basis for subsequent high level operations 
@@ -263,7 +263,7 @@ for elastic analysis only. Retraction portion of data is always discarded.
 - `hertz`: Used by default, fits the approach section of the data to an elastic
            Hertz model and then infers the contact point. 
 
-- `threshold`: Takes contact point as element after force exceeds `cpthresh`.
+- `threshold`: Takes contact point as element after force exceeds `param`.
 
 - `none`: No contact point detection algortihm is used.
 
@@ -277,16 +277,18 @@ filedir = "../data/afmData1.txt"
 dataforprocessing = AFMfileload(filedir, "strlx")
 ```
 """
-function AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpfind::String = "hertz", cp_param::Float64 = NaN64)
+function AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpfind::String = "hertz", param::Float64 = NaN64)
 
     # dictionary for referencing contact model functions
     contactmodels = Dict( "hertz" => contact_hertz,
                           "threshold" => contact_threshold,
                           "none" => contact_none )
 
-    # check that cp_param provided
-    if cpfind=="threshold"
-        @assert !isnan(cp_param) "If force threshold method is used, a force threshold must be provided using cp_param keyword argument."
+    # check that params provided where necessary
+    if cpfind == "threshold"
+        @assert !isnan(param) "If force threshold method is used, a force threshold must be provided using param keyword argument."
+    elseif cpfind == "hertz"
+        @assert !isnan(param) "If Hertz contact point method detection is used, radius of spherical indenter must be provided."
     end
 
     # get data from JPK formatted file using functions built above, 
@@ -294,26 +296,26 @@ function AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpf
     (data, sec, fcol, δcol, tcol) = AFMdataget(filedir)
 
     # get contact contact point info using only approach section
-    cp_index = contactmodels[cpfind](data[sec[1], fcol], data[sec[1], δcol]; param = cp_param)
+    cp_index = contactmodels[cpfind](data[sec[1], fcol], data[sec[1], δcol]; _param = param)
 
-    # get data
-    if visco
-        f = vcat(data[sec[1], fcol][cp_index:end], data[sec[2], fcol])
-        δ = vcat(data[sec[1], δcol][cp_index:end], data[sec[2], δcol])
-        t = vcat(data[sec[1], tcol][cp_index:end], data[sec[2], tcol])
-    else
-        f = data[sec[1], fcol][cp_index:end]
-        δ = data[sec[1], δcol][cp_index:end]
-        t = data[sec[1], tcol][cp_index:end]
-    end
+    # # get data
+    # if visco
+    #     f = vcat(data[sec[1], fcol][cp_index:end], data[sec[2], fcol])
+    #     δ = vcat(data[sec[1], δcol][cp_index:end], data[sec[2], δcol])
+    #     t = vcat(data[sec[1], tcol][cp_index:end], data[sec[2], tcol])
+    # else
+    #     f = data[sec[1], fcol][cp_index:end]
+    #     δ = data[sec[1], δcol][cp_index:end]
+    #     t = data[sec[1], tcol][cp_index:end]
+    # end
 
-    # regularise data
-    f = f
-    δ = -δ - minimum(-δ)
-    t = t - minimum(t)
+    # # regularise data
+    # f = f
+    # δ = -δ - minimum(-δ)
+    # t = t - minimum(t)
 
-    # send to constructor and return
-    AFMData(f, δ, t, test_type, filedir)
+    # # send to constructor and return
+    # AFMData(f, δ, t, test_type, filedir)
 
     # for cp debug, delete after other cpfind algos are implemented
     # plot(data[sec[1], tcol], data[sec[1], fcol])

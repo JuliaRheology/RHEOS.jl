@@ -186,8 +186,8 @@ function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Floa
                                                         _sampling = sampling))
 
     # minimise objective func, minx are the parameters resulting in minimum
-    (minf,minx,ret) = optimize(opt, params_init)
+    (minf, minx, ret) = optimize(opt, params_init)
 
     # return all
-    (minf,minx,ret)
+    (minf, minx, ret)
 end
