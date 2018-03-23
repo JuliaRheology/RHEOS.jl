@@ -80,7 +80,7 @@ function hertz_approx(f::Array{Float64,1}, δ::Array{Float64,1}, R::Float64, ν:
 
     # approximate contact point, assume linear near end of approach section
     # and trace line down to axis
-    last_section = Int(0.98*length(f)):length(f)
+    last_section = round(Int64, 0.98*length(f)):length(f)
 
     avg_gradient = mean(deriv(f[last_section], δ[last_section]))
 
@@ -98,7 +98,7 @@ function hertz_approx(f::Array{Float64,1}, δ::Array{Float64,1}, R::Float64, ν:
     approx_YM = avg_gradient_transformed/prefactor
 
     # estimate offset and tilt
-    first_section = 1:Int(0.5*length(f))
+    first_section = 1:round(Int64, 0.5*length(f))
 
     df_dh = deriv(f, δ)
 
