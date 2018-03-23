@@ -21,18 +21,21 @@ function contact_hertz(f::Array{Float64,1}, δ::Array{Float64,1}; _param::Float6
 
     # least squares fit
     opt = Opt(:LN_SBPLX, 4) # 4 parameters to fit
-
-    bounds_param = 0.04 # +/- limits allowance from initial contact point guess
+    
+    bounds_param = 0.25 # +/- limits allowance from initial contact point guess
     lower_bounds!(opt, [init_δ₀*(1 - bounds_param), 0.0, -5.0, -5.0])
     upper_bounds!(opt, [init_δ₀*(1 + bounds_param), 1e10, 5.0, 5.0])
 
-    xtol_rel!(opt,1e-4)
+    xtol_rel!(opt,1e-5)
 
     min_objective!(opt, (params, grad) -> hertz_cost(f, δ, R, ν, params[1], params[2], params[3], params[4]))
 
     params_init = [init_δ₀, init_YM, tilt_approx, offset_approx]
 
     (minf, minx, ret) = optimize(opt, params_init)
+
+    println("min parameters $minx")
+    println("min cost: $minf")
 
     f_fitted = hertz_model(δ, R, ν, minx[1], minx[2], minx[3], minx[4])
     plot(δ, f)
@@ -135,8 +138,8 @@ function hertz_cost(f::Array{Float64,1}, δ::Array{Float64,1}, R::Float64, ν::F
     Δ = f - hertz_model(δ, R, ν, δ₀, E, tilt, offset)
 
     # regularisation parameter for offset and tilt
-    λ = 10.0
+    λ = 0.1
 
     # sum of squares
-    cost = sum(Δ.^2) + λ*(tilt + offset)
+    cost = sum(Δ.^2) + λ*(tilt + offset)^2
 end

@@ -194,14 +194,14 @@ Used in AFMdataget pipeline - clean up version number line.
 """
 function versionnumstrip(vernumraw::String)
     
-    return split(vernumraw)[3]
+    return String(split(vernumraw)[3])
 end
 
 """
 Used in AFMdataget pipeline - clean up fancy names string so column 
 titles are in array format.
 """
-function fancynamestrip(fancynamesraw::String, vernum::SubString{String})
+function fancynamestrip(fancynamesraw::String, vernum::String)
 
     fancynames_split = split(fancynamesraw,"\"")
 
@@ -216,11 +216,18 @@ function fancynamestrip(fancynamesraw::String, vernum::SubString{String})
     # use fancynames and vernum to get column numbers of relevant data
     forcecol = find(fancynames .== "Vertical Deflection")[1]
 
-    timecol = find(fancynames .== "Series Time")[1]
+    # if no time column present then return timecol = 0
+    if length(find(fancynames .== "Series Time")) == 1
+        timecol = find(fancynames .== "Series Time")[1]
+    else
+        timecol = 0
+    end
 
-    if Int(vernum[5]) < 6
+    _vernum = parse(Int16, vernum[5])
+
+    if _vernum < 6
         dispcol = find(fancynames .== "Tip-Sample Separation")[1]
-    elseif Int(vernum[5]) >= 6
+    elseif _vernum >= 6
         dispcol = find(fancynames .== "Vertical Tip Position")[1]
     end
     return forcecol, dispcol, timecol
@@ -240,7 +247,7 @@ function AFMdataget(filedir::String)
     (forcecol, dispcol, timecol) = fancynamestrip(fancynamesraw, vernum)
 
     # get sectioned data with correct column names
-    (data, header) = uCSV.read(filedir; delim=' ', comment='#', types=[Float64, Float64, Float64])
+    (data, header) = uCSV.read(filedir; delim=' ', comment='#')
 
     data = hcat(data...)
 
@@ -306,20 +313,16 @@ function AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpf
     # else
     #     f = data[sec[1], fcol][cp_index:end]
     #     δ = data[sec[1], δcol][cp_index:end]
-    #     t = data[sec[1], tcol][cp_index:end]
     # end
 
     # # regularise data
     # f = f
     # δ = -δ - minimum(-δ)
+    # if visco
     # t = t - minimum(t)
+    # end
 
     # # send to constructor and return
     # AFMData(f, δ, t, test_type, filedir)
 
-    # for cp debug, delete after other cpfind algos are implemented
-    # plot(data[sec[1], tcol], data[sec[1], fcol])
-    # plot(data[sec[2], tcol], data[sec[2], fcol])
-    # plot(t[1], f[1], "o")
-    # show()
 end
