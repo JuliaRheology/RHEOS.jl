@@ -305,24 +305,24 @@ function AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpf
     # get contact contact point info using only approach section
     cp_index = contactmodels[cpfind](data[sec[1], fcol], data[sec[1], δcol]; _param = param)
 
-    # # get data
-    # if visco
-    #     f = vcat(data[sec[1], fcol][cp_index:end], data[sec[2], fcol])
-    #     δ = vcat(data[sec[1], δcol][cp_index:end], data[sec[2], δcol])
-    #     t = vcat(data[sec[1], tcol][cp_index:end], data[sec[2], tcol])
-    # else
-    #     f = data[sec[1], fcol][cp_index:end]
-    #     δ = data[sec[1], δcol][cp_index:end]
-    # end
+    # get data
+    if visco
+        f = vcat(data[sec[1], fcol][cp_index:end], data[sec[2], fcol])
+        δ = vcat(data[sec[1], δcol][cp_index:end], data[sec[2], δcol])
+        t = vcat(data[sec[1], tcol][cp_index:end], data[sec[2], tcol])
+    else
+        f = data[sec[1], fcol][cp_index:end]
+        δ = data[sec[1], δcol][cp_index:end]
+    end
 
-    # # regularise data
-    # f = f
-    # δ = -δ - minimum(-δ)
-    # if visco
-    # t = t - minimum(t)
-    # end
+    # regularise data
+    f = f - minimum(f)
+    δ = -δ - minimum(-δ)
+    if visco
+        t = t - minimum(t)
+    end
 
-    # # send to constructor and return
-    # AFMData(f, δ, t, test_type, filedir)
+    # send to constructor and return
+    AFMData(f, δ, t, test_type, filedir)
 
 end

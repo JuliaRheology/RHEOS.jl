@@ -34,13 +34,9 @@ function contact_hertz(f::Array{Float64,1}, δ::Array{Float64,1}; _param::Float6
 
     (minf, minx, ret) = optimize(opt, params_init)
 
-    println("min parameters $minx")
-    println("min cost: $minf")
-
-    f_fitted = hertz_model(δ, R, ν, minx[1], minx[2], minx[3], minx[4])
-    plot(δ, f)
-    plot(δ, f_fitted, "--")
-    show()
+    # return index of contact point
+    δ₀_index = indmin(abs.(δ - minx[1]))
+    
 end
 
 """

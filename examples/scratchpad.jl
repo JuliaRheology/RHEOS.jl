@@ -14,8 +14,8 @@ Emotion = Union{Happy, Sad}
 function emotion_reader(self::Emotion)
 
     println(typeof(self))
-    println("Intensity: ", self.intensity)
-    println("Reason: ", self.reason)
+    println("Intensity: ", getfield(self, :intensity) )
+    println("Reason: ", getfield(self, :reason) )
 
 end
 
