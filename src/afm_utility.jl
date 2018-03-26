@@ -25,17 +25,20 @@ mutable struct AFMData
     # or "creep" (creep, force controlled).
     test_type::String
 
+    # radius of sphere
+    R::Float64
+
     # original data
     f::Array{Float64,1}
     δ::Array{Float64,1}
     t::Array{Float64,1}
 
     # measured variable to appropriate power
-    measuredᵩ::Array{Float64,1}
+    cm_measured::Array{Float64,1}
 
     # controlled variable to appropriate power and multiplied by prefactor,
     # numerically differentiated WRT to time
-    dcontrolledᵩ ::Array{Float64,1}
+    cm_dcontrolled ::Array{Float64,1}
 
     # models
     fittedmodels::Dict
@@ -44,9 +47,12 @@ mutable struct AFMData
     appliedops::Array{String,1}
 
     # for initial loading of full dataset (measured + prescribed)
-    AFMData(f::Array{Float64,1}, δ::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) = AFMconstruct!(new(filedir, false, "constant", test_type, f, δ, t))
+    AFMData(f::Array{Float64,1}, δ::Array{Float64,1}, t::Array{Float64,1}, R::Float64, test_type::String, filedir::String) = AFMconstruct!(new(filedir, false, "constant", test_type, R, f, δ, t))
 
-    # inner constructor for resampled data TODO
+    # inner constructor for resampled data
+    AFMData(filedir::String, insight::Bool, sampling::String, test_type::String, R::Float64, f::Array{Float64,1}, δ::Array{Float64,1}, t::Array{Float64,1}, cm_measured::Array{Float64,1},
+            cm_dcontrolled::Array{Float64,1}, fittedmodels::Dict, appliedops::Array{String,1}) = 
+            new(filedir, insight, sampling, test_type, R, f, δ, t, cm_measured, cm_dcontrolled, fittedmodels, appliedops)
 
     # inner constructor for incomplete data; data_part should generally
     # be controlled variable (stress for creep, strain for strlx) TODO
@@ -57,6 +63,24 @@ end
 Inner constructor for AFMData struct, fills in fields as appropriate.
 """
 function AFMconstruct!(self::AFMData)
+
+    # assume spherical Hertz model
+    prefactor = 8.0*sqrt(self.R)/3.0
+
+    # define cm_measured and cm_dcontrolled as appropriate, REF Oyen paper
+    if self.test_type == "strlx"
+
+        self.cm_measured = self.f
+
+        self.cm_dcontrolled = prefactor*deriv((self.δ).^(3/2), self.t)
+
+    elseif self.test_type == "creep"
+
+        self.cm_measured = (self.δ).^(3/2)
+
+        self.cm_dcontrolled = deriv(self.f, self.t)/prefactor
+
+    end
 
     # initialise empty dictionary for model fit results
     self.fittedmodels = Dict()
@@ -284,7 +308,7 @@ filedir = "../data/afmData1.txt"
 dataforprocessing = AFMfileload(filedir, "strlx")
 ```
 """
-function AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpfind::String = "hertz", param::Float64 = NaN64)
+function AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpfind::String = "hertz", R::Float64 = NaN64, param::Float64 = NaN64)
 
     # dictionary for referencing contact model functions
     contactmodels = Dict( "hertz" => contact_hertz,
@@ -295,7 +319,8 @@ function AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpf
     if cpfind == "threshold"
         @assert !isnan(param) "If force threshold method is used, a force threshold must be provided using param keyword argument."
     elseif cpfind == "hertz"
-        @assert !isnan(param) "If Hertz contact point method detection is used, radius of spherical indenter must be provided."
+        @assert !isnan(R) "If Hertz contact point method detection is used, radius of spherical indenter must be provided."
+        param = R
     end
 
     # get data from JPK formatted file using functions built above, 
@@ -323,6 +348,6 @@ function AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpf
     end
 
     # send to constructor and return
-    AFMData(f, δ, t, test_type, filedir)
+    AFMData(f, δ, t, R, test_type, filedir)
 
 end
