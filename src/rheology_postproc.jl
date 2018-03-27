@@ -1,11 +1,11 @@
 #!/usr/bin/env julia
 
 """
-    fiteval(self::RheologyData, modelname::String; singularity = false)
+    fiteval(self::RheologyType, modelname::String; singularity = false)
 
 Show plot of data vs. fitted data for specified model.
 """
-function fiteval(self::RheologyData, modelname::String)
+function fiteval(self::RheologyType, modelname::String)
 
     # params
     params = self.fittedmodels[modelname]
@@ -13,20 +13,19 @@ function fiteval(self::RheologyData, modelname::String)
     # modulus function
     model = moduli(modelname, self.test_type)
 
-    # get data
-    if self.test_type == "strlx"
-        measured = self.σ
-        prescribed_dot = self.dϵ
-    elseif self.test_type == "creep"
-        measured = self.ϵ
-        prescribed_dot = self.dσ
-    end
-
     # get fit
-    if self.sampling == "constant"
-        fitted = boltzconvolve(model, self.t, deriv(self.t), params, prescribed_dot)
-    elseif self.sampling == "variable"
-        fitted = boltzintegral(model, self.t, params, prescribed_dot)
+    if !model.singularity && self.sampling == "constant"
+        fitted = boltzconvolve_nonsing(model, self.t, deriv(self.t), params, self.dcontrolled)
+
+    elseif model.singularity && self.sampling == "constant"
+        fitted = boltzconvolve_sing(model, self.t, deriv(self.t), params, self.dcontrolled)
+
+    elseif !model.singularity && self.sampling == "variable"
+        fitted = boltzintegral_nonsing(model, self.t, params, self.dcontrolled)
+
+    elseif model.singularity && self.sampling == "variable"
+        fitted = boltzintegral_sing(model, self.t, params, self.dcontrolled)
+
     end
 
     # print params
@@ -34,11 +33,11 @@ function fiteval(self::RheologyData, modelname::String)
 
     # stress subplot
     if model.singularity
-        plot(self.t[1:end], measured)
+        plot(self.t[1:end], self.measured)
         plot(self.t[2:end], fitted, "--")
         show()
     else
-        plot(self.t, measured)
+        plot(self.t, self.measured)
         plot(self.t, fitted, "--")
         show()
     end
@@ -46,21 +45,21 @@ function fiteval(self::RheologyData, modelname::String)
 end
 
 """
-    saveresult(self::RheologyData; include_data::Bool = false)
+    saveresult(self::RheologyType; include_data::Bool = false)
 
-Save RheologyData object using JLD format. If include_data set to false
+Save RheologyType object using JLD format. If include_data set to false
 (by default) then :σ, :ϵ, :t, :dσ, :dϵ fields are set to [0.0] to save
 space on disk. If include_data is set as true then these fields are saved
 as is.
 """
-function saveresult(self::RheologyData; include_data::Bool = false)
+function saveresult(self::RheologyType; include_data::Bool = false)
 
     # include original/processed numerical data σ, ϵ, t...etc.
     if include_data
 
         # save
         jldopen(string(self.filedir[1:end-4], "_RheologyData.jld"), "w") do file
-            # register RHEOS module (with RheologyData type) to JLD
+            # register RHEOS module (with RheologyType type) to JLD
             addrequire(file, RHEOS)
             # write self to file
             write(file, "self", self)
@@ -72,14 +71,14 @@ function saveresult(self::RheologyData; include_data::Bool = false)
         self_copy = deepcopy(self)
 
         # member variables to erase
-        to_reset = [:σ, :ϵ, :t, :dσ, :dϵ]
+        to_reset = self.numericdata
         for n in to_reset
             setfield!(self_copy, n, [0.0])
         end
 
         # save 
         jldopen(string(self_copy.filedir[1:end-4], "_RheologyMetadata.jld"), "w") do file
-            # register RHEOS module (with RheologyData type) to JLD
+            # register RHEOS module (with RheologyType type) to JLD
             addrequire(file, RHEOS)
             # write self_copy to file
             write(file, "self", self_copy)

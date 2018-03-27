@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 """
-    var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float64; _mapback = true)
+    var_resample(self::RheologyType, refvar::Symbol, pcntdownsample::Float64; _mapback::Bool = false)
 
 Convert a fixed sample rate array to a variable sample rate, with sampling points
 added according to a relative change in chosen variable `refvar`, 1st derivative
@@ -16,116 +16,107 @@ function or interpolating onto unsmoothed data.
 
 See help docstring for `var_resample` for more details on algorithm implementation.
 """
-function var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float64; _mapback = false)
+function var_resample(self::RheologyType, refvar::Symbol, pcntdownsample::Float64; _mapback::Bool = false)
 
     # enforce minimum period of original period/10
     _minperiod = (self.t[2] - self.t[1])/10.0
 
-    # interpolate all with respect to t
-    ϵ_interp = Interpolations.interpolate((self.t,), self.ϵ, Interpolations.Gridded(Interpolations.Linear()))
-    σ_interp = Interpolations.interpolate((self.t,), self.σ, Interpolations.Gridded(Interpolations.Linear()))
-    dϵ_interp = Interpolations.interpolate((self.t,), self.dϵ, Interpolations.Gridded(Interpolations.Linear()))
-    dσ_interp = Interpolations.interpolate((self.t,), self.dσ, Interpolations.Gridded(Interpolations.Linear()))
+    self_new = deepcopy(self)
 
     # get time resampled with respect to refvar
     (tᵦ, dummy)  = var_resample(self.t, getfield(self, refvar), pcntdownsample, _minperiod)
 
-    # get resampled
-    ϵᵦ = ϵ_interp[tᵦ]
-    σᵦ = σ_interp[tᵦ]
-    dϵᵦ = dϵ_interp[tᵦ]
-    dσᵦ = dσ_interp[tᵦ]
+    for variable in self_new.numericdata
+        # interpolate with respect to t
+        var_interp = Interpolations.interpolate((self.t,), getfield(self, variable), Interpolations.Gridded(Interpolations.Linear()))
+
+        # set field of new struct
+        setfield!(self_new, variable, var_interp[tᵦ])
+    end
 
     # if mapback required then mapback
     if _mapback
         # get mapped indices wrt original
         mapback_indices = mapback(tᵦ, self.t)
-        #map
-        tᵦ = self.t[mapback_indices]
-        ϵᵦ = self.ϵ[mapback_indices]
-        σᵦ = self.σ[mapback_indices]
-        dϵᵦ = self.dϵ[mapback_indices]
-        dσᵦ = self.dσ[mapback_indices]
+        
+        for variable in self_new.numericdata
+
+            setfield!(self_new, variable, getfield(self, variable)[mapback_indices])
+
+        end
     end
 
     # plot if insight required
     if self.insight
-        # strain subplot
-        subplot(121)
-        plot(self.t, self.ϵ, "o")
-        plot(tᵦ, ϵᵦ, "x")
-        title("Strain")
-        # stress subplot
-        subplot(122)
-        plot(self.t, self.σ, "o")
-        plot(tᵦ, σᵦ, "x")
-        title("Stress")
-        # show
-        show()
+        # plot all numeric data
+        for variable in self_new.numericdata[1:3]
+            # original data
+            plot(self.t, getfield(self, variable), "o")
+            # new data
+            plot(self_new.t, getfield(self_new, variable), "x")
+            title(String(variable))
+            show()
+        end
     end
 
+    # change sampling type to variable
+    self_new.sampling = "variable"
+    
     # add record of operation applied
-    appliedops = vcat(self.appliedops, "var_resample - refvar: $refvar, pcntdownsample: $pcntdownsample, _mapback: $_mapback")
+    self_new.appliedops = vcat(self_new.appliedops, "var_resample - refvar: $refvar, pcntdownsample: $pcntdownsample, _mapback: $_mapback")
 
-    # construct new RheologyData struct with resampled members
-    RheologyData(self.filedir, self.insight, "variable", self.test_type, σᵦ, ϵᵦ, tᵦ, dσᵦ, dϵᵦ, appliedops)
+    self_new
 
 end
 
 """
-    downsample(self::RheologyData, boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
+    downsample(self::RheologyType, boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
 
-Use indices from `downsample` to downsample all data in the RheologyData struct.
+Use indices from `downsample` to downsample all data in the RheologyType struct.
 
 See help docstring for `downsample` for more info on use of boundaries and elperiods
 arguments.
 """
-function downsample(self::RheologyData, boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
+function downsample(self::RheologyType, boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
 
     # get downsampled indices
     indices = downsample(boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
 
+    self_new = deepcopy(self)
+
     # downsample data
-    tᵦ = self.t[indices]
-    σᵦ = self.σ[indices]
-    ϵᵦ = self.ϵ[indices]
-    dϵᵦ = self.dϵ[indices]
-    dσᵦ = self.dσ[indices]
+    for variable in self_new.numericdata
+        # set field of new struct
+        setfield!(self_new, variable, getfield(self, variable)[indices])
+    end
 
     # plot if insight required
     if self.insight
-        # strain subplot
-        subplot(121)
-        plot(self.t, self.ϵ)
-        plot(tᵦ, ϵᵦ, "x")
-        title("Strain")
-        # stress subplot
-        subplot(122)
-        plot(self.t, self.σ)
-        plot(tᵦ, σᵦ, "x")
-        title("Stress")
-        # show
-        show()
+        # plot all numeric data
+        for variable in self_new.numericdata[1:3]
+            # original data
+            plot(self.t, getfield(self, variable), "o")
+            # new data
+            plot(self_new.t, getfield(self_new, variable), "x")
+            title(String(variable))
+            show()
+        end
     end
 
     # change to variable sampling rate if more than one section
     if length(elperiods) > 1
-        _sampling = "variable"
-    # otherwise, remain as before
-    else
-        _sampling = self.sampling
+        self_new.sampling = "variable"
     end
 
     # add record of operation applied
     appliedops = vcat(self.appliedops, "downsample - boundaries: $boundaries, elperiods: $elperiods")
 
-    # construct new RheologyData struct with resampled members
-    RheologyData(self.filedir, self.insight, _sampling, self.test_type, σᵦ, ϵᵦ, tᵦ, dσᵦ, dϵᵦ, self.appliedops)
+    self_new
 
 end
 
 """
-    fixed_resample(self::RheologyData, boundaries::Array{Int64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
+    fixed_resample(self::RheologyType, boundaries::Array{Int64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
 
 Resample three (or two) arrays with new sample rate(s).
 
@@ -135,72 +126,66 @@ sections will be interpolated versions of the original data.
 
 See docstring for `fixed_resample` for more info and example on calling signature.
 """
-function fixed_resample(self::RheologyData, boundaries::Array{Int64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
+function fixed_resample(self::RheologyType, boundaries::Array{Int64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
 
-    # resample main data
-    (tᵦ, σᵦ, ϵᵦ) = fixed_resample(self.t, self.σ, self.ϵ,
-                                                 boundaries, elperiods, direction)
+    self_new = deepcopy(self)
 
-    # resample derivatives
-    (tᵦ, dϵᵦ) = fixed_resample(self.t, self.dϵ, boundaries,
-                                          elperiods, direction)
+    # resample all data
+    for variable in self_new.numericdata
+        # resample derivatives
+        (tᵦ, tempvarᵦ) = fixed_resample(self.t, getfield(self, variable), boundaries, elperiods, direction)
 
-    (tᵦ, dσᵦ) = fixed_resample(self.t, self.dσ, boundaries,
-                                          elperiods, direction)
+        setfield!(self_new, variable, tempvarᵦ)
+    end
 
     # plot if insight required
     if self.insight
-        # strain subplot
-        subplot(121)
-        plot(self.t, self.ϵ)
-        plot(tᵦ, ϵᵦ, "x")
-        title("Strain")
-        # stress subplot
-        subplot(122)
-        plot(self.t, self.σ)
-        plot(tᵦ, σᵦ, "x")
-        title("Stress")
-        # show
-        show()
+        # plot all numeric data
+        for variable in self_new.numericdata[1:3]
+            # original data
+            plot(self.t, getfield(self, variable), "o")
+            # new data
+            plot(self_new.t, getfield(self_new, variable), "x")
+            title(String(variable))
+            show()
+        end
     end
 
     # change to variable sampling rate if more than one section
     if length(elperiods) > 1
-        _sampling = "variable"
-    # otherwise, remain as before
-    else
-        _sampling = self.sampling
+        self_new.sampling = "variable"
     end
 
     # add record of operation applied
     appliedops = vcat(self.appliedops, "fixed_resample - boundaries: $boundaries, elperiods: $elperiods, direction: $direction")
 
-    # construct new RheologyData struct with resampled members
-    RheologyData(self.filedir, self.insight, _sampling, self.test_type, σᵦ, ϵᵦ, tᵦ, dσᵦ, dϵᵦ, appliedops)
+    self_new
 
 end
 
 """
-    smooth(self::RheologyData, τ::Float64; to_smooth = "all")
+    smooth(self::RheologyType, τ::Float64; to_smooth = "all")
 
 Smooth data using a Gaussian Kernel to time scale τ (approximately half power).
 
 to_smooth can be an array of symbols so for example if you want to smooth ϵ and dϵ
 then to_smooth = [:ϵ, :dϵ]
 """
-function smooth(self::RheologyData, τ::Float64; to_smooth = "all")
+function smooth(self::RheologyType, τ::Float64; to_smooth = "all")
 
     @assert self.sampling=="constant" "Sample rate must be constant for Gaussian smoothing kernel to function properly"
 
     # check what to smooth
     if to_smooth == "all"
-        tosmooth = [:σ, :ϵ, :dσ, :dϵ]
+        temp_variables = deepcopy(self.numericdata)
+        filter!(i -> i≠:t, temp_variables)
+        tosmooth = temp_variables
     else
         tosmooth = to_smooth
     end
 
     # copy self
-    self_copy = deepcopy(self)
+    self_new = deepcopy(self)
 
     # get constant sample period
     dt = self.t[2] - self.t[1]
@@ -211,56 +196,56 @@ function smooth(self::RheologyData, τ::Float64; to_smooth = "all")
     # loop through fields to smooth
     for i in tosmooth
         # set iteratively
-        setfield!(self_copy, i, smoothgauss(getfield(self, i), τ, samplerate))
+        setfield!(self_new, i, smoothgauss(getfield(self, i), τ, samplerate))
     end
 
     # plot if insight required
     if self.insight
         # loop through symbols in tosmooth and plot
-        for i in tosmooth
+        for i in tosmooth[1:3]
             plot(self.t, getfield(self, i))
-            plot(self_copy.t, getfield(self_copy, i), "--")
+            plot(self_new.t, getfield(self_new, i), "--")
             title(String(i))
             show()
         end
     end
 
     # add record of operation applied
-    self_copy.appliedops = vcat(self.appliedops, "smooth - τ: $τ, to_smooth: $to_smooth")
+    self_new.appliedops = vcat(self.appliedops, "smooth - τ: $τ, to_smooth: $to_smooth")
 
-    # return
-    self_copy
+    self_new
+
 end
 
 """
-    function mapbackdata(self_new::RheologyData, self_original::RheologyData)
+    function mapbackdata(self_new::RheologyType, self_original::RheologyType)
 
 Map back elements (WRT closest time elements) of all data from self_new to
 self_original. See mapback help docstring for more info on how algorithm works.
 """
-function mapbackdata(self_new::RheologyData, self_original::RheologyData)
+function mapbackdata(self_new::RheologyType, self_original::RheologyType)
 
     # get copy
     self_out = deepcopy(self_new)
 
     # symbols of data
-    to_map = [:t, :σ, :ϵ, :dσ, :dϵ]
+    to_map = self_out.numericdata
 
     # get mapped back indices
     indices = mapback(self_new.t, self_original.t)
 
     # loop through to set variables
-    for i in to_map
-        setfield!(self_out, i, getfield(self_original, i)[indices])
+    for variable in to_map
+        setfield!(self_out, variable, getfield(self_original, variable)[indices])
     end
 
     # plot if insight required
     if self_new.insight
         # loop through symbols in tosmooth and plot
-        for i in to_map
-            plot(self_original.t, getfield(self_original, i), "o")
-            plot(self_out.t, getfield(self_out, i), "x")
-            title(String(i))
+        for variable in to_map[1:3]
+            plot(self_original.t, getfield(self_original, variable), "o")
+            plot(self_out.t, getfield(self_out, variable), "x")
+            title(String(variable))
             show()
         end
     end
@@ -268,6 +253,6 @@ function mapbackdata(self_new::RheologyData, self_original::RheologyData)
     # add record of operation applied
     self_out.appliedops = vcat(self_new.appliedops, "mapped back")
 
-    # return
     self_out
+
 end

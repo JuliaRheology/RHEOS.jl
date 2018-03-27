@@ -48,8 +48,12 @@ export J_SLS, J_SLS2, J_burgers,
         J_fractmaxwell, J_fractzener
 
 ######################################################
+# afm_contactmodels.jl
+export contact_hertz, contact_threshold, contact_none
+
+######################################################
 # rheology_utility.jl
-export RheologyData, fileload
+export RheologyData, fileload, AFMfileload, AFMData, RheologyType
 
 ######################################################
 # rheology_preproc.jl
@@ -64,22 +68,6 @@ export modelfit!, modelcomplete!
 export fiteval, saveresult, loadresult
 
 ######################################################
-# afm_contactmodels.jl
-export contact_hertz, contact_threshold, contact_none
-
-######################################################
-# afm_utility.jl
-export AFMfileload
-
-######################################################
-# afm_preproc.jl
-export var_resample, downsample, fixed_resample, smooth, mapbackdata
-
-######################################################
-# afm_proc.jl
-export modelfit!
-
-######################################################
 # Main functionality
 include("base_utility.jl")
 include("base_preproc.jl")
@@ -87,16 +75,10 @@ include("base_proc.jl")
 include("base_models.jl")
 
 # High level rheology interface
+include("afm_contactmodels.jl")
 include("rheology_utility.jl")
 include("rheology_preproc.jl")
 include("rheology_proc.jl")
 include("rheology_postproc.jl")
-
-# High level AFM/contact mechanics
-include("afm_contactmodels.jl")
-include("afm_utility.jl")
-include("afm_preproc.jl")
-include("afm_proc.jl")
-
 ######################################################
 end

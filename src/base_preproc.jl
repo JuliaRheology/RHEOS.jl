@@ -314,7 +314,7 @@ not interfering with data of the fidelity by use of interpolations. Can also be
 useful to ensure no region of the original data has been oversampled as duplicate
 indices are deleted.
 """
-function mapback(xᵦ::Array{Float64,1},x::Array{Float64,1})
+function mapback(xᵦ::Array{Float64,1}, x::Array{Float64,1})
 
     # array to store indices
     indices = zeros(Int32, length(xᵦ))
