@@ -298,30 +298,30 @@ function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Floa
     # set Opt object as a minimisation objective. Use a closure for additional
     # arguments sent to object objectivefunc
     if !model.singularity && sampling == "constant"
-    min_objective!(opt, (params, grad) -> obj_const_nonsing(params, grad, model,
+        min_objective!(opt, (params, grad) -> obj_const_nonsing(params, grad, model,
+                                                            time_series, dt_series,
+                                                            prescribed_dot, measured;
+                                                            _insight = insight,
+                                                            _sampling = sampling))
+
+    elseif model.singularity && sampling == "constant"
+        min_objective!(opt, (params, grad) -> obj_const_sing(params, grad, model,
                                                         time_series, dt_series,
                                                         prescribed_dot, measured;
                                                         _insight = insight,
                                                         _sampling = sampling))
 
-    elseif model.singularity && sampling == "constant"
-    min_objective!(opt, (params, grad) -> obj_const_sing(params, grad, model,
-                                                    time_series, dt_series,
-                                                    prescribed_dot, measured;
-                                                    _insight = insight,
-                                                    _sampling = sampling))
-
     elseif !model.singularity && sampling == "variable"
-    min_objective!(opt, (params, grad) -> obj_var_nonsing(params, grad, model,
-                                                    time_series, prescribed_dot, 
-                                                    measured; _insight = insight,
-                                                    _sampling = sampling))
+        min_objective!(opt, (params, grad) -> obj_var_nonsing(params, grad, model,
+                                                        time_series, prescribed_dot, 
+                                                        measured; _insight = insight,
+                                                        _sampling = sampling))
 
     elseif model.singularity && sampling == "variable"
-    min_objective!(opt, (params, grad) -> obj_var_sing(params, grad, model,
-                                                    time_series, prescribed_dot, 
-                                                    measured; _insight = insight,
-                                                    _sampling = sampling))
+        min_objective!(opt, (params, grad) -> obj_var_sing(params, grad, model,
+                                                        time_series, prescribed_dot, 
+                                                        measured; _insight = insight,
+                                                        _sampling = sampling))
 
     end
 
@@ -329,5 +329,6 @@ function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Floa
     (minf, minx, ret) = optimize(opt, params_init)
 
     # return all
-    (minf, minx, ret)
+    return (minf, minx, ret)
+
 end

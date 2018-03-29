@@ -6,33 +6,18 @@ filedir = "../data/rheologyData1.csv"
 
 data_raw = fileload(filedir, ["time","stress","strain"], "strlx")
 
-#=
-resampling examples
-=#
-
-data_resampled = fixed_resample(data_raw, [1, 450, 500],[8, 3],["up", "up"])
-# data_resampled = fixed_resample(data_beat, [1,length(data_beat.t)],[2],["down"])
+data_resampled = fixed_resample(data_raw, [1, 450],[8],["up"])
+# data_resampled = smooth(data_resampled, 5.0)
+# data_resampled = var_resample(data_resampled, :σ, 0.1, _mapback = false)
+# data_resampled = mapbackdata(data_resampled, data_raw)
 
 data_resampled.insight = true
-println(data_resampled.sampling)
 
-# data_smoothed = smooth(data_resampled, 5.0)
-# data_varresampled = var_resample(data_smoothed, :σ, 0.1, _mapback = false)
-#
-# data_varresampled.insight = true
-#
-# data_mappedback = mapbackdata(data_varresampled, data_resampled)
-# data_mappedback2 = mapbackdata(data_varresampled, data_raw)
-
-#=
-fitting examples
-=#
-
-# # SLS fit
-# p0 = [1000.0, 1000.0, 100.0]
-# lb = [0.0, 0.0, 0.0]
-# ub = [1e5, 1e5, 1e5]
-# modelfit!(data_resampled, "SLS", p0, lb, ub)
+# SLS fit
+p0 = [1000.0, 1000.0, 100.0]
+lb = [0.0, 0.0, 0.0]
+ub = [1e5, 1e5, 1e5]
+modelfit!(data_resampled, "SLS", p0, lb, ub)
 
 # Spring-pot fit
 p0 = [1000.0, 0.5]
@@ -47,8 +32,10 @@ modelfit!(data_resampled, "springpot", p0, lb, ub)
 # modelfit!(data_resampled, "fractspecial", p0, lb, ub)
 
 # fiteval(data_resampled, "SLS")
-fiteval(data_resampled, "springpot")
+# fiteval(data_resampled, "springpot")
 # fiteval(data_resampled, "fractspecial")
+
+fiteval(data_resampled)
 
 # saveresult(data_resampled; include_data = true)
 # saveresult(data_resampled; include_data = false)

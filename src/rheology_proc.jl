@@ -32,7 +32,7 @@ function modelfit!(self::RheologyType,
                                           insight = self.insight)
 
     # store fit results in RheologyType struct's fittedmodels dictionary
-    self.fittedmodels[model] = minx
+    self.fittedmodels[model] = (minf, minx, ret)
 end
 
 """
@@ -42,30 +42,33 @@ Given partial data (just t and ϵ for "strlx" test or t and σ for "creep"),
 model and parameters, find missing data (σ for "strlx" and ϵ for "creep").
 Currently only works for RheologyData and not more general RheologyType.
 """
-function modelcomplete!(self::RheologyData, model::String, params::Array{Float64,1})
+function modelcomplete!(self::RheologyData, modelname::String, params::Array{Float64,1})
 
     # generate time series difference array (for convolution)
     dt_series = deriv(self.t)
 
-    # get modulus function
-    modulus = moduli(model, self.test_type)
+    # get model
+    model = moduli(modelname, self.test_type)
 
     # get convolution
-    if self.sampling == "constant"
-        convolved = boltzconvolve(modulus, self.t, dt_series, params, self.dcontrolled)
-    elseif self.sampling == "variable"
-        convolved = boltzintegral(modulus, self.t, params, self.dcontrolled)
+    if !model.singularity && self.sampling == "constant"
+        convolved = boltzconvolve_nonsing(model, self.t, deriv(self.t), params, self.dcontrolled)
+
+    elseif model.singularity && self.sampling == "constant"
+        convolved = boltzconvolve_sing(model, self.t, deriv(self.t), params, self.dcontrolled)
+
+    elseif !model.singularity && self.sampling == "variable"
+        convolved = boltzintegral_nonsing(model, self.t, params, self.dcontrolled)
+
+    elseif model.singularity && self.sampling == "variable"
+        convolved = boltzintegral_sing(model, self.t, params, self.dcontrolled)
+
     end
 
     # store output in RheologyData object
     self.measured = convolved
+
+    # store operation
+    self.appliedops = vcat(self.appliedops, "modelname: $modelname, params: $params")
     
-    if self.test_type == "strlx"
-        self.σ = convolved
-    elseif self.test_type == "creep"
-        self.ϵ = convolved
-    end
 end
-#= think about extending what is stored in fittedmodels dict, could be
-params, convolved with those params, cost and more. Then modelcomplete!
-should place this convolved there, not in main self =#

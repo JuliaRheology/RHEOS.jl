@@ -1,14 +1,15 @@
 #!/usr/bin/env julia
 
 """
-    fiteval(self::RheologyType, modelname::String; singularity = false)
+    fiteval(self::RheologyType[, modelname::String]; singularity = false)
 
-Show plot of data vs. fitted data for specified model.
+Show plot of data vs. fitted data for specified model. If no model specified,
+shows plot with all fitted models.
 """
 function fiteval(self::RheologyType, modelname::String)
 
     # params
-    params = self.fittedmodels[modelname]
+    params = self.fittedmodels[modelname][2]
 
     # modulus function
     model = moduli(modelname, self.test_type)
@@ -31,16 +32,81 @@ function fiteval(self::RheologyType, modelname::String)
     # print params
     println(modelname, " fit: ", self.fittedmodels[modelname])
 
-    # stress subplot
+    # special for AFMData, Hertz sphere
+    if typeof(self) == AFMData && self.test_type == "strlx"
+        measured = self.measured.^(2/3)
+        fitted = fitted.^(2/3)
+    else
+        measured = self.measured
+    end
+
     if model.singularity
-        plot(self.t[1:end], self.measured)
+        plot(self.t[1:end], measured)
         plot(self.t[2:end], fitted, "--")
         show()
     else
-        plot(self.t, self.measured)
+        plot(self.t, measured)
         plot(self.t, fitted, "--")
         show()
     end
+
+end
+
+function fiteval(self::RheologyType)
+
+    # special for AFMData, Hertz sphere
+    if typeof(self) == AFMData && self.test_type == "strlx"
+        measured = self.measured.^(2/3)
+    else
+        measured = self.measured
+    end
+
+    fig, ax = subplots()
+
+    ax[:plot](self.t, measured, label="Original Data", alpha=0.65, linewidth=2)
+
+    for (modelname, value) in self.fittedmodels
+
+        # params
+        params = self.fittedmodels[modelname][2]
+
+        # modulus function
+        model = moduli(modelname, self.test_type)
+
+        # get fit
+        if !model.singularity && self.sampling == "constant"
+            fitted = boltzconvolve_nonsing(model, self.t, deriv(self.t), params, self.dcontrolled)
+
+        elseif model.singularity && self.sampling == "constant"
+            fitted = boltzconvolve_sing(model, self.t, deriv(self.t), params, self.dcontrolled)
+
+        elseif !model.singularity && self.sampling == "variable"
+            fitted = boltzintegral_nonsing(model, self.t, params, self.dcontrolled)
+
+        elseif model.singularity && self.sampling == "variable"
+            fitted = boltzintegral_sing(model, self.t, params, self.dcontrolled)
+
+        end
+
+        # print params
+        println(modelname, " fit: ", self.fittedmodels[modelname])
+
+        # special for AFMData, Hertz sphere
+        if typeof(self) == AFMData && self.test_type == "strlx"
+            fitted = fitted.^(2/3)
+        end
+
+        if model.singularity
+            ax[:plot](self.t[2:end], fitted, label=modelname, alpha=0.85, linewidth=2)
+        else
+            ax[:plot](self.t, fitted, label=modelname, alpha=0.85, linewidth=2)
+        end
+
+    end
+
+    ax[:legend](loc="best")
+
+    show()
 
 end
 

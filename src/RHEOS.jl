@@ -53,7 +53,7 @@ export contact_hertz, contact_threshold, contact_none
 
 ######################################################
 # rheology_utility.jl
-export RheologyData, fileload, AFMfileload, AFMData, RheologyType
+export RheologyData, fileload, AFMfileload, AFMData, RheologyType, stepdata_generate
 
 ######################################################
 # rheology_preproc.jl
