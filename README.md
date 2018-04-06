@@ -11,5 +11,5 @@ A. Alexander, B. Horn and A. Edelman - *Accelerated Convolutions for Efficient M
 R. Gorenflo, J. Loutchko and Y. Loutchko - *Computation of the Mittag-Leffler function and its derivative*,  Fract. Calc. Appl. Anal. **(2002)**
 
 #### Viscoelastic Hertz Model of Spherical Indententation 
-M. L. Oyen - [*Spherical Indentation Creep Following Ramp Loading*](https://www.cambridge.org/core/journals/journal-of-materials-research/article/spherical-indentation-creep-following-ramp-loading/2AE00B3BCE30DE462602822CCFC3E80A), Journal of Materials Research **(2005)**  
-J. M. Mattice, A. G. Lau, M. L. Oyen and R. W. Kent - [*Spherical indentation load-relaxation of soft biological tissues*](https://www.cambridge.org/core/journals/journal-of-materials-research/article/spherical-indentation-loadrelaxation-of-soft-biological-tissues/3E0C96BC351997A833C95F6879F9D8BF), Journal of Materials Research **(2006)**
+M. L. Oyen - [*Spherical Indentation Creep Following Ramp Loading*](https://doi.org/10.1557/JMR.2005.0259), Journal of Materials Research **(2005)**  
+J. M. Mattice, A. G. Lau, M. L. Oyen and R. W. Kent - [*Spherical indentation load-relaxation of soft biological tissues*](https://doi.org/10.1557/jmr.2006.0243), Journal of Materials Research **(2006)**
