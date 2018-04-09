@@ -3,7 +3,7 @@
 
 *Documentation currently under development*
 
-##Installation
+## Installation
 - Clone repository into desired location and run TEMP_INSTALL.jl  
 - Set environment variable "JULIA_NUM_THREADS" equal to number of processor cores available
 
