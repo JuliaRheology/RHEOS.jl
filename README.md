@@ -3,6 +3,10 @@
 
 *Documentation currently under development*
 
+##Installation
+- Clone repository into desired location and run TEMP_INSTALL.jl  
+- Set environment variable "JULIA_NUM_THREADS" equal to number of processor cores available
+
 ## References & Included Dependencies
 #### [FastConv.jl](https://github.com/aamini/FastConv.jl)
 A. Alexander, B. Horn and A. Edelman - *Accelerated Convolutions for Efficient Multi-Scale Time to Contact Computation in Julia*, arXiv preprint arXiv:1612.08825 **(2016)**
