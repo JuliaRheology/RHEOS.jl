@@ -4,7 +4,10 @@
 *Documentation currently under development*
 
 ## Installation
-- Clone repository into desired location and run TEMP_INSTALL.jl  
+
+- Install julia, version > 0.6.
+- Clone repository into desired location
+- Run TEMP_INSTALL.jl  
 - Set environment variable "JULIA_NUM_THREADS" equal to number of processor cores available
 
 ## References & Included Dependencies
