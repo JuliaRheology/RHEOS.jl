@@ -17,7 +17,7 @@ A. Alexander, B. Horn and A. Edelman - *Accelerated Convolutions for Efficient M
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
 R. Gorenflo, J. Loutchko and Y. Loutchko - *Computation of the Mittag-Leffler function and its derivative*,  Fract. Calc. Appl. Anal. **(2002)**
 
-#### Fractional Zener, Fractionl Maxwell and Fractional Kelvin-Voigt Models
+#### Fractional Zener, Fractional Maxwell and Fractional Kelvin-Voigt Models
 F. Mainardi, G. Spada - [*Creep, relaxation and viscosity properties for basic fractional models in rheology*](https://doi.org/10.1140/epjst/e2011-01387-1), Eur. Phys. J. Spec. Top. **(2011)**
 
 #### Viscoelastic Hertz Model of Spherical Indententation 
