@@ -17,6 +17,9 @@ A. Alexander, B. Horn and A. Edelman - *Accelerated Convolutions for Efficient M
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
 R. Gorenflo, J. Loutchko and Y. Loutchko - *Computation of the Mittag-Leffler function and its derivative*,  Fract. Calc. Appl. Anal. **(2002)**
 
+#### Fractional Zener, Fractionl Maxwell and Fractional Kelvin-Voigt Models
+F. Mainardi, G. Spada - *Creep, relaxation and viscosity properties for basic fractional models in rheology*, Eur. Phys. J. Spec. Top. **(2011)**
+
 #### Viscoelastic Hertz Model of Spherical Indententation 
 M. L. Oyen - [*Spherical Indentation Creep Following Ramp Loading*](https://doi.org/10.1557/JMR.2005.0259), Journal of Materials Research **(2005)**  
 J. M. Mattice, A. G. Lau, M. L. Oyen and R. W. Kent - [*Spherical indentation load-relaxation of soft biological tissues*](https://doi.org/10.1557/jmr.2006.0243), Journal of Materials Research **(2006)**
