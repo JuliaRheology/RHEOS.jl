@@ -1,5 +1,5 @@
 # RHEOS - RHEology, Open-Source
-#### A suite of tools for analysing rheology data alessandra test edit
+#### A suite of tools for analysing rheology data
 
 *Documentation currently under development*
 
