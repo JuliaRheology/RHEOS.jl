@@ -1,5 +1,5 @@
 # RHEOS - RHEology, Open-Source
-#### A suite of tools for analysing rheology data
+#### A suite of tools for analysing rheology data AAA
 
 *Documentation currently under development*
 
@@ -20,6 +20,6 @@ R. Gorenflo, J. Loutchko and Y. Loutchko - *Computation of the Mittag-Leffler fu
 #### Fractional Zener, Fractional Maxwell and Fractional Kelvin-Voigt Models
 F. Mainardi, G. Spada - [*Creep, relaxation and viscosity properties for basic fractional models in rheology*](https://doi.org/10.1140/epjst/e2011-01387-1), Eur. Phys. J. Spec. Top. **(2011)**
 
-#### Viscoelastic Hertz Model of Spherical Indententation 
+#### Viscoelastic Hertz Model of Spherical Indententation
 M. L. Oyen - [*Spherical Indentation Creep Following Ramp Loading*](https://doi.org/10.1557/JMR.2005.0259), Journal of Materials Research **(2005)**  
 J. M. Mattice, A. G. Lau, M. L. Oyen and R. W. Kent - [*Spherical indentation load-relaxation of soft biological tissues*](https://doi.org/10.1557/jmr.2006.0243), Journal of Materials Research **(2006)**
