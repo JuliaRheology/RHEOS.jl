@@ -170,6 +170,21 @@ function J_fractzener(t::Array{Float64,1}, params::Array{Float64,1})::Array{Floa
     J = (1/params[1] + (1-mittleff(params[3], -(t/params[4]).^params[3]))/params[2])/2
 end
 
+"""
+    J_fractspecial(t::Array{Float64,1}, params::Array{Float64,1})
+
+Special fractional model defined by A. Bonfanti (2017) defined as a 1 spring in
+parallel with a (spring-pot and dash-pot in series) parameters by index order:
+K, Cᵦ, β, η
+
+"""
+function J_fractspecial(t::Array{Float64,1}, params::Array{Float64,1})::Array{Float64,1}
+    a = params[4]/params[2];
+    b = params[1]*params[4]/params[2];
+
+    J = InverseLaplace.talbotarr( s -> 1/s^2 * ((1+a*s^(1-params[3])) / (params[4]+params[1]/s+b*s^(-params[3])) ) ,t );
+end
+
 ###########################
 #~ Model Function Return ~#
 ###########################
@@ -203,7 +218,8 @@ function moduli(model::String, test_type::String)::RheologyModel
                         "springpot" => RheologyModel(J_springpot, false, test_type),
                         "fractKV" => RheologyModel(J_fractKV, false, test_type),
                         "fractmaxwell" => RheologyModel(J_fractmaxwell, false, test_type),
-                        "fractzener" => RheologyModel(J_fractzener, false, test_type) )
+                        "fractzener" => RheologyModel(J_fractzener, false, test_type),
+                        "fractspecial" => RheologyModel(J_fractspecial, true, test_type) )
 
     relaxmoduli = Dict( "SLS" => RheologyModel(G_SLS, false, test_type),
                         "SLS2" => RheologyModel(G_SLS2, false, test_type),

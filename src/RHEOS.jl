@@ -7,6 +7,7 @@ module RHEOS
 # local dependencies, stored in "/RHEOS/deps/"
 using MittagLeffler
 using FastConv
+using InverseLaplace
 # install using Pkg.add from within Julia REPL
 using uCSV
 using ImageFiltering
