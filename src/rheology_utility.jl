@@ -129,7 +129,7 @@ function partialconstruct!(self::RheologyData, data_controlled::Array{Float64,1}
 
     # adjust starting point accordingly to remove NaNs
     data_controlled = data_controlled[newstartingval:end]
-    t = t[newstartingval:end] 
+    t = t[newstartingval:end]
 
     # readjust time to account for NaN movement and/or negative time values
     t = t - minimum(t)
@@ -226,7 +226,7 @@ function stepdata_generate(t_total::Float64, t_on::Float64, t_off::Float64, t_tr
     end
 
     t = collect(0:step_size:t_total)
-    
+
 	k = 10.0/t_transition
 
 	data_controlled = amplitude./(1 + exp.(-k*(t-t_on))) - amplitude./(1 + exp.(-k*(t-t_off)))
@@ -238,9 +238,9 @@ end
 """
     AFMData(stress::Array{Float64,1}, strain::Array{Float64,1}, time::Array{Float64,1}, test_type::String)
 
-AFMData mutable struct used for high level interaction with RHEOS. 
+AFMData mutable struct used for high level interaction with RHEOS.
 Initialise an instance directly or indirectly using the AFMfileload
-function. 
+function.
 """
 mutable struct AFMData
 
@@ -290,7 +290,7 @@ mutable struct AFMData
     # inner constructor for incomplete data; data_part should generally
     # be controlled variable (stress for creep, strain for strlx).
     # How to deal with contact point detection?
-    
+
 end
 
 """
@@ -331,11 +331,11 @@ end
 
 """
 Used in AFMdataget pipeline - clean up version number line.
-Identify beginning and end of AFM data sections, fancy names 
+Identify beginning and end of AFM data sections, fancy names
 line and version number of JPK data processing software.
 """
 function AFMgetlines(filedir::String)
-    
+
     # initialise array for storing line numbers of section beginnings and endings
     sectionbreaks = Int32[]
 
@@ -404,12 +404,12 @@ end
 Used in AFMdataget pipeline - clean up version number line.
 """
 function versionnumstrip(vernumraw::String)
-    
+
     return String(split(vernumraw)[3])
 end
 
 """
-Used in AFMdataget pipeline - clean up fancy names string so column 
+Used in AFMdataget pipeline - clean up fancy names string so column
 titles are in array format.
 """
 function fancynamestrip(fancynamesraw::String, vernum::String)
@@ -468,9 +468,9 @@ end
 """
     AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpfind::String = "hertz", param::Float64 = NaN64)
 
-Load data from a JPK AFM (plaintext) file format into an AFMData struct. 
-AFMData struct provides the basis for subsequent high level operations 
-within RHEOS. test_type is either "strlx" for a stress-relaxation test 
+Load data from a JPK AFM (plaintext) file format into an AFMData struct.
+AFMData struct provides the basis for subsequent high level operations
+within RHEOS. test_type is either "strlx" for a stress-relaxation test
 (strain controlled) or "creep" for a creep test (stress controlled).
 If `visco = true`, only approach and hold sections are included. If
 `visco = false` then only approach seciton included, which may be useful
@@ -479,7 +479,7 @@ for elastic analysis only. Retraction portion of data is always discarded.
 `cpfind` determines contact point detection method used, if any. Options are:
 
 - `hertz`: Used by default, fits the approach section of the data to an elastic
-           Hertz model and then infers the contact point. 
+           Hertz model and then infers the contact point.
 
 - `threshold`: Takes contact point as element after force exceeds `param`.
 
@@ -510,7 +510,7 @@ function AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpf
         param = R
     end
 
-    # get data from JPK formatted file using functions built above, 
+    # get data from JPK formatted file using functions built above,
     # add ability to parse other formats in future
     (data, sec, fcol, δcol, tcol) = AFMdataget(filedir)
 
