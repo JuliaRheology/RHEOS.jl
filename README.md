@@ -19,7 +19,9 @@ R. Gorenflo, J. Loutchko and Y. Loutchko - *Computation of the Mittag-Leffler fu
 
 #### [InverseLaplace.jl](https://github.com/jlapeyre/InverseLaplace.jl)
 J.A.C Weideman, Algorithms for Parameter Selection in the Weeks Method for Inverting the Laplace Transform, SIAM Journal on Scientific Computing, Vol. 21, pp. 111-128 **(1999)**
+
 Abate, J. and Valkó, P.P., Multi-precision Laplace transform inversion International Journal for Numerical Methods in Engineering, Vol. 60 (Iss. 5-7) pp 979–993 **(2004)**
+
 Valkó, P.P. and Abate, J., Comparison of Sequence Accelerators for the Gaver Method of Numerical Laplace Transform Inversion, Computers and Mathematics with Application, Vol. 48 (Iss.3-40) pp. 629-636 **(2004)**
 
 
