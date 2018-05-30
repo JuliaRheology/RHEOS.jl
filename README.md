@@ -17,6 +17,12 @@ A. Alexander, B. Horn and A. Edelman - *Accelerated Convolutions for Efficient M
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
 R. Gorenflo, J. Loutchko and Y. Loutchko - *Computation of the Mittag-Leffler function and its derivative*,  Fract. Calc. Appl. Anal. **(2002)**
 
+#### [InverseLaplace.jl](https://github.com/jlapeyre/InverseLaplace.jl)
+J.A.C Weideman, Algorithms for Parameter Selection in the Weeks Method for Inverting the Laplace Transform, SIAM Journal on Scientific Computing, Vol. 21, pp. 111-128 **(1999)**
+Abate, J. and Valkó, P.P., Multi-precision Laplace transform inversion International Journal for Numerical Methods in Engineering, Vol. 60 (Iss. 5-7) pp 979–993 **(2004)**
+Valkó, P.P. and Abate, J., Comparison of Sequence Accelerators for the Gaver Method of Numerical Laplace Transform Inversion, Computers and Mathematics with Application, Vol. 48 (Iss.3-40) pp. 629-636 **(2004)**
+
+
 #### Fractional Zener, Fractional Maxwell and Fractional Kelvin-Voigt Models
 F. Mainardi, G. Spada - [*Creep, relaxation and viscosity properties for basic fractional models in rheology*](https://doi.org/10.1140/epjst/e2011-01387-1), Eur. Phys. J. Spec. Top. **(2011)**
 
