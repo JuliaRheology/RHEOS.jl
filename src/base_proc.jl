@@ -40,7 +40,7 @@ Calculate Boltzmann Superposition integral using direct integration method.
 This is much slower and slightly less accurate (depending on sample resolution)
 than the convolution method. However, it works for variable sample rate.
 
-Should be used when viscoelastic model contains a singularity and should be compared 
+Should be used when viscoelastic model contains a singularity and should be compared
 with [2:end] of reference array when fitting.
 
 # Arguments
@@ -102,7 +102,7 @@ Calculate Boltzmann Superposition integral using convolution method.
 This is much faster and slightly more accurate (depending on sample resolution)
 than the integral method. However, it works for constant sample rate.
 
-Should be used when singularity exists in viscoelastic model and should be compared 
+Should be used when singularity exists in viscoelastic model and should be compared
 with [2:end] of reference array when fitting.
 
 # Arguments
@@ -214,7 +214,7 @@ sample rate is variable and no singularity in model.
 """
 function obj_var_nonsing(params::Array{Float64,1}, grad::Array{Float64,1},
                             model::RheologyModel, time_series::Array{Float64,1},
-                            prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; 
+                            prescribed_dot::Array{Float64,1}, measured::Array{Float64,1};
                             _insight::Bool = false, _sampling::String = "constant")::Float64
 
     # if insight=true then output parameters used, add auto-updating plot?
@@ -248,7 +248,7 @@ sample rate is variable and there IS singularity in model.
 """
 function obj_var_sing(params::Array{Float64,1}, grad::Array{Float64,1},
                             model::RheologyModel, time_series::Array{Float64,1},
-                            prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; 
+                            prescribed_dot::Array{Float64,1}, measured::Array{Float64,1};
                             _insight::Bool = false, _sampling::String = "constant")::Float64
 
     # if insight=true then output parameters used, add auto-updating plot?
@@ -313,20 +313,20 @@ function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Floa
 
     elseif !model.singularity && sampling == "variable"
         min_objective!(opt, (params, grad) -> obj_var_nonsing(params, grad, model,
-                                                        time_series, prescribed_dot, 
+                                                        time_series, prescribed_dot,
                                                         measured; _insight = insight,
                                                         _sampling = sampling))
 
     elseif model.singularity && sampling == "variable"
         min_objective!(opt, (params, grad) -> obj_var_sing(params, grad, model,
-                                                        time_series, prescribed_dot, 
+                                                        time_series, prescribed_dot,
                                                         measured; _insight = insight,
                                                         _sampling = sampling))
 
     end
 
     # minimise objective func, minx are the parameters resulting in minimum
-    (minf, minx, ret) = optimize(opt, params_init)
+    (minf, minx, ret) = NLopt.optimize(opt, params_init)
 
     # return all
     return (minf, minx, ret)

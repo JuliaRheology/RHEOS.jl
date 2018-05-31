@@ -24,15 +24,15 @@ function modelfit!(self::RheologyType,
 
     # get appropriate RheologyModel struct
     modulus = moduli(model, self.test_type)
-
     # start fit
+    tic()
     (minf, minx, ret) = leastsquares_init(params_init, low_bounds, hi_bounds,
                                           modulus, self.t, dt_series, self.dcontrolled,
                                           self.measured; sampling = self.sampling,
                                           insight = self.insight)
-
+    timetaken = toc()
     # store fit results in RheologyType struct's fittedmodels dictionary
-    self.fittedmodels[model] = (minf, minx, ret)
+    self.fittedmodels[model] = (minf, minx, ret, timetaken)
 end
 
 """
@@ -70,5 +70,5 @@ function modelcomplete!(self::RheologyData, modelname::String, params::Array{Flo
 
     # store operation
     self.appliedops = vcat(self.appliedops, "modelname: $modelname, params: $params")
-    
+
 end
