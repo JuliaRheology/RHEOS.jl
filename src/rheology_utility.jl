@@ -95,6 +95,13 @@ function derivconstruct!(self::RheologyData, σ::Array{Float64,1}, ϵ::Array{Flo
 
     end
 
+    # Check if time vector is equally spaced
+    diff = round.(self.t[2:end]-self.t[1:end-1],4);
+    check = any(x->x!=diff[1], diff);
+    if check == true
+       self.sampling = "variable";
+    end
+
     # readjust time to account for NaN movement and/or negative time values
     self.t = self.t - minimum(self.t)
 

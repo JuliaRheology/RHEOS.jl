@@ -1,5 +1,6 @@
 #!/usr/bin/env julia
 include("../src/RHEOS.jl")
+using PyPlot
 using RHEOS
 
 filedir = "../data/rheologyData1.csv"
