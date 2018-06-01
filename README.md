@@ -10,6 +10,18 @@
 - Run TEMP_INSTALL.jl  
 - Set environment variable "JULIA_NUM_THREADS" equal to number of processor cores available
 
+## To do
+
++ Documentation
++ Reorganise directory referencing structure and installation to make more robust
++ Add Sync Interpolation for going from variable to constant sample rate
++ Add Tolerance option (relative and absolute) that can be set using the high level interface
++ Add option to save/export the full generated model curves for plotting in other software
++ Split indentation models and standard rheology into two sections, refactor code appropriately
++ Add axes labels in all insight plots
++ Add different test loading methods such as ramp, sinusoidal etc. Allow them to be superposed on each other?
++ For some fractional models, convert time scale τ to cᵦ as it fits better and is more physical (already done for relaxation models)
+
 ## References & Included Dependencies
 #### [FastConv.jl](https://github.com/aamini/FastConv.jl)
 + A. Alexander, B. Horn and A. Edelman - *Accelerated Convolutions for Efficient Multi-Scale Time to Contact Computation in Julia*, arXiv preprint arXiv:1612.08825 **(2016)**
