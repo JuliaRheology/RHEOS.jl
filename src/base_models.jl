@@ -61,22 +61,22 @@ end
     G_fractmaxwell(t::Array{Float64,1}, params::Array{Float64,1})
 
 Fractional Maxwell model as defined by Mainardi & Spada (2011) parameters by
-index order: μ, τ, ν
+index order: μ, cᵦ, ν
 """
 function G_fractmaxwell(t::Array{Float64,1}, params::Array{Float64,1})::Array{Float64,1}
 
-    G = 2*params[1]*mittleff(params[3], -((t/params[2]).^params[3]))
+    G = 2*params[1]*mittleff(params[3], -params[2]*(t.^params[3]))
 end
 
 """
     G_fractzener(t::Array{Float64,1}, params::Array{Float64,1})
 
 Fraction Zener model as defined by Mainardi & Spada (2011) parameters by index
-order: μ*, r, τ, ν
+order: μ*, r, cᵦ, ν
 """
 function G_fractzener(t::Array{Float64,1}, params::Array{Float64,1})::Array{Float64,1}
 
-    G = 2*params[1]*(1 + params[2]*mittleff(params[4], -((t/params[3]).^params[4])))
+    G = 2*params[1]*(1 + params[2]*mittleff(params[4], -params[3]*(t.^params[4])))
 end
 
 """
@@ -177,7 +177,6 @@ Special fractional model defined by A. Bonfanti (2017) defined as a 1 spring in
 parallel with a (spring-pot and dash-pot in series) parameters by index order:
 K, Cᵦ, β, η.
 Using default Talbot() method for the Laplace transform.
-
 """
 function J_fractspecial_slow(t::Array{Float64,1}, params::Array{Float64,1})::Array{Float64,1}
     a = params[4]/params[2];
@@ -195,7 +194,6 @@ Special fractional model defined by A. Bonfanti (2017) defined as a 1 spring in
 parallel with a (spring-pot and dash-pot in series) parameters by index order:
 K, Cᵦ, β, η.
 Using the 'fixed' Talbot method for the Laplace transform (less accurate).
-
 """
 function J_fractspecial_fast(t::Array{Float64,1}, params::Array{Float64,1})::Array{Float64,1}
     a = params[4]/params[2];
