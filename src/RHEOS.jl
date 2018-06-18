@@ -1,14 +1,14 @@
 #!/usr/bin/env julia
 __precompile__()
 
-push!(LOAD_PATH, "../deps")
+push!(LOAD_PATH, "../deps/")
 
 module RHEOS
 # local dependencies, stored in "/RHEOS/deps/"
 using MittagLeffler
 using FastConv
-using InverseLaplace
 # install using Pkg.add from within Julia REPL
+using InverseLaplace
 using uCSV
 using ImageFiltering
 using Interpolations
