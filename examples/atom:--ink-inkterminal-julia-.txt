@@ -1,1 +1,0 @@
-atom://ink-inkterminal/julia-terminal
