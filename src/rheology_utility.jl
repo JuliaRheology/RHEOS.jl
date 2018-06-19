@@ -11,46 +11,27 @@ If not, load data in according to format and call RheologyData constructor.
 """
 mutable struct RheologyData
 
-    # filedir is location of file on disk, for reference and saving
-    filedir::String
-
-    # insight parameter, tells functions whether to plot result or not
-    # during preprocessing. False by default.
-    insight::Bool
+    # original data
+    σ::Array{Float64,1}
+    ϵ::Array{Float64,1}
+    t::Array{Float64,1}
 
     # sampling type. "constant" by default. Use of `var_resample`, `downsample`
     # with more than one section or `fixed_resample` with more than one section
     # overrides to "variable".
     sampling::String
 
-    # test type is either "strlx" (stress relaxation, strain controlled)
-    # or "creep" (creep, stress controlled).
-    test_type::String
-
-    # original data
-    σ::Array{Float64,1}
-    ϵ::Array{Float64,1}
-    t::Array{Float64,1}
-
-    # measured variabel and controlled variable numerically differentiated WRT to time
-    measured::Array{Float64,1}
-    dcontrolled::Array{Float64,1}
-
-    # models
-    fittedmodels::Dict
-
     # operations applied, stores history of which functions (including arguments)
-    appliedops::Array{String,1}
-
-    # to resample if "all"
-    numericdata::Array{Symbol,1}
+    log::Array{String,1}
 
     # for initial loading of full dataset (measured + prescribed)
-    RheologyData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) = derivconstruct!(new(filedir, false, "constant", test_type, σ, ϵ, t), σ, ϵ, t)
+    RheologyData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, ) = completeconstruct!(new(σ, ϵ, t))
+
+    RheologyData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, filedir::String) = completeconstruct!(new(σ, ϵ, t), filedir)
 
     # inner constructor for incomplete data; data_controlled should generally
     # be controlled variable (stress for creep, strain for strlx).
-    RheologyData(data_controlled::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) =
+    RheologyData(data_controlled::Array{Float64,1}, t::Array{Float64,1}, test_type::String) =
                 partialconstruct!(new(filedir, false, "constant", test_type), data_controlled, t, test_type)
 
 end
@@ -62,7 +43,7 @@ have 1 or 2 samples of NaN at beginning) then deletes these and starts at the fi
 non-NaN sample, also readjusts time start to t = 0 to account for NaNs and and
 negative time values at beginning of data recording.
 """
-function derivconstruct!(self::RheologyData, σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1})
+function completeconstruct!(self::RheologyData)
 
     # define as local so it can be accessed in subsequent scopes
     local newstartingval::T where T<:Integer
@@ -81,41 +62,34 @@ function derivconstruct!(self::RheologyData, σ::Array{Float64,1}, ϵ::Array{Flo
         setfield!(self, n, getfield(self, n)[newstartingval:end])
     end
 
-    if self.test_type == "creep"
-        # derivative of stress WRT time
-        self.dcontrolled = deriv(self.σ, self.t)
-
-        self.measured = self.ϵ
-
-    elseif self.test_type == "strlx"
-        # derivative of stress WRT time
-        self.dcontrolled = deriv(self.ϵ, self.t)
-
-        self.measured = self.σ
-
-    end
-
     # Check if time vector is equally spaced
-    diff = round.(self.t[2:end]-self.t[1:end-1],4);
-    check = any(x->x!=diff[1], diff);
+    diff = round.(self.t[2:end]-self.t[1:end-1],4)
+    check = any(x->x!=diff[1], diff)
     if check == true
-       self.sampling = "variable";
+       self.sampling = "variable"
+    else
+       self.sampling = "constant"
     end
 
     # readjust time to account for NaN movement and/or negative time values
     self.t = self.t - minimum(self.t)
 
-    # initialise empty dictionary for model fit results
-    self.fittedmodels = Dict()
-
     # initialise empty array to record operations applied during preprocessing
-    self.appliedops = []
+    self.log = []
 
     # initialise array of sybols for use if resampling/smoothing all numerical data
     self.numericdata = [:σ, :ϵ, :t, :measured, :dcontrolled]
 
     # return class with all fields initialised
     self
+end
+
+function completeconstruct!(self::RheologyData, filedir::String)
+
+    self = completeconstruct!(self)
+
+    self.log.append("file loaded from $filedir")
+
 end
 
 """
@@ -217,7 +191,8 @@ function fileload(filedir::String, colnames::Array{String,1}, test_type::String)
     end
 
     # generate RheologyData struct and output
-    data = RheologyData(data[cols[1]], data[cols[2]], data[cols[3]], test_type, filedir)
+    data = RheologyData(data[cols[1]], data[cols[2]], data[cols[3]], filedir)
+
 end
 
 """
