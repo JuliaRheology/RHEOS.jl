@@ -7,7 +7,8 @@
 
 - Install julia, version > 0.6.
 - Clone repository into desired location
-- Run TEMP_INSTALL.jl  
+- Run TEMP_INSTALL.jl
+- Add push!(LOAD_PATH, "%RHEOS directory%/deps/") to your juliarc.jl file   
 - Set environment variable "JULIA_NUM_THREADS" equal to number of processor cores available
 
 ## To do

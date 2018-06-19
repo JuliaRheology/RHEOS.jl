@@ -1,2 +1,11 @@
-julia 0.6
+julia 0.6.3
 Cartesian
+QuadGK
+uCSV
+ImageFiltering
+Interpolations
+NLopt
+PyPlot
+JLD
+InverseLaplace
+DataFrames

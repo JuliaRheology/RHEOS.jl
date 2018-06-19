@@ -1,4 +1,5 @@
 push!(LOAD_PATH, "../src/")
 
-using Documenter
-using RHEOS
+using Documenter, RHEOS
+
+makedocs()
