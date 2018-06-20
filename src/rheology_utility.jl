@@ -470,10 +470,3 @@ function AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpf
     AFMData(f, δ, t, R, test_type, filedir)
 
 end
-
-"""
-    RheologyType = Union{RheologyData, AFMData}
-
-A superset of the two possible data types accepted by preprocessing, processing and postprocessing functions.
-"""
-RheologyType = Union{RheologyData, AFMData}
