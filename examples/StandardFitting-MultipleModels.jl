@@ -5,25 +5,7 @@ using RHEOS
 
 filedir = "../data/rheologyData1.csv"
 
-data_raw = fileload(filedir, ["time","stress","strain"])
-
-println(data_raw.log)
-println(data_raw.sampling)
-plot(data_raw.t, data_raw.σ)
-plot(data_raw.t, data_raw.ϵ)
-show()
-
-data_partial = constructRheologyData(["stress", "time"], data_raw.σ, data_raw.t)
-println(data_raw.log)
-println(data_raw.sampling)
-plot(data_raw.t, data_raw.σ)
-show()
-
-data_partial = constructRheologyData(["strain", "time"], data_raw.ϵ, data_raw.t)
-println(data_raw.log)
-println(data_raw.sampling)
-plot(data_raw.t, data_raw.ϵ)
-show()
+data_raw = fileload(["time","stress","strain"], filedir)
 
 # data_resampled = fixed_resample(data_raw, [1, 450],[8],["up"])
 # data_resampled = smooth(data_resampled, 5.0)

@@ -27,19 +27,28 @@ struct RheologyData
 end
 
 """
-    constructRheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}[, data3::Array{Float64,1}, filedir::String="none"])::RheologyData
+    constructRheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}[, data3::Array{Float64,1}; filedir::String="none", log::Array{String,1}=Array{String}(0)])::RheologyData
 
 Constructor function for RheologyData struct, if stress/strain arrays have NaN values at the beginning (some datasets
 have 1 or 2 samples of NaN at beginning) then deletes these and starts at the first non-NaN sample, also readjusts time start to 
 t = 0 to account for NaNs and and negative time values at beginning of data recording.
 """
-function constructRheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}, data3::Array{Float64,1}=zeros(length(data2)), filedir::String="none")::RheologyData
+function constructRheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}, data3::Array{Float64,1}=zeros(length(data2)); filedir::String="none", log::Array{String,1}=Array{String}(0))::RheologyData
+
+    # checks
+    @assert length(data1)==length(data2) "Data arrays must be same length"
+    @assert length(data1)==length(data3) "Data arrays must be same length"
 
     # get data in correct variables
     data = [data1, data2, data3]
-    local σ::Array{Float64,1}
-    local ϵ::Array{Float64,1}
-    local t::Array{Float64,1}
+    local σ::Array{Float64,1} = zeros(length(data1))
+    local ϵ::Array{Float64,1} = zeros(length(data1))
+    local t::Array{Float64,1} = zeros(length(data1))
+
+    # occurence flags
+    local stress_present::Bool = false
+    local strain_present::Bool = false
+    local time_present::Bool = false
 
     for (i, v) in enumerate(colnames)
         if v == "stress"
@@ -69,6 +78,19 @@ function constructRheologyData(colnames::Array{String,1}, data1::Array{Float64,1
     ϵ = ϵ[newstartingval:end]
     t = t[newstartingval:end]
 
+    # readjust time to account for NaN movement and/or negative time values
+    t = t - minimum(t)
+
+    # initialise empty array to record operations applied during preprocessing
+    if filedir != "none" || length(log)==0
+        if length(colnames)<3
+            push!(log, "partial data loaded from:")
+        elseif length(colnames)==3
+            push!(log, "complete data loaded from:")
+        end
+        push!(log, filedir)
+    end
+
     # Check if time vector is equally spaced
     diff = round.(t[2:end]-t[1:end-1], 4)
     check = any(x->x!=diff[1], diff)
@@ -78,18 +100,12 @@ function constructRheologyData(colnames::Array{String,1}, data1::Array{Float64,1
        sampling = "constant"
     end
 
-    # readjust time to account for NaN movement and/or negative time values
-    t = t - minimum(t)
-
-    # initialise empty array to record operations applied during preprocessing
-    log = ["loaded file from:", filedir]
-
     # return class with all fields initialised
     RheologyData(σ, ϵ, t, sampling, log)
 end
 
 """
-    fileload(filedir::String, colnames::Array{String,1})
+    fileload(colnames::Array{String,1}, filedir::String)
 
 Load data from a CSV file (three columns, comma seperated). Columns must
 be identified by providing an array of strings which tell the function
@@ -104,20 +120,29 @@ subsequent high level operations within RHEOS.
 fileDir = "../data/rheologyData1.csv"
 
 # load the data into RheologyData struct
-dataforprocessing = fileload(fileDir, ["time","stress","strain"])
+dataforprocessing = fileload(["time","stress","strain"], fileDir)
 ```
 """
-function fileload(filedir::String, colnames::Array{String,1})::RheologyData
+function fileload(colnames::Array{String,1}, filedir::String)::RheologyData
 
     # check colnames length is correct
-    @assert length(colnames) == 3 "Three column names required, 'stress', 'strain' and 'time'."
+    @assert length(colnames)==3 || length(colnames)==2 "Two or three column names required, one of each: 'stress', 'strain' and 'time'."
+
+    # init types helper
+    types = [Float64 for i = 1:length(colnames)]
 
     # read data from file
-    (data, head_out) = uCSV.read(filedir; delim=',', types=[Float64,Float64,Float64])
+    (datacsv, head_out) = uCSV.read(filedir; delim=',', types=types)
+
+    # init data var
+    local data::RheologyData
 
     # generate RheologyData struct and output
-    data = constructRheologyData(colnames, data[1], data[2], data[3], filedir)
-
+    if length(colnames)==3
+        data = constructRheologyData(colnames, datacsv[1], datacsv[2], datacsv[3]; filedir = filedir)
+    elseif length(colnames)==2
+        data = constructRheologyData(colnames, datacsv[1], datacsv[2]; filedir = filedir)
+    end
 end
 
 """
