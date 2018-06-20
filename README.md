@@ -1,6 +1,6 @@
 <a name="logo"/>
 <div align="center">
-<img src="docs/Logo.png" alt="Julia Logo" width="210" height="142"></img>
+<img src="docs/Logo.png" alt="Julia Logo" height="142"></img>
 </a>
 </div>
 
