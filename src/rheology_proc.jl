@@ -1,19 +1,19 @@
 #!/usr/bin/env julia
 
 """
-    modelfit!(self::RheologyType, model::String, params_init::Array{Float64,1}, low_bounds::Array{Float64,1}, hi_bounds::Array{Float64,1})
+    modelfit!(self::RheologyData, model::String, params_init::Array{Float64,1}, low_bounds::Array{Float64,1}, hi_bounds::Array{Float64,1})
 
-Fit RheologyType struct to model and store fitted parameters in self.fittedmodels.
+Fit RheologyData struct to model and store fitted parameters in self.fittedmodels.
 
 # Arguments
 
-- `self`: RheologyType struct containing all data
+- `self`: RheologyData struct containing all data
 - `model`: E.g. "SLS", "springpot", "burgers" etc. See models.jl for full list
 - `params_init`: Initial parameters to use in fit
 - `low_bounds`: Lower bounds for parameters
 - `hi_bounds`: Higher bounds for parameters
 """
-function modelfit!(self::RheologyType,
+function modelfit!(self::RheologyData,
                   model::String,
                   params_init::Array{Float64,1},
                   low_bounds::Array{Float64,1},
@@ -31,7 +31,7 @@ function modelfit!(self::RheologyType,
                                           self.measured; sampling = self.sampling,
                                           insight = self.insight)
     timetaken = toc()
-    # store fit results in RheologyType struct's fittedmodels dictionary
+    # store fit results in RheologyData struct's fittedmodels dictionary
     self.fittedmodels[model] = (minf, minx, ret, timetaken)
 end
 
@@ -40,7 +40,7 @@ end
 
 Given partial data (just t and ϵ for "strlx" test or t and σ for "creep"),
 model and parameters, find missing data (σ for "strlx" and ϵ for "creep").
-Currently only works for RheologyData and not more general RheologyType.
+Currently only works for RheologyData and not more general RheologyData.
 """
 function modelcomplete!(self::RheologyData, modelname::String, params::Array{Float64,1})
 

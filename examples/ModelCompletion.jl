@@ -3,23 +3,30 @@ include("../src/RHEOS.jl")
 using RHEOS
 using PyPlot
 
-filedir = "../data/rheologyData1.csv"
+filedir = "../data/rheologyData1_incomplete.csv"
 
-data_raw = fileload(filedir, ["time","stress","strain"], "strlx")
+data_partial = fileload(["time", "stress"], filedir)
 
-data_partial = RheologyData(data_raw.ϵ[1:450], data_raw.t[1:450], "strlx", filedir)
+# data_resampled = var_resample(data_partial, :σ, 0.1; _mapback = false)
+# data_resampled = downsample(data_partial, [1, 450], [3])
+# data_resampled = fixed_resample(data_partial, [1, 200, 450], [8, 25], ["up", "down"])
+data_resampled = fixed_resample(data_partial, [1, 450], [8], ["up"])
+# data_resampled = smooth(data_partial, 5.0)
 
-# plot init
-fig, ax = subplots()
+# # plot init
+# fig, ax = subplots()
 
-# get SLS data and plot
-modelcomplete!(data_partial, "SLS", [844.152, 2043.98, 5.15527])
-ax[:plot](data_partial.t, data_partial.measured, label="SLS")
+# plot stress data to check loaded in properly
+# ax[:plot](data_partial.t, data_partial.σ)
 
-# get springpot data and plot
-modelcomplete!(data_partial, "springpot", [2997.7, 0.281836])
-ax[:plot](data_partial.t[2:end], data_partial.measured, label="springpot")
+# # get SLS data and plot strain data
+# modelcomplete!(data_partial, "SLS", [844.152, 2043.98, 5.15527])
+# ax[:plot](data_partial.t, data_partial.measured, label="SLS")
 
-# legend and plot
-ax[:legend](loc="best")
-show()
+# # get springpot data and plot strain data
+# modelcomplete!(data_partial, "springpot", [2997.7, 0.281836])
+# ax[:plot](data_partial.t[2:end], data_partial.measured, label="springpot")
+
+# # legend and plot
+# ax[:legend](loc="best")
+# show()

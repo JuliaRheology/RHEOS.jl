@@ -1,12 +1,12 @@
 #!/usr/bin/env julia
 
 """
-    fiteval(self::RheologyType[, modelname::String]; singularity = false)
+    fiteval(self::RheologyData[, modelname::String]; singularity = false)
 
 Show plot of data vs. fitted data for specified model. If no model specified,
 shows plot with all fitted models.
 """
-function fiteval(self::RheologyType, modelname::String)
+function fiteval(self::RheologyData, modelname::String)
 
     # params
     params = self.fittedmodels[modelname][2]
@@ -52,7 +52,7 @@ function fiteval(self::RheologyType, modelname::String)
 
 end
 
-function fiteval(self::RheologyType)
+function fiteval(self::RheologyData)
 
     # special for AFMData, Hertz sphere
     if typeof(self) == AFMData && self.test_type == "strlx"
@@ -111,21 +111,21 @@ function fiteval(self::RheologyType)
 end
 
 """
-    saveresult(self::RheologyType; include_data::Bool = false)
+    saveresult(self::RheologyData; include_data::Bool = false)
 
-Save RheologyType object using JLD format. If include_data set to false
+Save RheologyData object using JLD format. If include_data set to false
 (by default) then :σ, :ϵ, :t, :dσ, :dϵ fields are set to [0.0] to save
 space on disk. If include_data is set as true then these fields are saved
 as is.
 """
-function saveresult(self::RheologyType; include_data::Bool = false)
+function saveresult(self::RheologyData; include_data::Bool = false)
 
     # include original/processed numerical data σ, ϵ, t...etc.
     if include_data
 
         # save
         jldopen(string(self.filedir[1:end-4], "_RheologyData.jld"), "w") do file
-            # register RHEOS module (with RheologyType type) to JLD
+            # register RHEOS module (with RheologyData type) to JLD
             addrequire(file, RHEOS)
             # write self to file
             write(file, "self", self)
@@ -144,7 +144,7 @@ function saveresult(self::RheologyType; include_data::Bool = false)
 
         # save 
         jldopen(string(self_copy.filedir[1:end-4], "_RheologyMetadata.jld"), "w") do file
-            # register RHEOS module (with RheologyType type) to JLD
+            # register RHEOS module (with RheologyData type) to JLD
             addrequire(file, RHEOS)
             # write self_copy to file
             write(file, "self", self_copy)

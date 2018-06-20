@@ -1,187 +1,117 @@
 #!/usr/bin/env julia
 
 """
-    RheologyData(stress::Array{Float64,1}, strain::Array{Float64,1}, time::Array{Float64,1}, test_type::String)
+    RheologyData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, sampling::String, log::Array{String,1})
 
-RheologyData mutable struct used for high level interaction with RHEOS
+RheologyData struct used for high level interaction with RHEOS
 preprocessing and fitting functions. Initialise an instance directly or
-indirectly. If data is in three column, comma seperated CSV file then
-fileload function can be used, which calls the RheologyData constructor.
-If not, load data in according to format and call RheologyData constructor.
+indirectly. If data is in three column, comma separated CSV file then
+fileload function can be used, which calls the constructRheologyData function. 
+If not, load data in according to format and call constructRheologyData function.
 """
-mutable struct RheologyData
-
-    # filedir is location of file on disk, for reference and saving
-    filedir::String
-
-    # insight parameter, tells functions whether to plot result or not
-    # during preprocessing. False by default.
-    insight::Bool
-
-    # sampling type. "constant" by default. Use of `var_resample`, `downsample`
-    # with more than one section or `fixed_resample` with more than one section
-    # overrides to "variable".
-    sampling::String
-
-    # test type is either "strlx" (stress relaxation, strain controlled)
-    # or "creep" (creep, stress controlled).
-    test_type::String
+struct RheologyData
 
     # original data
     σ::Array{Float64,1}
     ϵ::Array{Float64,1}
     t::Array{Float64,1}
 
-    # measured variabel and controlled variable numerically differentiated WRT to time
-    measured::Array{Float64,1}
-    dcontrolled::Array{Float64,1}
-
-    # models
-    fittedmodels::Dict
+    # sampling type. "constant" by default. Use of `var_resample`, `downsample`
+    # with more than one section or `fixed_resample` with more than one section
+    # overrides to "variable".
+    sampling::String
 
     # operations applied, stores history of which functions (including arguments)
-    appliedops::Array{String,1}
-
-    # to resample if "all"
-    numericdata::Array{Symbol,1}
-
-    # for initial loading of full dataset (measured + prescribed)
-    RheologyData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) = derivconstruct!(new(filedir, false, "constant", test_type, σ, ϵ, t), σ, ϵ, t)
-
-    # inner constructor for incomplete data; data_controlled should generally
-    # be controlled variable (stress for creep, strain for strlx).
-    RheologyData(data_controlled::Array{Float64,1}, t::Array{Float64,1}, test_type::String, filedir::String) =
-                partialconstruct!(new(filedir, false, "constant", test_type), data_controlled, t, test_type)
+    log::Array{String,1}
 
 end
 
 """
-Inner constructor for RheologyData struct, providing gradients of stress
-and strain. If stress/strain arrays have NaN values at the beginning (some datasets
-have 1 or 2 samples of NaN at beginning) then deletes these and starts at the first
-non-NaN sample, also readjusts time start to t = 0 to account for NaNs and and
-negative time values at beginning of data recording.
+    constructRheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}[, data3::Array{Float64,1}; filedir::String="none", log::Array{String,1}=Array{String}(0)])::RheologyData
+
+Constructor function for RheologyData struct, if stress/strain arrays have NaN values at the beginning (some datasets
+have 1 or 2 samples of NaN at beginning) then deletes these and starts at the first non-NaN sample, also readjusts time start to 
+t = 0 to account for NaNs and and negative time values at beginning of data recording.
 """
-function derivconstruct!(self::RheologyData, σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1})
+function constructRheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}, data3::Array{Float64,1}=zeros(length(data2)); filedir::String="none", log::Array{String,1}=Array{String}(0))::RheologyData
+
+    # checks
+    @assert length(data1)==length(data2) "Data arrays must be same length"
+    @assert length(data1)==length(data3) "Data arrays must be same length"
+
+    # get data in correct variables
+    data = [data1, data2, data3]
+    local σ::Array{Float64,1} = zeros(length(data1))
+    local ϵ::Array{Float64,1} = zeros(length(data1))
+    local t::Array{Float64,1} = zeros(length(data1))
+
+    # occurence flags
+    local stress_present::Bool = false
+    local strain_present::Bool = false
+    local time_present::Bool = false
+
+    for (i, v) in enumerate(colnames)
+        if v == "stress"
+            σ = data[i]
+        elseif v == "strain"
+            ϵ = data[i]
+        elseif v == "time"
+            t = data[i]
+        else
+            @assert false "Incorrect Column Names"
+        end
+    end
 
     # define as local so it can be accessed in subsequent scopes
     local newstartingval::T where T<:Integer
 
     # test for NaNs
-    for i in 1:length(self.σ)
-        if !isnan(self.σ[i]) && !isnan(self.ϵ[i])
+    for i in 1:length(σ)
+        if !isnan(σ[i]) && !isnan(ϵ[i])
             newstartingval = i
             break
         end
     end
 
     # adjust starting point accordingly to remove NaNs in σ, ϵ
-    initfields = [:σ, :ϵ, :t]
-    for n in initfields
-        setfield!(self, n, getfield(self, n)[newstartingval:end])
-    end
-
-    if self.test_type == "creep"
-        # derivative of stress WRT time
-        self.dcontrolled = deriv(self.σ, self.t)
-
-        self.measured = self.ϵ
-
-    elseif self.test_type == "strlx"
-        # derivative of stress WRT time
-        self.dcontrolled = deriv(self.ϵ, self.t)
-
-        self.measured = self.σ
-
-    end
-
-    # Check if time vector is equally spaced
-    diff = round.(self.t[2:end]-self.t[1:end-1],4);
-    check = any(x->x!=diff[1], diff);
-    if check == true
-       self.sampling = "variable";
-    end
-
-    # readjust time to account for NaN movement and/or negative time values
-    self.t = self.t - minimum(self.t)
-
-    # initialise empty dictionary for model fit results
-    self.fittedmodels = Dict()
-
-    # initialise empty array to record operations applied during preprocessing
-    self.appliedops = []
-
-    # initialise array of sybols for use if resampling/smoothing all numerical data
-    self.numericdata = [:σ, :ϵ, :t, :measured, :dcontrolled]
-
-    # return class with all fields initialised
-    self
-end
-
-"""
-Inner constructor completion function for case when only partial data is provided.
-"""
-function partialconstruct!(self::RheologyData, data_controlled::Array{Float64,1}, t::Array{Float64,1}, test_type::String)
-
-    # define as local so it can be accessed in subsequent scopes
-    local newstartingval::T where T<:Integer
-
-    # test for NaNs
-    for i in 1:length(data_controlled)
-        if !isnan(data_controlled[i])
-            newstartingval = i
-            break
-        end
-    end
-
-    # adjust starting point accordingly to remove NaNs
-    data_controlled = data_controlled[newstartingval:end]
+    σ = σ[newstartingval:end]
+    ϵ = ϵ[newstartingval:end]
     t = t[newstartingval:end]
 
     # readjust time to account for NaN movement and/or negative time values
     t = t - minimum(t)
 
-    # set time
-    self.t = t
-
-    # test dependent
-    if test_type=="strlx"
-        # set controlled variable as strain
-        self.ϵ = data_controlled
-        # derivative of stress WRT time
-        self.dcontrolled = deriv(self.ϵ, self.t)
-
-    elseif test_type=="creep"
-        # set controlled variable as stress
-        self.σ = data_controlled
-        # derivative of strain WRT time
-        self.dcontrolled = deriv(self.σ, self.t)
+    # initialise empty array to record operations applied during preprocessing
+    if filedir != "none" || length(log)==0
+        if length(colnames)<3
+            push!(log, "partial data loaded from:")
+        elseif length(colnames)==3
+            push!(log, "complete data loaded from:")
+        end
+        push!(log, filedir)
     end
 
-    # initialise empty dictionary for model fit results
-    self.fittedmodels = Dict()
-
-    # initialise empty array for operations applied
-    self.appliedops = []
-
-    # initialise array of sybols for use if resampling/smoothing all numerical data
-    self.numericdata = [:σ, :ϵ, :t, :measured, :dcontrolled]
+    # Check if time vector is equally spaced
+    diff = round.(t[2:end]-t[1:end-1], 4)
+    check = any(x->x!=diff[1], diff)
+    if check == true
+       sampling = "variable"
+    else
+       sampling = "constant"
+    end
 
     # return class with all fields initialised
-    self
+    RheologyData(σ, ϵ, t, sampling, log)
 end
 
-
 """
-    fileload(filedir::String, colnames::Array{String,1}, test_type::String)
+    fileload(colnames::Array{String,1}, filedir::String)
 
 Load data from a CSV file (three columns, comma seperated). Columns must
 be identified by providing an array of strings which tell the function
 which data (stress, strain or time) is contained in each column. This is
 used to construct a RheologyData struct, which provides the basis for
-subsequent high level operations within RHEOS. test_type is either "strlx"
-for a stress-relaxation test (strain controlled) or "creep" for a creep
-test (stress controlled).
+subsequent high level operations within RHEOS.
 
 # Example
 
@@ -190,34 +120,29 @@ test (stress controlled).
 fileDir = "../data/rheologyData1.csv"
 
 # load the data into RheologyData struct
-dataforprocessing = fileload(fileDir, ["time","stress","strain"], "strlx")
+dataforprocessing = fileload(["time","stress","strain"], fileDir)
 ```
 """
-function fileload(filedir::String, colnames::Array{String,1}, test_type::String)::RheologyData
+function fileload(colnames::Array{String,1}, filedir::String)::RheologyData
 
     # check colnames length is correct
-    @assert length(colnames) == 3 "Only three column names required, 'stress', 'strain' and 'time'."
+    @assert length(colnames)==3 || length(colnames)==2 "Two or three column names required, one of each: 'stress', 'strain' and 'time'."
+
+    # init types helper
+    types = [Float64 for i = 1:length(colnames)]
 
     # read data from file
-    (data, head_out) = uCSV.read(filedir; delim=',',
-                                 types=[Float64,Float64,Float64])
+    (datacsv, head_out) = uCSV.read(filedir; delim=',', types=types)
 
-    # get column numbers in order of RheologyData struct
-    cols = zeros(Int8, 3)
-    for (i, v) in enumerate(colnames)
-        if v == "stress"
-            cols[1] = i
-        elseif v == "strain"
-            cols[2] = i
-        elseif v == "time"
-            cols[3] = i
-        else
-            @assert false "Incorrect Column Names"
-        end
-    end
+    # init data var
+    local data::RheologyData
 
     # generate RheologyData struct and output
-    data = RheologyData(data[cols[1]], data[cols[2]], data[cols[3]], test_type, filedir)
+    if length(colnames)==3
+        data = constructRheologyData(colnames, datacsv[1], datacsv[2], datacsv[3]; filedir = filedir)
+    elseif length(colnames)==2
+        data = constructRheologyData(colnames, datacsv[1], datacsv[2]; filedir = filedir)
+    end
 end
 
 """
@@ -545,10 +470,3 @@ function AFMfileload(filedir::String, test_type::String; visco::Bool = true, cpf
     AFMData(f, δ, t, R, test_type, filedir)
 
 end
-
-"""
-    RheologyType = Union{RheologyData, AFMData}
-
-A superset of the two possible data types accepted by preprocessing, processing and postprocessing functions.
-"""
-RheologyType = Union{RheologyData, AFMData}

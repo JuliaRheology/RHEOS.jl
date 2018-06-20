@@ -2,7 +2,7 @@
 __precompile__()
 
 module RHEOS
-# local dependencies, stored in "/RHEOS/deps/"
+# installed using Pkg.clone from rheos-cambridge repos
 using MittagLeffler
 using FastConv
 # install using Pkg.add from within Julia REPL
@@ -11,7 +11,6 @@ using uCSV
 using ImageFiltering
 using Interpolations
 using NLopt
-using PyPlot
 using JLD
 # experimental dependency not automatically imported from base.jl
 using Base.Threads
@@ -52,7 +51,7 @@ export contact_hertz, contact_threshold, contact_none
 
 ######################################################
 # rheology_utility.jl
-export RheologyData, fileload, AFMfileload, AFMData, RheologyType, stepdata_generate
+export RheologyData, constructRheologyData, fileload, AFMfileload, AFMData, stepdata_generate
 
 ######################################################
 # rheology_preproc.jl
