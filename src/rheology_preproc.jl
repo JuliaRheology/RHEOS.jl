@@ -161,23 +161,19 @@ self_original. See mapback help docstring for more info on how algorithm works.
 """
 function mapbackdata(self_new::RheologyData, self_original::RheologyData)
 
-    # get copy
-    self_out = deepcopy(self_new)
-
-    # symbols of data
-    to_map = self_out.numericdata
-
     # get mapped back indices
     indices = mapback(self_new.t, self_original.t)
 
-    # loop through to set variables
-    for variable in to_map
-        setfield!(self_out, variable, getfield(self_original, variable)[indices])
-    end
+    #  set variables
+    σ = self_original.σ[indices]
+    ϵ = self_original.ϵ[indices]
+    t = self_original.t[indices]
 
     # add record of operation applied
-    self_out.appliedops = vcat(self_new.appliedops, "mapped back")
+    log = vcat(self_new.log, "mapped back") # mapped back to what? Include self_origina.log as well? Need to change Array type if so.
 
-    self_out
+    # to add, check if sample rate is now variable or constant (unlikely but could fall back to constant?)
+
+    self_new = RheologyData(σ, ϵ, t, self_new.sampling, log)
 
 end

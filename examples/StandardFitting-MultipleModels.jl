@@ -10,20 +10,8 @@ data_raw = fileload(["time","stress","strain"], filedir)
 # data_resampled = var_resample(data_raw, :σ, 0.1; _mapback = false)
 # data_resampled = downsample(data_raw, [1, 450], [3])
 # data_resampled = fixed_resample(data_raw, [1, 200, 450], [8, 25], ["up", "down"])
-# data_resampled = fixed_resample(data_raw, [1, 450], [8], ["up"])
+data_resampled = fixed_resample(data_raw, [1, 450], [8], ["up"])
 # data_resampled = smooth(data_raw, 5.0)
-
-println(data_resampled.sampling)
-println(data_resampled.log)
-
-plot(data_raw.t, data_raw.σ, "-")
-plot(data_resampled.t, data_resampled.σ, "o")
-show()
-
-plot(data_raw.t, data_raw.ϵ, "-")
-plot(data_resampled.t, data_resampled.ϵ, "o")
-show()
-
 # data_resampled = mapbackdata(data_resampled, data_raw)
 
 # # SLS fit
