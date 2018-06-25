@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 """
-    modelfit!(self::RheologyData, model::String, params_init::Array{Float64,1}, low_bounds::Array{Float64,1}, hi_bounds::Array{Float64,1})
+    modelfit(self::RheologyData, model::String, params_init::Array{Float64,1}, low_bounds::Array{Float64,1}, hi_bounds::Array{Float64,1})
 
 Fit RheologyData struct to model and store fitted parameters in self.fittedmodels.
 
@@ -13,7 +13,7 @@ Fit RheologyData struct to model and store fitted parameters in self.fittedmodel
 - `low_bounds`: Lower bounds for parameters
 - `hi_bounds`: Higher bounds for parameters
 """
-function modelfit!(self::RheologyData,
+function modelfit(self::RheologyData,
                   model::String,
                   params_init::Array{Float64,1},
                   low_bounds::Array{Float64,1},
@@ -36,13 +36,13 @@ function modelfit!(self::RheologyData,
 end
 
 """
-    modelcomplete!(self::RheologyData, model::String, params::Array{Float64,1})
+    modelcomplete(self::RheologyData, model::String, params::Array{Float64,1})
 
 Given partial data (just t and ϵ for "strlx" test or t and σ for "creep"),
 model and parameters, find missing data (σ for "strlx" and ϵ for "creep").
 Currently only works for RheologyData and not more general RheologyData.
 """
-function modelcomplete!(self::RheologyData, modelname::String, params::Array{Float64,1})
+function modelcomplete(self::RheologyData, modelname::String, params::Array{Float64,1})
 
     # generate time series difference array (for convolution)
     dt_series = deriv(self.t)
