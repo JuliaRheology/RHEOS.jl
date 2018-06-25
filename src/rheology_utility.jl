@@ -6,8 +6,8 @@
 RheologyData struct used for high level interaction with RHEOS
 preprocessing and fitting functions. Initialise an instance directly or
 indirectly. If data is in three column, comma separated CSV file then
-fileload function can be used, which calls the constructRheologyData function. 
-If not, load data in according to format and call constructRheologyData function.
+fileload function can be used, which calls the RheologyData outer constructor method. 
+If not, load data in according to format and call RheologyData outer constructor method.
 """
 struct RheologyData
 
@@ -27,13 +27,13 @@ struct RheologyData
 end
 
 """
-    constructRheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}[, data3::Array{Float64,1}; filedir::String="none", log::Array{String,1}=Array{String}(0)])::RheologyData
+    RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}[, data3::Array{Float64,1}; filedir::String="none", log::Array{String,1}=Array{String}(0)])::RheologyData
 
 Constructor function for RheologyData struct, if stress/strain arrays have NaN values at the beginning (some datasets
 have 1 or 2 samples of NaN at beginning) then deletes these and starts at the first non-NaN sample, also readjusts time start to 
 t = 0 to account for NaNs and and negative time values at beginning of data recording.
 """
-function constructRheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}, data3::Array{Float64,1}=zeros(length(data2)); filedir::String="none", log::Array{String,1}=Array{String}(0))::RheologyData
+function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}, data3::Array{Float64,1}=zeros(length(data2)); filedir::String="none", log::Array{String,1}=Array{String}(0))::RheologyData
 
     # checks
     @assert length(data1)==length(data2) "Data arrays must be same length"
@@ -139,8 +139,91 @@ function fileload(colnames::Array{String,1}, filedir::String)::RheologyData
 
     # generate RheologyData struct and output
     if length(colnames)==3
-        data = constructRheologyData(colnames, datacsv[1], datacsv[2], datacsv[3]; filedir = filedir)
+        data = RheologyData(colnames, datacsv[1], datacsv[2], datacsv[3]; filedir = filedir)
     elseif length(colnames)==2
-        data = constructRheologyData(colnames, datacsv[1], datacsv[2]; filedir = filedir)
+        data = RheologyData(colnames, datacsv[1], datacsv[2]; filedir = filedir)
     end
+end
+
+"""
+    RheologyModel(form::Function, singularity::Bool, modeltype::String)
+
+Struct which contains the functional form of a chosen model, a bool stating whether
+or not that functional form contains a singularity at t=0, and whether it is
+considered a "strlx" (strain controlled) or "creep" (stress controlled) modulus.
+"""
+struct RheologyModel
+
+    form::Function
+
+    singularity::Bool
+
+    modeltype::String
+
+end
+
+"""
+    modul(model::String, testType::String)
+
+Get modulus function for requested viscoelastic model and test type (either
+"G" for stress relaxation or "J" for creep).
+
+The following models are built in to RHEOS:
+
+- `SLS`: Standard Linear Solid
+- `SLS2`: 2 time scale Standard Linear Solid
+- `burgers`: Burgers model
+- `springpot`: Single Spring-Pot
+- `fractKV`: Fractional Kelvin-Voigt model
+- `fractmaxwell`: Fractional Maxwell model
+- `fractzener`: Fractional Zener model
+- `fractspecial`: *STRLX ONLY* - Fractional model defined by A. Bonfanti, 2017. *GET REF*
+
+Additional models can be added at any time by the user by defining the model as
+a function in "RHEOS/src/models.jl" and appending it the appropriate dictionary
+within the `moduli` function which is in that same file.
+"""
+function modulusgetter(model::String, modeltype::String)::RheologyModel
+
+    creepmoduli = Dict( "SLS" => RheologyModel(J_SLS, false, modeltype),
+                        "SLS2" => RheologyModel(J_SLS2, false, modeltype),
+                        "burgers" => RheologyModel(J_burgers, false, modeltype),
+                        "springpot" => RheologyModel(J_springpot, false, modeltype),
+                        "fractKV" => RheologyModel(J_fractKV, false, modeltype),
+                        "fractmaxwell" => RheologyModel(J_fractmaxwell, false, modeltype),
+                        "fractzener" => RheologyModel(J_fractzener, false, modeltype),
+                        "fractspecial_slow" => RheologyModel(J_fractspecial_slow, true, modeltype),
+                        "fractspecial_fast" => RheologyModel(J_fractspecial_fast, true, modeltype) )
+
+    relaxmoduli = Dict( "SLS" => RheologyModel(G_SLS, false, modeltype),
+                        "SLS2" => RheologyModel(G_SLS2, false, modeltype),
+                        "burgers" => RheologyModel(G_burgers, false, modeltype),
+                        "springpot" => RheologyModel(G_springpot, true, modeltype),
+                        "fractKV" => RheologyModel(G_fractKV, true, modeltype),
+                        "fractmaxwell" => RheologyModel(G_fractmaxwell, false, modeltype),
+                        "fractzener" => RheologyModel(G_fractzener, false, modeltype),
+                        "fractspecial" => RheologyModel(G_fractspecial, true, modeltype) )
+
+    if modeltype=="creep"
+        return creepmoduli[model]
+    elseif modeltype=="strlx"
+        return relaxmoduli[model]
+    end
+
+end
+
+"""
+    FittedModel(name::Function, parmeters::Array{Float64,1}, log::Array{String,1})
+
+Struct which contains the results of a model fit: model name, parameters, and inherited log with final cost, 
+reason for termination of fitting procedure and time taken to fit appended to it.
+"""
+struct FittedModel
+
+    name::Function
+
+    parameters::Array{Float64,1}
+
+    log::Array{String,1}
+
 end

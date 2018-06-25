@@ -141,14 +141,6 @@ function smooth(self::RheologyData, τ::Float64)
     # sample rate
     samplerate = 1.0/dt;
 
-    σ = :σ
-    ϵ = :ϵ
-    for i = [:σ, :ϵ]
-        # @eval ($smoothgauss)(($getfield)($self, $i), $τ, $samplerate)
-        # @eval $var = ($smoothgauss)(($getfield)($self, $i), $τ, $samplerate)
-        @eval ($println)($i)
-    end
-
     σ = smoothgauss(self.σ, τ, samplerate)
     ϵ = smoothgauss(self.ϵ, τ, samplerate)
 

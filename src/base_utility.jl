@@ -126,21 +126,3 @@ end
 #     # call mittagleffler within an array comprehension
 #     y = [MittagLeffler.mittleff(α, β, x) for x in xList]
 # end
-
-
-"""
-    RheologyModel(form::Function, singularity::Bool, test_type::String)
-
-Struct which contains the functional form of a chosen model, a bool stating whether
-or not that functional form contains a singularity at t=0, and whether it is
-considered a "strlx" (strain controlled) or "creep" (stress controlled) modulus.
-"""
-struct RheologyModel
-
-    form::Function
-
-    singularity::Bool
-
-    test_type::String
-
-end

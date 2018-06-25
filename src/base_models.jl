@@ -179,10 +179,10 @@ K, Cᵦ, β, η.
 Using default Talbot() method for the Laplace transform.
 """
 function J_fractspecial_slow(t::Array{Float64,1}, params::Array{Float64,1})::Array{Float64,1}
-    a = params[4]/params[2];
-    b = params[1]*params[4]/params[2];
+    a = params[4]/params[2]
+    b = params[1]*params[4]/params[2]
 
-    J = InverseLaplace.ILt( s -> 1/s^2 * ((1+a*s^(1-params[3])) / (params[4]+params[1]/s+b*s^(-params[3])) ));
+    J = InverseLaplace.ILt( s -> 1/s^2 * ((1+a*s^(1-params[3])) / (params[4]+params[1]/s+b*s^(-params[3])) ))
 
     return [J(t_val) for t_val in t]
 end
@@ -196,61 +196,9 @@ K, Cᵦ, β, η.
 Using the 'fixed' Talbot method for the Laplace transform (less accurate).
 """
 function J_fractspecial_fast(t::Array{Float64,1}, params::Array{Float64,1})::Array{Float64,1}
-    a = params[4]/params[2];
-    b = params[1]*params[4]/params[2];
+    a = params[4]/params[2]
+    b = params[1]*params[4]/params[2]
 
-    J = InverseLaplace.talbotarr( s -> 1/s^2 * ((1+a*s^(1-params[3])) / (params[4]+params[1]/s+b*s^(-params[3])) ) ,t );
+    J = InverseLaplace.talbotarr( s -> 1/s^2 * ((1+a*s^(1-params[3])) / (params[4]+params[1]/s+b*s^(-params[3])) ), t)
 end
 
-###########################
-#~ Model Function Return ~#
-###########################
-
-"""
-    moduli(model::String, testType::String)
-
-Get moduli function for requested viscoelastic model and test type (either
-"strlx" for stress relaxation or "creep" for creep).
-
-The following models are built in to RHEOS:
-
-- `SLS`: Standard Linear Solid
-- `SLS2`: 2 time scale Standard Linear Solid
-- `burgers`: Burgers model
-- `springpot`: Single Spring-Pot
-- `fractKV`: Fractional Kelvin-Voigt model
-- `fractmaxwell`: Fractional Maxwell model
-- `fractzener`: Fractional Zener model
-- `fractspecial`: *STRLX ONLY* - Fractional model defined by A. Bonfanti, 2017. *GET REF*
-
-Additional models can be added at any time by the user by defining the model as
-a function in "RHEOS/src/models.jl" and appending it the appropriate dictionary
-within the `moduli` function which is in that same file.
-"""
-function moduli(model::String, test_type::String)::RheologyModel
-
-    creepmoduli = Dict( "SLS" => RheologyModel(J_SLS, false, test_type),
-                        "SLS2" => RheologyModel(J_SLS2, false, test_type),
-                        "burgers" => RheologyModel(J_burgers, false, test_type),
-                        "springpot" => RheologyModel(J_springpot, false, test_type),
-                        "fractKV" => RheologyModel(J_fractKV, false, test_type),
-                        "fractmaxwell" => RheologyModel(J_fractmaxwell, false, test_type),
-                        "fractzener" => RheologyModel(J_fractzener, false, test_type),
-                        "fractspecial_slow" => RheologyModel(J_fractspecial_slow, true, test_type),
-                        "fractspecial_fast" => RheologyModel(J_fractspecial_fast, true, test_type) )
-
-    relaxmoduli = Dict( "SLS" => RheologyModel(G_SLS, false, test_type),
-                        "SLS2" => RheologyModel(G_SLS2, false, test_type),
-                        "burgers" => RheologyModel(G_burgers, false, test_type),
-                        "springpot" => RheologyModel(G_springpot, true, test_type),
-                        "fractKV" => RheologyModel(G_fractKV, true, test_type),
-                        "fractmaxwell" => RheologyModel(G_fractmaxwell, false, test_type),
-                        "fractzener" => RheologyModel(G_fractzener, false, test_type),
-                        "fractspecial" => RheologyModel(G_fractspecial, true, test_type) )
-
-    if test_type=="creep"
-        return creepmoduli[model]
-    elseif test_type=="strlx"
-        return relaxmoduli[model]
-    end
-end

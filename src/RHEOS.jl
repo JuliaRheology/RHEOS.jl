@@ -21,7 +21,7 @@ using Base.Threads
 
 ######################################################
 # base_utility.jl
-export deriv, trapz, mittleff, RheologyModel
+export deriv, trapz, mittleff
 
 ######################################################
 # base_preproc.jl
@@ -33,8 +33,6 @@ export leastsquares_init, objectivefunc, boltzconvolve, boltzintegral
 
 ######################################################
 # base_models.jl
-export moduli
-
 export G_SLS, G_SLS2, G_burgers,
         G_springpot, G_fractKV,
         G_fractmaxwell, G_fractzener,
@@ -45,12 +43,8 @@ export J_SLS, J_SLS2, J_burgers,
         J_fractmaxwell, J_fractzener
 
 ######################################################
-# afm_contactmodels.jl
-export contact_hertz, contact_threshold, contact_none
-
-######################################################
 # rheology_utility.jl
-export RheologyData, constructRheologyData, fileload
+export RheologyData, constructRheologyData, fileload, RheologyModel, modulusgetter, FittedModel
 
 ######################################################
 # rheology_datagen.jl
