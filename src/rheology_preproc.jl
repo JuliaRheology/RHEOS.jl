@@ -1,5 +1,4 @@
 #!/usr/bin/env julia
-
 """
     var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float64; mapback::Bool = false)
 
@@ -140,9 +139,16 @@ function smooth(self::RheologyData, τ::Float64)
     dt = t[2] - t[1]
 
     # sample rate
-    samplerate = 1.0/dt
+    samplerate = 1.0/dt;
 
-    # go through fields to smooth
+    σ = :σ
+    ϵ = :ϵ
+    for i = [:σ, :ϵ]
+        # @eval ($smoothgauss)(($getfield)($self, $i), $τ, $samplerate)
+        # @eval $var = ($smoothgauss)(($getfield)($self, $i), $τ, $samplerate)
+        @eval ($println)($i)
+    end
+
     σ = smoothgauss(self.σ, τ, samplerate)
     ϵ = smoothgauss(self.ϵ, τ, samplerate)
 

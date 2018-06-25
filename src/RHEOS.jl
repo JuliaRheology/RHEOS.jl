@@ -14,11 +14,10 @@ using NLopt
 using JLD
 # experimental dependency not automatically imported from base.jl
 using Base.Threads
-# using Plots; gr() # add support for different plotting backends
 
-println("\n===========================")
-println("Number of threads in use: ", nthreads())
-println("===========================\n")
+# println("\n===========================")
+# println("Number of threads in use: ", nthreads())
+# println("===========================\n")
 
 ######################################################
 # base_utility.jl
