@@ -14,10 +14,13 @@ Fit RheologyData struct to model and store fitted parameters in self.fittedmodel
 - `hi_bounds`: Higher bounds for parameters
 """
 function modelfit(self::RheologyData,
-                  model::String,
+                  model::String, mtype::String,
                   params_init::Array{Float64,1},
                   low_bounds::Array{Float64,1},
-                  hi_bounds::Array{Float64,1})
+                  hi_bounds::Array{Float64,1};
+                  verbose:Bool = false)::RheologyModel
+
+    # 
 
     # generate time series difference array (for convolution)
     dt_series = deriv(self.t)
@@ -28,21 +31,22 @@ function modelfit(self::RheologyData,
     tic()
     (minf, minx, ret) = leastsquares_init(params_init, low_bounds, hi_bounds,
                                           modulus, self.t, dt_series, self.dcontrolled,
-                                          self.measured; sampling = self.sampling,
-                                          insight = self.insight)
+                                          self.measured; insight = verbose,
+                                          sampling = self.sampling, 
+                                          singularity = sing)
     timetaken = toc()
     # store fit results in RheologyData struct's fittedmodels dictionary
     self.fittedmodels[model] = (minf, minx, ret, timetaken)
 end
 
 """
-    modelcomplete(self::RheologyData, model::String, params::Array{Float64,1})
+    modelpredict(self::RheologyData, model::String, params::Array{Float64,1})
 
 Given partial data (just t and ϵ for "strlx" test or t and σ for "creep"),
 model and parameters, find missing data (σ for "strlx" and ϵ for "creep").
 Currently only works for RheologyData and not more general RheologyData.
 """
-function modelcomplete(self::RheologyData, modelname::String, params::Array{Float64,1})
+function modepredict(self::RheologyData, modelname::String, params::Array{Float64,1})::RheologyData
 
     # generate time series difference array (for convolution)
     dt_series = deriv(self.t)

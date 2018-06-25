@@ -56,7 +56,7 @@ export var_resample, downsample, fixed_resample, smooth, mapbackdata
 
 ######################################################
 # rheology_proc.jl
-export modelfit!, modelcomplete!
+export modelfit, modelpredict
 
 ######################################################
 # rheology_postproc.jl
