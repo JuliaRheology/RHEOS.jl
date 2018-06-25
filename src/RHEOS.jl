@@ -50,7 +50,11 @@ export contact_hertz, contact_threshold, contact_none
 
 ######################################################
 # rheology_utility.jl
-export RheologyData, constructRheologyData, fileload, AFMfileload, AFMData, stepdata_generate
+export RheologyData, constructRheologyData, fileload
+
+######################################################
+# rheology_datagen.jl
+export stepdata_generate
 
 ######################################################
 # rheology_preproc.jl
@@ -72,8 +76,8 @@ include("base_proc.jl")
 include("base_models.jl")
 
 # High level rheology interface
-include("afm_contactmodels.jl")
 include("rheology_utility.jl")
+include("rheology_datagen.jl")
 include("rheology_preproc.jl")
 include("rheology_proc.jl")
 include("rheology_postproc.jl")
