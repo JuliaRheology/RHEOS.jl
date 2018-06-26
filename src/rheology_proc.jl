@@ -1,20 +1,20 @@
 #!/usr/bin/env julia
 
 """
-    modelfit(self::RheologyData, modulus::Function[, p0::Array{Float64,1}, lo::Array{Float64,1}, hi::Array{Float64,1}; verbose::Bool = false])
+    modelfit(data::RheologyData, modulus::Function[, p0::Array{Float64,1}, lo::Array{Float64,1}, hi::Array{Float64,1}; verbose::Bool = false])
 
-Fit RheologyData struct to model and store fitted parameters in self.fittedmodels.
+Fit RheologyData struct to model and return a fitted model as a RheologyModel object.
 
 # Arguments
 
-- `self`: RheologyData struct containing all data
+- `data`: RheologyData struct containing all data
 - `modulus`: E.g. G_SLS, J_springpot etc. See base_models.jl for full list
 - `p0`: Initial parameters to use in fit
 - `lo`: Lower bounds for parameters
 - `hi`: Higher bounds for parameters
 - `verbose`: If true, prints parameters on each optimisation iteration
 """
-function modelfit(self::RheologyData,
+function modelfit(data::RheologyData,
                   modulus::Function;
                   p0::Array{Float64,1} = [-1.0],
                   lo::Array{Float64,1} = [-1.0],
@@ -33,15 +33,15 @@ function modelfit(self::RheologyData,
     end 
 
     # generate time series difference array (for convolution)
-    dt_series = deriv(self.t)
+    dt_series = deriv(data.t)
 
     # get derivative of controlled variable and measured variable
     if controlledvar == "σ"
-        dcontrolled = deriv(self.σ, self.t)
-        measured = self.ϵ
+        dcontrolled = deriv(data.σ, data.t)
+        measured = data.ϵ
     elseif controlledvar == "ϵ"
-        dcontrolled = deriv(self.ϵ, self.t)
-        measured = self.σ
+        dcontrolled = deriv(data.ϵ, data.t)
+        measured = data.σ
     end
 
     # start fit
@@ -50,58 +50,71 @@ function modelfit(self::RheologyData,
                                           lo, 
                                           hi,
                                           modulus, 
-                                          self.t, 
+                                          data.t, 
                                           dt_series, 
                                           dcontrolled,
                                           measured; 
                                           insight = verbose,
-                                          sampling = self.sampling, 
+                                          sampling = data.sampling, 
                                           singularity = sing)
-    timetaken = toc()
+    timetaken = toq()
 
     #
     modulusname = string(:modulus)
 
-    log = vcat(self.log, "Fitted modulus($modulusname) in $timetaken, finished due to $ret with parans $minx")
+    log = vcat(data.log, "Fitted modulus($modulusname) in $timetaken, finished due to $ret with parans $minx")
 
     RheologyModel(modulus, minx, log)
 
 end
 
 """
-    modelpredict(self::RheologyData, model::String, params::Array{Float64,1})
+    modelpredict(data::RheologyData, model::RheologyModel)
 
-Given partial data (just t and ϵ for "strlx" test or t and σ for "creep"),
-model and parameters, find missing data (σ for "strlx" and ϵ for "creep").
-Currently only works for RheologyData and not more general RheologyData.
+Given data and model and parameters, predict new dataset based on both.
 """
-function modepredict(self::RheologyData, modelname::String, params::Array{Float64,1})::RheologyData
+function modelpredict(data::RheologyData, model::RheologyModel)::RheologyData
+
+    # get modulus info from database
+    (controlledvar, p0_default) = modeldatabase(model.modulus)
+
+    # get singularity presence
+    sing = singularitytest(model.modulus)
+
+    if controlledvar == "σ"
+        dcontrolled = deriv(data.σ, data.t)
+    elseif controlledvar == "ϵ"
+        dcontrolled = deriv(data.ϵ, data.t)
+    end
 
     # generate time series difference array (for convolution)
-    dt_series = deriv(self.t)
-
-    # get model
-    model = moduli(modelname, self.test_type)
+    dt_series = deriv(data.t)
 
     # get convolution
-    if !model.singularity && self.sampling == "constant"
-        convolved = boltzconvolve_nonsing(model, self.t, deriv(self.t), params, self.dcontrolled)
+    if !sing && data.sampling == "constant"
+        convolved = boltzconvolve_nonsing(model.modulus, data.t, deriv(data.t), model.parameters, dcontrolled)
+    elseif sing && data.sampling == "constant"
+        convolved = boltzconvolve_sing(model.modulus, data.t, deriv(data.t), model.parameters, dcontrolled)
 
-    elseif model.singularity && self.sampling == "constant"
-        convolved = boltzconvolve_sing(model, self.t, deriv(self.t), params, self.dcontrolled)
+    elseif !sing && data.sampling == "variable"
+        convolved = boltzintegral_nonsing(model.modulus, data.t, model.parameters, dcontrolled)
 
-    elseif !model.singularity && self.sampling == "variable"
-        convolved = boltzintegral_nonsing(model, self.t, params, self.dcontrolled)
-
-    elseif model.singularity && self.sampling == "variable"
-        convolved = boltzintegral_sing(model, self.t, params, self.dcontrolled)
+    elseif sing && data.sampling == "variable"
+        convolved = boltzintegral_sing(model.modulus, data.t, model.parameters, dcontrolled)
 
     end
 
-    # store output in RheologyData object
-    self.measured = convolved
+    if controlledvar == "σ"
+        σ = data.σ
+        ϵ = convolved
+    elseif controlledvar == "ϵ"
+        σ = convolved
+        ϵ = data.ϵ
+    end   
 
     # store operation
-    self.appliedops = vcat(self.appliedops, "modelname: $modelname, params: $params")
+    log = vcat(data.log, "Predicted data from model:", model.log)
+
+    RheologyData(σ, ϵ, data.t, data.sampling, log)
 
 end
