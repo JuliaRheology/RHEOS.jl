@@ -5,26 +5,20 @@ using PyPlot
 
 filedir = "../data/rheologyData1_incomplete.csv"
 
-data_partial = fileload(["time", "stress"], filedir)
+data_partial = fileload(["time", "strain"], filedir)
+
+println(data_partial.t[5])
+println(data_partial.σ[5])
+println(data_partial.ϵ[5])
 
 data_resampled = fixed_resample(data_partial, [1, 450], [8], ["up"])
 
+sls_fit = RheologyModel(G_SLS, [843.149, 2024.2, 5.22901])
 
+sls_predicted = modelpredict(data_resampled, sls_fit)
 
-# # plot init
-# fig, ax = subplots()
-
-# plot stress data to check loaded in properly
-# ax[:plot](data_partial.t, data_partial.σ)
-
-# # get SLS data and plot strain data
-# modelcomplete!(data_partial, "SLS", [844.152, 2043.98, 5.15527])
-# ax[:plot](data_partial.t, data_partial.measured, label="SLS")
-
-# # get springpot data and plot strain data
-# modelcomplete!(data_partial, "springpot", [2997.7, 0.281836])
-# ax[:plot](data_partial.t[2:end], data_partial.measured, label="springpot")
-
-# # legend and plot
-# ax[:legend](loc="best")
-# show()
+fig, ax = subplots()
+ax[:plot](data_resampled.t, data_resampled.σ)
+ax[:plot](sls_predicted.t, sls_predicted.σ, label="SLS")
+ax[:legend](loc="best")
+show()

@@ -26,7 +26,7 @@ data_resampled = fixed_resample(data_raw, [1, 450], [8], ["up"])
 p0 = [1000.0, 1000.0, 100.0]
 lb = [0.0, 0.0, 0.0]
 ub = [1e5, 1e5, 1e5]
-sls_fit = modelfit(data_resampled, G_SLS; p0=p0, lo=lb, hi=ub, verbose=false)
+sls_fit = modelfit(data_resampled, G_SLS; p0=p0, lo=lb, hi=ub, verbose=true)
 
 # Spring-pot fit
 p0 = [1000.0, 0.5]
