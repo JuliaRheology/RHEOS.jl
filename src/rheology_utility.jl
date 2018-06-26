@@ -153,7 +153,7 @@ reason for termination of fitting procedure and time taken to fit appended to it
 """
 struct RheologyModel
 
-    name::Function
+    modulus::Function
 
     parameters::Array{Float64,1}
 

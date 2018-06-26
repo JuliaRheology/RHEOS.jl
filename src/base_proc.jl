@@ -129,7 +129,7 @@ function boltzconvolve_sing(modulus::Function, time_series::Array{Float64,1}, dt
 end
 
 """
-    obj_const_nonsing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, dt_series::Array{Float64,1}, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _verbose::Bool = false)
+    obj_const_nonsing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, dt_series::Array{Float64,1}, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _insight::Bool = false)
 
 Generate the sum-of-squares of the difference between `measured` and the Boltzmann
 convolution integral of the selected `modulus` and `prescribed_dot`. Used when
@@ -144,14 +144,14 @@ sample rate is constant and model does not feature singularity.
 - `dt_series`: Array of time data differences,  equal to deriv(time_series)
 - `prescribed_dot`: Convolved with `modulus` over `time_series`, usually dϵ/dt for stress relaxation and dσ/dt for creep
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
-- `_verbose`: Declare whether verbose info should be shown when this function is called, true or false
+- `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
 function obj_const_nonsing(params::Array{Float64,1}, grad::Array{Float64,1},
                             modulus::Function, time_series::Array{Float64,1},
                             dt_series::Array{Float64,1}, prescribed_dot::Array{Float64,1},
-                            measured::Array{Float64,1}; _verbose::Bool = false)::Float64
+                            measured::Array{Float64,1}; _insight::Bool = false)::Float64
 
-    if _verbose
+    if _insight
         println("Current Parameters: ", params)
     end
 
@@ -162,7 +162,7 @@ function obj_const_nonsing(params::Array{Float64,1}, grad::Array{Float64,1},
 end
 
 """
-    obj_const_sing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, dt_series::Array{Float64,1}, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _verbose::Bool = false)
+    obj_const_sing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, dt_series::Array{Float64,1}, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _insight::Bool = false)
 
 Generate the sum-of-squares of the difference between `measured` and the Boltzmann
 convolution integral of the selected `modulus` and `prescribed_dot`. Used when
@@ -177,14 +177,14 @@ sample rate is constant and model does feature singularity.
 - `dt_series`: Array of time data differences,  equal to deriv(time_series)
 - `prescribed_dot`: Convolved with `modulus` over `time_series`, usually dϵ/dt for stress relaxation and dσ/dt for creep
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
-- `_verbose`: Declare whether verbose info should be shown when this function is called, true or false
+- `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
 function obj_const_sing(params::Array{Float64,1}, grad::Array{Float64,1},
                             modulus::Function, time_series::Array{Float64,1},
                             dt_series::Array{Float64,1}, prescribed_dot::Array{Float64,1},
-                            measured::Array{Float64,1}; _verbose::Bool = false)::Float64
+                            measured::Array{Float64,1}; _insight::Bool = false)::Float64
 
-    if _verbose
+    if _insight
         println("Current Parameters: ", params)
     end
 
@@ -196,7 +196,7 @@ function obj_const_sing(params::Array{Float64,1}, grad::Array{Float64,1},
 end
 
 """
-    obj_var_nonsing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _verbose::Bool = false)
+    obj_var_nonsing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _insight::Bool = false)
 
 Generate the sum-of-squares of the difference between `measured` and the Boltzmann
 convolution integral of the selected `modulus` and `prescribed_dot`. Used when
@@ -210,14 +210,14 @@ sample rate is variable and no singularity in model.
 - `time_series`: Array of time data
 - `prescribed_dot`: Convolved with `modulus` over `time_series`, usually dϵ/dt for stress relaxation and dσ/dt for creep
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
-- `_verbose`: Declare whether verbose info should be shown when this function is called, true or false
+- `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
 function obj_var_nonsing(params::Array{Float64,1}, grad::Array{Float64,1},
                             modulus::Function, time_series::Array{Float64,1},
                             prescribed_dot::Array{Float64,1}, measured::Array{Float64,1};
-                            _verbose::Bool = false)::Float64
+                            _insight::Bool = false)::Float64
 
-    if _verbose
+    if _insight
         println("Current Parameters: ", params)
     end
 
@@ -228,7 +228,7 @@ function obj_var_nonsing(params::Array{Float64,1}, grad::Array{Float64,1},
 end
 
 """
-    obj_var_sing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _verbose::Bool = false)
+    obj_var_sing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _insight::Bool = false)
 
 Generate the sum-of-squares of the difference between `measured` and the Boltzmann
 convolution integral of the selected `modulus` and `prescribed_dot`. Used when
@@ -242,14 +242,14 @@ sample rate is variable and there IS singularity in model.
 - `time_series`: Array of time data
 - `prescribed_dot`: Convolved with `modulus` over `time_series`, usually dϵ/dt for stress relaxation and dσ/dt for creep
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
-- `_verbose`: Declare whether verbose info should be shown when this function is called, true or false
+- `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
 function obj_var_sing(params::Array{Float64,1}, grad::Array{Float64,1},
                             modulus::Function, time_series::Array{Float64,1},
                             prescribed_dot::Array{Float64,1}, measured::Array{Float64,1};
-                            _verbose::Bool = false)::Float64
+                            _insight::Bool = false)::Float64
 
-    if _verbose
+    if _insight
         println("Current Parameters: ", params)
     end
 
@@ -261,7 +261,7 @@ function obj_var_sing(params::Array{Float64,1}, grad::Array{Float64,1},
 end
 
 """
-    leastsquares_init(params_init, low_bounds, hi_bounds, modulus, time_series, dt_series, prescribed_dot, measured; verbose = false, sampling = "constant", singularity = false)
+    leastsquares_init(params_init, low_bounds, hi_bounds, modulus, time_series, dt_series, prescribed_dot, measured; insight = false, sampling = "constant", singularity = false)
 
 Initialise then begin a least squares fitting of the supplied data.
 
@@ -276,14 +276,14 @@ Initialise then begin a least squares fitting of the supplied data.
 - `prescribed_dot`: Convolved with `modulus` over `time_series`, usually dϵ/dt for stress relaxation and dσ/dt for creep
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `sampling`: Declare whether sample rate is `constant` or `variable` so that convolution or integration is used respectively
-- `verbose`: Declare whether verbose info should be shown when this function is called, true or false
+- `insight`: Declare whether insight info should be shown when this function is called, true or false
 - `singularity`: Presence of singularity in model
 """
 function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Float64,1},
                            hi_bounds::Array{Float64,1}, modulus::Function,
                            time_series::Array{Float64,1}, dt_series::Array{Float64,1},
                            prescribed_dot::Array{Float64,1}, measured::Array{Float64,1};
-                           verbose::Bool = false, sampling::String = "constant",
+                           insight::Bool = false, sampling::String = "constant",
                            singularity::Bool = false)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
@@ -307,23 +307,23 @@ function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Floa
         min_objective!(opt, (params, grad) -> obj_const_nonsing(params, grad, modulus,
                                                             time_series, dt_series,
                                                             prescribed_dot, measured;
-                                                            _verbose = verbose))
+                                                            _insight = insight))
 
     elseif singularity && sampling == "constant"
         min_objective!(opt, (params, grad) -> obj_const_sing(params, grad, modulus,
                                                         time_series, dt_series,
                                                         prescribed_dot, measured;
-                                                        _verbose = verbose))
+                                                        _insight = insight))
 
     elseif !singularity && sampling == "variable"
         min_objective!(opt, (params, grad) -> obj_var_nonsing(params, grad, modulus,
                                                         time_series, prescribed_dot,
-                                                        measured; _verbose = verbose))
+                                                        measured; _insight = insight))
 
     elseif singularity && sampling == "variable"
         min_objective!(opt, (params, grad) -> obj_var_sing(params, grad, modulus,
                                                         time_series, prescribed_dot,
-                                                        measured; _verbose = verbose))
+                                                        measured; _insight = insight))
 
     end
 

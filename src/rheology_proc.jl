@@ -19,7 +19,7 @@ function modelfit(self::RheologyData,
                   p0::Array{Float64,1} = [-1.0],
                   lo::Array{Float64,1} = [-1.0],
                   hi::Array{Float64,1} = [-1.0],
-                  verbose:Bool = false)::RheologyModel
+                  verbose::Bool = false)::RheologyModel
 
     # get modulus info from database
     (controlledvar, p0_default) = modeldatabase(modulus)
@@ -59,9 +59,13 @@ function modelfit(self::RheologyData,
                                           singularity = sing)
     timetaken = toc()
 
-    # store fit results in RheologyData struct's fittedmodels dictionary
-    (minf, minx, ret, timetaken)
-    
+    #
+    modulusname = string(:modulus)
+
+    log = vcat(self.log, "Fitted modulus($modulusname) in $timetaken, finished due to $ret with parans $minx")
+
+    RheologyModel(modulus, minx, log)
+
 end
 
 """
