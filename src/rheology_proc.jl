@@ -93,6 +93,7 @@ function modelpredict(data::RheologyData, model::RheologyModel)::RheologyData
     # get convolution
     if !sing && data.sampling == "constant"
         convolved = boltzconvolve_nonsing(model.modulus, data.t, deriv(data.t), model.parameters, dcontrolled)
+
     elseif sing && data.sampling == "constant"
         convolved = boltzconvolve_sing(model.modulus, data.t, deriv(data.t), model.parameters, dcontrolled)
 

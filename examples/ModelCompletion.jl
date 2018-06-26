@@ -13,8 +13,7 @@ sls_fit = RheologyModel(G_SLS, [843.149, 2024.2, 5.22901])
 
 sls_predicted = modelpredict(data_resampled, sls_fit)
 
-# fig, ax = subplots()
-# ax[:plot](data_resampled.t, data_resampled.ϵ)
-# ax[:plot](sls_predicted.t, sls_predicted.ϵ, "--", label="SLS")
-# ax[:legend](loc="best")
-# show()
+fig, ax = subplots()
+ax[:plot](sls_predicted.t, sls_predicted.σ, "--", label="SLS")
+ax[:legend](loc="best")
+show()
