@@ -10,8 +10,8 @@ data_raw = fileload(["time","stress","strain"], filedir)
 # data_resampled = var_resample(data_raw, :σ, 0.1; _mapback = false)
 # data_resampled = downsample(data_raw, [1, 450], [3])
 # data_resampled = fixed_resample(data_raw, [1, 200, 450], [8, 25], ["up", "down"])
-# data_resampled = fixed_resample(data_raw, [1, 450], [8], ["up"])
-data_resampled = smooth(data_raw, 5.0)
+data_resampled = fixed_resample(data_raw, [1, 450], [8], ["up"])
+# data_resampled = smooth(data_raw, 5.0)
 # data_resampled = mapbackdata(data_resampled, data_raw)
 
 # plot(data_raw.t, data_raw.ϵ)
@@ -22,11 +22,11 @@ data_resampled = smooth(data_raw, 5.0)
 # plot(data_resampled.t, data_resampled.σ)
 # show()
 
-# # SLS fit
-# p0 = [1000.0, 1000.0, 100.0]
-# lb = [0.0, 0.0, 0.0]
-# ub = [1e5, 1e5, 1e5]
-# modelfit!(data_resampled, "SLS", p0, lb, ub)
+# SLS fit
+p0 = [1000.0, 1000.0, 100.0]
+lb = [0.0, 0.0, 0.0]
+ub = [1e5, 1e5, 1e5]
+fittedmodel = modelfit(data_resampled, G_SLS; p0=p0, lo=lb, hi=ub, verbose=true)
 
 # # Spring-pot fit
 # p0 = [1000.0, 0.5]
