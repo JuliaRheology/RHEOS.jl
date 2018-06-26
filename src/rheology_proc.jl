@@ -1,42 +1,67 @@
 #!/usr/bin/env julia
 
 """
-    modelfit(self::RheologyData, model::String, params_init::Array{Float64,1}, low_bounds::Array{Float64,1}, hi_bounds::Array{Float64,1})
+    modelfit(self::RheologyData, modulus::Function[, p0::Array{Float64,1}, lo::Array{Float64,1}, hi::Array{Float64,1}; verbose::Bool = false])
 
 Fit RheologyData struct to model and store fitted parameters in self.fittedmodels.
 
 # Arguments
 
 - `self`: RheologyData struct containing all data
-- `model`: E.g. "SLS", "springpot", "burgers" etc. See models.jl for full list
-- `params_init`: Initial parameters to use in fit
-- `low_bounds`: Lower bounds for parameters
-- `hi_bounds`: Higher bounds for parameters
+- `modulus`: E.g. G_SLS, J_springpot etc. See base_models.jl for full list
+- `p0`: Initial parameters to use in fit
+- `lo`: Lower bounds for parameters
+- `hi`: Higher bounds for parameters
+- `verbose`: If true, prints parameters on each optimisation iteration
 """
 function modelfit(self::RheologyData,
-                  model::String, mtype::String,
-                  params_init::Array{Float64,1},
-                  low_bounds::Array{Float64,1},
-                  hi_bounds::Array{Float64,1};
+                  modulus::Function;
+                  p0::Array{Float64,1} = [-1.0],
+                  lo::Array{Float64,1} = [-1.0],
+                  hi::Array{Float64,1} = [-1.0],
                   verbose:Bool = false)::RheologyModel
 
-    # 
+    # get modulus info from database
+    (controlledvar, p0_default) = modeldatabase(modulus)
+
+    # get singularity presence
+    sing = singularitytest(modulus)
+
+    # use default p0 if not provided
+    if quasinull(p0)
+        p0 = p0_default
+    end 
 
     # generate time series difference array (for convolution)
     dt_series = deriv(self.t)
 
-    # get appropriate RheologyModel struct
-    modulus = moduli(model, self.test_type)
+    # get derivative of controlled variable and measured variable
+    if controlledvar == "σ"
+        dcontrolled = deriv(self.σ, self.t)
+        measured = self.ϵ
+    elseif controlledvar == "ϵ"
+        dcontrolled = deriv(self.ϵ, self.t)
+        measured = self.σ
+    end
+
     # start fit
     tic()
-    (minf, minx, ret) = leastsquares_init(params_init, low_bounds, hi_bounds,
-                                          modulus, self.t, dt_series, self.dcontrolled,
-                                          self.measured; insight = verbose,
+    (minf, minx, ret) = leastsquares_init(p0,
+                                          lo, 
+                                          hi,
+                                          modulus, 
+                                          self.t, 
+                                          dt_series, 
+                                          dcontrolled,
+                                          measured; 
+                                          insight = verbose,
                                           sampling = self.sampling, 
                                           singularity = sing)
     timetaken = toc()
+
     # store fit results in RheologyData struct's fittedmodels dictionary
-    self.fittedmodels[model] = (minf, minx, ret, timetaken)
+    (minf, minx, ret, timetaken)
+    
 end
 
 """

@@ -42,6 +42,8 @@ export J_SLS, J_SLS2, J_burgers,
         J_springpot, J_fractKV,
         J_fractmaxwell, J_fractzener
 
+export modeldatabase
+
 ######################################################
 # rheology_utility.jl
 export RheologyData, constructRheologyData, fileload, RheologyModel, modulusgetter, FittedModel

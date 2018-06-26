@@ -146,56 +146,6 @@ function fileload(colnames::Array{String,1}, filedir::String)::RheologyData
 end
 
 """
-    singularitylookup(model::String, modeltype::String)
-
-Get modulus function for requested viscoelastic model and test type (either
-"G" for relaxation or "J" for creep).
-
-The following models are built in to RHEOS:
-
-- `SLS`: Standard Linear Solid
-- `SLS2`: 2 time scale Standard Linear Solid
-- `burgers`: Burgers model
-- `springpot`: Single Spring-Pot
-- `fractKV`: Fractional Kelvin-Voigt model
-- `fractmaxwell`: Fractional Maxwell model
-- `fractzener`: Fractional Zener model
-- `fractspecial`: Fractional model defined by A. Bonfanti, 2017. *GET REF*
-
-Additional models can be added at any time by the user by defining the model as
-a function in "RHEOS/src/models.jl" and appending it the appropriate dictionary
-within the `moduli` function which is in that same file.
-"""
-function modulusgetter(model::String, modeltype::String)::RheologyModulus
-
-    creepmoduli = Dict( "SLS" => RheologyModulus(J_SLS, false, modeltype),
-                        "SLS2" => RheologyModulus(J_SLS2, false, modeltype),
-                        "burgers" => RheologyModulus(J_burgers, false, modeltype),
-                        "springpot" => RheologyModulus(J_springpot, false, modeltype),
-                        "fractKV" => RheologyModulus(J_fractKV, false, modeltype),
-                        "fractmaxwell" => RheologyModulus(J_fractmaxwell, false, modeltype),
-                        "fractzener" => RheologyModulus(J_fractzener, false, modeltype),
-                        "fractspecial_slow" => RheologyModulus(J_fractspecial_slow, true, modeltype),
-                        "fractspecial_fast" => RheologyModulus(J_fractspecial_fast, true, modeltype) )
-
-    relaxmoduli = Dict( "SLS" => RheologyModulus(G_SLS, false, modeltype),
-                        "SLS2" => RheologyModulus(G_SLS2, false, modeltype),
-                        "burgers" => RheologyModulus(G_burgers, false, modeltype),
-                        "springpot" => RheologyModulus(G_springpot, true, modeltype),
-                        "fractKV" => RheologyModulus(G_fractKV, true, modeltype),
-                        "fractmaxwell" => RheologyModulus(G_fractmaxwell, false, modeltype),
-                        "fractzener" => RheologyModulus(G_fractzener, false, modeltype),
-                        "fractspecial" => RheologyModulus(G_fractspecial, true, modeltype) )
-
-    if modeltype=="J"
-        return creepmoduli[model]
-    elseif modeltype=="G"
-        return relaxmoduli[model]
-    end
-
-end
-
-"""
     RheologyModel(name::Function, parmeters::Array{Float64,1}, log::Array{String,1})
 
 Struct which contains the results of a model fit: model name, parameters, and inherited log with final cost, 

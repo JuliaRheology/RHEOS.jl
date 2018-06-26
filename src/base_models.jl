@@ -202,3 +202,61 @@ function J_fractspecial_fast(t::Array{Float64,1}, params::Array{Float64,1})::Arr
     J = InverseLaplace.talbotarr( s -> 1/s^2 * ((1+a*s^(1-params[3])) / (params[4]+params[1]/s+b*s^(-params[3])) ), t)
 end
 
+####################
+#~ Model Database ~#
+####################
+
+"""
+    modeldatabase(modulus::Function)
+
+For a specified modulus function, yields controlled variable, singularity presence
+and suggested initial conditions as a tuple.
+
+Additional models can be added at any time by the user by defining the modulus as
+a function in "RHEOS/src/base_models.jl" and appending it the dictionary in this
+function along with the its controlled variable (e.g. σ for creep moduli), singularity
+presence and suggested initial conditions.
+"""
+function modeldatabase(modulus::Function)
+
+    database = Dict(# creep moduli
+                    J_SLS => ("σ", [1.0, 0.5, 1.0]),
+                    J_SLS2 => ("σ", [1.0, 0.25, 0.25, 0.25, 3.0]),
+                    J_burgers => ("σ", [1.0, 0.02, 0.5, 5.0]),
+                    J_springpot => ("σ", [2.0, 0.5]),
+                    J_fractKV => ("σ", [0.5, 0.65, 1.5]),
+                    J_fractmaxwell => ("σ", [1.0, 0.35, 10.5]),
+                    J_fractzener => ("σ", [1.0, 1.0, 0.7, 1.0]),
+                    # Laplaced - takes relaxation modulus parameters but returns creep modulus
+                    J_fractspecial_slow => ("σ", [1.0, 1.0, 0.2, 1.0]),
+                    J_fractspecial_fast => ("σ", [1.0, 1.0, 0.2, 1.0]),
+
+                    # relaxation moduli
+                    G_SLS => ("ϵ", [1.0, 1.0, 1.0]),
+                    G_SLS2 => ("ϵ", [0.667, 0.667, 0.35, 0.667, 5.0]),
+                    G_burgers => ("ϵ", [1.0, 1.0, 1.0, 5.0]),
+                    G_springpot => ("ϵ",[2.0, 0.5]),
+                    G_fractKV => ("ϵ",[0.25, 1.0, 0.25]),
+                    G_fractmaxwell => ("ϵ", [0.5, 2.0, 0.52]),
+                    G_fractzener => ("ϵ", [0.5, 1.0, 1.0, 0.5]),
+                    G_fractspecial => ("ϵ",[1.0, 1.0, 0.2, 1.0]) 
+                    
+                    )
+
+        database[modulus]
+
+end
+
+function singularitytest(modulus::Function)
+
+    (symbol, params) = modeldatabase(modulus)
+
+    startval = modulus([0.0], params)[1]
+
+    if startval == NaN || startval == Inf
+        return true
+    else
+        return false 
+    end
+
+end

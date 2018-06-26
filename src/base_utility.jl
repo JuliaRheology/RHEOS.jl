@@ -126,3 +126,13 @@ end
 #     # call mittagleffler within an array comprehension
 #     y = [MittagLeffler.mittleff(α, β, x) for x in xList]
 # end
+
+function quasinull(x::Array{Float64,1})
+
+    if x == [-1.0]
+        return true
+    else
+        return false
+    end
+
+end
