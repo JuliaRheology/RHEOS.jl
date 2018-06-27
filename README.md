@@ -25,6 +25,8 @@
 - [ ] Add option to save/export RheologyData in CSV form for plotting in other software
 - [ ] Artificial data generation such as ramp, sinusoidal etc. that can be superposed
 - [ ] For fractional models, convert time scale τ to cᵦ as it fits better and is more physical (already done for relaxation models)
+- [ ] Add tests
+- [ ] Add more examples
 
 ## References & Included Dependencies
 #### [FastConv.jl](https://github.com/aamini/FastConv.jl)
