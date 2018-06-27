@@ -25,7 +25,7 @@ catch
 end
 
 #= temporarily add DataFrames, it is now included in the latest version of uCSV,
- but this is not yet on  the official Julia repository =#
+ but this is not yet on the official Julia repository =#
 Pkg.add("DataFrames")
 
 Pkg.update()

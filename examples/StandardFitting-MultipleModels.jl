@@ -19,12 +19,14 @@ p0 = [1000.0, 1000.0, 100.0]
 lb = [0.0, 0.0, 0.0]
 ub = [1e5, 1e5, 1e5]
 sls_fit = modelfit(data_resampled, G_SLS; p0=p0, lo=lb, hi=ub, verbose=false)
+println(sls_fit.parameters)
 
 # Spring-pot fit
 p0 = [1000.0, 0.5]
 lb = [0.0, 0.0]
 ub = [1e5, 1.0]
 springpot_fit = modelfit(data_resampled, G_springpot; p0=p0, lo=lb, hi=ub, verbose=false)
+println(springpot_fit.parameters)
 
 savemodel(springpot_fit)
 
