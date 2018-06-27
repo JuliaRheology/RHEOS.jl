@@ -29,10 +29,12 @@ springpot_fit = modelfit(data_resampled, G_springpot; p0=p0, lo=lb, hi=ub, verbo
 sls_predicted = modelpredict(data_resampled, sls_fit)
 springpot_predicted = modelpredict(data_resampled, springpot_fit)
 
-# plot(sls_predicted.t, sls_predicted.σ)
-# plot(springpot_predicted.t, springpot_predicted.σ)
-# plot(data_resampled.t, data_resampled.σ)
-# show()
+savedata(sls_predicted)
 
-savedata(data_resampled)
+loadedstuff = loaddata(string(filedir, "_RheologyData.jld"))
+
+plot(loadedstuff.t, loadedstuff.σ)
+plot(springpot_predicted.t, springpot_predicted.σ)
+plot(data_resampled.t, data_resampled.σ)
+show()
 
