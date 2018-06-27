@@ -18,15 +18,13 @@
 
 ## To do
 
-+ Documentation
-+ Reorganise directory referencing structure and installation to make more robust
-+ Add Sync Interpolation for going from variable to constant sample rate
-+ Add Tolerance option (relative and absolute) that can be set using the high level interface
-+ Add option to save/export the full generated model curves for plotting in other software
-+ Split indentation models and standard rheology into two sections, refactor code appropriately
-+ Add axes labels in all insight plots
-+ Add different test loading methods such as ramp, sinusoidal etc. Allow them to be superposed on each other?
-+ For some fractional models, convert time scale τ to cᵦ as it fits better and is more physical (already done for relaxation models)
+- [ ] Documentation
+- [ ] Set up Travis CI
+- [ ] Add Sync Interpolation for going from variable to constant sample rate
+- [ ] Add Tolerance option (relative and absolute) that can be set using the high level interface
+- [ ] Add option to save/export RheologyData in CSV form for plotting in other software
+- [ ] Artificial data generation such as ramp, sinusoidal etc. that can be superposed
+- [ ] For fractional models, convert time scale τ to cᵦ as it fits better and is more physical (already done for relaxation models)
 
 ## References & Included Dependencies
 #### [FastConv.jl](https://github.com/aamini/FastConv.jl)
