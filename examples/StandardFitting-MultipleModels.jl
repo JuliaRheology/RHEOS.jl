@@ -26,14 +26,18 @@ lb = [0.0, 0.0]
 ub = [1e5, 1.0]
 springpot_fit = modelfit(data_resampled, G_springpot; p0=p0, lo=lb, hi=ub, verbose=false)
 
+savemodel(springpot_fit)
+
+loaded_springpot = loadmodel("../data/rheologyData1.csv_RHEOS.G_springpot.jld")
+
 sls_predicted = modelpredict(data_resampled, sls_fit)
-springpot_predicted = modelpredict(data_resampled, springpot_fit)
+springpot_predicted = modelpredict(data_resampled, loaded_springpot)
 
 savedata(sls_predicted)
 
-loadedstuff = loaddata(string(filedir, "_RheologyData.jld"))
+loaded_sls = loaddata(string(filedir, "_RheologyData.jld"))
 
-plot(loadedstuff.t, loadedstuff.σ)
+plot(loaded_sls.t, loaded_sls.σ)
 plot(springpot_predicted.t, springpot_predicted.σ)
 plot(data_resampled.t, data_resampled.σ)
 show()

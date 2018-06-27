@@ -42,7 +42,7 @@ export modeldatabase
 
 ######################################################
 # definitions.jl
-export RheologyData, constructRheologyData, fileload, RheologyModel, modulusgetter, FittedModel
+export RheologyData, fileload, RheologyModel, RheologyModelTemp
 
 ######################################################
 # datagen.jl
@@ -54,7 +54,7 @@ export var_resample, downsample, fixed_resample, smooth, mapbackdata
 
 export modelfit, modelpredict
 
-export savedata, loaddata
+export savedata, loaddata, savemodel, loadmodel
 
 ######################################################
 # Main functionality
