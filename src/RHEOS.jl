@@ -54,7 +54,7 @@ export var_resample, downsample, fixed_resample, smooth, mapbackdata
 
 export modelfit, modelpredict
 
-export fiteval, saveresult, loadresult
+export savedata, loaddata
 
 ######################################################
 # Main functionality

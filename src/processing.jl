@@ -290,18 +290,32 @@ function modelpredict(data::RheologyData, model::RheologyModel)::RheologyData
 
     end
 
-    if controlledvar == "σ"
-        σ = data.σ
-        ϵ = convolved
-    elseif controlledvar == "ϵ"
-        σ = convolved
-        ϵ = data.ϵ
-    end   
+    if sing
+        if controlledvar == "σ"
+            σ = data.σ[2:end]
+            ϵ = convolved
+        elseif controlledvar == "ϵ"
+            σ = convolved
+            ϵ = data.ϵ[2:end]
+        end   
+        t = data.t[2:end]
 
+    elseif !sing
+        if controlledvar == "σ"
+            σ = data.σ
+            ϵ = convolved
+        elseif controlledvar == "ϵ"
+            σ = convolved
+            ϵ = data.ϵ
+        end 
+        t = data.t
+
+    end
+        
     # store operation
     log = vcat(data.log, "Predicted data from model:", model.log)
 
-    RheologyData(σ, ϵ, data.t, data.sampling, log)
+    RheologyData(σ, ϵ, t, data.sampling, log)
 
 end
 
@@ -310,166 +324,51 @@ end
 ##############################
 
 """
-    fiteval(self::RheologyData[, modelname::String]; singularity = false)
+    savedata(self::RheologyDatal; filedir::String = "", ext = "_RheologyData.jld")
 
-Show plot of data vs. fitted data for specified model. If no model specified,
-shows plot with all fitted models.
+Save RheologyData object using JLD format. Save file directory
+must be specified. If data was loaded from disk using fileload
+or the full RheologyData constructor then filedir argument can 
+be set to empty string "" which will try to use the original file 
+dir concatenated with the optional ext string argument  - e.g. 
+"/originalpathto/file.csv_RheologyData.jld".
 """
-function fiteval(self::RheologyData, modelname::String)
+function savedata(self::RheologyData; filedir::String = "", ext = "_RheologyData.jld")
 
-    # params
-    params = self.fittedmodels[modelname][2]
+    if filedir == ""
+        if self.log[2] == "none"
+            error("No file directory provided in savedata method or embedded in RheologyData object.")
 
-    # modulus function
-    model = moduli(modelname, self.test_type)
-
-    # get fit
-    if !model.singularity && self.sampling == "constant"
-        fitted = boltzconvolve_nonsing(model, self.t, deriv(self.t), params, self.dcontrolled)
-
-    elseif model.singularity && self.sampling == "constant"
-        fitted = boltzconvolve_sing(model, self.t, deriv(self.t), params, self.dcontrolled)
-
-    elseif !model.singularity && self.sampling == "variable"
-        fitted = boltzintegral_nonsing(model, self.t, params, self.dcontrolled)
-
-    elseif model.singularity && self.sampling == "variable"
-        fitted = boltzintegral_sing(model, self.t, params, self.dcontrolled)
-
-    end
-
-    # print params
-    println(modelname, " fit: ", self.fittedmodels[modelname])
-
-    # special for AFMData, Hertz sphere
-    if typeof(self) == AFMData && self.test_type == "strlx"
-        measured = self.measured.^(2/3)
-        fitted = fitted.^(2/3)
-    else
-        measured = self.measured
-    end
-
-    if model.singularity
-        plot(self.t[1:end], measured)
-        plot(self.t[2:end], fitted, "--")
-        show()
-    else
-        plot(self.t, measured)
-        plot(self.t, fitted, "--")
-        show()
-    end
-
-end
-
-function fiteval(self::RheologyData)
-
-    # special for AFMData, Hertz sphere
-    if typeof(self) == AFMData && self.test_type == "strlx"
-        measured = self.measured.^(2/3)
-    else
-        measured = self.measured
-    end
-
-    fig, ax = subplots()
-
-    ax[:plot](self.t, measured, label="Original Data", alpha=0.65, linewidth=2)
-
-    for (modelname, value) in self.fittedmodels
-
-        # params
-        params = self.fittedmodels[modelname][2]
-
-        # modulus function
-        model = moduli(modelname, self.test_type)
-
-        # get fit
-        if !model.singularity && self.sampling == "constant"
-            fitted = boltzconvolve_nonsing(model, self.t, deriv(self.t), params, self.dcontrolled)
-
-        elseif model.singularity && self.sampling == "constant"
-            fitted = boltzconvolve_sing(model, self.t, deriv(self.t), params, self.dcontrolled)
-
-        elseif !model.singularity && self.sampling == "variable"
-            fitted = boltzintegral_nonsing(model, self.t, params, self.dcontrolled)
-
-        elseif model.singularity && self.sampling == "variable"
-            fitted = boltzintegral_sing(model, self.t, params, self.dcontrolled)
-
-        end
-
-        # print params
-        println(modelname, " fit: ", self.fittedmodels[modelname])
-
-        # special for AFMData, Hertz sphere
-        if typeof(self) == AFMData && self.test_type == "strlx"
-            fitted = fitted.^(2/3)
-        end
-
-        if model.singularity
-            ax[:plot](self.t[2:end], fitted, label=modelname, alpha=0.85, linewidth=2)
         else
-            ax[:plot](self.t, fitted, label=modelname, alpha=0.85, linewidth=2)
+            _filedir = self.log[2]
+
         end
+
+    else
+        _filedir = filedir
 
     end
 
-    ax[:legend](loc="best")
+    fulldir = string(_filedir, ext)
 
-    show()
+    jldopen(fulldir, "w") do file
+        # register RHEOS module (with RheologyData type) to JLD
+        addrequire(file, RHEOS)
+        # write self to file
+        write(file, "self", self)
+    end
 
 end
 
 """
-    saveresult(self::RheologyData; include_data::Bool = false)
-
-Save RheologyData object using JLD format. If include_data set to false
-(by default) then :σ, :ϵ, :t, :dσ, :dϵ fields are set to [0.0] to save
-space on disk. If include_data is set as true then these fields are saved
-as is.
-"""
-function saveresult(self::RheologyData; include_data::Bool = false)
-
-    # include original/processed numerical data σ, ϵ, t...etc.
-    if include_data
-
-        # save
-        jldopen(string(self.filedir[1:end-4], "_RheologyData.jld"), "w") do file
-            # register RHEOS module (with RheologyData type) to JLD
-            addrequire(file, RHEOS)
-            # write self to file
-            write(file, "self", self)
-        end
-    # or not    
-    elseif !include_data
-
-        # get copy
-        self_copy = deepcopy(self)
-
-        # member variables to erase
-        to_reset = self.numericdata
-        for n in to_reset
-            setfield!(self_copy, n, [0.0])
-        end
-
-        # save 
-        jldopen(string(self_copy.filedir[1:end-4], "_RheologyMetadata.jld"), "w") do file
-            # register RHEOS module (with RheologyData type) to JLD
-            addrequire(file, RHEOS)
-            # write self_copy to file
-            write(file, "self", self_copy)
-        end
-    end
-end
-
-"""
-    loadresult(filedir::String)
+    loaddata(filedir::String)
 
 Convenience function loads result without having to call loadresult(filedir)["self"]
 """
-function loadresult(filedir::String)
+function loaddata(filedir::String)
     # load in result
-    loaded_result = load(filedir)
+    loaded_data = load(filedir)
     # return
-    loaded_result["self"]
+    loaded_data["self"]
 end
 

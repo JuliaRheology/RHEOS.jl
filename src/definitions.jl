@@ -81,7 +81,12 @@ function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2:
     # readjust time to account for NaN movement and/or negative time values
     t = t - minimum(t)
 
-    # initialise empty array to record operations applied during preprocessing
+    ### TEMP TEST 
+    filedir = "none"
+    ################
+
+    # set up log for three cases, file dir given, derived from other data so filedir
+    # in log already, no file name or log given.
     if filedir != "none" || length(log)==0
         if length(colnames)<3
             push!(log, "partial data loaded from:")
@@ -135,14 +140,11 @@ function fileload(colnames::Array{String,1}, filedir::String)::RheologyData
     # read data from file
     (datacsv, head_out) = uCSV.read(filedir; delim=',', types=types)
 
-    # init data var
-    local data::RheologyData
-
     # generate RheologyData struct and output
     if length(colnames)==3
-        data = RheologyData(colnames, datacsv[1], datacsv[2], datacsv[3]; filedir = filedir)
+        return RheologyData(colnames, datacsv[1], datacsv[2], datacsv[3]; filedir = filedir)
     elseif length(colnames)==2
-        data = RheologyData(colnames, datacsv[1], datacsv[2]; filedir = filedir)
+        return RheologyData(colnames, datacsv[1], datacsv[2]; filedir = filedir)
     end
 end
 
