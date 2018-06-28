@@ -27,6 +27,7 @@
 - [ ] For fractional models, convert time scale τ to cᵦ as it fits better and is more physical (already done for relaxation models)
 - [ ] Add tests
 - [ ] Add more examples
+- [ ] Add G* complex modulus fitting
 
 ## References & Included Dependencies
 #### [FastConv.jl](https://github.com/aamini/FastConv.jl)
