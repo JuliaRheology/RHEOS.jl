@@ -8,6 +8,7 @@ Pkg.add("Interpolations")
 Pkg.add("NLopt")
 Pkg.add("JLD")
 Pkg.add("InverseLaplace")
+Pkg.add("CSV")
 
 # From rheos-cambridge forked repositories (so that versions are fixed and controlled)
 try

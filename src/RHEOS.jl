@@ -12,6 +12,7 @@ using ImageFiltering
 using Interpolations
 using NLopt
 using JLD
+using CSV
 # experimental dependency not automatically imported from base.jl
 using Base.Threads
 

@@ -445,3 +445,8 @@ function loadmodel(filedir::String)
     ######################################################################### 
 
 end
+
+"""
+
+"""
+function exportdata(self::RheologyData; filedir::String = "", ext = "_RheologyData.jld")
