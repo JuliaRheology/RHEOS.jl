@@ -447,7 +447,10 @@ function loadmodel(filedir::String)
 end
 
 """
+    exportdata(self::RheologyData; filedir::String = "", ext = "_mod.csv")
 
+Export RheologyData to csv format. Exports three columns in order: stress, strain, time.
+Useful for plotting/analysis in other software.
 """
 function exportdata(self::RheologyData; filedir::String = "", ext = "_mod.csv")
 
