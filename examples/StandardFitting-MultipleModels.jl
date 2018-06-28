@@ -36,15 +36,15 @@ loaded_springpot = loadmodel("../data/rheologyData1.csv_RHEOS.G_springpot.jld")
 sls_predicted = modelpredict(data_resampled, sls_fit)
 springpot_predicted = modelpredict(data_resampled, loaded_springpot)
 
-# # save and load RheologyData for demonstration purposes (contains σ, ϵ, t, sampling and log)
-# savedata(sls_predicted)
-# loaded_sls = loaddata(string(filedir, "_RheologyData.jld"))
+# save and load RheologyData for demonstration purposes (contains σ, ϵ, t, sampling and log)
+savedata(sls_predicted)
+loaded_sls = loaddata(string(filedir, "_RheologyData.jld"))
 
-# # plot all data
-# plot(loaded_sls.t, loaded_sls.σ)
-# plot(springpot_predicted.t, springpot_predicted.σ)
-# plot(data_resampled.t, data_resampled.σ)
-# show()
+# plot all data
+plot(loaded_sls.t, loaded_sls.σ)
+plot(springpot_predicted.t, springpot_predicted.σ)
+plot(data_resampled.t, data_resampled.σ)
+show()
 
 # finally, export SLS data as a CSV for example plotting in different software
 exportdata(sls_predicted)
