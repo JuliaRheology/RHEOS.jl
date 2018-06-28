@@ -449,4 +449,33 @@ end
 """
 
 """
-function exportdata(self::RheologyData; filedir::String = "", ext = "_RheologyData.jld")
+function exportdata(self::RheologyData; filedir::String = "", ext = "_mod.csv")
+
+    if filedir == ""
+        if self.log[2] == "none"
+            error("No file directory provided in savedata method or embedded in RheologyData object.")
+
+        else
+            _filedir = self.log[2]
+
+        end
+
+    else
+        _filedir = filedir
+
+    end
+
+    fulldir = string(_filedir, ext)
+
+    fulldata_array = hcat(self.σ, self.ϵ, self.t)
+
+    fulldata_frame = convert(DataFrame, fulldata_array)
+
+    names!(fulldata_frame, [:stress, :strain, :time])
+
+    # array to write
+    fulldata = [self.σ, self.ϵ, self.t]
+
+    uCSV.write(fulldir, fulldata_frame)
+
+end

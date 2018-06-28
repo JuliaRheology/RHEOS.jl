@@ -22,7 +22,6 @@
 - [ ] Set up Travis CI
 - [ ] Add Sync Interpolation for going from variable to constant sample rate
 - [ ] Add Tolerance option (relative and absolute) that can be set using the high level interface
-- [ ] Add option to save/export RheologyData in CSV form for plotting in other software
 - [ ] Artificial data generation such as ramp, sinusoidal etc. that can be superposed
 - [ ] For fractional models, convert time scale τ to cᵦ as it fits better and is more physical (already done for relaxation models)
 - [ ] Add tests

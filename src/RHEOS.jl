@@ -12,7 +12,7 @@ using ImageFiltering
 using Interpolations
 using NLopt
 using JLD
-using CSV
+using DataFrames
 # experimental dependency not automatically imported from base.jl
 using Base.Threads
 
@@ -55,7 +55,7 @@ export var_resample, downsample, fixed_resample, smooth, mapbackdata
 
 export modelfit, modelpredict
 
-export savedata, loaddata, savemodel, loadmodel
+export savedata, loaddata, savemodel, loadmodel, exportdata
 
 ######################################################
 # Main functionality
