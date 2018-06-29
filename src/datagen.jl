@@ -102,7 +102,7 @@ end
 #####################
 
 """
-    function stepdata(t_total::Float64, t_on::Float64; t_trans::Float64 = (t_total - t_on)/100.0, amplitude::Float64 = 1.0, startval::Float64 = 0.0, stepsize::Float64 = 0.5)
+    stepdata(t_total::Float64, t_on::Float64; t_trans::Float64 = (t_total - t_on)/100.0, amplitude::Float64 = 1.0, startval::Float64 = 0.0, stepsize::Float64 = 0.5)
 
 Generate RheologyData struct with a step function approximated by a logisitic function.
 
@@ -126,7 +126,7 @@ function stepdata(t_total::Float64,
 end
 
 """
-    function rampdata(t_total::Float64, t_start::Float64, t_stop::Float64; amplitude::Float64 = 1.0, startval::Float64 = 0.0, stepsize::Float64 = 0.5)
+    rampdata(t_total::Float64, t_start::Float64, t_stop::Float64; amplitude::Float64 = 1.0, startval::Float64 = 0.0, stepsize::Float64 = 0.5)
 
 Generate RheologyData struct with a ramp function.
 
@@ -159,6 +159,13 @@ function rampdata(t_total::Float64,
 
 end
 
+"""
+    oscillatordata(t_total::Float64, t_start::Float64, t_stop::Float64; amplitude::Float64 = 1.0, startval::Float64 = 0.0, stepsize::Float64 = 0.5)
+
+Generate RheologyData struct with a ramp function.
+
+Sends generated data to both ϵ and σ so as to be compatible with all types of tests.
+"""
 function oscillatordata(t_total::Float64,
                         frequency::Float64;
                         amplitude::Float64 = 1.0,
@@ -167,21 +174,23 @@ function oscillatordata(t_total::Float64,
 
 end
 
+function spacerdata()
+
+end
+
 function repeatdata()
 # just repeats data given data for n cycles
 end
 
-# step test
-# foo = stepdata(1000.0, 100.0; startval = 0.0, stepsize = 0.5)
-# bar = stepdata(1200.0, 500.0; amplitude = -1.0)
-# baz = foo - bar;
-# plot(baz.t, baz.data)
-# show()
-
-# ramp test
-# foo = rampdata(1000.0, 100.0, 200.0; startval = 0.0)
-# bar = rampdata(1200.0, 500.0, 700.0; amplitude = -1.0)
+# # step test
+# foo = stepdata(800.0, 100.0; startval = 0.0, stepsize = 0.5)
+# bar = stepdata(850.0, 500.0; amplitude = -1.0)
 # baz = foo + bar;
 # plot(baz.t, baz.data)
-# plot(bazaar.t, bazaar.data)
+
+# # ramp test
+# foo = rampdata(800.0, 100.0, 200.0; startval = 0.0)
+# bar = rampdata(825.0, 500.0, 700.0; amplitude = -1.0)
+# baz = foo - bar;
+# plot(baz.t, baz.data)
 # show()
