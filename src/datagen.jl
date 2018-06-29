@@ -107,7 +107,9 @@ function repeatdata(self::RheologyArtificial, n::Integer)
         data[i] = v
     end
 
-    RheologyArtificial(data, t, self.stepsize, [""])
+    log = vcat(self.log, ["repeated data $n times"])
+
+    RheologyArtificial(data, t, self.stepsize, log)
 
 end
 

@@ -239,6 +239,12 @@ function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2:
     
 end
 
+function RheologyData(self::RheologyArtificial)
+
+    return RheologyData(self.data, self.data, self.t, "constant", self.log)
+
+end
+
 """
     fileload(colnames::Array{String,1}, filedir::String)
 
