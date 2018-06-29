@@ -204,7 +204,8 @@ function modelfit(data::RheologyData,
                   p0::Array{Float64,1} = [-1.0],
                   lo::Array{Float64,1} = [-1.0],
                   hi::Array{Float64,1} = [-1.0],
-                  verbose::Bool = false)::RheologyModel
+                  verbose::Bool = false,
+                  rel_tol = 1e-4)::RheologyModel
 
     # get modulus info from database
     (controlledvar, p0_default) = modeldatabase(modulus)
@@ -241,7 +242,8 @@ function modelfit(data::RheologyData,
                                           measured; 
                                           insight = verbose,
                                           sampling = data.sampling, 
-                                          singularity = sing)
+                                          singularity = sing,
+                                          _rel_tol = rel_tol)
     timetaken = toq()
 
     #

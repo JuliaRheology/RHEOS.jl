@@ -776,7 +776,7 @@ function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Floa
                            time_series::Array{Float64,1}, dt_series::Array{Float64,1},
                            prescribed_dot::Array{Float64,1}, measured::Array{Float64,1};
                            insight::Bool = false, sampling::String = "constant",
-                           singularity::Bool = false)
+                           singularity::Bool = false, _rel_tol = 1e-4)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(:LN_SBPLX, length(params_init))
@@ -791,7 +791,7 @@ function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Floa
     end
 
     # set relative tolerance
-    xtol_rel!(opt, 1e-4)
+    xtol_rel!(opt, _rel_tol)
 
     # set Opt object as a minimisation objective. Use a closure for additional
     # arguments sent to object objectivefunc
