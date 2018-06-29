@@ -34,12 +34,21 @@ function +(self1::RheologyArtificial, self2::RheologyArtificial)
     # init data array and fill by summing over each argument's indices
     data = zeros(length(t))
 
-    for i in 1:length(self1.t)
-        data[i] += self1.data[i]
-    end
+    # sum with last value propagating (hanging)
+    for i in 1:length(t)
 
-    for i in 1:length(self2.t)
-        data[i] += self2.data[i]
+        if i<=length(self1.t)
+            data[i] += self1.data[i]
+        else
+            data[i] += self1.data[end]
+        end
+
+        if i<=length(self2.t)
+            data[i] += self2.data[i]
+        else
+            data[i] += self2.data[end]
+        end
+
     end
 
     # log
@@ -48,6 +57,45 @@ function +(self1::RheologyArtificial, self2::RheologyArtificial)
     RheologyArtificial(data, t, self1.stepsize, log)
 
 end
+
+function -(self1::RheologyArtificial, self2::RheologyArtificial)
+
+    @assert self1.stepsize==self2.stepsize "Step size must be same for both datasets"
+
+    # get time array
+    if length(self1.t) >= length(self2.t)
+        t  = self1.t
+    else
+        t = self2.t
+    end
+
+    # init data array and fill by summing over each argument's indices
+    data = zeros(length(t))
+
+    # sum with last value propagating (hanging)
+    for i in 1:length(t)
+
+        if i<=length(self1.t)
+            data[i] += self1.data[i]
+        else
+            data[i] += self1.data[end]
+        end
+
+        if i<=length(self2.t)
+            data[i] -= self2.data[i]
+        else
+            data[i] -= self2.data[end]
+        end
+
+    end
+
+    # log
+    log = vcat(self1.log, self2.log, ["previous two logs added"])
+
+    RheologyArtificial(data, t, self1.stepsize, log)
+
+end
+
 
 #####################
 #~ Data Generators ~#
@@ -81,8 +129,8 @@ bar = stepdata(1200.0, 500.0; amplitude = -1.0)
 
 
 baz = foo + bar;
+bazaar = foo - bar;
 
-plot(foo.t, foo.data)
-plot(bar.t, bar.data)
 plot(baz.t, baz.data)
+plot(bazaar.t, bazaar.data)
 show()
