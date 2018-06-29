@@ -21,7 +21,6 @@
 - [ ] Documentation
 - [ ] Set up Travis CI
 - [ ] Add Sync Interpolation for going from variable to constant sample rate
-- [ ] Artificial data generation such as ramp, sinusoidal etc. that can be superposed
 - [ ] For fractional models, convert time scale τ to cᵦ as it fits better and is more physical (already done for relaxation models)
 - [ ] Add tests
 - [ ] Add more examples
