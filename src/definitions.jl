@@ -1,6 +1,139 @@
 #!/usr/bin/env julia
 
 """
+    RheologyArtificial(data::Array{Float64,1}, t::Array{Float64,1}, stepsize::Float64, log::Array{String,1})
+
+Contains generated data using functions from datagen.jl. Overloaded to support
+addtion, subtraction and multiplication.
+"""
+struct RheologyArtificial
+
+    # original data
+    data::Array{Float64,1}
+    t::Array{Float64,1}
+
+    # constant sample rate step size
+    stepsize::Float64
+
+    # operations applied, stores history of which functions (including arguments)
+    log::Array{String,1}
+
+end
+
+function +(self1::RheologyArtificial, self2::RheologyArtificial)
+
+    @assert self1.stepsize==self2.stepsize "Step size must be same for both datasets"
+
+    # get time array
+    if length(self1.t) >= length(self2.t)
+        t  = self1.t
+    else
+        t = self2.t
+    end
+
+    # init data array and fill by summing over each argument's indices
+    data = zeros(length(t))
+
+    # sum with last value propagating (hanging)
+    for i in 1:length(t)
+
+        if i<=length(self1.t)
+            data[i] += self1.data[i]
+        else
+            data[i] += self1.data[end]
+        end
+
+        if i<=length(self2.t)
+            data[i] += self2.data[i]
+        else
+            data[i] += self2.data[end]
+        end
+
+    end
+
+    # log
+    log = vcat(self1.log, self2.log, ["previous two logs added"])
+
+    RheologyArtificial(data, t, self1.stepsize, log)
+
+end
+
+function -(self1::RheologyArtificial, self2::RheologyArtificial)
+
+    @assert self1.stepsize==self2.stepsize "Step size must be same for both datasets"
+
+    # get time array
+    if length(self1.t) >= length(self2.t)
+        t  = self1.t
+    else
+        t = self2.t
+    end
+
+    # init data array and fill by summing over each argument's indices
+    data = zeros(length(t))
+
+    # sum with last value propagating (hanging)
+    for i in 1:length(t)
+
+        if i<=length(self1.t)
+            data[i] += self1.data[i]
+        else
+            data[i] += self1.data[end]
+        end
+
+        if i<=length(self2.t)
+            data[i] -= self2.data[i]
+        else
+            data[i] -= self2.data[end]
+        end
+
+    end
+
+    # log
+    log = vcat(self1.log, self2.log, ["previous two logs added"])
+
+    RheologyArtificial(data, t, self1.stepsize, log)
+
+end
+
+function *(self1::RheologyArtificial, self2::RheologyArtificial)
+
+    @assert self1.stepsize==self2.stepsize "Step size must be same for both datasets"
+
+    # get time array
+    if length(self1.t) >= length(self2.t)
+        t  = self1.t
+    else
+        t = self2.t
+    end
+
+    # init data array and fill by summing over each argument's indices
+    data = zeros(length(t))
+
+    # sum with last value propagating (hanging)
+    for i in 1:length(t)
+
+        if i<=length(self1.t) && i<=length(self2.t)
+            data[i] = self1.data[i]*self2.data[i]
+
+        elseif i<=length(self1.t) && i>length(self2.t)
+            data[i] = self1.data[i]
+
+        elseif i>length(self1.t) && i<=length(self2.t)
+            data[i] = self2.data[i]
+
+        end
+
+    end
+
+    # log
+    log = vcat(self1.log, self2.log, ["previous two logs added"])
+
+    RheologyArtificial(data, t, self1.stepsize, log)
+
+end
+
+"""
     RheologyData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, sampling::String, log::Array{String,1})
 
 RheologyData struct used for high level interaction with RHEOS

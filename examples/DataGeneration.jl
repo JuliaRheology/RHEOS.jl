@@ -3,20 +3,26 @@ include("../src/RHEOS.jl")
 using RHEOS
 using PyPlot
 
-# get step data
-data_step = stepdata(1000.0, 250.0, 750.0, 10.0, 1000.0, "strlx")
+# step test
+foo = stepdata(800.0, 100.0; baseval = 0.0, stepsize = 0.5)
+bar = stepdata(850.0, 500.0; amplitude = -1.0)
+baz = foo + bar
+plot(baz.t, baz.data)
 
-# # plot init
-# fig, ax = subplots()
+# ramp test
+foo = rampdata(800.0, 100.0, 200.0; baseval = 0.0)
+bar = rampdata(825.0, 500.0, 700.0; amplitude = -1.0)
+baz = foo - bar
+plot(baz.t, baz.data)
 
-# # get SLS data and plot
-# modelcomplete!(data_step, "SLS", [844.152, 2043.98, 5.15527])
-# ax[:plot](data_step.t, data_step.measured, label="SLS")
+# oscillator test
+foo = oscillatordata(800.0, 1/50; phase = -90.0)
+bar = rampdata(800.0, 10.0, 400.0) - rampdata(825.0, 400.0, 800.0)
+baz = foo*bar
+plot(baz.t, baz.data)
 
-# # get springpot data and plot
-# modelcomplete!(data_step, "springpot", [2997.7, 0.281836])
-# ax[:plot](data_step.t[2:end], data_step.measured, label="springpot")
-
-# # legend and plot
-# ax[:legend](loc="best")
-# show()
+# repeat test
+foo = stepdata(170.0, 125.0; amplitude = -1.0)
+bar = repeatdata(foo, 5)
+plot(bar.t, bar.data, "--")
+show()

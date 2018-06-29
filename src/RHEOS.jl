@@ -15,6 +15,8 @@ using JLD
 using DataFrames
 # experimental dependency not automatically imported from base.jl
 using Base.Threads
+# for overloading in datagen.jl
+import Base: +, -, *
 
 # println("\n===========================")
 # println("Number of threads in use: ", nthreads())
@@ -43,11 +45,11 @@ export modeldatabase
 
 ######################################################
 # definitions.jl
-export RheologyData, fileload, RheologyModel, RheologyModelTemp
+export RheologyArtificial, RheologyData, fileload, RheologyModel, RheologyModelTemp
 
 ######################################################
 # datagen.jl
-export stepdata_generate
+export stepdata, rampdata, oscillatordata, repeatdata
 
 ######################################################
 # processing.jl
