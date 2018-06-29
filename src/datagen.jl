@@ -102,35 +102,86 @@ end
 #####################
 
 """
-    function stepdata(t_total::Float64, t_on::Float64; t_trans::Float64 = (t_total - t_on)/100.0, amplitude::Float64 = 1.0, start_val::Float64 = 0.0, step_size::Float64 = 0.5)
+    function stepdata(t_total::Float64, t_on::Float64; t_trans::Float64 = (t_total - t_on)/100.0, amplitude::Float64 = 1.0, startval::Float64 = 0.0, stepsize::Float64 = 0.5)
 
 Generate RheologyData struct with a step function approximated by a logisitic function.
+
 Sends generated data to both ϵ and σ so as to be compatible with all types of tests.
 """
 function stepdata(t_total::Float64, 
                   t_on::Float64;
                   t_trans::Float64 = (t_total - t_on)/100.0,
                   amplitude::Float64 = 1.0,
-                  start_val::Float64 = 0.0,
-                  step_size::Float64 = 0.5, )
+                  startval::Float64 = 0.0,
+                  stepsize::Float64 = 0.5, )
 
-    t = collect(0:step_size:t_total)
+    t = collect(0:stepsize:t_total)
 
 	k = 10.0/t_trans
 
-	data = start_val + amplitude./(1 + exp.(-k*(t-t_on)))
+	data = startval + amplitude./(1 + exp.(-k*(t-t_on)))
 
-    RheologyArtificial(data, t, step_size, ["stepdata: t_total: $t_total, t_on: $t_on, t_trans: $t_trans, amplitude: $amplitude, step_size: $step_size"])
+    RheologyArtificial(data, t, stepsize, ["stepdata: t_total: $t_total, t_on: $t_on, t_trans: $t_trans, amplitude: $amplitude, startval: $startval, stepsize: $stepsize"])
 
 end
 
-foo = stepdata(1000.0, 100.0; start_val = 0.0, step_size = 0.5)
-bar = stepdata(1200.0, 500.0; amplitude = -1.0)
+"""
+    function rampdata(t_total::Float64, t_start::Float64, t_stop::Float64; amplitude::Float64 = 1.0, startval::Float64 = 0.0, stepsize::Float64 = 0.5)
 
+Generate RheologyData struct with a ramp function.
 
-baz = foo + bar;
-bazaar = foo - bar;
+Sends generated data to both ϵ and σ so as to be compatible with all types of tests.
+"""
+function rampdata(t_total::Float64,
+                  t_start::Float64,
+                  t_stop::Float64;
+                  amplitude::Float64 = 1.0,
+                  startval::Float64 = 0.0,
+                  stepsize::Float64 = 0.5 )
 
-plot(baz.t, baz.data)
-plot(bazaar.t, bazaar.data)
-show()
+    t = collect(0:stepsize:t_total)
+
+    m = amplitude/(t_stop - t_start)
+
+    data = startval + zeros(length(t))
+
+    for (i, v) in enumerate(t)
+
+        if t_start<=v<=t_stop
+            data[i] += data[i-1] + stepsize*m
+        elseif v>t_stop
+            data[i] = data[i-1]
+        end
+
+    end
+
+    RheologyArtificial(data, t, stepsize, ["rampdata: t_total: $t_total, t_start: $t_start, t_stop: $t_stop, amplitude: $amplitude, startval: $startval, stepsize: $stepsize"])
+
+end
+
+function oscillatordata(t_total::Float64,
+                        frequency::Float64;
+                        amplitude::Float64 = 1.0,
+                        startval::Float64 = 0.0,
+                        stepsize::Float64 = 0.5 )
+
+end
+
+function repeatdata()
+# just repeats data given data for n cycles
+end
+
+# step test
+# foo = stepdata(1000.0, 100.0; startval = 0.0, stepsize = 0.5)
+# bar = stepdata(1200.0, 500.0; amplitude = -1.0)
+# baz = foo - bar;
+# plot(baz.t, baz.data)
+# show()
+
+# ramp test
+# foo = rampdata(1000.0, 100.0, 200.0; startval = 0.0)
+# bar = rampdata(1200.0, 500.0, 700.0; amplitude = -1.0)
+# baz = foo + bar;
+# plot(baz.t, baz.data)
+# plot(bazaar.t, bazaar.data)
+# show()
