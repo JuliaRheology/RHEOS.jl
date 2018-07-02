@@ -51,36 +51,82 @@ using PyPlot
 #####
 
 # get data
-step = stepdata(50.0, 25.0; stepsize = 0.05, t_trans = 2.5)
-repeatedstep = repeatdata(step, 5; t_trans = 2.5)
+# step = stepdata(50.0, 25.0; stepsize = 0.05, t_trans = 2.5)
+# repeatedstep = repeatdata(step, 5; t_trans = 2.5)
 
-data = RheologyData(repeatedstep)
+# data = RheologyData(repeatedstep)
 
 # sls_model = RheologyModel(G_SLS)
-springpot_model = RheologyModel(G_springpot)
-fractKV_model = RheologyModel(G_fractKV)
+# springpot_model = RheologyModel(G_springpot)
+# fractKV_model = RheologyModel(G_fractKV)
 
 # fractzener_model = RheologyModel(G_fractzener)
 
 # sls_predicted = modelpredict(data, sls_model)
-springpot_predicted = modelpredict(data, springpot_model)
+# springpot_predicted = modelpredict(data, springpot_model)
 # fractzener_predicted = modelpredict(data, fractzener_model)
-fractKV_predicted = modelpredict(data, fractKV_model)
+# fractKV_predicted = modelpredict(data, fractKV_model)
 
-fig, ax = subplots()
-ax[:plot](data.t, data.σ, "-", label="original")
+# fig, ax = subplots()
+# ax[:plot](data.t, data.σ, "-", label="original")
 # ax[:plot](sls_predicted.t, sls_predicted.σ, "-", label="SLS")
-ax[:plot](springpot_predicted.t, springpot_predicted.σ, "--", label="springpot")
-ax[:plot](fractKV_predicted.t, fractKV_predicted.σ, "--", label="fractKV")
+# ax[:plot](springpot_predicted.t, springpot_predicted.σ, "--", label="springpot")
+# ax[:plot](fractKV_predicted.t, fractKV_predicted.σ, "--", label="fractKV")
 # ax[:plot](fractzener_predicted.t, fractzener_predicted.σ, "--", label="fract zener")
-ax[:legend](loc="best")
-show()
+# ax[:legend](loc="best")
+# show()
+
+# get data 
+# stepUP = stepdata(150.0, 75.0; stepsize = 0.05, t_trans = 10.0)
+# stepDOWN = stepdata(150.0, 75.0; amplitude = -1.0, stepsize = 0.05, t_trans = 10.0)
+
+# dataUP = RheologyData(stepUP)
+# dataDOWN = RheologyData(stepDOWN)
+
+# springpot_model = RheologyModel(G_springpot)
+
+# sp_predUP = modelpredict(dataUP, springpot_model)
+# sp_predDOWN = modelpredict(dataDOWN, springpot_model)
+
+# fig, ax = subplots()
+# ax[:plot](dataUP.t, dataUP.ϵ, "-", label="original")
+# ax[:plot](dataDOWN.t, dataDOWN.ϵ, "-", label="original")
+# ax[:plot](sp_predUP.t, sp_predUP.ϵ, "-", label="springpot UP")
+# ax[:plot](sp_predDOWN.t, sp_predDOWN.ϵ, "-", label="springpot DOWN")
+# ax[:plot](sp_predDOWN.t, -sp_predDOWN.ϵ, "--", label="springpot DOWN flipped!")
+# ax[:legend](loc="best")
+# show()
+
+# get data
+# step = stepdata(50.0, 25.0; amplitude = +1.0, stepsize = 1.0, t_trans = 2.0)
+# repeatedstep = repeatdata(step, 5; t_trans = 2.0)
+
+# data = RheologyData(repeatedstep)
+
+# springpot_model = RheologyModel(J_springpot)
+
+# springpot_predicted = modelpredict(data, springpot_model)
 
 # fig, ax = subplots()
 # ax[:plot](data.t, data.ϵ, "-", label="original")
-# ax[:plot](sls_predicted.t, sls_predicted.ϵ, "-", label="SLS")
+# # ax[:plot](springpot_predicted.t, springpot_predicted.ϵ, "--", label="springpot")
+# ax[:legend](loc="best")
+# show()
+
+# get data
+# stepUP = stepdata(50.0, 2.5; amplitude = +1.0, stepsize = 0.05, t_trans = 2.5)
+# stepDOWN = stepdata(50.0, 27.5; amplitude = -2.0, stepsize = 0.05, t_trans = 2.5)
+# step = stepUP + stepDOWN
+# repeatedstep = repeatdata(step, 5; t_trans = 2.5)
+
+# data = RheologyData(repeatedstep)
+
+# springpot_model = RheologyModel(G_springpot)
+
+# springpot_predicted = modelpredict(data, springpot_model)
+
+# fig, ax = subplots()
+# ax[:plot](data.t, data.ϵ, "-", label="original")
 # ax[:plot](springpot_predicted.t, springpot_predicted.ϵ, "--", label="springpot")
-# ax[:plot](fractKV_predicted.t, fractKV_predicted.ϵ, "--", label="fractKV")
-# ax[:plot](fractzener_predicted.t, fractzener_predicted.ϵ, "--", label="fract zener")
 # ax[:legend](loc="best")
 # show()

@@ -83,6 +83,8 @@ function oscillatordata(t_total::Float64,
 
 end
 
+using PyPlot
+
 """
     repeatdata(self::RheologyArtificial, n::Integer)
 
@@ -90,21 +92,31 @@ Repeat a given RheologyArtificial generated data set n times.
 
 Needs fix to increase accuracy over many repeats.
 """
-function repeatdata(self::RheologyArtificial, n::Integer; t_trans = 0.5)
+function repeatdata(self::RheologyArtificial, n::Integer; t_trans = 0.1)
 
     t = collect(0.0:self.stepsize:(self.t[end]*n))
-    t = t[1:(length(t)-1)]
+
+    elbuffer = round(Int, (1/2)*(t_trans/self.stepsize))
+    selflength = length(self.t)
 
     # ensure smooth transition from end of self.data to new beginning so no discontinuities
-    data_smooth_single = stepdata(self.t[end], t_trans; t_trans = t_trans, amplitude = self.data[1] - self.data[end], baseval = self.data[end], stepsize = self.stepsize)
+    data_smooth_end = stepdata(self.t[end], self.t[end]; t_trans = t_trans, amplitude = self.data[1] - self.data[end], baseval = self.data[selflength - elbuffer], stepsize = self.stepsize)
+    data_smooth_start = stepdata(self.t[end], 0.0; t_trans = t_trans, amplitude = self.data[1] - self.data[end], baseval = self.data[selflength - elbuffer], stepsize = self.stepsize)
+    data_smoother = data_smooth_end + data_smooth_start
 
-    data_single = data_smooth_single + self
+    data_single = self + data_smoother
 
-    data = repeat(data_single.data[1:(length(data_single.data)-1)] - self.data[1], outer=[n])
+    data = repeat(data_single.data[1:end] - self.data[selflength - elbuffer], outer=[n])
+
+    for i = 1:(n-1)
+        deleteat!(data, i*length(self.t) + (2-i))
+    end
 
     # fix first repeat
     for (i, v) in enumerate(self.data)
-        data[i] = v
+        if i<(elbuffer*100) && i<round(Int, length(self.t)/2) 
+            data[i] = v
+        end
     end
 
     log = vcat(self.log, ["repeated data $n times"])
