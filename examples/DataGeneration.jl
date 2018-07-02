@@ -26,3 +26,13 @@ foo = stepdata(170.0, 125.0; amplitude = -1.0, t_trans = 1.0)
 bar = repeatdata(foo, 5; t_trans = 1.0)
 plot(bar.t, bar.data, "--")
 show()
+
+# complicated test
+stepup = stepdata(50.0, 25.0; stepsize = 0.05, t_trans = 2.5)
+osci = oscillatordata(50.0, 0.4; amplitude = 0.1, stepsize = 0.05)
+rampup = rampdata(50.0, 25.0, 37.5; stepsize = 0.05)
+rampdown = rampdata(50.0, 37.5, 48.0; stepsize = 0.05, amplitude = -1.0)
+combined = osci*(rampup + rampdown) + stepup
+repeated = repeatdata(combined, 3)
+plot(repeated.t, repeated.data)
+show()
