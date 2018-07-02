@@ -90,17 +90,17 @@ Repeat a given RheologyArtificial generated data set n times.
 
 Needs fix to increase accuracy over many repeats.
 """
-function repeatdata(self::RheologyArtificial, n::Integer)
+function repeatdata(self::RheologyArtificial, n::Integer; t_trans = 0.5)
 
     t = collect(0.0:self.stepsize:(self.t[end]*n))
     t = t[1:(length(t)-1)]
 
     # ensure smooth transition from end of self.data to new beginning so no discontinuities
-    data_smooth_single = stepdata(self.t[end], 0.0; t_trans = 1.0, amplitude = -self.data[end], baseval = self.data[end])
+    data_smooth_single = stepdata(self.t[end], t_trans; t_trans = t_trans, amplitude = self.data[1] - self.data[end], baseval = self.data[end], stepsize = self.stepsize)
 
     data_single = data_smooth_single + self
 
-    data = repeat(data_single.data[1:(length(data_single.data)-1)], outer=[n])
+    data = repeat(data_single.data[1:(length(data_single.data)-1)] - self.data[1], outer=[n])
 
     # fix first repeat
     for (i, v) in enumerate(self.data)
