@@ -2,10 +2,10 @@
 __precompile__()
 
 module RHEOS
-# installed using Pkg.clone from rheos-cambridge repos
+# installed using Pkg.clone from rheos-cambridge forked repos
 using MittagLeffler
 using FastConv
-# install using Pkg.add from within Julia REPL
+# install using Pkg.add from Julia central package repository
 using InverseLaplace
 using uCSV
 using ImageFiltering
