@@ -1,5 +1,7 @@
 #!/usr/bin/env julia
 
+Pkg.update()
+
 # From Julia Repository
 Pkg.add("QuadGK")
 Pkg.add("uCSV")
@@ -29,4 +31,3 @@ end
  but this is not yet on the official Julia repository =#
 Pkg.add("DataFrames")
 
-Pkg.update()
