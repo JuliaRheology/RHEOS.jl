@@ -24,7 +24,7 @@ import Base: +, -, *
 
 ######################################################
 # base.jl
-export deriv, trapz, mittleff
+export deriv, trapz, mittleff, closestindex
 
 export var_resample, downsample, fixed_resample
 

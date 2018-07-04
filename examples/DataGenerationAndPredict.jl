@@ -23,7 +23,7 @@ ax[:plot](springpot_predicted.t, springpot_predicted.σ*1e-3, "--", label="sprin
 ax[:legend](loc="best")
 show()
 
-get data
+# get data
 step = stepdata(50.0, 25.0; stepsize = 0.05, t_trans = 2.5)
 repeatedstep = repeatdata(step, 5; t_trans = 2.5)
 
