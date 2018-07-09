@@ -25,4 +25,3 @@ G_SLS(t::Array{Float64,1}, params::Array{Float64,1})
 
 ## Hi-Level Post-processing
 
-```@docs
