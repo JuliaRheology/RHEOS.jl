@@ -1,5 +1,4 @@
 #!/usr/bin/env julia
-include("../src/RHEOS.jl")
 using RHEOS
 using PyPlot
 
