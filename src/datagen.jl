@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 """
-    stepgen(t_total::Float64, t_on::Float64; t_trans::Float64 = (t_total - t_on)/100.0, amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 0.5)
+    stepgen(t_total::Float64, t_on::Float64; t_trans::Float64 = (t_total - t_on)/100.0, amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 1.0)
 
 Generate RheologyArtificial struct with a step function approximated by a logisitic function.
 """
@@ -10,7 +10,7 @@ function stepgen(t_total::Float64,
                   t_trans::Float64 = (t_total - t_on)/100.0,
                   amplitude::Float64 = 1.0,
                   baseval::Float64 = 0.0,
-                  stepsize::Float64 = 0.5, )
+                  stepsize::Float64 = 1.0, )
 
     t = collect(0.0:stepsize:t_total)
 
@@ -23,7 +23,7 @@ function stepgen(t_total::Float64,
 end
 
 """
-    rampgen(t_total::Float64, t_start::Float64, t_stop::Float64; amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 0.5)
+    rampgen(t_total::Float64, t_start::Float64, t_stop::Float64; amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 1.0)
 
 Generate RheologyArtificial struct with a ramp function.
 """
@@ -32,7 +32,7 @@ function rampgen(t_total::Float64,
                   t_stop::Float64;
                   amplitude::Float64 = 1.0,
                   baseval::Float64 = 0.0,
-                  stepsize::Float64 = 0.5 )
+                  stepsize::Float64 = 1.0 )
 
     t = collect(0.0:stepsize:t_total)
 
@@ -55,7 +55,7 @@ function rampgen(t_total::Float64,
 end
 
 """
-    singen(t_total::Float64, frequency::Float64; t_start::Float64 = 0.0, phase::Float64 = 0.0, amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 0.5)
+    singen(t_total::Float64, frequency::Float64; t_start::Float64 = 0.0, phase::Float64 = 0.0, amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 1.0)
 
 Generate RheologyArtificial struct with a sinusoidal function.
 """
@@ -65,7 +65,7 @@ function singen(t_total::Float64,
                 phase::Float64 = 0.0,
                 amplitude::Float64 = 1.0,
                 baseval::Float64 = 0.0,
-                stepsize::Float64 = 0.5 )
+                stepsize::Float64 = 1.0 )
 
     t = collect(0.0:stepsize:t_total)
 
@@ -89,8 +89,6 @@ using PyPlot
     repeatdata(self::RheologyArtificial, n::Integer)
 
 Repeat a given RheologyArtificial generated data set n times.
-
-Needs fix to increase accuracy over many repeats.
 """
 function repeatdata(self::RheologyArtificial, n::Integer; t_trans = 0.1)
 
@@ -122,6 +120,30 @@ function repeatdata(self::RheologyArtificial, n::Integer; t_trans = 0.1)
     log = vcat(self.log, ["repeated data $n times"])
 
     RheologyArtificial(data, t, self.stepsize, log)
+
+end
+
+"""
+    addnoise(self::RheologyArtificial; amplitude::Float64 = 0.1, seed::Union{Int, Void} = nothing)
+
+Add random noise to artificially generated data.
+"""
+function addnoise(self::RheologyArtificial; amplitude::Float64 = 0.1, seed::Union{Int, Void} = nothing)
+
+    if typeof(seed)==Void
+        # get random seed
+        srand()
+    elseif typeof(seed)<:Int
+        # use specified seed
+        @assert seed>=0 "Seed must be non-negative"
+        srand(seed)
+    end
+
+    data = self.data + amplitude*(2*rand(Float64, length(self.data)) - 1)
+
+    log = vcat(self.log, ["added noise of amplitude $amplitude, with seed $seed"])
+
+    RheologyArtificial(data, self.t, self.stepsize, log)
 
 end
 

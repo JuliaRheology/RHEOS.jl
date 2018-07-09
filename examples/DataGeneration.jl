@@ -22,7 +22,7 @@ baz = foo*bar
 plot(baz.t, baz.data)
 
 # repeat test
-foo = stepgen(170.0, 125.0; amplitude = -1.0, t_trans = 1.0)
+foo = stepgen(170.0, 125.0; amplitude = -1.0, t_trans = 1.0, stepsize = 0.01)
 bar = repeatdata(foo, 5; t_trans = 1.0)
 plot(bar.t, bar.data, "--")
 show()
@@ -34,17 +34,17 @@ rampup = rampgen(50.0, 25.0, 37.5; stepsize = 0.05)
 rampdown = rampgen(50.0, 37.5, 48.0; stepsize = 0.05, amplitude = -1.0)
 combined = osci*(rampup + rampdown) + stepup
 repeated = repeatdata(combined, 3)
+noisyrepeated = addnoise(repeated; amplitude = 0.05, seed = 1)
 plot(repeated.t, repeated.data)
+plot(noisyrepeated.t, noisyrepeated.data)
 show()
 
 ## To add
 
 # direct assignment
 # foo = zerosgen(1000) (or flat gen, e.g. constantgen(1.0) for constant line at 1.0)
+# baz = foo+1 could then use the above function
 
-# add constant to all data elements
-# baz = foo+1
-
-# shift (and mirror?)
+# shift (and mirror in y axis i.e. t -> -t)
 # baz = shiftgen, 100)
-# baz = mirrorgen)
+# baz = mirrorgen
