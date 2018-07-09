@@ -1,11 +1,11 @@
 #!/usr/bin/env julia
 
 """
-    stepdata(t_total::Float64, t_on::Float64; t_trans::Float64 = (t_total - t_on)/100.0, amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 0.5)
+    stepgen(t_total::Float64, t_on::Float64; t_trans::Float64 = (t_total - t_on)/100.0, amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 0.5)
 
 Generate RheologyArtificial struct with a step function approximated by a logisitic function.
 """
-function stepdata(t_total::Float64, 
+function stepgen(t_total::Float64, 
                   t_on::Float64;
                   t_trans::Float64 = (t_total - t_on)/100.0,
                   amplitude::Float64 = 1.0,
@@ -18,16 +18,16 @@ function stepdata(t_total::Float64,
 
 	data = baseval + amplitude./(1 + exp.(-k*(t-t_on)))
 
-    RheologyArtificial(data, t, stepsize, ["stepdata: t_total: $t_total, t_on: $t_on, t_trans: $t_trans, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
+    RheologyArtificial(data, t, stepsize, ["stepgen: t_total: $t_total, t_on: $t_on, t_trans: $t_trans, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
 
 end
 
 """
-    rampdata(t_total::Float64, t_start::Float64, t_stop::Float64; amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 0.5)
+    rampgen(t_total::Float64, t_start::Float64, t_stop::Float64; amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 0.5)
 
 Generate RheologyArtificial struct with a ramp function.
 """
-function rampdata(t_total::Float64,
+function rampgen(t_total::Float64,
                   t_start::Float64,
                   t_stop::Float64;
                   amplitude::Float64 = 1.0,
@@ -50,22 +50,22 @@ function rampdata(t_total::Float64,
 
     end
 
-    RheologyArtificial(data, t, stepsize, ["rampdata: t_total: $t_total, t_start: $t_start, t_stop: $t_stop, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
+    RheologyArtificial(data, t, stepsize, ["rampgen: t_total: $t_total, t_start: $t_start, t_stop: $t_stop, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
 
 end
 
 """
-    oscillatordata(t_total::Float64, frequency::Float64; t_start::Float64 = 0.0, phase::Float64 = 0.0, amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 0.5)
+    singen(t_total::Float64, frequency::Float64; t_start::Float64 = 0.0, phase::Float64 = 0.0, amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 0.5)
 
 Generate RheologyArtificial struct with a sinusoidal function.
 """
-function oscillatordata(t_total::Float64,
-                        frequency::Float64;
-                        t_start::Float64 = 0.0,
-                        phase::Float64 = 0.0,
-                        amplitude::Float64 = 1.0,
-                        baseval::Float64 = 0.0,
-                        stepsize::Float64 = 0.5 )
+function singen(t_total::Float64,
+                frequency::Float64;
+                t_start::Float64 = 0.0,
+                phase::Float64 = 0.0,
+                amplitude::Float64 = 1.0,
+                baseval::Float64 = 0.0,
+                stepsize::Float64 = 0.5 )
 
     t = collect(0.0:stepsize:t_total)
 
@@ -79,7 +79,7 @@ function oscillatordata(t_total::Float64,
 
     end
 
-    RheologyArtificial(data, t, stepsize, ["oscillatordata: t_total: $t_total, frequency: $frequency, t_start: $t_start, phase: $phase, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
+    RheologyArtificial(data, t, stepsize, ["singen: t_total: $t_total, frequency: $frequency, t_start: $t_start, phase: $phase, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
 
 end
 
@@ -100,8 +100,8 @@ function repeatdata(self::RheologyArtificial, n::Integer; t_trans = 0.1)
     selflength = length(self.t)
 
     # ensure smooth transition from end of self.data to new beginning so no discontinuities
-    data_smooth_end = stepdata(self.t[end], self.t[end]; t_trans = t_trans, amplitude = self.data[1] - self.data[end], baseval = self.data[selflength - elbuffer], stepsize = self.stepsize)
-    data_smooth_start = stepdata(self.t[end], 0.0; t_trans = t_trans, amplitude = self.data[1] - self.data[end], baseval = self.data[selflength - elbuffer], stepsize = self.stepsize)
+    data_smooth_end = stepgen(self.t[end], self.t[end]; t_trans = t_trans, amplitude = self.data[1] - self.data[end], baseval = self.data[selflength - elbuffer], stepsize = self.stepsize)
+    data_smooth_start = stepgen(self.t[end], 0.0; t_trans = t_trans, amplitude = self.data[1] - self.data[end], baseval = self.data[selflength - elbuffer], stepsize = self.stepsize)
     data_smoother = data_smooth_end + data_smooth_start
 
     data_single = self + data_smoother
