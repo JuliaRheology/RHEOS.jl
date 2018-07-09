@@ -1,6 +1,6 @@
 using Documenter, RHEOS
 
-makedocs(modules=["RHEOS"],
+makedocs(modules=[RHEOS],
          doctest=false, clean=true,
          format =:html,
          sitename="RHEOS.jl",
