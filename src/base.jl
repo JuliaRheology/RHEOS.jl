@@ -340,6 +340,23 @@ function closestindex(x::Array{Float64,1}, val::Float64)::Int32
 end
 
 """
+    closestindices(x::Array{Float64,1}, vals::Array{Float64,1})
+
+Uses `closestindex` iteratively to find closest index for all values in `vals` array.
+"""
+function closestindices(x::Array{Float64,1}, vals::Array{Float64,1})::Array{Int64,1}
+
+    indicesbest = Array{Int64,1}(length(vals))
+    # call closest index iteratively
+    for (i, v) in enumerate(vals)
+        indicesbest[i] = closestindex(x, v)
+    end
+
+    indicesbest
+
+end
+
+"""
     mapback(xᵦ::Array{Float64,1}, x::Array{Float64,1})
 
 Match a variable downsampled array xᵦ to its closest possible elements in original
