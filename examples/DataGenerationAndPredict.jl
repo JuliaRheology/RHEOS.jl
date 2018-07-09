@@ -24,8 +24,8 @@ ax[:legend](loc="best")
 show()
 
 # get data
-step = stepgen(50.0, 25.0; stepsize = 0.05, t_trans = 2.5)
-repeatedstep = repeatdata(step, 5; t_trans = 2.5)
+step = stepgen(50.0, 25.0; stepsize = 0.01)
+repeatedstep = repeatdata(step, 5)
 
 data = RheologyData(repeatedstep)
 

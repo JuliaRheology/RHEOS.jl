@@ -22,8 +22,8 @@ baz = foo*bar
 plot(baz.t, baz.data)
 
 # repeat test
-foo = stepgen(170.0, 125.0; amplitude = -1.0, t_trans = 1.0, stepsize = 0.01)
-bar = repeatdata(foo, 5; t_trans = 1.0)
+foo = stepgen(170.0, 125.0; amplitude = -1.0, stepsize = 0.001)
+bar = repeatdata(foo, 5)
 plot(bar.t, bar.data, "--")
 show()
 
