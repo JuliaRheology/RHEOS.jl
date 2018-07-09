@@ -133,6 +133,25 @@ function *(self1::RheologyArtificial, self2::RheologyArtificial)
 
 end
 
+function *(self::RheologyArtificial, operand::Real)
+
+    # init data array and fill by summing over each argument's indices
+    data = self.data*operand
+
+    # log
+    log = vcat(self.log, ["multiplied data by $operand"])
+
+    RheologyArtificial(data, self.t, self.stepsize, log)
+
+end
+
+function *(operand::Real, self::RheologyArtificial)
+    
+    # multiplication commutes so call function as defined for opposite operand order
+    return self*operand
+
+end
+
 """
     RheologyData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, sampling::String, log::Array{String,1})
 
