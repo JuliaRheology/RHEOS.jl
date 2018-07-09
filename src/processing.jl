@@ -63,14 +63,14 @@ function var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float6
 end
 
 """
-    downsample(self::RheologyData, boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
+    downsample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1})
 
-Use indices from `downsample` to downsample all data in the RheologyData struct.
-
-See help docstring for `downsample` for more info on use of boundaries and elperiods
-arguments.
+High-level RheologyData interface to downsample in base.jl. Boundaries are floating point times which are then converted to the closest elements.
 """
-function downsample(self::RheologyData, boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
+function downsample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1})
+
+    # convert boundaries from times to element indicies
+    boundaries = closestindices(self.t, time_boundaries)
 
     # get downsampled indices
     indices = downsample(boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
@@ -96,17 +96,14 @@ function downsample(self::RheologyData, boundaries::Array{Int64,1}, elperiods::A
 end
 
 """
-    fixed_resample(self::RheologyData, boundaries::Array{Int64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
+    fixed_resample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
 
-Resample three (or two) arrays with new sample rate(s).
-
-Whereas `downsample` can only reduce the sample rate by not taking every array element,
-fixed_resample can also upsample. This is why it cannot return indices as upsampled
-sections will be interpolated versions of the original data.
-
-See docstring for `fixed_resample` for more info and example on calling signature.
+High-level RheologyData interface to fixed_resample in base.jl
 """
-function fixed_resample(self::RheologyData, boundaries::Array{Int64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
+function fixed_resample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
+
+    # convert boundaries from times to element indicies
+    boundaries = closestindices(self.t, time_boundaries)
 
     # resample all data
     (t, σ) = fixed_resample(self.t, self.σ, boundaries, elperiods, direction)
