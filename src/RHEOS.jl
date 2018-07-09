@@ -49,7 +49,7 @@ export RheologyArtificial, RheologyData, fileload, RheologyModel, RheologyModelT
 
 ######################################################
 # datagen.jl
-export stepdata, rampdata, oscillatordata, repeatdata
+export stepgen, rampgen, singen, repeatdata
 
 ######################################################
 # processing.jl
