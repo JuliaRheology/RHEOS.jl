@@ -26,7 +26,7 @@
 - [ ] Add more examples
 - [ ] Add G* complex modulus fitting
 - [ ] Add constantgen to data generation (creates constant line)
-- [ ] Add shift (0 pads at front and truncates at end) and mirror to data generation functions
+- [ ] Add shift (pads with first value at front or truncates and vice versa at end) and mirror (y axis reflect) to data generation functions
 
 ## References & Included Dependencies
 #### [FastConv.jl](https://github.com/aamini/FastConv.jl)
