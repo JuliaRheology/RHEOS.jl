@@ -38,13 +38,3 @@ noisyrepeated = addnoise(repeated; amplitude = 0.05, seed = 1)
 plot(repeated.t, repeated.data)
 plot(noisyrepeated.t, noisyrepeated.data)
 show()
-
-## To add
-
-# direct assignment
-# foo = zerosgen(1000) (or flat gen, e.g. constantgen(1.0) for constant line at 1.0)
-# baz = foo+1 could then use the above function
-
-# shift (and mirror in y axis i.e. t -> -t)
-# baz = shiftgen, 100)
-# baz = mirrorgen
