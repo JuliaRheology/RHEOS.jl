@@ -2,7 +2,7 @@ include("../src/RHEOS.jl")
 using RHEOS
 using PyPlot
 
-step = stepdata(50.0, 25.0; stepsize = 0.05, t_trans = 0.051)
+step = stepgen(50.0, 25.0; stepsize = 0.05, t_trans = 0.051)
 repeatedstep = repeatdata(step, 5; t_trans = 0.051)
 
 data = RheologyData(repeatedstep)
