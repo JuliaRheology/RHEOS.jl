@@ -21,7 +21,7 @@
 - [ ] Documentation
 - [ ] Set up Travis CI
 - [ ] Add Sync Interpolation for going from variable to constant sample rate
-- [ ] For fractional models, convert time scale τ to cᵦ as it fits better and is more physical (already done for relaxation models)
+- [ ] Implement corrected fractional models as derived by Ale
 - [ ] Add tests
 - [ ] Add more examples
 - [ ] Add G* complex modulus fitting
