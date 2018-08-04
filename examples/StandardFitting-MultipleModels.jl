@@ -27,6 +27,7 @@ ub = [1e5, 1.0]
 springpot_fit = modelfit(data_resampled, G_springpot; p0=p0, lo=lb, hi=ub, verbose=false)
 println(springpot_fit.parameters)
 
+# SPLIT THIS UP INTO SEPERATE EXAMPLES
 # save and load springpot model (RheologyModel type) for demonstration purposes (contains model name, params and log)
 savemodel(springpot_fit)
 loaded_springpot = loadmodel("../data/rheologyData1.csv_RHEOS.G_springpot.jld")
