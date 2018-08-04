@@ -31,7 +31,7 @@ git:
 
 ## uncomment the following lines to override the default test script
 script:
- - julia -e 'Pkg.clone(pwd()); Pkg.build("RHEOS"); Pkg.clone("https://github.com/rheos-cambridge/MittagLeffler.jl"); Pkg.test("RHEOS"; coverage=true)'
+ - julia -e 'Pkg.clone(pwd()); Pkg.build("RHEOS"); Pkg.clone("https://github.com/rheos-cambridge/MittagLeffler.jl"); Pkg.clone("https://github.com/rheos-cambridge/FastConv.jl"); Pkg.test("RHEOS"; coverage=true)'
 
 after_success:
   # push coverage results to Coveralls

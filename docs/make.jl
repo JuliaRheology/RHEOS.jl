@@ -1,4 +1,4 @@
-using Documenter, RHEOS
+# using Documenter, RHEOS
 
 makedocs(modules=[RHEOS],
          doctest=false, clean=true,
