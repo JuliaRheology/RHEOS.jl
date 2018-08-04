@@ -4,7 +4,7 @@
 </a>
 </div>
 
-[![Build Status](https://travis-ci.org/rheos-cambridge/RHEOS.jl.svg?branch=master)](https://travis-ci.org/rheos-cambridge/RHEOS.jl)
+Linux:[![Build Status](https://travis-ci.org/rheos-cambridge/RHEOS.jl.svg?branch=master)](https://travis-ci.org/rheos-cambridge/RHEOS.jl) 
 
 # RHEOS - RHEology, Open-Source
 #### A suite of tools for analysing rheology data
