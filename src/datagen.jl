@@ -95,8 +95,6 @@ function singen(t_total::Float64,
 
 end
 
-using PyPlot
-
 """
     repeatdata(self::RheologyArtificial, n::Integer)
 
