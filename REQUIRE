@@ -1,12 +1,12 @@
 julia 0.6.3
+InverseLaplace
+FastConv
 Cartesian
-QuadGK
 uCSV
 ImageFiltering
 Interpolations
 NLopt
-PyPlot
 JLD
-InverseLaplace
 DataFrames
-FastConv
+QuadGK
+

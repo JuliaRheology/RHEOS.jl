@@ -1,19 +1,23 @@
 ## Documentation: http://docs.travis-ci.com/user/languages/julia/
 language: julia
+
 os:
   - linux
   - osx
+
 julia:
-  - 0.6
-  - nightly
+  - 0.6.3
+  # - nightly
+
 notifications:
   email: false
+
 git:
   depth: 99999999
 
 ## uncomment the following lines to allow failures on nightly julia
 ## (tests will run but not make your overall status red)
-#matrix:
+# matrix:
 #  allow_failures:
 #  - julia: nightly
 
@@ -28,8 +32,12 @@ git:
 ## uncomment the following lines to override the default test script
 #script:
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("RHEOS"); Pkg.test("RHEOS"; coverage=true)'
+
 after_success:
   # push coverage results to Coveralls
   - julia -e 'cd(Pkg.dir("RHEOS")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
   # push coverage results to Codecov
   - julia -e 'cd(Pkg.dir("RHEOS")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  # generate docs
+  - julia -e 'Pkg.add("Documenter")'
+  - julia -e 'cd(Pkg.dir("RHEOS")); include(joinpath("docs", "make.jl"))'

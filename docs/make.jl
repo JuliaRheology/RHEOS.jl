@@ -4,13 +4,16 @@ makedocs(modules=[RHEOS],
          doctest=false, clean=true,
          format =:html,
          sitename="RHEOS.jl",
-         authors="Louis Kaplan, Alessandra Bonfanti, Alexandre Kabla"
+         authors="Louis Kaplan",
+         pages = [
+             "Home" => "index.md"
+         ]
          )
 
-# deploydocs(repo = "github.com:rheos-cambridge/RHEOS.jl.git",
-#            target = "build",
-#            osname = "windows",
-#            julia = "0.6.3",
-#            deps = nothing,
-#            make = nothing
-#            )
+deploydocs(
+    repo = "github.com:moustachio-belvedere/MoustachioDocsTest.jl.git",
+    julia = "0.6.3",
+    deps = nothing,
+    make = nothing,
+    target = "build"
+)
