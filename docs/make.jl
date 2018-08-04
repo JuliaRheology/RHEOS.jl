@@ -11,7 +11,7 @@ makedocs(modules=[RHEOS],
          )
 
 deploydocs(
-    repo = "github.com:moustachio-belvedere/MoustachioDocsTest.jl.git",
+    repo = "github.com:rheos-cambridge/RHEOS.jl.git",
     julia = "0.6.3",
     deps = nothing,
     make = nothing,
