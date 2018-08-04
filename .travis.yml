@@ -30,8 +30,8 @@ git:
 #  - if [ $TRAVIS_OS_NAME = osx ]; then brew install gcc; fi
 
 ## uncomment the following lines to override the default test script
-#script:
-#  - julia -e 'Pkg.clone(pwd()); Pkg.build("RHEOS"); Pkg.test("RHEOS"; coverage=true)'
+script:
+ - julia -e 'Pkg.clone(pwd()); Pkg.build("RHEOS"); Pkg.clone("https://github.com/rheos-cambridge/MittagLeffler.jl"); Pkg.test("RHEOS"; coverage=true)'
 
 after_success:
   # push coverage results to Coveralls
