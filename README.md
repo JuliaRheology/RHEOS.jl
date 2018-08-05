@@ -7,7 +7,7 @@
 Linux: [![Build Status](https://travis-ci.org/rheos-cambridge/RHEOS.jl.svg?branch=master)](https://travis-ci.org/rheos-cambridge/RHEOS.jl) &nbsp; 
 Windows: [![Build Status](https://ci.appveyor.com/api/projects/status/github/rheos-cambridge/RHEOS.jl?branch=master&svg=true)](https://ci.appveyor.com/project/rheos-cambridge/RHEOS-jl) &nbsp;
 [![Latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://rheos-cambridge.github.io/RHEOS.jl/latest) &nbsp;
-[![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md)
+[![License](https://img.shields.io/badge/License-MIT-ff69b2.svg?style=flat)](LICENSE.md)
 
 # RHEOS - RHEology, Open-Source
 #### A suite of tools for analysing rheology data
