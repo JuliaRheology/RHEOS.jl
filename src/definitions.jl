@@ -303,7 +303,7 @@ function fileload(colnames::Array{String,1}, filedir::String)::RheologyData
 end
 
 """
-    RheologyModel(name::Function, parameters::Array{Float64,1}[, log::Array{String,1}])
+    RheologyModel(name::Function[, parameters::Array{Float64,1}, log::Array{String,1}])
 
 Struct which contains the results of a model fit: model name, parameters, and inherited log with final cost, 
 reason for termination of fitting procedure and time taken to fit appended to it.

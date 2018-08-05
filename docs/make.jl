@@ -6,7 +6,11 @@ makedocs(modules=[RHEOS],
          sitename="RHEOS.jl",
          authors="Louis Kaplan",
          pages = [
-             "Home" => "index.md"
+             "Home" => "index.md",
+             "Rheology Types" => "keytypes.md",
+             "Preprocessing" => "preprocessing.md",
+             "Fit and Predict" => "fitpredict.md",
+             "Save and Load" => "loadsave.md"
          ]
          )
 
