@@ -323,7 +323,7 @@ end
 ##############################
 
 """
-    savedata(self::RheologyDatal; filedir::String = "", ext = "_RheologyData.jld")
+    savedata(self::RheologyData; filedir::String = "", ext = "_RheologyData.jld")
 
 Save RheologyData object using JLD format. Save file directory
 must be specified. If data was loaded from disk using fileload
