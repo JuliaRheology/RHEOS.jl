@@ -1,5 +1,5 @@
 ```@docs
-savedata(self::RheologyDatal; filedir::String = "", ext = "_RheologyData.jld")
+savedata(self::RheologyData; filedir::String = "", ext = "_RheologyData.jld")
 ```
 
 ```@docs

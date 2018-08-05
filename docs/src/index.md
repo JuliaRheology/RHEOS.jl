@@ -6,14 +6,15 @@ RHEOS, an abbreviation of Rheology Open Source, is a Julia package which provide
 
 From within the Julia v0.6.3 REPL, type:
 
-`Pkg.clone("https://github.com/rheos-cambridge/RHEOS.jl.git")`
+```Pkg.clone("https://github.com/rheos-cambridge/RHEOS.jl.git")```
 
 Then, from within the RHEOS directory in your Julia library (or just downloaded from the Github seperately), run:
 
-`julia TEMP_INSTALL.jl`
+```julia TEMP_INSTALL.jl```
 
 to install the two dependencies not yet registered on METADATA.
 
+# Program Structure
 
 
 
