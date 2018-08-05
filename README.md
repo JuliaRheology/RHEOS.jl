@@ -10,28 +10,26 @@ Windows: [![Build Status](https://ci.appveyor.com/api/projects/status/github/rhe
 [![License](https://img.shields.io/badge/License-MIT-ff69b2.svg?style=flat)](LICENSE.md)
 
 # RHEOS - RHEology, Open-Source
-#### A suite of tools for analysing rheology data
-
-*Documentation currently under development*
+A suite of tools for analysing rheology data. Stress/Strain/Time data can be easily be fitted to a viscoelastic model. (Commonly occuring
+standard and fractional viscoelastic models have alread been implemented within RHEOS — new ones can be added by users.) A fitted model can
+be used to predict the behaviour of the material under other loading conditions. Artificial loading conditions can be generated within
+RHEOS to better understand models' response. 
 
 ## Installation
 
-- Install julia, version 0.6.3
-- git clone repository into desired location
-- Run TEMP_INSTALL.jl
+- Install Julia, version 0.6.3
+- From Julia REPL, type ```Pkg.clone("https://github.com/rheos-cambridge/RHEOS.jl.git")```
+- Run ```julia TEMP_INSTALL.jl```, a script located in your RHEOS directory
 - (optional) Set environment variable "JULIA_NUM_THREADS" equal to number of processor cores available
 
 ## To do
-
 - [ ] Documentation
-- [ ] Set up Travis CI
-- [ ] Add Sync Interpolation for going from variable to constant sample rate
-- [ ] Implement corrected fractional models as derived by Ale
-- [ ] Add tests
-- [ ] Add more examples
+- [ ] Implement corrected fractional models
 - [ ] Add G* complex modulus fitting
-- [ ] Add constantgen to data generation (creates constant line)
-- [ ] Add shift (pads with first value at front or truncates and vice versa at end) and mirror (y axis reflect) to data generation functions
+- [ ] Test new model structure (G, G* and J combined)
+- [ ] Add tests
+- [ ] Add Sync Interpolation for going from variable to constant sample rate
+- [ ] Set up OS X CI on Travis
 
 ## References & Included Dependencies
 #### [FastConv.jl](https://github.com/aamini/FastConv.jl)
