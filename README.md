@@ -4,9 +4,9 @@
 </a>
 </div>
 
-Linux: [![Build Status](https://travis-ci.org/rheos-cambridge/RHEOS.jl.svg?branch=master)](https://travis-ci.org/rheos-cambridge/RHEOS.jl) &nbsp; 
-Windows: [![Build Status](https://ci.appveyor.com/api/projects/status/github/rheos-cambridge/RHEOS.jl?branch=master&svg=true)](https://ci.appveyor.com/project/rheos-cambridge/RHEOS-jl) &nbsp;
-[![Latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://rheos-cambridge.github.io/RHEOS.jl/latest) &nbsp;
+Linux: [![Build Status](https://travis-ci.org/JuliaRheology/RHEOS.jl.svg?branch=master)](https://travis-ci.org/JuliaRheology/RHEOS.jl) &nbsp; 
+Windows: [![Build Status](https://ci.appveyor.com/api/projects/status/github/JuliaRheology/RHEOS.jl?branch=master&svg=true)](https://ci.appveyor.com/project/JuliaRheology/RHEOS-jl) &nbsp;
+[![Latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaRheology.github.io/RHEOS.jl/latest) &nbsp;
 [![License](https://img.shields.io/badge/License-MIT-ff69b2.svg?style=flat)](LICENSE.md)
 
 # RHEOS - RHEology, Open-Source
@@ -18,7 +18,7 @@ RHEOS to better understand models' response.
 ## Installation
 
 - Install Julia, version 0.6.3
-- From Julia REPL, type ```Pkg.clone("https://github.com/rheos-cambridge/RHEOS.jl.git")```
+- From Julia REPL, type ```Pkg.clone("https://github.com/JuliaRheology/RHEOS.jl.git")```
 - Run ```julia TEMP_INSTALL.jl```, a script located in your RHEOS directory
 - (optional) Set environment variable "JULIA_NUM_THREADS" equal to number of processor cores available
 
