@@ -28,6 +28,6 @@ function deriv_test_int_simple()
 end
 
 @test deriv_test_int_simple() == 10
-@test typeof(deriv_test_int_simple()) == Int64
+@test typeof(deriv_test_int_simple()) <: Integer
 
 
