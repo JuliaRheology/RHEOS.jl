@@ -48,15 +48,15 @@ y = x.^2
 dy_dx = deriv(y, x) # ~= 2*x
 ```
 """
-function deriv(y::Array{Float64,1}, x::Array{Float64,1})::Array{Float64,1}
+function deriv(y::Array{T,1}, x::Array{T,1}) where T<:Number
 
     # assert y and x arrays are same length
     @assert length(y)==length(x) "X and Y Array lengths must match."
 
     # initialise zero array of length y
-    ydot = zeros(Float64, length(y))
-    for i in 1:length(y)
-        if i==1
+    ydot = zeros(T, length(y))
+    for i in eachindex(y)
+        if i==start(eachindex(y))
             # right handed difference for lower boundary
             @inbounds ydot[i] = (y[i+1] - y[i])/(x[i+1] - x[i])
         elseif i==length(y)
@@ -72,12 +72,12 @@ function deriv(y::Array{Float64,1}, x::Array{Float64,1})::Array{Float64,1}
     ydot
 end
 
-function deriv(y::Array{Float64,1})::Array{Float64,1}
+function deriv(y::Array{T,1}) where T<:Number
 
     # initialise zero array of length y
-    ydot = zeros(Float64, length(y))
-    for i in 1:length(y)
-        if i==1
+    ydot = zeros(T, length(y))
+    for i in eachindex(y)
+        if i==start(eachindex(y))
             # right handed difference for lower boundary
             @inbounds ydot[i] = (y[i+1] - y[i])
         elseif i==length(y)
@@ -85,7 +85,7 @@ function deriv(y::Array{Float64,1})::Array{Float64,1}
             @inbounds ydot[i] = (y[i] - y[i-1])
         else
             # central difference with even unit 1 spacing
-            @inbounds ydot[i] = (y[i+1] - y[i-1])/2.0
+            @inbounds ydot[i] = (y[i+1] - y[i-1])/2
         end
     end
     ydot
