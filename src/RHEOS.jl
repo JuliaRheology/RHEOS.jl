@@ -31,21 +31,17 @@ export var_resample, downsample, fixed_resample
 export leastsquares_init, objectivefunc, boltzconvolve, boltzintegral
 
 ######################################################
-# models.jl
-export G_SLS, G_SLS2, G_burgers,
-        G_springpot, G_fractKV,
-        G_fractmaxwell, G_fractzener,
-        G_fractspecial
-
-export J_SLS, J_SLS2, J_burgers,
-        J_springpot, J_fractKV,
-        J_fractmaxwell, J_fractzener
-
-export modeldatabase
-
-######################################################
 # definitions.jl
 export RheologyArtificial, RheologyData, fileload, RheologyModel, RheologyModelTemp
+
+######################################################
+# models.jl
+export SLS, SLS2, Burgers,
+        SpringPot, FractKV,
+        FractMaxwell, FractZener,
+        FractSpecial
+
+# export modeldatabase
 
 ######################################################
 # datagen.jl
@@ -60,12 +56,9 @@ export modelfit, modelpredict
 export savedata, loaddata, savemodel, loadmodel, exportdata
 
 ######################################################
-# Main functionality
 include("base.jl")
-include("models.jl")
-
-# High level rheology interface
 include("definitions.jl")
+include("models.jl")
 include("datagen.jl")
 include("processing.jl")
 ######################################################
