@@ -91,44 +91,34 @@ function deriv(y::Array{T,1}) where T<:Number
     ydot
 end
 
-"""
-    mittleff(α::Float64[, β::Float64], x::Array{Float64,1})
+# """
+#     mittleff(α::Float64[, β::Float64], x::Array{Float64,1})
 
-Threaded convience wrapper around MittagLeffler.mittleff for array arguments. X
-array is limited to float type in accordance with the requirements of RHEOS.
-"""
-function mittleff(α::Float64, x_array::Array{Float64,1})::Array{Float64,1}
+# Threaded convience wrapper around MittagLeffler.mittleff for array arguments. X
+# array is limited to float type in accordance with the requirements of RHEOS.
+# """
+# function mittleff(α::Float64, x_array::Array{Float64,1})::Array{Float64,1}
 
-    # initialise array
-    y = Array{Float64}(length(x_array))
-    # do static scheduled threaded loop with no bounds checking
-    @threads for i = 1:length(x_array)
-        @inbounds y[i] = MittagLeffler.mittleff(α, x_array[i])
-    end
-    # return
-    y
-end
-
-function mittleff(α::Float64, β::Float64, x_array::Array{Float64,1})::Array{Float64,1}
-
-    # initialise array
-    y = Array{Float64}(length(x_array))
-    # do static scheduled threaded loop with no bounds checking
-    @threads for i = 1:length(x_array)
-        @inbounds y[i] = MittagLeffler.mittleff(α, β, x_array[i])
-    end
-    # return
-    y
-end
-# NON THREADED VERSIONS
-# function mittleff(α::Float64, xList::Array{Float64,1})::Array{Float64,1}
-#     # call mittagleffler within an array comprehension
-#     y = [MittagLeffler.mittleff(α, x) for x in xList]
+#     # initialise array
+#     y = Array{Float64}(length(x_array))
+#     # do static scheduled threaded loop with no bounds checking
+#     @threads for i = 1:length(x_array)
+#         @inbounds y[i] = MittagLeffler.mittleff(α, x_array[i])
+#     end
+#     # return
+#     y
 # end
-#
-# function mittleff(α::Float64, β::Float64, xList::Array{Float64,1})::Array{Float64,1}
-#     # call mittagleffler within an array comprehension
-#     y = [MittagLeffler.mittleff(α, β, x) for x in xList]
+
+# function mittleff(α::Float64, β::Float64, x_array::Array{Float64,1})::Array{Float64,1}
+
+#     # initialise array
+#     y = Array{Float64}(length(x_array))
+#     # do static scheduled threaded loop with no bounds checking
+#     @threads for i = 1:length(x_array)
+#         @inbounds y[i] = MittagLeffler.mittleff(α, β, x_array[i])
+#     end
+#     # return
+#     y
 # end
 
 function quasinull(x::Array{Float64,1})
