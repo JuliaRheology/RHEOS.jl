@@ -197,32 +197,33 @@ Fit RheologyData struct to model and return a fitted model as a RheologyModel ob
 - `verbose`: If true, prints parameters on each optimisation iteration
 """
 function modelfit(data::RheologyData,
-                  modulus::Function;
+                  model::RheologyModel,
+                  modtouse::Symbol;
                   p0::Array{Float64,1} = [-1.0],
                   lo::Array{Float64,1} = [-1.0],
                   hi::Array{Float64,1} = [-1.0],
                   verbose::Bool = false,
                   rel_tol = 1e-4)::RheologyModel
 
-    # get modulus info from database
-    (controlledvar, p0_default) = modeldatabase(modulus)
-
-    # get singularity presence
-    sing = singularitytest(modulus)
+    # get modulus function
+    modulus = getfield(model, modtouse)
 
     # use default p0 if not provided
     if quasinull(p0)
-        p0 = p0_default
+        p0 = model.parameters
     end 
+
+    # get singularity presence
+    sing = singularitytest(modulus, p0)
 
     # generate time series difference array (for convolution)
     dt_series = deriv(data.t)
 
     # get derivative of controlled variable and measured variable
-    if controlledvar == "σ"
+    if modtouse == :J
         dcontrolled = deriv(data.σ, data.t)
         measured = data.ϵ
-    elseif controlledvar == "ϵ"
+    elseif modtouse == :G
         dcontrolled = deriv(data.ϵ, data.t)
         measured = data.σ
     end
@@ -248,7 +249,7 @@ function modelfit(data::RheologyData,
 
     log = vcat(data.log, "Fitted modulus($modulusname) in $timetaken, finished due to $ret with parans $minx")
 
-    RheologyModel(modulus, minx, log)
+    RheologyModel(model.G, model.J, minx, log)
 
 end
 
@@ -257,17 +258,17 @@ end
 
 Given data and model and parameters, predict new dataset based on both.
 """
-function modelpredict(data::RheologyData, model::RheologyModel)::RheologyData
+function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol)::RheologyData
 
-    # get modulus info from database
-    (controlledvar, p0_default) = modeldatabase(model.modulus)
+    # get modulus
+    modulus = getfield(model, modtouse)
 
     # get singularity presence
-    sing = singularitytest(model.modulus)
+    sing = singularitytest(modulus, model.parameters)
 
-    if controlledvar == "σ"
+    if modtouse == :J
         dcontrolled = deriv(data.σ, data.t)
-    elseif controlledvar == "ϵ"
+    elseif modtouse == :G
         dcontrolled = deriv(data.ϵ, data.t)
     end
 
@@ -276,34 +277,34 @@ function modelpredict(data::RheologyData, model::RheologyModel)::RheologyData
 
     # get convolution
     if !sing && data.sampling == "constant"
-        convolved = boltzconvolve_nonsing(model.modulus, data.t, deriv(data.t), model.parameters, dcontrolled)
+        convolved = boltzconvolve_nonsing(modulus, data.t, deriv(data.t), model.parameters, dcontrolled)
 
     elseif sing && data.sampling == "constant"
-        convolved = boltzconvolve_sing(model.modulus, data.t, deriv(data.t), model.parameters, dcontrolled)
+        convolved = boltzconvolve_sing(modulus, data.t, deriv(data.t), model.parameters, dcontrolled)
 
     elseif !sing && data.sampling == "variable"
-        convolved = boltzintegral_nonsing(model.modulus, data.t, model.parameters, dcontrolled)
+        convolved = boltzintegral_nonsing(modulus, data.t, model.parameters, dcontrolled)
 
     elseif sing && data.sampling == "variable"
-        convolved = boltzintegral_sing(model.modulus, data.t, model.parameters, dcontrolled)
+        convolved = boltzintegral_sing(modulus, data.t, model.parameters, dcontrolled)
 
     end
 
     if sing
-        if controlledvar == "σ"
+        if modtouse == :J
             σ = data.σ[2:end]
             ϵ = convolved
-        elseif controlledvar == "ϵ"
+        elseif modtouse == :G
             σ = convolved
             ϵ = data.ϵ[2:end]
         end   
         t = data.t[2:end]
 
     elseif !sing
-        if controlledvar == "σ"
+        if modtouse == :J
             σ = data.σ
             ϵ = convolved
-        elseif controlledvar == "ϵ"
+        elseif modtouse == :G
             σ = convolved
             ϵ = data.ϵ
         end 

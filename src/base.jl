@@ -499,6 +499,18 @@ end
 #~ Processing Functions ~#
 ##########################
 
+function singularitytest(modulus::Function, params::Array{T, 1} where T<:Number)
+
+    startval = modulus([0.0], params)[1]
+
+    if startval == NaN || startval == Inf
+        return true
+    else
+        return false 
+    end
+
+end
+
 """
     boltzintegral_nonsing(modulus::Function, time_series::Array{Float64,1}, params::Array{Float64,1}, prescribed_dot::Array{Float64,1})
 

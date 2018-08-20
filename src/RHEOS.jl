@@ -26,7 +26,7 @@ import Base: +, -, *
 # base.jl
 export deriv, trapz, mittleff, closestindex, closestindices
 
-export var_resample, downsample, fixed_resample
+export singularitytest, var_resample, downsample, fixed_resample
 
 export leastsquares_init, objectivefunc, boltzconvolve, boltzintegral
 
@@ -36,12 +36,9 @@ export RheologyArtificial, RheologyData, fileload, RheologyModel, RheologyModelT
 
 ######################################################
 # models.jl
-export SLS, SLS2, Burgers,
-        SpringPot, FractKV,
-        FractMaxwell, FractZener,
-        FractSpecial
+export SLS, SpringPot, FractionalMaxwell, FractionalKelvinVoigt,  FractionalSpecial
 
-# export modeldatabase
+export null_modulus
 
 ######################################################
 # datagen.jl
