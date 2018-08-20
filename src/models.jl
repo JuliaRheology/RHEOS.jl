@@ -1,5 +1,10 @@
 #!/usr/bin/env julia
 
+# Null modulus
+function null_modulus(t::Array{T,1}, params::Array{T, 1}) where T<:Number
+    return 10000000.0
+end
+
 # Standard Linear Solid (Maxwell Form)
 function G_SLS(t::Array{T,1}, params::Array{T,1}) where T<:Number
     k₀, k₁, η₁ = params
@@ -99,7 +104,12 @@ FractionalSpecial(params::Array{T, 1}) where T<:Number = RheologyModel(G_fractsp
 FractionalSpecial_Precision() = RheologyModel(G_fractspecial, J_fractspecial_slow, [1.0, 1.0, 0.2, 1.0], ["model created with default parameters"])
 FractionalSpecial_Precision(params::Array{T, 1}) where T<:Number = RheologyModel(G_fractspecial, J_fractspecial_slow, params, ["model created by user with parameters $params"])
 
-# Null modulus
-function null_modulus(t::Array{T,1}, params::Array{T, 1}) where T<:Number
-    return 0
+# Plateau-d Power Law
+function G_platpow(t::Array{T,1}, params::Array{T,1}) where T<:Number
+    Gᵩ, G₀, α = params
+
+    G = Gᵩ + (G₀ - Gᵩ)./(1 + t).^(α)
 end
+
+PowerLawPlateau() = RheologyModel(G_platpow, null_modulus, [1.0, 2.0, 0.2], ["model created with default parameters"])
+PowerLawPlateau(params::Array{T, 1}) where T<:Number = RheologyModel(G_platpow, null_modulus, params, ["model created by user with parameters $params"])

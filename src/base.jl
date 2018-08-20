@@ -499,9 +499,9 @@ end
 #~ Processing Functions ~#
 ##########################
 
-function singularitytest(modulus::Function, params::Array{T, 1} where T<:Number)
+function singularitytest(modulus::Function, params::Array{T, 1}; t1::T=0.0) where T<:Number
 
-    startval = modulus([0.0], params)[1]
+    startval = modulus([t1], params)[1]
 
     if startval == NaN || startval == Inf
         return true
@@ -835,6 +835,69 @@ function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Floa
         min_objective!(opt, (params, grad) -> obj_var_sing(params, grad, modulus,
                                                         time_series, prescribed_dot,
                                                         measured; _insight = insight))
+
+    end
+
+    # minimise objective func, minx are the parameters resulting in minimum
+    (minf, minx, ret) = NLopt.optimize(opt, params_init)
+
+    # return all
+    return (minf, minx, ret)
+
+end
+
+function obj_step_nonsing(params::Array{T,1}, grad::Array{T,1}, modulus::Function, t::Array{T,1}, prescribed::T, measured::Array{T,1}; _insight=false) where T<:Number
+    if _insight
+        println("Current Parameters: ", params)
+    end
+
+    estimated = prescribed*modulus(t, params)
+
+    cost = sum(0.5*(measured - estimated).^2)
+end
+
+function obj_step_sing(params::Array{T,1}, grad::Array{T,1}, modulus::Function, t::Array{T,1}, prescribed::T, measured::Array{T,1}; _insight=false) where T<:Number
+    if _insight
+        println("Current Parameters: ", params)
+    end
+
+    estimated = prescribed*modulus(t, params)[2:end]
+
+    cost = sum(0.5*(measured[2:end] - estimated).^2)
+end
+
+function leastsquares_stepinit(params_init::Array{Float64,1}, low_bounds::Array{Float64,1},
+                           hi_bounds::Array{Float64,1}, modulus::Function,
+                           time_series::Array{Float64,1}, prescribed::Float64,
+                           measured::Array{Float64,1}; insight::Bool = false, 
+                           singularity::Bool = false, _rel_tol = 1e-4)
+
+    # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
+    opt = Opt(:LN_SBPLX, length(params_init))
+
+    # set lower bounds and upper bounds unless they take null value of [-1.0]
+    if !quasinull(low_bounds)
+        lower_bounds!(opt, low_bounds)
+    end
+
+    if !quasinull(hi_bounds)
+        upper_bounds!(opt, hi_bounds)
+    end
+
+    # set relative tolerance
+    xtol_rel!(opt, _rel_tol)
+
+    # set Opt object as a minimisation objective. Use a closure for additional
+    # arguments sent to object objectivefunc
+    if !singularity
+        min_objective!(opt, (params, grad) -> obj_step_nonsing(params, grad, modulus,
+                                                            time_series, prescribed, measured;
+                                                            _insight = insight))
+
+    elseif singularity
+        min_objective!(opt, (params, grad) -> obj_step_sing(params, grad, modulus,
+                                                        time_series, prescribed, measured;
+                                                        _insight = insight))
 
     end
 

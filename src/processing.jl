@@ -244,7 +244,6 @@ function modelfit(data::RheologyData,
                                           _rel_tol = rel_tol)
     timetaken = toq()
 
-    #
     modulusname = string(:modulus)
 
     log = vcat(data.log, "Fitted modulus($modulusname) in $timetaken, finished due to $ret with parans $minx")
@@ -318,6 +317,109 @@ function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol
     RheologyData(σ, ϵ, t, data.sampling, log)
 
 end
+
+function modelstepfit(data::RheologyData,
+                  model::RheologyModel,
+                  modtouse::Symbol;
+                  p0::Array{Float64,1} = [-1.0],
+                  lo::Array{Float64,1} = [-1.0],
+                  hi::Array{Float64,1} = [-1.0],
+                  verbose::Bool = false,
+                  rel_tol = 1e-4)::RheologyModel
+
+    # get modulus function
+    modulus = getfield(model, modtouse)
+
+    # use default p0 if not provided
+    if quasinull(p0)
+        p0 = model.parameters
+    end 
+
+    # get singularity presence
+    sing = singularitytest(modulus, p0; t1 = data.t[1])
+
+    # get controlled variable (just take first element as it's a step) and measured variable
+    if modtouse == :J
+        controlled = data.σ[1]
+        measured = data.ϵ
+    elseif modtouse == :G
+        controlled = data.ϵ[1]
+        measured = data.σ
+    end
+
+    # start fit
+    tic()
+    (minf, minx, ret) = leastsquares_stepinit(p0,
+                                              lo, 
+                                              hi,
+                                              modulus, 
+                                              data.t, 
+                                              controlled,
+                                              measured; 
+                                              insight = verbose,
+                                              singularity = sing,
+                                              _rel_tol = rel_tol)
+    timetaken = toq()
+
+    modulusname = string(:modulus)
+
+    log = vcat(data.log, "Fitted modulus($modulusname) in $timetaken, finished due to $ret with parans $minx")
+
+    RheologyModel(model.G, model.J, minx, log)
+
+end
+
+function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Symbol)::RheologyData
+
+    # get modulus
+    modulus = getfield(model, modtouse)
+
+    # get singularity presence
+    sing = singularitytest(modulus, model.parameters; t1 = data.t[1])
+
+    if modtouse == :J
+        controlled = data.σ[1]
+    elseif modtouse == :G
+        controlled = data.ϵ[1]
+    end
+
+    # get convolution
+    if !sing
+        predicted = controlled*modulus(data.t, model.parameters)
+
+    elseif sing
+        predicted = controlled*modulus(data.t, model.parameters)[2:end]
+    end
+
+    if sing
+        if modtouse == :J
+            σ = data.σ[2:end]
+            ϵ = predicted
+        elseif modtouse == :G
+            σ = predicted
+            ϵ = data.ϵ[2:end]
+        end   
+        t = data.t[2:end]
+
+    elseif !sing
+        if modtouse == :J
+            σ = data.σ
+            ϵ = predicted
+        elseif modtouse == :G
+            σ = predicted
+            ϵ = data.ϵ
+        end 
+        t = data.t
+
+    end
+        
+    # store operation
+    log = vcat(data.log, "Predicted data from model:", model.log)
+
+    RheologyData(σ, ϵ, t, data.sampling, log)
+
+end
+
 
 ##############################
 #~ Postprocessing Functions ~#
@@ -477,7 +579,7 @@ function exportdata(self::RheologyData; filedir::String = "", ext = "_mod.csv")
     names!(fulldata_frame, [:stress, :strain, :time])
 
     # array to write
-    fulldata = [self.σ, self.ϵ, self.t]
+    # fulldata = [self.σ, self.ϵ, self.t]
 
     uCSV.write(fulldir, fulldata_frame)
 
