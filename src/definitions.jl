@@ -1,156 +1,24 @@
 #!/usr/bin/env julia
 
-"""
-    RheologyArtificial(data::Array{Float64,1}, t::Array{Float64,1}, stepsize::Float64, log::Array{String,1})
+# """
+#     RheologyData(data::Array{Float64,1}, t::Array{Float64,1}, stepsize::Float64, log::Array{String,1})
 
-Contains generated data using functions from datagen.jl. Overloaded to support
-addtion, subtraction and multiplication.
-"""
-struct RheologyArtificial
+# Contains generated data using functions from datagen.jl. Overloaded to support
+# addtion, subtraction and multiplication.
+# """
+# struct RheologyData
 
-    # original data
-    data::Array{Float64,1}
-    t::Array{Float64,1}
+#     # original data
+#     data::Array{Float64,1}
+#     t::Array{Float64,1}
 
-    # constant sample rate step size
-    stepsize::Float64
+#     # constant sample rate step size
+#     stepsize::Float64
 
-    # operations applied, stores history of which functions (including arguments)
-    log::Array{String,1}
+#     # operations applied, stores history of which functions (including arguments)
+#     log::Array{String,1}
 
-end
-
-function +(self1::RheologyArtificial, self2::RheologyArtificial)
-
-    @assert self1.stepsize==self2.stepsize "Step size must be same for both datasets"
-
-    # get time array
-    if length(self1.t) >= length(self2.t)
-        t  = self1.t
-    else
-        t = self2.t
-    end
-
-    # init data array and fill by summing over each argument's indices
-    data = zeros(length(t))
-
-    # sum with last value propagating (hanging)
-    for i in 1:length(t)
-
-        if i<=length(self1.t)
-            data[i] += self1.data[i]
-        else
-            data[i] += self1.data[end]
-        end
-
-        if i<=length(self2.t)
-            data[i] += self2.data[i]
-        else
-            data[i] += self2.data[end]
-        end
-
-    end
-
-    # log
-    log = vcat(self1.log, self2.log, ["previous two logs added"])
-
-    RheologyArtificial(data, t, self1.stepsize, log)
-
-end
-
-function -(self1::RheologyArtificial, self2::RheologyArtificial)
-
-    @assert self1.stepsize==self2.stepsize "Step size must be same for both datasets"
-
-    # get time array
-    if length(self1.t) >= length(self2.t)
-        t  = self1.t
-    else
-        t = self2.t
-    end
-
-    # init data array and fill by summing over each argument's indices
-    data = zeros(length(t))
-
-    # sum with last value propagating (hanging)
-    for i in 1:length(t)
-
-        if i<=length(self1.t)
-            data[i] += self1.data[i]
-        else
-            data[i] += self1.data[end]
-        end
-
-        if i<=length(self2.t)
-            data[i] -= self2.data[i]
-        else
-            data[i] -= self2.data[end]
-        end
-
-    end
-
-    # log
-    log = vcat(self1.log, self2.log, ["previous two logs added"])
-
-    RheologyArtificial(data, t, self1.stepsize, log)
-
-end
-
-function *(self1::RheologyArtificial, self2::RheologyArtificial)
-
-    @assert self1.stepsize==self2.stepsize "Step size must be same for both datasets"
-
-    # get time array
-    if length(self1.t) >= length(self2.t)
-        t  = self1.t
-    else
-        t = self2.t
-    end
-
-    # init data array and fill by summing over each argument's indices
-    data = zeros(length(t))
-
-    # sum with last value propagating (hanging)
-    for i in 1:length(t)
-
-        if i<=length(self1.t) && i<=length(self2.t)
-            data[i] = self1.data[i]*self2.data[i]
-
-        elseif i<=length(self1.t) && i>length(self2.t)
-            data[i] = self1.data[i]
-
-        elseif i>length(self1.t) && i<=length(self2.t)
-            data[i] = self2.data[i]
-
-        end
-
-    end
-
-    # log
-    log = vcat(self1.log, self2.log, ["previous two logs added"])
-
-    RheologyArtificial(data, t, self1.stepsize, log)
-
-end
-
-function *(self::RheologyArtificial, operand::Real)
-
-    # init data array and fill by summing over each argument's indices
-    data = self.data*operand
-
-    # log
-    log = vcat(self.log, ["multiplied data by $operand"])
-
-    RheologyArtificial(data, self.t, self.stepsize, log)
-
-end
-
-function *(operand::Real, self::RheologyArtificial)
-    
-    # multiplication commutes so call function as defined for opposite operand order
-    return self*operand
-
-end
+# end
 
 """
     RheologyData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, sampling::String, log::Array{String,1})
@@ -245,12 +113,11 @@ function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2:
     end
 
     # Check if time vector is equally spaced
-    diff = round.(t[2:end]-t[1:end-1], 4)
-    check = any(x->x!=diff[1], diff)
-    if check == true
-       sampling = "variable"
-    else
+    constant = constantcheck(t)
+    if constant
        sampling = "constant"
+    elseif !constant
+       sampling = "variable"
     end
 
     # return class with all fields initialised
@@ -258,9 +125,146 @@ function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2:
     
 end
 
-function RheologyData(self::RheologyArtificial)
+function RheologyData(data::Array{T,1}, t::Array{T,1}, log::Array{String,1}) where T<:Real
+    # used when generating data so always constant
+    RheologyData(data, data, t, "constant", log)
 
-    return RheologyData(self.data, self.data, self.t, "constant", self.log)
+end
+
+function +(self1::RheologyData, self2::RheologyData)
+
+    @assert sampleratecompare(self1.t, self2.t) "Step size must be same for both datasets"
+
+    # get time array
+    if length(self1.t) >= length(self2.t)
+        t = self1.t
+    else
+        t = self2.t
+    end
+
+    # init data array and fill by summing over each argument's indices
+    σ = zeros(length(t))
+    ϵ = zeros(length(t))
+    # sum with last value propagating (hanging)
+    for i in 1:length(t)
+        if i<=length(self1.t)
+            σ[i] += self1.σ[i]
+            ϵ[i] += self1.ϵ[i]
+        else
+            σ[i] += self1.σ[end]
+            ϵ[i] += self1.ϵ[end]
+        end
+
+        if i<=length(self2.t)
+            σ[i] += self2.σ[i]
+            ϵ[i] += self2.ϵ[i]
+        else
+            σ[i] += self2.σ[end]
+            ϵ[i] += self2.ϵ[end]
+        end
+    end
+
+    # log
+    log = vcat(self1.log, self2.log, ["previous two logs added"])
+
+    RheologyData(σ, ϵ, t, "constant", log)
+
+end
+
+function -(self1::RheologyData, self2::RheologyData)
+
+    @assert sampleratecompare(self1.t, self2.t) "Step size must be same for both datasets"
+
+    # get time array
+    if length(self1.t) >= length(self2.t)
+        t = self1.t
+    else
+        t = self2.t
+    end
+
+    # init data array and fill by summing over each argument's indices
+    σ = zeros(length(t))
+    ϵ = zeros(length(t))
+    # sum with last value propagating (hanging)
+    for i in 1:length(t)
+        if i<=length(self1.t)
+            σ[i] += self1.σ[i]
+            ϵ[i] += self1.ϵ[i]
+        else
+            σ[i] += self1.σ[end]
+            ϵ[i] += self1.ϵ[end]
+        end
+
+        if i<=length(self2.t)
+            σ[i] -= self2.σ[i]
+            ϵ[i] -= self2.ϵ[i]
+        else
+            σ[i] -= self2.σ[end]
+            ϵ[i] -= self2.ϵ[end]
+        end
+    end
+
+    # log
+    log = vcat(self1.log, self2.log, ["previous two logs added"])
+
+    RheologyData(σ, ϵ, t, "constant", log)
+
+end
+
+function *(self1::RheologyData, self2::RheologyData)
+
+    @assert sampleratecompare(self1.t, self2.t) "Step size must be same for both datasets"
+
+    # get time array
+    if length(self1.t) >= length(self2.t)
+        t  = self1.t
+    else
+        t = self2.t
+    end
+
+    # init data array and fill by summing over each argument's indices
+    σ = zeros(length(t))
+    ϵ = zeros(length(t))
+    # sum with last value propagating (hanging)
+    for i in 1:length(t)
+        if i<=length(self1.t) && i<=length(self2.t)
+            σ[i] = self1.σ[i]*self2.σ[i]
+            ϵ[i] = self1.ϵ[i]*self2.ϵ[i]
+
+        elseif i<=length(self1.t) && i>length(self2.t)
+            σ[i] = self1.σ[i]
+            ϵ[i] = self1.ϵ[i]
+
+        elseif i>length(self1.t) && i<=length(self2.t)
+            σ[i] = self2.σ[i]
+            ϵ[i] = self2.ϵ[i]
+
+        end
+    end
+
+    # log
+    log = vcat(self1.log, self2.log, ["previous two logs added"])
+
+    RheologyData(σ, ϵ, t, "constant", log)
+
+end
+
+function *(self::RheologyData, operand::Real)
+
+    ϵ = self.ϵ*operand
+    σ = self.σ*operand
+
+    # log
+    log = vcat(self.log, ["multiplied data by $operand"])
+
+    RheologyData(σ, ϵ, self.t, "constant", log)
+
+end
+
+function *(operand::Real, self::RheologyData)
+    
+    # multiplication commutes so call function as defined for opposite operand order
+    return self*operand
 
 end
 

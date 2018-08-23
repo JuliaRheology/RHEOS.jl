@@ -3,14 +3,14 @@
 """
     stepgen(t_total::Float64, t_on::Float64; t_trans::Float64 = (t_total - t_on)/100.0, amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 1.0)
 
-Generate RheologyArtificial struct with a step function approximated by a logisitic function.
+Generate RheologyData struct with a step function approximated by a logisitic function.
 """
 function stepgen(t_total::Float64, 
                   t_on::Float64;
                   t_trans::Float64 = 0.0,
                   amplitude::Float64 = 1.0,
                   baseval::Float64 = 0.0,
-                  stepsize::Float64 = 1.0, )
+                  stepsize::Float64 = 1.0)
 
     t = collect(0.0:stepsize:t_total)
 
@@ -30,21 +30,21 @@ function stepgen(t_total::Float64,
         end
     end
 
-    RheologyArtificial(data, t, stepsize, ["stepgen: t_total: $t_total, t_on: $t_on, t_trans: $t_trans, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
+    RheologyData(data, t, ["stepgen: t_total: $t_total, t_on: $t_on, t_trans: $t_trans, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
 
 end
 
 """
     rampgen(t_total::Float64, t_start::Float64, t_stop::Float64; amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 1.0)
 
-Generate RheologyArtificial struct with a ramp function.
+Generate RheologyData struct with a ramp function.
 """
 function rampgen(t_total::Float64,
                   t_start::Float64,
                   t_stop::Float64;
                   amplitude::Float64 = 1.0,
                   baseval::Float64 = 0.0,
-                  stepsize::Float64 = 1.0 )
+                  stepsize::Float64 = 1.0)
 
     t = collect(0.0:stepsize:t_total)
 
@@ -62,14 +62,14 @@ function rampgen(t_total::Float64,
 
     end
 
-    RheologyArtificial(data, t, stepsize, ["rampgen: t_total: $t_total, t_start: $t_start, t_stop: $t_stop, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
+    RheologyData(data, t, ["rampgen: t_total: $t_total, t_start: $t_start, t_stop: $t_stop, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
 
 end
 
 """
     singen(t_total::Float64, frequency::Float64; t_start::Float64 = 0.0, phase::Float64 = 0.0, amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 1.0)
 
-Generate RheologyArtificial struct with a sinusoidal function.
+Generate RheologyData struct with a sinusoidal function.
 """
 function singen(t_total::Float64,
                 frequency::Float64;
@@ -77,7 +77,7 @@ function singen(t_total::Float64,
                 phase::Float64 = 0.0,
                 amplitude::Float64 = 1.0,
                 baseval::Float64 = 0.0,
-                stepsize::Float64 = 1.0 )
+                stepsize::Float64 = 1.0)
 
     t = collect(0.0:stepsize:t_total)
 
@@ -91,16 +91,20 @@ function singen(t_total::Float64,
 
     end
 
-    RheologyArtificial(data, t, stepsize, ["singen: t_total: $t_total, frequency: $frequency, t_start: $t_start, phase: $phase, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
+    RheologyData(data, t, ["singen: t_total: $t_total, frequency: $frequency, t_start: $t_start, phase: $phase, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
 
 end
 
 """
-    repeatdata(self::RheologyArtificial, n::Integer)
+    repeatdata(self::RheologyData, n::Integer)
 
-Repeat a given RheologyArtificial generated data set n times.
+Repeat a given RheologyData generated data set n times.
 """
-function repeatdata(self::RheologyArtificial, n::Integer; t_trans = 0.0)
+function repeatdata(self::RheologyData, n::Integer; t_trans = 0.0)
+
+    # to deal with new factoring just add check that all(ϵ)==all(σ) 
+    # then call dataraw = self.ϵ or dataraw = self.σ, change self.data
+    # to dataraw, and change constructor at the end.
 
     t = collect(0.0:self.stepsize:(self.t[end]*n))
 
@@ -131,7 +135,7 @@ function repeatdata(self::RheologyArtificial, n::Integer; t_trans = 0.0)
 
         log = vcat(self.log, ["repeated data $n times with transition time $t_trans"])
 
-        return RheologyArtificial(data, t, self.stepsize, log)
+        return RheologyData(data, t, log)
 
     # discrete jump
     elseif t_trans==0.0
@@ -144,18 +148,22 @@ function repeatdata(self::RheologyArtificial, n::Integer; t_trans = 0.0)
 
         log = vcat(self.log, ["repeated data $n times with transition time $t_trans"])
 
-        return RheologyArtificial(data, t, self.stepsize, log)
+        return RheologyData(data, t, log)
 
     end
 
 end
 
 """
-    addnoise(self::RheologyArtificial; amplitude::Float64 = 0.1, seed::Union{Int, Void} = nothing)
+    addnoise(self::RheologyData; amplitude::Float64 = 0.1, seed::Union{Int, Void} = nothing)
 
 Add random noise to artificially generated data.
 """
-function addnoise(self::RheologyArtificial; amplitude::Float64 = 0.1, seed::Union{Int, Void} = nothing)
+function addnoise(self::RheologyData; amplitude::Float64 = 0.1, seed::Union{Int, Void} = nothing)
+
+    # to deal with new factoring just add check that all(ϵ)==all(σ) 
+    # then call dataraw = self.ϵ or dataraw = self.σ, change self.data
+    # to dataraw, and change constructor at the end.
 
     if typeof(seed)==Void
         # get random seed
@@ -170,7 +178,7 @@ function addnoise(self::RheologyArtificial; amplitude::Float64 = 0.1, seed::Unio
 
     log = vcat(self.log, ["added noise of amplitude $amplitude, with seed $seed"])
 
-    RheologyArtificial(data, self.t, self.stepsize, log)
+    RheologyData(data, self.t, log)
 
 end
 

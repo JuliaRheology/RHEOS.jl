@@ -24,7 +24,7 @@ import Base: +, -, *
 
 ######################################################
 # base.jl
-export deriv, trapz, mittleff, closestindex, closestindices
+export deriv, trapz, mittleff, closestindex, closestindices, constantcheck, sampleratecompare
 
 export singularitytest, var_resample, downsample, fixed_resample
 
@@ -32,7 +32,7 @@ export leastsquares_init, objectivefunc, boltzconvolve, boltzintegral
 
 ######################################################
 # definitions.jl
-export RheologyArtificial, RheologyData, fileload, RheologyModel, RheologyModelTemp
+export RheologyData, fileload, RheologyModel, RheologyModelTemp
 
 ######################################################
 # models.jl

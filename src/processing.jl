@@ -244,9 +244,9 @@ function modelfit(data::RheologyData,
                                           _rel_tol = rel_tol)
     timetaken = toq()
 
-    modulusname = string(:modulus)
+    modulusname = string(modulus)
 
-    log = vcat(data.log, "Fitted modulus($modulusname) in $timetaken, finished due to $ret with parans $minx")
+    log = vcat(data.log, "Fitted modulus $modulusname in $timetaken seconds, finished due to $ret with parameters $minx")
 
     RheologyModel(model.G, model.J, minx, log)
 
@@ -361,15 +361,15 @@ function modelstepfit(data::RheologyData,
                                               _rel_tol = rel_tol)
     timetaken = toq()
 
-    modulusname = string(:modulus)
+    modulusname = string(modulus)
 
-    log = vcat(data.log, "Fitted modulus($modulusname) in $timetaken, finished due to $ret with parans $minx")
+    log = vcat(data.log, "Fitted modulus $modulusname in $timetaken seconds, finished due to $ret with parameters $minx")
 
     RheologyModel(model.G, model.J, minx, log)
 
 end
 
-function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Symbol)::RheologyData
+function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; step_on::Real = 0.0)::RheologyData
 
     # get modulus
     modulus = getfield(model, modtouse)
@@ -385,38 +385,28 @@ function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Sy
 
     # get convolution
     if !sing
-        predicted = controlled*modulus(data.t, model.parameters)
+        stepon_el = closestindex(data.t, step_on)
+        predicted = zeros(length(data.t))
+        predicted[(stepon_el):end] = controlled*modulus(data.t[stepon_el:end] - data.t[stepon_el], model.parameters)
 
     elseif sing
-        predicted = controlled*modulus(data.t, model.parameters)[2:end]
+        stepon_el = closestindex(data.t, step_on)
+        predicted = zeros(length(data.t))
+        predicted[(stepon_el + 1):end] = controlled*modulus(data.t[(stepon_el + 1):end] - data.t[stepon_el], model.parameters)
     end
 
-    if sing
-        if modtouse == :J
-            σ = data.σ[2:end]
-            ϵ = predicted
-        elseif modtouse == :G
-            σ = predicted
-            ϵ = data.ϵ[2:end]
-        end   
-        t = data.t[2:end]
-
-    elseif !sing
-        if modtouse == :J
-            σ = data.σ
-            ϵ = predicted
-        elseif modtouse == :G
-            σ = predicted
-            ϵ = data.ϵ
-        end 
-        t = data.t
-
-    end
+    if modtouse == :J
+        σ = data.σ
+        ϵ = predicted
+    elseif modtouse == :G
+        σ = predicted
+        ϵ = data.ϵ
+    end 
         
     # store operation
     log = vcat(data.log, "Predicted data from model:", model.log)
 
-    RheologyData(σ, ϵ, t, data.sampling, log)
+    RheologyData(σ, ϵ, data.t, data.sampling, log)
 
 end
 

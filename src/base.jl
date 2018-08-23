@@ -908,3 +908,21 @@ function leastsquares_stepinit(params_init::Array{Float64,1}, low_bounds::Array{
     return (minf, minx, ret)
 
 end
+
+function constantcheck(t::Array{T,1} where T<:Real)
+    diff = round.(t[2:end]-t[1:end-1], 4)
+    # check if any element is not equal to 1st element
+    check = !any(x -> x != diff[1], diff) 
+end
+
+function sampleratecompare(t1::Array{T,1}, t2::Array{T,1}) where T<:Real
+
+    @assert constantcheck(t1) "Sample-rate of both arguments must be constant, first argument is non-constant"
+    @assert constantcheck(t2) "Sample-rate of both arguments must be constant, second argument is non-constant"
+
+    diff1 = round.(t1[2:end]-t1[1:end-1], 4)
+    diff2 = round.(t2[2:end]-t2[1:end-1], 4)
+
+    diff1[1] == diff2[1]
+
+end
