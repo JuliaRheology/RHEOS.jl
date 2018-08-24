@@ -13,53 +13,30 @@ using Interpolations
 using NLopt
 using JLD
 using DataFrames
-# experimental dependency not automatically imported from base.jl
-using Base.Threads
-# for overloading in datagen.jl
 import Base: +, -, *
 
-# println("\n===========================")
-# println("Number of threads in use: ", nthreads())
-# println("===========================\n")
-
 ######################################################
-# base.jl
-export deriv, trapz, mittleff, closestindex, closestindices, constantcheck, sampleratecompare
 
-export singularitytest, var_resample, downsample, fixed_resample
-
-export leastsquares_init, objectivefunc, boltzconvolve, boltzintegral
-
-######################################################
 # definitions.jl
 export RheologyData, RheologyModel, RheologyModelTemp
-
-######################################################
 # IO.jl
 export fileload, savedata, loaddata, savemodel, loadmodel, exportdata
-
-######################################################
 # models.jl
-export SLS, SpringPot, FractionalMaxwell, FractionalKelvinVoigt, FractionalSpecial, PowerLawPlateau
-
 export null_modulus
-
-######################################################
+export SLS, SpringPot, FractionalMaxwell, FractionalKelvinVoigt, FractionalSpecial, PowerLawPlateau
 # datagen.jl
 export stepgen, rampgen, singen, repeatdata, addnoise
-
-######################################################
 # processing.jl
 export var_resample, downsample, fixed_resample, smooth, mapbackdata
-
 export modelfit, modelpredict, modelstepfit, modelsteppredict
 
-######################################################
 include("base.jl")
 include("definitions.jl")
 include("IO.jl")
 include("models.jl")
 include("datagen.jl")
 include("processing.jl")
+
 ######################################################
+
 end

@@ -5,14 +5,14 @@
 #######################
 
 """
-    trapz(y::Array{Float64,1}, x::Array{Float64,1}[; init::Float64 = 0.0])
+    trapz(y, x[; init = 0.0])
 
 Array based trapezoidal integration of y with respect to x.
 
 Limits of integration defined by the start and end points of the arrays. 'init'
 keyword argument is used for setting an initial condition.
 """
-function trapz(y::Array{Float64,1}, x::Array{Float64,1}; init::Float64=0.0)::Float64
+function trapz(y::Array{T,1}, x::Array{T,1}; init::T=0.0) where T<:Real
 
     @assert length(x)==length(y) "X and Y array length must match."
 
@@ -26,66 +26,58 @@ function trapz(y::Array{Float64,1}, x::Array{Float64,1}; init::Float64=0.0)::Flo
 
     # return summation
     r/2.0
+
 end
 
 
 """
-    deriv(y::Array{Float64,1}[, x::Array{Float64,1}])
+    deriv(y[, x])
 
 Given two arrays of data, x and y, calculate dy/dx using central difference
 method and forward and backward difference for array boundaries.
 
 If only one array passed in, y, then calculates derivative y with respect to
 array element indices.
-
-# Example
-
-```jldoctest
-x = collect(0.0:0.1:5.0)
-
-y = x.^2
-
-dy_dx = deriv(y, x) # ~= 2*x
-```
 """
-function deriv(y::Array{T,1}, x::Array{T,1}) where T<:Number
+function deriv(y::Array{T,1}, x::Array{T,1}) where T<:Real
 
     # assert y and x arrays are same length
     @assert length(y)==length(x) "X and Y Array lengths must match."
 
     # initialise zero array of length y
-    ydot = zeros(T, length(y))
-    for i in eachindex(y)
+    ydot = similar(y)
+    @inbounds for i in eachindex(y)
         if i==start(eachindex(y))
             # right handed difference for lower boundary
-            @inbounds ydot[i] = (y[i+1] - y[i])/(x[i+1] - x[i])
+            ydot[i] = (y[i+1] - y[i])/(x[i+1] - x[i])
         elseif i==length(y)
             # left handed difference for upper boundary
-            @inbounds ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
+            ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
         else
             # central difference with uneven spacing
-            @inbounds Δx₁ = x[i] - x[i-1]
-            @inbounds Δx₂ = x[i+1] - x[i]
-            @inbounds ydot[i] = (y[i+1]*Δx₁^2 + (Δx₂^2 - Δx₁^2)*y[i] - y[i-1]*Δx₂^2)/(Δx₁*Δx₂*(Δx₁ + Δx₂))
+            Δx₁ = x[i] - x[i-1]
+            Δx₂ = x[i+1] - x[i]
+            ydot[i] = (y[i+1]*Δx₁^2 + (Δx₂^2 - Δx₁^2)*y[i] - y[i-1]*Δx₂^2)/(Δx₁*Δx₂*(Δx₁ + Δx₂))
         end
     end
     ydot
+
 end
 
 function deriv(y::Array{T,1}) where T<:Number
 
     # initialise zero array of length y
-    ydot = zeros(T, length(y))
-    for i in eachindex(y)
+    ydot = similar(y)
+    @inbounds for i in eachindex(y)
         if i==start(eachindex(y))
             # right handed difference for lower boundary
-            @inbounds ydot[i] = (y[i+1] - y[i])
+            ydot[i] = (y[i+1] - y[i])
         elseif i==length(y)
             # left handed difference for upper boundary
-            @inbounds ydot[i] = (y[i] - y[i-1])
+            ydot[i] = (y[i] - y[i-1])
         else
             # central difference with even unit 1 spacing
-            @inbounds ydot[i] = (y[i+1] - y[i-1])/2
+            ydot[i] = (y[i+1] - y[i-1])/2
         end
     end
     ydot
@@ -353,7 +345,6 @@ end
 Uses `closestindex` iteratively to find closest index for all values in `vals` array.
 """
 closestindices(x::Array{T,1}, vals::Array{T,1}) where T<:Real = broadcast(closestindex, (x,), vals)
-
 
 """
     mapback(xᵦ::Array{Float64,1}, x::Array{Float64,1})
