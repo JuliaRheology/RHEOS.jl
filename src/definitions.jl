@@ -269,44 +269,6 @@ function *(operand::Real, self::RheologyData)
 end
 
 """
-    fileload(colnames::Array{String,1}, filedir::String)
-
-Load data from a CSV file (three columns, comma seperated). Columns must
-be identified by providing an array of strings which tell the function
-which data (stress, strain or time) is contained in each column. This is
-used to construct a RheologyData struct, which provides the basis for
-subsequent high level operations within RHEOS.
-
-# Example
-
-```jldoctest
-# directory path to the file
-fileDir = "../data/rheologyData1.csv"
-
-# load the data into RheologyData struct
-dataforprocessing = fileload(["time","stress","strain"], fileDir)
-```
-"""
-function fileload(colnames::Array{String,1}, filedir::String)::RheologyData
-
-    # check colnames length is correct
-    @assert length(colnames)==3 || length(colnames)==2 "Two or three column names required, one of each: 'stress', 'strain' and 'time'."
-
-    # init types helper
-    types = [Float64 for i = 1:length(colnames)]
-
-    # read data from file
-    (datacsv, head_out) = uCSV.read(filedir; delim=',', types=types)
-
-    # generate RheologyData struct and output
-    if length(colnames)==3
-        return RheologyData(colnames, datacsv[1], datacsv[2], datacsv[3]; filedir = filedir)
-    elseif length(colnames)==2
-        return RheologyData(colnames, datacsv[1], datacsv[2]; filedir = filedir)
-    end
-end
-
-"""
     RheologyModel(name::Function[, parameters::Array{Float64,1}, log::Array{String,1}])
 
 Struct which contains the results of a model fit: model name, parameters, and inherited log with final cost, 

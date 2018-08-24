@@ -32,7 +32,12 @@ export leastsquares_init, objectivefunc, boltzconvolve, boltzintegral
 
 ######################################################
 # definitions.jl
-export RheologyData, fileload, RheologyModel, RheologyModelTemp
+export RheologyData, RheologyModel, RheologyModelTemp
+
+######################################################
+# IO.jl
+
+export fileload, savedata, loaddata, savemodel, loadmodel, exportdata
 
 ######################################################
 # models.jl
@@ -50,11 +55,10 @@ export var_resample, downsample, fixed_resample, smooth, mapbackdata
 
 export modelfit, modelpredict, modelstepfit, modelsteppredict
 
-export savedata, loaddata, savemodel, loadmodel, exportdata
-
 ######################################################
 include("base.jl")
 include("definitions.jl")
+# include("IO.jl")
 include("models.jl")
 include("datagen.jl")
 include("processing.jl")
