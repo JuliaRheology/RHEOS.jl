@@ -5,15 +5,10 @@ using PyPlot
 # get data
 sine = singen(800.0, 1/50; phase = -90.0)
 ramp = rampgen(800.0, 10.0, 400.0) - rampgen(825.0, 400.0, 800.0)
-rampedsine = ramp*sine
+data = ramp*sine
 
-data = RheologyData(rampedsine)
-
-sls_model = RheologyModel(G_SLS, [844.152, 2043.98, 5.15527])
-springpot_model = RheologyModel(G_springpot, [2997.7, 0.281836])
-
-sls_predicted = modelpredict(data, sls_model)
-springpot_predicted = modelpredict(data, springpot_model)
+sls_predicted = modelpredict(data, SLS([844.152, 2043.98, 5.15527]), :G)
+springpot_predicted = modelpredict(data, SpringPot([2997.7, 0.281836]), :G)
 
 fig, ax = subplots()
 ax[:plot](data.t, data.σ, "-", label="original")
@@ -24,22 +19,14 @@ show()
 
 # get data
 step = stepgen(50.0, 25.0; stepsize = 0.01)
-repeatedstep = repeatdata(step, 5)
+data = repeatdata(step, 5)
 
-data = RheologyData(repeatedstep)
-
-sls_model = RheologyModel(G_SLS)
-springpot_model = RheologyModel(G_springpot)
-fractzener_model = RheologyModel(G_fractzener)
-
-sls_predicted = modelpredict(data, sls_model)
-springpot_predicted = modelpredict(data, springpot_model)
-fractzener_predicted = modelpredict(data, fractzener_model)
+sls_predicted = modelpredict(data, SLS(), :G)
+springpot_predicted = modelpredict(data, SpringPot(), :G)
 
 fig, ax = subplots()
 ax[:plot](data.t, data.σ, "-", label="original")
 ax[:plot](sls_predicted.t, sls_predicted.σ, "-", label="SLS")
 ax[:plot](springpot_predicted.t, springpot_predicted.σ, "--", label="springpot")
-ax[:plot](fractzener_predicted.t, fractzener_predicted.σ, "--", label="fract zener")
 ax[:legend](loc="best")
 show()

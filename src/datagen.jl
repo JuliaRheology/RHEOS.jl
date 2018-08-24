@@ -102,32 +102,36 @@ Repeat a given RheologyData generated data set n times.
 """
 function repeatdata(self::RheologyData, n::Integer; t_trans = 0.0)
 
-    # to deal with new factoring just add check that all(ϵ)==all(σ) 
-    # then call dataraw = self.ϵ or dataraw = self.σ, change self.data
-    # to dataraw, and change constructor at the end.
+    @assert self.σ==self.ϵ "Repeat data only works when σ==ϵ which is the state of RheologyData after being generated using the built-in RHEOS data generation functions"
+    
+    dataraw = self.σ
 
-    t = collect(0.0:self.stepsize:(self.t[end]*n))
+    @assert constantcheck(self.t) "Data sample-rate must be constant"
+
+    step_size = self.t[2] - self.t[1]
+
+    t = collect(0.0:step_size:(self.t[end]*n))
 
     # smooth transition between repeats
     if t_trans>0.0
-        elbuffer = round(Int, (1/2)*(t_trans/self.stepsize))
+        elbuffer = round(Int, (1/2)*(t_trans/step_size))
         selflength = length(self.t)
 
-        # ensure smooth transition from end of self.data to new beginning so no discontinuities
-        data_smooth_end = stepgen(self.t[end], self.t[end]; t_trans = t_trans, amplitude = self.data[1] - self.data[end], baseval = self.data[selflength - elbuffer], stepsize = self.stepsize)
-        data_smooth_start = stepgen(self.t[end], 0.0; t_trans = t_trans, amplitude = self.data[1] - self.data[end], baseval = self.data[selflength - elbuffer], stepsize = self.stepsize)
+        # ensure smooth transition from end of data to new beginning so no discontinuities
+        data_smooth_end = stepgen(self.t[end], self.t[end]; t_trans = t_trans, amplitude = dataraw[1] - dataraw[end], baseval = dataraw[selflength - elbuffer], stepsize = step_size)
+        data_smooth_start = stepgen(self.t[end], 0.0; t_trans = t_trans, amplitude = dataraw[1] - dataraw[end], baseval = dataraw[selflength - elbuffer], stepsize = step_size)
         data_smoother = data_smooth_end + data_smooth_start
 
         data_single = self + data_smoother
 
-        data = repeat(data_single.data[1:end] - self.data[selflength - elbuffer], outer=[n])
+        data = repeat(data_single.data[1:end] - dataraw[selflength - elbuffer], outer=[n])
 
         for i = 1:(n-1)
             deleteat!(data, i*length(self.t) + (2-i))
         end
 
         # fix first repeat
-        for (i, v) in enumerate(self.data)
+        for (i, v) in enumerate(dataraw)
             if i<(elbuffer*100) && i<round(Int, length(self.t)/2) 
                 data[i] = v
             end
@@ -140,7 +144,7 @@ function repeatdata(self::RheologyData, n::Integer; t_trans = 0.0)
     # discrete jump
     elseif t_trans==0.0
 
-        data = repeat(self.data, outer=[n])
+        data = repeat(dataraw, outer=[n])
 
         for i = 1:(n-1)
             deleteat!(data, i*length(self.t) + (2-i))
@@ -161,9 +165,9 @@ Add random noise to artificially generated data.
 """
 function addnoise(self::RheologyData; amplitude::Float64 = 0.1, seed::Union{Int, Void} = nothing)
 
-    # to deal with new factoring just add check that all(ϵ)==all(σ) 
-    # then call dataraw = self.ϵ or dataraw = self.σ, change self.data
-    # to dataraw, and change constructor at the end.
+    @assert self.σ==self.ϵ "addnoise only works when σ==ϵ which is the state of RheologyData after being generated using the built-in RHEOS data generation functions"
+
+    dataraw = self.σ
 
     if typeof(seed)==Void
         # get random seed
@@ -174,7 +178,7 @@ function addnoise(self::RheologyData; amplitude::Float64 = 0.1, seed::Union{Int,
         srand(seed)
     end
 
-    data = self.data + amplitude*(2*rand(Float64, length(self.data)) - 1)
+    data = dataraw + amplitude*(2*rand(Float64, length(dataraw)) - 1)
 
     log = vcat(self.log, ["added noise of amplitude $amplitude, with seed $seed"])
 

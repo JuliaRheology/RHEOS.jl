@@ -36,7 +36,6 @@ export RheologyData, RheologyModel, RheologyModelTemp
 
 ######################################################
 # IO.jl
-
 export fileload, savedata, loaddata, savemodel, loadmodel, exportdata
 
 ######################################################
@@ -58,7 +57,7 @@ export modelfit, modelpredict, modelstepfit, modelsteppredict
 ######################################################
 include("base.jl")
 include("definitions.jl")
-# include("IO.jl")
+include("IO.jl")
 include("models.jl")
 include("datagen.jl")
 include("processing.jl")
