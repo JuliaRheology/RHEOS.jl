@@ -1,10 +1,5 @@
 #!/usr/bin/env julia
 
-# Null modulus
-function null_modulus(t::Array{T,1}, params::Array{T, 1}) where T<:Real
-    return [-1.0]
-end
-
 # Standard Linear Solid (Maxwell Form)
 function G_SLS(t::Array{T,1}, params::Array{T,1}) where T<:Real
     k₀, k₁, η₁ = params
@@ -38,8 +33,8 @@ function J_springpot(t::Array{T,1}, params::Array{T,1}) where T<:Real
     J = (t.^β)/(cᵦ*gamma(1 + β))
 end
 
-SpringPot() = RheologyModel(G_springpot, J_springpot, [2.0, 0.5], ["model created with default parameters"])
-SpringPot(params::Array{T, 1}) where T<:Real = RheologyModel(G_springpot, J_springpot, params, ["model created by user with parameters $params"])
+SpringPot() = RheologyModel(G_springpot, J_springpot, null_modulus, null_modulus, [2.0, 0.5], ["model created with default parameters"])
+SpringPot(params::Array{T, 1}) where T<:Real = RheologyModel(G_springpot, J_springpot, null_modulus, null_modulus, params, ["model created by user with parameters $params"])
 
 # Fractional Maxwell Model
 function G_fractmaxwell(t::Array{T,1}, params::Array{T,1}) where T<:Real
@@ -54,8 +49,8 @@ function J_fractmaxwell(t::Array{T,1}, params::Array{T,1}) where T<:Real
     J = t.^(a)/(cₐ*gamma(1 + a)) + t.^(β)/(cᵦ*gamma(1 + β))
 end
 
-FractionalMaxwell() = RheologyModel(G_fractmaxwell, J_fractmaxwell, [2.0, 0.2, 1.0, 0.5], ["model created with default parameters"])
-FractionalMaxwell(params::Array{T, 1}) where T<:Real = RheologyModel(G_fractmaxwell, J_fractmaxwell, params, ["model created by user with parameters $params"])
+FractionalMaxwell() = RheologyModel(G_fractmaxwell, J_fractmaxwell, null_modulus, null_modulus, [2.0, 0.2, 1.0, 0.5], ["model created with default parameters"])
+FractionalMaxwell(params::Array{T, 1}) where T<:Real = RheologyModel(G_fractmaxwell, J_fractmaxwell, null_modulus, null_modulus, params, ["model created by user with parameters $params"])
 
 # Fraction Kelvin-Voigt model
 function G_fractKV(t::Array{T,1}, params::Array{T,1}) where T<:Real
@@ -70,8 +65,8 @@ function J_fractKV(t::Array{T,1}, params::Array{T,1}) where T<:Real
     J = cₐ*t.^(a)*mittleff.(a - β, 1 + a, -cᵦ*t.^(a - β)/cₐ)
 end
 
-FractionalKelvinVoigt() = RheologyModel(G_fractKV, J_fractKV, [2.0, 0.2, 1.0, 0.5], ["model created with default parameters"])
-FractionalKelvinVoigt(params::Array{T, 1}) where T<:Real = RheologyModel(G_fractKV, J_fractKV, params, ["model created by user with parameters $params"])
+FractionalKelvinVoigt() = RheologyModel(G_fractKV, J_fractKV, null_modulus, null_modulus, [2.0, 0.2, 1.0, 0.5], ["model created with default parameters"])
+FractionalKelvinVoigt(params::Array{T, 1}) where T<:Real = RheologyModel(G_fractKV, J_fractKV, null_modulus, null_modulus, params, ["model created by user with parameters $params"])
 
 # Fractional Special Model
 function G_fractspecial(t::Array{T,1}, params::Array{T,1}) where T<:Real

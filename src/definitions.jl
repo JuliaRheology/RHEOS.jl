@@ -263,11 +263,22 @@ struct RheologyModel
 
     Gpp::Function
 
-    parameters::Array{Real,1} where T<:Real
+    parameters::Array{T,1} where T<:Real
 
     log::Array{String,1}
 
 end
+
+function null_modulus(t::Array{T,1}, params::Array{T, 1}) where T<:Real
+    return [-1.0]
+end
+
+RheologyModel(;G::Function = null_modulus, 
+               J::Function = null_modulus, 
+               Gp::Function = null_modulus, 
+               Gpp::Function = null_modulus, 
+               params::Array{T,1} where T<:Real = [-1.0], 
+               log::Array{String,1} = [""]) = RheologyModel(G, J, Gp, Gpp, params, log)
 
 """
 TEMPORARY STRUCT AS A WORKAROUND FOR THIS JLD ISSUE, FUNCTIONS or STRUCTS CONTAINING

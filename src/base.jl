@@ -81,37 +81,8 @@ function deriv(y::Array{T,1}) where T<:Number
         end
     end
     ydot
+
 end
-
-# """
-#     mittleff(α::Float64[, β::Float64], x::Array{Float64,1})
-
-# Threaded convience wrapper around MittagLeffler.mittleff for array arguments. X
-# array is limited to float type in accordance with the requirements of RHEOS.
-# """
-# function mittleff(α::Float64, x_array::Array{Float64,1})::Array{Float64,1}
-
-#     # initialise array
-#     y = Array{Float64}(length(x_array))
-#     # do static scheduled threaded loop with no bounds checking
-#     @threads for i = 1:length(x_array)
-#         @inbounds y[i] = MittagLeffler.mittleff(α, x_array[i])
-#     end
-#     # return
-#     y
-# end
-
-# function mittleff(α::Float64, β::Float64, x_array::Array{Float64,1})::Array{Float64,1}
-
-#     # initialise array
-#     y = Array{Float64}(length(x_array))
-#     # do static scheduled threaded loop with no bounds checking
-#     @threads for i = 1:length(x_array)
-#         @inbounds y[i] = MittagLeffler.mittleff(α, β, x_array[i])
-#     end
-#     # return
-#     y
-# end
 
 function quasinull(x::Array{Float64,1})
 
@@ -124,9 +95,11 @@ function quasinull(x::Array{Float64,1})
 end
 
 function constantcheck(t::Array{T,1} where T<:Real)
+
     diff = round.(t[2:end]-t[1:end-1], 4)
     # check if any element is not equal to 1st element
-    check = !any(x -> x != diff[1], diff) 
+    check = !any(x -> x != diff[1], diff)
+    
 end
 
 function sampleratecompare(t1::Array{T,1}, t2::Array{T,1}) where T<:Real
@@ -145,16 +118,15 @@ end
 #~ Preprocessing Functions ~#
 #############################
 
-
 """
-    getsigma(τ::Float64, samplerate::Float64)::Float64
+    getsigma(τ, samplerate)
 
 Generate sigma/std deviation for gaussian smoothing kernel.
 
 Acts as a low pass filter. Information of time scale τ will be half power,
 faster will be increasingly cut. Called by smoothgauss function.
 """
-function getsigma(τ::Float64, samplerate::Float64)::Float64
+function getsigma(τ::Real, samplerate::Real)
 
     # smoothing frequency to reduce to half power
     smoothfreq = 1.0/τ
@@ -164,27 +136,29 @@ function getsigma(τ::Float64, samplerate::Float64)::Float64
 
     # calculate std deviation and return
     σ = samplerate/(2.0*π*sF_halfpower)
+
 end
 
 """
-    smoothgauss(yArray::Array{Float64,1}, τ::Float64, samplerate::Float64[; pad::String="replicate"])
+    smoothgauss(yArray, τ, samplerate[; pad="replicate"])
 
 Smooth a signal using a Gaussian kernel.
 
 Essentially a low pass filter with frequencies of 1/τ being cut to approximately
 half power. For other pad types available see ImageFiltering documentation.
 """
-function smoothgauss(yArray::Array{Float64,1}, τ::Float64, samplerate::Float64; pad::String="replicate")::Array{Float64,1}
+function smoothgauss(yArray::Array{T,1} where T<:Real, τ::Real, samplerate::Real; pad::String="replicate")
 
     # get standard deviation for Gaussian kernel
     σ = getsigma(τ, samplerate)
 
     # smooth signal and return
     smooth = ImageFiltering.imfilter(yArray, ImageFiltering.Kernel.reflect(ImageFiltering.Kernel.gaussian((σ,))), pad)
+
 end
 
 """
-    var_resample(tᵢ::Array{Float64,1}, yᵢ::Array{Float64,1}, pcntdownsample::Float64, minperiod::Float64[; minsamplenum::Int64 = 25])
+    var_resample(tᵢ, yᵢ, pcntdownsample, minperiod[; minsamplenum = 25])
 
 Convert a fixed sample rate array to a variable sample rate, with sampling points
 added according to a relative change in y, 1st derivative of y and 2nd derivative
@@ -212,7 +186,7 @@ See source code for more implementation details.
 - `minperiod`: Minimum allowed distance between x array points, recommended to set > 0.0 to something like dx/10.0 to avoid algorithm over-focusing on a particular region.
 - `minsamplenum = 25`: (Optional) number of initial, equally spaced seed samples required for algorithm to initialise.
 """
-function var_resample(tᵢ::Array{Float64,1}, yᵢ::Array{Float64,1}, pcntdownsample::Float64, minperiod::Float64; minsamplenum::Int64 = 25)::Tuple{Array{Float64,1},Array{Float64,1}}
+function var_resample(tᵢ::Array{T,1}, yᵢ::Array{T,1}, pcntdownsample::T, minperiod::T; minsamplenum::Int64 = 25) where T<:Real
 
     @assert length(tᵢ)==length(yᵢ) "X and Y arrays must have same length."
 
@@ -499,7 +473,7 @@ end
 #~ Processing Functions ~#
 ##########################
 
-function singularitytest(modulus::Function, params::Array{T, 1}; t1::T=0.0) where T<:Number
+function singularitytest(modulus::Function, params::Array{T, 1}; t1::T=0.0) where T<:Real
 
     startval = modulus([t1], params)[1]
 
