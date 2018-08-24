@@ -131,6 +131,24 @@ function quasinull(x::Array{Float64,1})
 
 end
 
+function constantcheck(t::Array{T,1} where T<:Real)
+    diff = round.(t[2:end]-t[1:end-1], 4)
+    # check if any element is not equal to 1st element
+    check = !any(x -> x != diff[1], diff) 
+end
+
+function sampleratecompare(t1::Array{T,1}, t2::Array{T,1}) where T<:Real
+
+    @assert constantcheck(t1) "Sample-rate of both arguments must be constant, first argument is non-constant"
+    @assert constantcheck(t2) "Sample-rate of both arguments must be constant, second argument is non-constant"
+
+    diff1 = round.(t1[2:end]-t1[1:end-1], 4)
+    diff2 = round.(t2[2:end]-t2[1:end-1], 4)
+
+    diff1[1] == diff2[1]
+
+end
+
 #############################
 #~ Preprocessing Functions ~#
 #############################
@@ -305,11 +323,11 @@ function var_resample(tᵢ::Array{Float64,1}, yᵢ::Array{Float64,1}, pcntdownsa
 end
 
 """
-    closestindex(x::Array{Float64,1}, val::Float64)::Int32
+    closestindex(x, val)
 
 Find the index of the array element closest to val.
 """
-function closestindex(x::Array{Float64,1}, val::Float64)::Int32
+function closestindex(x::Array{T,1} where T<:Real, val::Real)
 
     # intialise closest match variable, assuming best match is index 1
     ibest = start(eachindex(x))
@@ -330,21 +348,12 @@ function closestindex(x::Array{Float64,1}, val::Float64)::Int32
 end
 
 """
-    closestindices(x::Array{Float64,1}, vals::Array{Float64,1})
+    closestindices(x, vals)
 
 Uses `closestindex` iteratively to find closest index for all values in `vals` array.
 """
-function closestindices(x::Array{Float64,1}, vals::Array{Float64,1})::Array{Int64,1}
+closestindices(x::Array{T,1}, vals::Array{T,1}) where T<:Real = broadcast(closestindex, (x,), vals)
 
-    indicesbest = Array{Int64,1}(length(vals))
-    # call closest index iteratively
-    for (i, v) in enumerate(vals)
-        indicesbest[i] = closestindex(x, v)
-    end
-
-    indicesbest
-
-end
 
 """
     mapback(xᵦ::Array{Float64,1}, x::Array{Float64,1})
@@ -906,23 +915,5 @@ function leastsquares_stepinit(params_init::Array{Float64,1}, low_bounds::Array{
 
     # return all
     return (minf, minx, ret)
-
-end
-
-function constantcheck(t::Array{T,1} where T<:Real)
-    diff = round.(t[2:end]-t[1:end-1], 4)
-    # check if any element is not equal to 1st element
-    check = !any(x -> x != diff[1], diff) 
-end
-
-function sampleratecompare(t1::Array{T,1}, t2::Array{T,1}) where T<:Real
-
-    @assert constantcheck(t1) "Sample-rate of both arguments must be constant, first argument is non-constant"
-    @assert constantcheck(t2) "Sample-rate of both arguments must be constant, second argument is non-constant"
-
-    diff1 = round.(t1[2:end]-t1[1:end-1], 4)
-    diff2 = round.(t2[2:end]-t2[1:end-1], 4)
-
-    diff1[1] == diff2[1]
 
 end

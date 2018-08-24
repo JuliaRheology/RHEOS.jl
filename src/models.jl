@@ -2,7 +2,7 @@
 
 # Null modulus
 function null_modulus(t::Array{T,1}, params::Array{T, 1}) where T<:Real
-    return -1.0
+    return [-1.0]
 end
 
 # Standard Linear Solid (Maxwell Form)
@@ -22,8 +22,8 @@ function J_SLS(t::Array{T,1}, params::Array{T,1}) where T<:Real
     J = c₀ - c₁*exp.(-t/τᵣ)
 end
 
-SLS() = RheologyModel(G_SLS, J_SLS, [1.0, 0.5, 1.0], ["model created with default parameters"])
-SLS(params::Array{T, 1}) where T<:Real = RheologyModel(G_SLS, J_SLS, params, ["model created by user with parameters $params"])
+SLS() = RheologyModel(G_SLS, J_SLS, null_modulus, null_modulus, [1.0, 0.5, 1.0], ["model created with default parameters"])
+SLS(params::Array{T, 1}) where T<:Real = RheologyModel(G_SLS, J_SLS, null_modulus, null_modulus, params, ["model created by user with parameters $params"])
 
 # Spring-Pot Model
 function G_springpot(t::Array{T,1}, params::Array{T,1}) where T<:Real
@@ -80,7 +80,7 @@ function G_fractspecial(t::Array{T,1}, params::Array{T,1}) where T<:Real
     G = k + cᵦ*t.^(-β).*mittleff.(1 - β, 1 - β, -cᵦ*(t.^(1 - β))/η)
 end
 
-function J_fractspecial_slow(t::Array{T,1}, params::Array{T,1}) where T<:Real
+function J_fractspecial(t::Array{T,1}, params::Array{T,1}) where T<:Real
     k, cᵦ, β, η = params
 
     a = η/cᵦ
@@ -90,21 +90,9 @@ function J_fractspecial_slow(t::Array{T,1}, params::Array{T,1}) where T<:Real
 
     return [J(t_val) for t_val in t]
 end
-
-function J_fractspecial_fast(t::Array{T,1}, params::Array{T,1}) where T<:Real
-    k, cᵦ, β, η = params
-
-    a = η/cᵦ
-    b = k*η/cᵦ
-
-    J = InverseLaplace.talbotarr( s -> 1/s^2 * ((1+a*s^(1-β)) / (η+k/s+b*s^(-β)) ), t)
-end
                 
-FractionalSpecial() = RheologyModel(G_fractspecial, J_fractspecial_fast, [1.0, 1.0, 0.2, 1.0], ["model created with default parameters"])
-FractionalSpecial(params::Array{T, 1}) where T<:Real = RheologyModel(G_fractspecial, J_fractspecial_fast, params, ["model created by user with parameters $params"])
-
-FractionalSpecial_Precision() = RheologyModel(G_fractspecial, J_fractspecial_slow, [1.0, 1.0, 0.2, 1.0], ["model created with default parameters"])
-FractionalSpecial_Precision(params::Array{T, 1}) where T<:Real = RheologyModel(G_fractspecial, J_fractspecial_slow, params, ["model created by user with parameters $params"])
+FractionalSpecial() = RheologyModel(G_fractspecial, J_fractspecial_slow, null_modulus, null_modulus, [1.0, 1.0, 0.2, 1.0], ["model created with default parameters"])
+FractionalSpecial(params::Array{T, 1}) where T<:Real = RheologyModel(G_fractspecial, J_fractspecial, null_modulus, null_modulus, params, ["model created by user with parameters $params"])
 
 # Plateau-d Power Law
 function G_platpow(t::Array{T,1}, params::Array{T,1}) where T<:Real
@@ -113,5 +101,5 @@ function G_platpow(t::Array{T,1}, params::Array{T,1}) where T<:Real
     G = Gᵩ + (G₀ - Gᵩ)./(1 + t).^(α)
 end
 
-PowerLawPlateau() = RheologyModel(G_platpow, null_modulus, [1.0, 2.0, 0.2], ["model created with default parameters"])
-PowerLawPlateau(params::Array{T, 1}) where T<:Real = RheologyModel(G_platpow, null_modulus, params, ["model created by user with parameters $params"])
+PowerLawPlateau() = RheologyModel(G_platpow, null_modulus, null_modulus, null_modulus, [1.0, 2.0, 0.2], ["model created with default parameters"])
+PowerLawPlateau(params::Array{T, 1}) where T<:Real = RheologyModel(G_platpow, null_modulus, null_modulus, null_modulus, params, ["model created by user with parameters $params"])
