@@ -1,25 +1,5 @@
 #!/usr/bin/env julia
 
-# """
-#     RheologyData(data::Array{Float64,1}, t::Array{Float64,1}, stepsize::Float64, log::Array{String,1})
-
-# Contains generated data using functions from datagen.jl. Overloaded to support
-# addtion, subtraction and multiplication.
-# """
-# struct RheologyData
-
-#     # original data
-#     data::Array{Float64,1}
-#     t::Array{Float64,1}
-
-#     # constant sample rate step size
-#     stepsize::Float64
-
-#     # operations applied, stores history of which functions (including arguments)
-#     log::Array{String,1}
-
-# end
-
 """
     RheologyData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, sampling::String, log::Array{String,1})
 
