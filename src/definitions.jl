@@ -278,7 +278,7 @@ RheologyModel(;G::Function = null_modulus,
                Gp::Function = null_modulus, 
                Gpp::Function = null_modulus, 
                params::Array{T,1} where T<:Real = [-1.0], 
-               log::Array{String,1} = [""]) = RheologyModel(G, J, Gp, Gpp, params, log)
+               log::Array{String,1} = ["model created by user with parameters $params"]) = RheologyModel(G, J, Gp, Gpp, params, log)
 
 """
 TEMPORARY STRUCT AS A WORKAROUND FOR THIS JLD ISSUE, FUNCTIONS or STRUCTS CONTAINING

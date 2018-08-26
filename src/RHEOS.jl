@@ -23,7 +23,8 @@ export RheologyData, RheologyModel, RheologyModelTemp
 export fileload, savedata, loaddata, savemodel, loadmodel, exportdata
 # models.jl
 export null_modulus
-export SLS, SpringPot, FractionalMaxwell, FractionalKelvinVoigt, FractionalSpecial, PowerLawPlateau
+export SpringPot, Spring, Dashpot
+#  SLS, FractionalMaxwell, FractionalKelvinVoigt, FractionalSpecial, PowerLawPlateau
 # datagen.jl
 export stepgen, rampgen, singen, repeatdata, addnoise
 # processing.jl
@@ -33,7 +34,7 @@ export modelfit, modelpredict, modelstepfit, modelsteppredict
 include("base.jl")
 include("definitions.jl")
 include("IO.jl")
-include("models.jl")
+include("modeldatabase.jl")
 include("datagen.jl")
 include("processing.jl")
 
