@@ -1,13 +1,13 @@
 #!/usr/bin/env julia
 
-# Zener Model (Standard Linear Solid in Maxwell Form)
-function G_zener(t::Array{T,1}, params::Array{T,1}) where T<:Real
+# Standard Linear Solid in Maxwell Form
+function G_sls(t::Array{T,1}, params::Array{T,1}) where T<:Real
     k₀, k₁, η₁ = params
 
     G = k₀ + k₁*exp.(-t*k₁/η₁)
 end
 
-function J_zener(t::Array{T,1}, params::Array{T,1}) where T<:Real
+function J_sls(t::Array{T,1}, params::Array{T,1}) where T<:Real
     k₀, k₁, η₁ = params
 
     c₀ = 1/k₀
@@ -17,9 +17,13 @@ function J_zener(t::Array{T,1}, params::Array{T,1}) where T<:Real
     J = c₀ - c₁*exp.(-t/τᵣ)
 end
 
-function Gp_zener(ω::Array{T,1}, params::Array{T,1}) where T<:Real
+function Gp_sls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
 
 end
 
-Zener() = RheologyModel(G_zener, J_zener, null_modulus, null_modulus, [1.0, 0.5, 1.0], ["model created with default parameters"])
-Zener(params::Array{T, 1}) where T<:Real = RheologyModel(G_zener, J_zener, null_modulus, null_modulus, params, ["model created by user with parameters $params"])
+function Gpp_sls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
+
+end
+
+SLS() = RheologyModel(G_sls, J_sls, null_modulus, null_modulus, [1.0, 0.5, 1.0], ["model created with default parameters"])
+SLS(params::Array{T, 1}) where T<:Real = RheologyModel(G_sls, J_sls, null_modulus, null_modulus, params, ["model created by user with parameters $params"])
