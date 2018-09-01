@@ -19,12 +19,12 @@ include(joinpath(models_directory, "special.jl"))
 
 # Plateau-d Power Law
 function G_platpow(t::Array{T,1}, params::Array{T,1}) where T<:Real
-    Gᵩ, G₀, α = params
+    Gᵩ, G₀, τ, α = params
 
-    G = Gᵩ + (G₀ - Gᵩ)./(1 + t).^(α)
+    G = Gᵩ + (G₀ - Gᵩ)./(1 + t/τ).^(α)
 end
 
-PowerLawPlateau() = RheologyModel(G_platpow, null_modulus, null_modulus, null_modulus, [1.0, 2.0, 0.2], ["model created with default parameters"])
+PowerLawPlateau() = RheologyModel(G_platpow, null_modulus, null_modulus, null_modulus, [1.0, 2.0, 1.0, 0.2], ["model created with default parameters"])
 PowerLawPlateau(params::Array{T, 1}) where T<:Real = RheologyModel(G_platpow, null_modulus, null_modulus, null_modulus, params, ["model created by user with parameters $params"])
 
 # generalized Zener (Maxwell form)

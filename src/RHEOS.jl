@@ -16,14 +16,16 @@ using DataFrames
 import Base: +, -, *
 
 ######################################################
-
+# utility
+export closestindex
 # definitions.jl
 export RheologyData, RheologyModel, RheologyModelTemp
 # IO.jl
 export fileload, savedata, loaddata, savemodel, loadmodel, exportdata
 # models.jl
 export null_modulus
-export SpringPot, Spring, Dashpot
+export SpringPot, Spring, Dashpot, SLS, FractionalSLS, FractionalKVspring, PowerLawPlateau
+export FractionalMaxwell, FractionalMaxwellSpring, FractionalMaxwellDashpot, Maxwell
 #  SLS, FractionalMaxwell, FractionalKelvinVoigt, FractionalSpecial, PowerLawPlateau
 # datagen.jl
 export stepgen, rampgen, singen, repeatdata, addnoise
