@@ -17,7 +17,7 @@ import Base: +, -, *
 
 ######################################################
 # utility
-export closestindex
+export closestindex, deriv
 # definitions.jl
 export RheologyData, RheologyModel, RheologyModelTemp
 # IO.jl
