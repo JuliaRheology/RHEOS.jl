@@ -3,7 +3,7 @@ __precompile__()
 
 module RHEOS
 # installed using Pkg.clone from rheos-cambridge forked repos
-using MittagLeffler
+using MittLeffLite
 using FastConv
 # install using Pkg.add from Julia central package repository
 using InverseLaplace
@@ -16,6 +16,9 @@ using DataFrames
 import Base: +, -, *
 
 ######################################################
+# debug
+export boltzintegral_sing, trapz, G_springpot, boltzintegral_nonsing, G_spring
+
 # utility
 export closestindex, deriv
 # definitions.jl
@@ -26,6 +29,7 @@ export fileload, savedata, loaddata, savemodel, loadmodel, exportdata
 export null_modulus
 export SpringPot, Spring, Dashpot, SLS, FractionalSLS, FractionalKVspring, PowerLawPlateau
 export FractionalMaxwell, FractionalMaxwellSpring, FractionalMaxwellDashpot, Maxwell
+export FractionalSpecial
 #  SLS, FractionalMaxwell, FractionalKelvinVoigt, FractionalSpecial, PowerLawPlateau
 # datagen.jl
 export stepgen, rampgen, singen, repeatdata, addnoise

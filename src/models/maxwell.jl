@@ -40,7 +40,15 @@ FractionalMaxwell(params::Array{T, 1}) where T<:Real = RheologyModel(G_fractmaxw
 function G_fractmaxwell_spring(t::Array{T,1}, params::Array{T,1}) where T<:Real
     cₐ, a, k = params
 
-    G = k*mittleff.(a, -k*t.^a/cₐ)
+    # special case when α==0.0
+    if a==0.0
+        # 2 springs in series
+        return [1.0/(1.0/cₐ + 1.0/k) for i in t]
+    else
+        # normal case
+        G = k*mittleff.(a, -k*t.^a/cₐ)
+        return G
+    end
 end
 
 function J_fractmaxwell_spring(t::Array{T,1}, params::Array{T,1}) where T<:Real
@@ -75,7 +83,7 @@ FractionalMaxwellSpring(params::Array{T, 1}) where T<:Real = RheologyModel(G_fra
 # Fractional Maxwell Model (α=0, first spring-pot specialized to dash-pot)
 function G_fractmaxwell_dashpot(t::Array{T,1}, params::Array{T,1}) where T<:Real
     η, cᵦ, β = params
-
+    
     G = cᵦ*t.^(-β).*mittleff.(1 - β, 1 - β, -cᵦ*t.^(1 - β)/η)
 end
 

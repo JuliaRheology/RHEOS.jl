@@ -18,5 +18,5 @@ function J_fractspecial(t::Array{T,1}, params::Array{T,1}) where T<:Real
     return [J(t_val) for t_val in t]
 end
                 
-FractionalSpecial() = RheologyModel(G_fractspecial, J_fractspecial_slow, null_modulus, null_modulus, [1.0, 1.0, 0.2, 1.0], ["model created with default parameters"])
+FractionalSpecial() = RheologyModel(G_fractspecial, J_fractspecial, null_modulus, null_modulus, [1.0, 1.0, 0.2, 1.0], ["model created with default parameters"])
 FractionalSpecial(params::Array{T, 1}) where T<:Real = RheologyModel(G_fractspecial, J_fractspecial, null_modulus, null_modulus, params, ["model created by user with parameters $params"])

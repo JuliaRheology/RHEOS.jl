@@ -79,7 +79,7 @@ function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2:
     t = t[newstartingval:end]
 
     # readjust time to account for NaN movement and/or negative time values
-    t = t - minimum(t)
+    # t = t - minimum(t)
 
     # set up log for three cases, file dir given, derived from other data so filedir
     # in log already, no file name or log given.

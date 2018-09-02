@@ -64,6 +64,25 @@ function deriv(y::Array{T,1}, x::Array{T,1}) where T<:Real
 
 end
 
+# function deriv(y::Array{T,1}, x::Array{T,1}) where T<:Real
+
+#     # assert y and x arrays are same length
+#     @assert length(y)==length(x) "X and Y Array lengths must match."
+
+#     # initialise zero array of length y
+#     ydot = similar(y)
+#     @inbounds for i in eachindex(y)
+#         if i==start(eachindex(y))
+#             # right handed difference for lower boundary
+#             ydot[i] = y[i]/x[i]
+#         else
+#             ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
+#         end
+#     end
+#     ydot
+
+# end
+
 function deriv(y::Array{T,1}) where T<:Number
 
     # initialise zero array of length y
@@ -83,6 +102,21 @@ function deriv(y::Array{T,1}) where T<:Number
     ydot
 
 end
+
+# function deriv(y::Array{T,1}) where T<:Number
+#     # initialise zero array of length y
+#     ydot = similar(y)
+#     @inbounds for i in eachindex(y)
+#         if i==start(eachindex(y))
+#             # right handed difference for lower boundary
+#             ydot[i] = y[i]
+#         else
+#             ydot[i] = (y[i] - y[i-1])
+#         end
+#     end
+#     ydot
+
+# end
 
 function quasinull(x::Array{Float64,1})
 
@@ -541,14 +575,14 @@ function boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, pa
 
     I = zeros(length(time_series)-1)
     # only traverse after time t=0, first element
-    for (i,v) in enumerate(time_series[2:end])
+    @inbounds for (i, v) in enumerate(time_series[2:end])
         # generate integral for each time step
-        @inbounds τ = time_series[1:i]
+        τ = time_series[1:i]
         Modulus_arg = v - τ
         Modulusᵢ = modulus(Modulus_arg, params)
-        @inbounds df_dtᵢ = prescribed_dot[1:i]
+        df_dtᵢ = prescribed_dot[1:i]
         intergrand = Modulusᵢ.*df_dtᵢ
-        @inbounds I[i] = trapz(intergrand, τ)
+        I[i] = trapz(intergrand, τ)
     end
 
     I
