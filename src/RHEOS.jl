@@ -17,7 +17,9 @@ import Base: +, -, *
 
 ######################################################
 # debug
-export boltzintegral_sing, trapz, G_springpot, boltzintegral_nonsing, G_spring
+export trapz, G_springpot, G_spring
+export boltzintegral_sing, boltzintegral_nonsing
+export boltzconvolve_sing, boltzconvolve_nonsing
 
 # utility
 export closestindex, deriv
@@ -30,6 +32,7 @@ export null_modulus
 export SpringPot, Spring, Dashpot, SLS, FractionalSLS, FractionalKVspring, PowerLawPlateau
 export FractionalMaxwell, FractionalMaxwellSpring, FractionalMaxwellDashpot, Maxwell
 export FractionalSpecial
+export SLS2
 #  SLS, FractionalMaxwell, FractionalKelvinVoigt, FractionalSpecial, PowerLawPlateau
 # datagen.jl
 export stepgen, rampgen, singen, repeatdata, addnoise

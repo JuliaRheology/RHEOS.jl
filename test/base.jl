@@ -30,4 +30,17 @@ end
 @test deriv_test_int_simple() == 10
 @test typeof(deriv_test_int_simple()) <: Integer
 
+# # boltz integral / convole test (non-singular)
+# function nonsing_get_integral()
+
+#     t = collect(0.0:0.1:1000.0)
+#     dt = 
+
+# end
+
+# function nonsing_get_convolution()
+
+# end
+
+
 

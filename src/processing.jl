@@ -337,7 +337,7 @@ function modelstepfit(data::RheologyData,
 
     # get singularity presence
     sing = singularitytest(modulus, p0; t1 = data.t[1])
-
+    
     # get controlled variable (just take first element as it's a step) and measured variable
     if modtouse == :J
         controlled = data.σ[1]
@@ -374,8 +374,9 @@ function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Sy
     # get modulus
     modulus = getfield(model, modtouse)
 
-    # get singularity presence
-    sing = singularitytest(modulus, model.parameters; t1 = data.t[1])
+    # check singularity presence at time closest to step
+    stepon_el = closestindex(data.t, step_on)
+    sing = singularitytest(modulus, model.parameters; t1 = (data.t[stepon_el] - step_on))
 
     if modtouse == :J
         controlled = data.σ[1]
@@ -383,16 +384,15 @@ function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Sy
         controlled = data.ϵ[1]
     end
 
-    # get convolution
+    # get predicted
     if !sing
-        stepon_el = closestindex(data.t, step_on)
         predicted = zeros(length(data.t))
-        predicted[(stepon_el):end] = controlled*modulus(data.t[stepon_el:end] - data.t[stepon_el], model.parameters)
+        predicted[stepon_el:end] = controlled*modulus(data.t[stepon_el:end] - step_on, model.parameters)
 
     elseif sing
-        stepon_el = closestindex(data.t, step_on)
         predicted = zeros(length(data.t))
-        predicted[(stepon_el + 1):end] = controlled*modulus(data.t[(stepon_el + 1):end] - data.t[stepon_el], model.parameters)
+        predicted[(stepon_el + 1):end] = controlled*modulus(data.t[(stepon_el + 1):end] - step_on, model.parameters)
+
     end
 
     if modtouse == :J

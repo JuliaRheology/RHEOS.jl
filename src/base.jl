@@ -64,7 +64,7 @@ function deriv(y::Array{T,1}, x::Array{T,1}) where T<:Real
 
 end
 
-# function deriv(y::Array{T,1}, x::Array{T,1}) where T<:Real
+# function deriv2_backwards_difference(y::Array{T,1}, x::Array{T,1}) where T<:Real
 
 #     # assert y and x arrays are same length
 #     @assert length(y)==length(x) "X and Y Array lengths must match."
@@ -73,9 +73,10 @@ end
 #     ydot = similar(y)
 #     @inbounds for i in eachindex(y)
 #         if i==start(eachindex(y))
-#             # right handed difference for lower boundary
-#             ydot[i] = y[i]/x[i]
+#             # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
+#             ydot[i] = (y[1] - 0.0)/(x[2] - x[1]) 
 #         else
+#             # backward difference for rest of array
 #             ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
 #         end
 #     end
@@ -83,7 +84,7 @@ end
 
 # end
 
-function deriv(y::Array{T,1}) where T<:Number
+function deriv(y::Array{T,1}) where T<:Real
 
     # initialise zero array of length y
     ydot = similar(y)
@@ -103,7 +104,7 @@ function deriv(y::Array{T,1}) where T<:Number
 
 end
 
-# function deriv(y::Array{T,1}) where T<:Number
+# function deriv(y::Array{T,1}) where T<:Real
 #     # initialise zero array of length y
 #     ydot = similar(y)
 #     @inbounds for i in eachindex(y)
@@ -611,7 +612,7 @@ function boltzconvolve_nonsing(modulus::Function, time_series::Array{Float64,1},
     Modulus = modulus(time_series, params)
     β = FastConv.convn(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
-    β = β[1:length(dt_series)].*dt_series
+    β = β[1:length(time_series)].*dt_series
 
 end
 
