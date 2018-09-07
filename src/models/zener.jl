@@ -20,7 +20,7 @@ function Gpp_fracsls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
 end
 
 FractionalSLS() = RheologyModel(G_fracsls, null_modulus, null_modulus, null_modulus, [0.5, 0.5, 1.0, 0.2], ["model created with default parameters"])
-FractionalSLS(params::Array{T, 1}) where T<:Real = RheologyModel(G_sls, null_modulus, null_modulus, null_modulus, params, ["model created by user with parameters $params"])
+FractionalSLS(params::Array{T, 1}) where T<:Real = RheologyModel(G_fracsls, null_modulus, null_modulus, null_modulus, params, ["model created by user with parameters $params"])
 
 # Standard Linear Solid in Maxwell Form
 function G_sls(t::Array{T,1}, params::Array{T,1}) where T<:Real

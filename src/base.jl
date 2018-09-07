@@ -84,41 +84,6 @@ end
 
 # end
 
-function deriv(y::Array{T,1}) where T<:Real
-
-    # initialise zero array of length y
-    ydot = similar(y)
-    @inbounds for i in eachindex(y)
-        if i==start(eachindex(y))
-            # right handed difference for lower boundary
-            ydot[i] = (y[i+1] - y[i])
-        elseif i==length(y)
-            # left handed difference for upper boundary
-            ydot[i] = (y[i] - y[i-1])
-        else
-            # central difference with even unit 1 spacing
-            ydot[i] = (y[i+1] - y[i-1])/2
-        end
-    end
-    ydot
-
-end
-
-# function deriv(y::Array{T,1}) where T<:Real
-#     # initialise zero array of length y
-#     ydot = similar(y)
-#     @inbounds for i in eachindex(y)
-#         if i==start(eachindex(y))
-#             # right handed difference for lower boundary
-#             ydot[i] = y[i]
-#         else
-#             ydot[i] = (y[i] - y[i-1])
-#         end
-#     end
-#     ydot
-
-# end
-
 function quasinull(x::Array{Float64,1})
 
     if x == [-1.0]
@@ -591,7 +556,7 @@ function boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, pa
 end
 
 """
-    boltzconvolve_nonsing(modulus::Function, time_series::Array{Float64,1}, dt_series::Array{Float64,1}, params::Array{Float64,1}, prescribed_dot::Array{Float64,1})
+    boltzconvolve_nonsing(modulus::Function, time_series::Array{Float64,1}, dt::Float64, params::Array{Float64,1}, prescribed_dot::Array{Float64,1})
 
 Calculate Boltzmann Superposition integral using convolution method.
 
@@ -602,22 +567,22 @@ than the integral method. However, it works for constant sample rate.
 
 - `modulus`: Viscoelastic modulus function
 - `time_series`: The array of times
-- `dt_series`: Array of gradient of time series, can be found using deriv(time_series)
+- `dt`: Constant time step (sample period)
 - `params`: Parameters passed to viscoelastic modulus
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
-function boltzconvolve_nonsing(modulus::Function, time_series::Array{Float64,1}, dt_series::Array{Float64,1},
+function boltzconvolve_nonsing(modulus::Function, time_series::Array{Float64,1}, dt::Float64,
                         params::Array{Float64,1}, prescribed_dot::Array{Float64,1})::Array{Float64,1}
 
     Modulus = modulus(time_series, params)
     β = FastConv.convn(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
-    β = β[1:length(time_series)].*dt_series
+    β = β[1:length(time_series)]*dt
 
 end
 
 """
-    boltzconvolve_sing(modulus::Function, time_series::Array{Float64,1}, dt_series::Array{Float64,1}, params::Array{Float64,1}, prescribed_dot::Array{Float64,1})
+    boltzconvolve_sing(modulus::Function, time_series::Array{Float64,1}, dt::Float64, params::Array{Float64,1}, prescribed_dot::Array{Float64,1})
 
 Calculate Boltzmann Superposition integral using convolution method.
 
@@ -631,25 +596,25 @@ with [2:end] of reference array when fitting.
 
 - `modulus`: Viscoelastic modulus function
 - `time_series`: The array of times
-- `dt_series`: Array of gradient of time series, can be found using deriv(time_series)
+- `dt`: Constant time step (sample period)
 - `params`: Parameters passed to viscoelastic modulus
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
-function boltzconvolve_sing(modulus::Function, time_series::Array{Float64,1}, dt_series::Array{Float64,1},
+function boltzconvolve_sing(modulus::Function, time_series::Array{Float64,1}, dt::Float64,
                         params::Array{Float64,1}, prescribed_dot::Array{Float64,1})::Array{Float64,1}
 
     # convolved length will be original_length-1
-    len = length(dt_series)-1
+    len = length(time_series)-1
     Modulus = modulus(time_series, params)
     # fast convolution, ignoring initial singularity
     β = FastConv.convn(Modulus[2:end], prescribed_dot[1:end])
     # pick out relevant elements (1st half) and multiply by dt
-    β = β[1:len].*dt_series[1:len]
+    β = β[1:len]*dt
 
 end
 
 """
-    obj_const_nonsing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, dt_series::Array{Float64,1}, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _insight::Bool = false)
+    obj_const_nonsing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, dt::Float64, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _insight::Bool = false)
 
 Generate the sum-of-squares of the difference between `measured` and the Boltzmann
 convolution integral of the selected `modulus` and `prescribed_dot`. Used when
@@ -661,28 +626,28 @@ sample rate is constant and model does not feature singularity.
 - `grad`: Gradient argument used by NLOpt
 - `modulus`: Viscoelastic modulus function
 - `time_series`: Array of time data
-- `dt_series`: Array of time data differences,  equal to deriv(time_series)
+- `dt`: Constant time step (sample period)
 - `prescribed_dot`: Convolved with `modulus` over `time_series`, usually dϵ/dt for stress relaxation and dσ/dt for creep
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
 function obj_const_nonsing(params::Array{Float64,1}, grad::Array{Float64,1},
                             modulus::Function, time_series::Array{Float64,1},
-                            dt_series::Array{Float64,1}, prescribed_dot::Array{Float64,1},
+                            dt::Float64, prescribed_dot::Array{Float64,1},
                             measured::Array{Float64,1}; _insight::Bool = false)::Float64
 
     if _insight
         println("Current Parameters: ", params)
     end
 
-    convolved = boltzconvolve_nonsing(modulus, time_series, dt_series, params, prescribed_dot)
+    convolved = boltzconvolve_nonsing(modulus, time_series, dt, params, prescribed_dot)
 
     cost = sum(0.5*(measured - convolved).^2)
 
 end
 
 """
-    obj_const_sing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, dt_series::Array{Float64,1}, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _insight::Bool = false)
+    obj_const_sing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, dt::Float64, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _insight::Bool = false)
 
 Generate the sum-of-squares of the difference between `measured` and the Boltzmann
 convolution integral of the selected `modulus` and `prescribed_dot`. Used when
@@ -694,21 +659,21 @@ sample rate is constant and model does feature singularity.
 - `grad`: Gradient argument used by NLOpt
 - `modulus`: Viscoelastic modulus function
 - `time_series`: Array of time data
-- `dt_series`: Array of time data differences,  equal to deriv(time_series)
+- `dt`: Constant time step (sample period)
 - `prescribed_dot`: Convolved with `modulus` over `time_series`, usually dϵ/dt for stress relaxation and dσ/dt for creep
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
 function obj_const_sing(params::Array{Float64,1}, grad::Array{Float64,1},
                             modulus::Function, time_series::Array{Float64,1},
-                            dt_series::Array{Float64,1}, prescribed_dot::Array{Float64,1},
+                            dt::Float64, prescribed_dot::Array{Float64,1},
                             measured::Array{Float64,1}; _insight::Bool = false)::Float64
 
     if _insight
         println("Current Parameters: ", params)
     end
 
-    convolved = boltzconvolve_sing(modulus, time_series, dt_series, params, prescribed_dot)
+    convolved = boltzconvolve_sing(modulus, time_series, dt, params, prescribed_dot)
 
     # don't use first element as singularity exists in model
     cost = sum(0.5*(measured[2:end] - convolved).^2)
@@ -781,7 +746,7 @@ function obj_var_sing(params::Array{Float64,1}, grad::Array{Float64,1},
 end
 
 """
-    leastsquares_init(params_init, low_bounds, hi_bounds, modulus, time_series, dt_series, prescribed_dot, measured; insight = false, sampling = "constant", singularity = false)
+    leastsquares_init(params_init, low_bounds, hi_bounds, modulus, time_series, dt, prescribed_dot, measured; insight = false, sampling = "constant", singularity = false)
 
 Initialise then begin a least squares fitting of the supplied data.
 
@@ -792,7 +757,7 @@ Initialise then begin a least squares fitting of the supplied data.
 - `hi_bounds`: Higher bounds for parameters
 - `modulus`: Viscoelastic modulus function
 - `time_series`: Array of time data
-- `dt_series`: Array of time data differences,  equal to deriv(time_series)
+- `dt`: Constant time step (sample period)
 - `prescribed_dot`: Convolved with `modulus` over `time_series`, usually dϵ/dt for stress relaxation and dσ/dt for creep
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `sampling`: Declare whether sample rate is `constant` or `variable` so that convolution or integration is used respectively
@@ -801,7 +766,7 @@ Initialise then begin a least squares fitting of the supplied data.
 """
 function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Float64,1},
                            hi_bounds::Array{Float64,1}, modulus::Function,
-                           time_series::Array{Float64,1}, dt_series::Array{Float64,1},
+                           time_series::Array{Float64,1}, dt::Float64,
                            prescribed_dot::Array{Float64,1}, measured::Array{Float64,1};
                            insight::Bool = false, sampling::String = "constant",
                            singularity::Bool = false, _rel_tol = 1e-4)
@@ -825,13 +790,13 @@ function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Floa
     # arguments sent to object objectivefunc
     if !singularity && sampling == "constant"
         min_objective!(opt, (params, grad) -> obj_const_nonsing(params, grad, modulus,
-                                                            time_series, dt_series,
+                                                            time_series, dt,
                                                             prescribed_dot, measured;
                                                             _insight = insight))
 
     elseif singularity && sampling == "constant"
         min_objective!(opt, (params, grad) -> obj_const_sing(params, grad, modulus,
-                                                        time_series, dt_series,
+                                                        time_series, dt,
                                                         prescribed_dot, measured;
                                                         _insight = insight))
 

@@ -216,8 +216,8 @@ function modelfit(data::RheologyData,
     # get singularity presence
     sing = singularitytest(modulus, p0)
 
-    # generate time series difference array (for convolution)
-    dt_series = deriv(data.t)
+    # get constant time step (for convolution)
+    dt = data.t[2] - data.t[1]
 
     # get derivative of controlled variable and measured variable
     if modtouse == :J
@@ -235,7 +235,7 @@ function modelfit(data::RheologyData,
                                           hi,
                                           modulus, 
                                           data.t, 
-                                          dt_series, 
+                                          dt, 
                                           dcontrolled,
                                           measured; 
                                           insight = verbose,
