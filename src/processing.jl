@@ -203,7 +203,8 @@ function modelfit(data::RheologyData,
                   lo::Array{Float64,1} = [-1.0],
                   hi::Array{Float64,1} = [-1.0],
                   verbose::Bool = false,
-                  rel_tol = 1e-4)::RheologyModel
+                  rel_tol = 1e-4,
+                  diff_method="BD")::RheologyModel
 
     # get modulus function
     modulus = getfield(model, modtouse)
@@ -216,8 +217,19 @@ function modelfit(data::RheologyData,
     # get singularity presence
     sing = singularitytest(modulus, p0)
 
-    # get constant time step (for convolution)
+    # get time step (only needed for convolution, which requires constant so t[2]-t[1] is sufficient)
     dt = data.t[2] - data.t[1]
+
+    # TEMP - CHECK WITH ALE AND ALEXANDRE BUT IS DEFINITELY NECESSARY
+    # time must start at 0 for convolution to work properly!
+    t_zeroed = data.t - minimum(data.t)
+
+    # use correct method for derivative
+    if diff_method=="BD"
+        deriv = derivBD
+    elseif diff_method=="CD"
+        deriv = derivCD
+    end
 
     # get derivative of controlled variable and measured variable
     if modtouse == :J
@@ -234,7 +246,7 @@ function modelfit(data::RheologyData,
                                           lo, 
                                           hi,
                                           modulus, 
-                                          data.t, 
+                                          t_zeroed, 
                                           dt, 
                                           dcontrolled,
                                           measured; 
@@ -257,7 +269,7 @@ end
 
 Given data and model and parameters, predict new dataset based on both.
 """
-function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol)::RheologyData
+function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; diff_method="BD")::RheologyData
 
     # get modulus
     modulus = getfield(model, modtouse)
@@ -265,39 +277,62 @@ function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol
     # get singularity presence
     sing = singularitytest(modulus, model.parameters)
 
+    # use correct method for derivative
+    if diff_method=="BD"
+        deriv = derivBD
+    elseif diff_method=="CD"
+        deriv = derivCD
+    end
+
     if modtouse == :J
         dcontrolled = deriv(data.σ, data.t)
     elseif modtouse == :G
         dcontrolled = deriv(data.ϵ, data.t)
     end
 
-    # generate time series difference array (for convolution)
-    dt_series = deriv(data.t)
+    # get time step (only needed for convolution, which requires constant so t[2]-t[1] is sufficient)
+    dt = data.t[2] - data.t[1]
+
+    # TEMP - CHECK WITH ALE AND ALEXANDRE BUT IS DEFINITELY NECESSARY
+    # time must start at 0 for convolution to work properly!
+    t_zeroed = data.t - minimum(data.t)
 
     # get convolution
     if !sing && data.sampling == "constant"
-        convolved = boltzconvolve_nonsing(modulus, data.t, deriv(data.t), model.parameters, dcontrolled)
+        convolved = boltzconvolve_nonsing(modulus, t_zeroed, dt, model.parameters, dcontrolled)
 
     elseif sing && data.sampling == "constant"
-        convolved = boltzconvolve_sing(modulus, data.t, deriv(data.t), model.parameters, dcontrolled)
+        convolved = boltzconvolve_sing(modulus, t_zeroed, dt, model.parameters, dcontrolled)
 
     elseif !sing && data.sampling == "variable"
-        convolved = boltzintegral_nonsing(modulus, data.t, model.parameters, dcontrolled)
+        convolved = boltzintegral_nonsing(modulus, t_zeroed, model.parameters, dcontrolled)
 
     elseif sing && data.sampling == "variable"
-        convolved = boltzintegral_sing(modulus, data.t, model.parameters, dcontrolled)
+        convolved = boltzintegral_sing(modulus, t_zeroed, model.parameters, dcontrolled)
 
     end
 
+    # code commented out has off by one error
+    # need to find a better way to handle singularities
+    # if sing
+    #     if modtouse == :J
+    #         σ = data.σ[2:end]
+    #         ϵ = convolved
+    #     elseif modtouse == :G
+    #         σ = convolved
+    #         ϵ = data.ϵ[2:end]
+    #     end   
+    #     t = data.t[2:end]
+
     if sing
         if modtouse == :J
-            σ = data.σ[2:end]
+            σ = data.σ
             ϵ = convolved
         elseif modtouse == :G
             σ = convolved
-            ϵ = data.ϵ[2:end]
-        end   
-        t = data.t[2:end]
+            ϵ = data.ϵ
+        end 
+        t = data.t
 
     elseif !sing
         if modtouse == :J

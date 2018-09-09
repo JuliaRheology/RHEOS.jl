@@ -14,11 +14,15 @@ keyword argument is used for setting an initial condition.
 """
 function trapz(y::Array{T,1}, x::Array{T,1}; init::T=0.0) where T<:Real
 
-    @assert length(x)==length(y) "X and Y array length must match."
+    n = length(x)
 
+    @assert n==length(y) "X and Y array length must match."
+       
     # init*2 to simplify final division by 2
     r = 2.0*init
 
+    if n==1; return r; end
+    
     # trapezoidal rule
     for i in 2:length(x)
         @inbounds r += (y[i-1] + y[i])*(x[i] - x[i-1])
@@ -31,15 +35,12 @@ end
 
 
 """
-    deriv(y[, x])
+    derivCD(y, x)
 
 Given two arrays of data, x and y, calculate dy/dx using central difference
 method and forward and backward difference for array boundaries.
-
-If only one array passed in, y, then calculates derivative y with respect to
-array element indices.
 """
-function deriv(y::Array{T,1}, x::Array{T,1}) where T<:Real
+function derivCD(y::Array{T,1}, x::Array{T,1}) where T<:Real
 
     # assert y and x arrays are same length
     @assert length(y)==length(x) "X and Y Array lengths must match."
@@ -48,13 +49,13 @@ function deriv(y::Array{T,1}, x::Array{T,1}) where T<:Real
     ydot = similar(y)
     @inbounds for i in eachindex(y)
         if i==start(eachindex(y))
-            # right handed difference for lower boundary
+            # forward difference for lower boundary
             ydot[i] = (y[i+1] - y[i])/(x[i+1] - x[i])
         elseif i==length(y)
-            # left handed difference for upper boundary
+            # backward difference for upper boundary
             ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
         else
-            # central difference with uneven spacing
+            # central difference with uneven spacing for general case of constant or variable sample rate
             Δx₁ = x[i] - x[i-1]
             Δx₂ = x[i+1] - x[i]
             ydot[i] = (y[i+1]*Δx₁^2 + (Δx₂^2 - Δx₁^2)*y[i] - y[i-1]*Δx₂^2)/(Δx₁*Δx₂*(Δx₁ + Δx₂))
@@ -64,25 +65,32 @@ function deriv(y::Array{T,1}, x::Array{T,1}) where T<:Real
 
 end
 
-# function deriv2_backwards_difference(y::Array{T,1}, x::Array{T,1}) where T<:Real
+"""
+    derivBD(y, x)
 
-#     # assert y and x arrays are same length
-#     @assert length(y)==length(x) "X and Y Array lengths must match."
+Given two arrays of data, x and y, calculate dy/dx using 1st order
+backward difference. Assumes y==0 at a previous point, i.e.
+y is 'at rest'. Captures instantaneous loading where derivCD will not.
+"""
+function derivBD(y::Array{T,1}, x::Array{T,1}) where T<:Real
 
-#     # initialise zero array of length y
-#     ydot = similar(y)
-#     @inbounds for i in eachindex(y)
-#         if i==start(eachindex(y))
-#             # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
-#             ydot[i] = (y[1] - 0.0)/(x[2] - x[1]) 
-#         else
-#             # backward difference for rest of array
-#             ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
-#         end
-#     end
-#     ydot
+    # assert y and x arrays are same length
+    @assert length(y)==length(x) "X and Y Array lengths must match."
 
-# end
+    # initialise zero array of length y
+    ydot = similar(y)
+    @inbounds for i in eachindex(y)
+        if i==start(eachindex(y))
+            # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
+            ydot[i] = (y[1] - 0.0)/(x[2] - x[1]) 
+        else
+            # backward difference for rest of array
+            ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
+        end
+    end
+    ydot
+
+end
 
 function quasinull(x::Array{Float64,1})
 
@@ -316,7 +324,8 @@ end
 """
     closestindices(x, vals)
 
-Uses `closestindex` iteratively to find closest index for all values in `vals` array.
+Uses `closestindex` iteratively to find closest index for each value in `vals` array,
+returns array of indices.
 """
 closestindices(x::Array{T,1}, vals::Array{T,1}) where T<:Real = broadcast(closestindex, (x,), vals)
 
@@ -503,18 +512,27 @@ than the convolution method. However, it works for variable sample rate.
 function boltzintegral_nonsing(modulus::Function, time_series::Array{Float64,1}, params::Array{Float64,1},
                     prescribed_dot::Array{Float64,1})::Array{Float64,1}
 
-    I = zeros(length(time_series))
-    for (i,v) in enumerate(time_series[1:end])
+    # need to add an additional 'previous' time point to capture any instantaneous loading
+    time_previous = time_series[1] - (time_series[2] - time_series[1])
+    time_mod = vcat([time_previous], time_series)
+    # material is assumed at rest at this 'previous' time
+    prescribed_dot_mod = vcat([0.0], prescribed_dot)
+    
+    I = zeros(length(time_mod))
+    @inbounds for (i,v) in enumerate(time_mod)
         # generate integral for each time step
-        @inbounds τ = time_series[1:i]
+        τ = time_mod[1:i]
         Modulus_arg = v - τ
         Modulusᵢ = modulus(Modulus_arg, params)
-        @inbounds df_dtᵢ = prescribed_dot[1:i]
+        df_dtᵢ = prescribed_dot_mod[1:i]
         intergrand = Modulusᵢ.*df_dtᵢ
-        @inbounds I[i] = trapz(intergrand, τ)
+        I[i] = trapz(intergrand, τ)
     end
 
-    I
+    # fix initial point 
+    I[2] = (prescribed_dot[1]*modulus([0.0], params)*(time_series[2] - time_series[1]))[1]
+    
+    return I[2:end]
 
 end
 
@@ -536,12 +554,33 @@ with [2:end] of reference array when fitting.
 - `params`: Parameters passed to viscoelastic modulus
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
+# function boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, params::Array{Float64,1},
+#                     prescribed_dot::Array{Float64,1})::Array{Float64,1}
+
+#     I = zeros(length(time_series)-1)
+#     # only traverse after time t=0, first element
+#     @inbounds for (i, v) in enumerate(time_series[2:end])
+#         # generate integral for each time step
+#         τ = time_series[1:i]
+#         Modulus_arg = v - τ
+#         Modulusᵢ = modulus(Modulus_arg, params)
+#         df_dtᵢ = prescribed_dot[1:i]
+#         intergrand = Modulusᵢ.*df_dtᵢ
+#         I[i] = trapz(intergrand, τ)
+#     end
+
+#     I
+
+# end
+
 function boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, params::Array{Float64,1},
                     prescribed_dot::Array{Float64,1})::Array{Float64,1}
 
-    I = zeros(length(time_series)-1)
-    # only traverse after time t=0, first element
-    @inbounds for (i, v) in enumerate(time_series[2:end])
+    init_time = 0.0 + (time_series[2] - time_series[1])/10.0
+    time_mod = vcat([init_time], time_series[2:end])    
+
+    I = zeros(length(time_mod))
+    @inbounds for (i,v) in enumerate(time_mod[1:end])
         # generate integral for each time step
         τ = time_series[1:i]
         Modulus_arg = v - τ
@@ -600,16 +639,27 @@ with [2:end] of reference array when fitting.
 - `params`: Parameters passed to viscoelastic modulus
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
-function boltzconvolve_sing(modulus::Function, time_series::Array{Float64,1}, dt::Float64,
+# function boltzconvolve_sing(modulus::Function, time_series::Array{Float64,1}, dt::Float64,
+#                         params::Array{Float64,1}, prescribed_dot::Array{Float64,1})::Array{Float64,1}
+
+#     # convolved length will be original_length-1
+#     len = length(time_series)-1
+#     Modulus = modulus(time_series, params)
+#     # fast convolution, ignoring initial singularity
+#     β = FastConv.convn(Modulus[2:end], prescribed_dot[1:end])
+#     # pick out relevant elements (1st half) and multiply by dt
+#     β = β[1:len]*dt
+
+# end
+
+function boltzconvolve(modulus::Function, time_series::Array{Float64,1}, dt::Float64,
                         params::Array{Float64,1}, prescribed_dot::Array{Float64,1})::Array{Float64,1}
 
-    # convolved length will be original_length-1
-    len = length(time_series)-1
     Modulus = modulus(time_series, params)
-    # fast convolution, ignoring initial singularity
-    β = FastConv.convn(Modulus[2:end], prescribed_dot[1:end])
+    # fast convolution
+    β = FastConv.convn(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
-    β = β[1:len]*dt
+    β = β[1:length(time_series)]*dt
 
 end
 
@@ -673,10 +723,14 @@ function obj_const_sing(params::Array{Float64,1}, grad::Array{Float64,1},
         println("Current Parameters: ", params)
     end
 
-    convolved = boltzconvolve_sing(modulus, time_series, dt, params, prescribed_dot)
+    # convolved = boltzconvolve_sing(modulus, time_series, dt, params, prescribed_dot)
+    convolved = boltzconvolve(modulus, time_series, dt, params, prescribed_dot)
 
-    # don't use first element as singularity exists in model
-    cost = sum(0.5*(measured[2:end] - convolved).^2)
+    # don't use first element as singularity exists in model - Edit: INCORRECT COMMENT!
+    # cost = sum(0.5*(measured[1:(length(measured)-1)] - convolved).^2)
+
+    # do as this has been taken care of in convolution!
+    cost = sum(0.5*(measured - convolved).^2)
 
 end
 
@@ -740,8 +794,11 @@ function obj_var_sing(params::Array{Float64,1}, grad::Array{Float64,1},
 
     convolved = boltzintegral_sing(modulus, time_series, params, prescribed_dot)
 
-    # don't use first element as singularity exists in model
-    cost = sum(0.5*(measured[2:end] - convolved).^2)
+    # don't use first element as singularity exists in model - Edit: INCORRECT COMMENT!
+    # cost = sum(0.5*(measured[2:end] - convolved).^2)
+
+    # do as this has been taken care of in convolution!
+    cost = sum(0.5*(measured - convolved).^2)
 
 end
 
@@ -795,6 +852,9 @@ function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Floa
                                                             _insight = insight))
 
     elseif singularity && sampling == "constant"
+        # remove singularity, just go close to it, 1/10th over first sample period
+        time_series[1] = 0.0 + (time_series[2] - time_series[1])/10.0
+
         min_objective!(opt, (params, grad) -> obj_const_sing(params, grad, modulus,
                                                         time_series, dt,
                                                         prescribed_dot, measured;
