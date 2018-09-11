@@ -302,7 +302,10 @@ function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol
         convolved = boltzconvolve_nonsing(modulus, t_zeroed, dt, model.parameters, dcontrolled)
 
     elseif sing && data.sampling == "constant"
-        convolved = boltzconvolve_sing(modulus, t_zeroed, dt, model.parameters, dcontrolled)
+        # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, model.parameters, dcontrolled)
+        t_zeroed[1] = 0.0 + (t_zeroed[2] - t_zeroed[1])/10.0
+        # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, model.parameters, dcontrolled)
+        convolved = boltzconvolve(modulus, t_zeroed, dt, model.parameters, dcontrolled)
 
     elseif !sing && data.sampling == "variable"
         convolved = boltzintegral_nonsing(modulus, t_zeroed, model.parameters, dcontrolled)
