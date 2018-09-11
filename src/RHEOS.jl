@@ -19,7 +19,7 @@ import Base: +, -, *
 # debug
 export trapz, G_springpot, G_spring
 export boltzintegral_sing, boltzintegral_nonsing
-export boltzconvolve_sing, boltzconvolve_nonsing
+export boltzconvolve
 
 # utility
 export closestindex, deriv

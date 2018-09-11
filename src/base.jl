@@ -82,6 +82,7 @@ function derivBD(y::Array{T,1}, x::Array{T,1}) where T<:Real
     @inbounds for i in eachindex(y)
         if i==start(eachindex(y))
             # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
+            # this is a physical assumption that material is at rest before first data point.
             ydot[i] = (y[1] - 0.0)/(x[2] - x[1]) 
         else
             # backward difference for rest of array
@@ -576,21 +577,31 @@ with [2:end] of reference array when fitting.
 function boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, params::Array{Float64,1},
                     prescribed_dot::Array{Float64,1})::Array{Float64,1}
 
-    init_time = 0.0 + (time_series[2] - time_series[1])/10.0
-    time_mod = vcat([init_time], time_series[2:end])    
-
+    # init time diff, used to cope with singularity
+    init_offset = (time_series[2] - time_series[1])/10.0
+    
+    # need to add an additional 'previous' time point to capture any instantaneous loading
+    time_previous = time_series[1] - (time_series[2] - time_series[1])
+    time_mod = vcat([time_previous], time_series)
+    # material is assumed at rest at this 'previous' time
+    prescribed_dot_mod = vcat([0.0], prescribed_dot)
+        
     I = zeros(length(time_mod))
-    @inbounds for (i,v) in enumerate(time_mod[1:end])
+    @inbounds for (i,v) in enumerate(time_mod)
         # generate integral for each time step
-        τ = time_series[1:i]
+        τ = time_mod[1:i]
         Modulus_arg = v - τ
+        Modulus_arg[end] = init_offset
         Modulusᵢ = modulus(Modulus_arg, params)
-        df_dtᵢ = prescribed_dot[1:i]
+        df_dtᵢ = prescribed_dot_mod[1:i]
         intergrand = Modulusᵢ.*df_dtᵢ
         I[i] = trapz(intergrand, τ)
     end
 
-    I
+    # fix initial point 
+    I[2] = (prescribed_dot[1]*modulus([init_offset], params)*(time_series[2] - time_series[1]))[1]
+    
+    return I[2:end]
 
 end
 
