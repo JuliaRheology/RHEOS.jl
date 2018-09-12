@@ -258,7 +258,7 @@ function modelfit(data::RheologyData,
 
     modulusname = string(modulus)
 
-    log = vcat(data.log, "Fitted modulus $modulusname in $timetaken seconds, finished due to $ret with parameters $minx")
+    log = vcat(data.log, "Fitted $modulusname, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
 
     RheologyModel(model.G, model.J, model.Gp, model.Gpp, minx, log)
 
@@ -401,7 +401,7 @@ function modelstepfit(data::RheologyData,
 
     modulusname = string(modulus)
 
-    log = vcat(data.log, "Fitted modulus $modulusname in $timetaken seconds, finished due to $ret with parameters $minx")
+    log = vcat(data.log, "Fitted $modulusname, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
 
     RheologyModel(model.G, model.J, model.Gp, model.Gpp, minx, log)
 

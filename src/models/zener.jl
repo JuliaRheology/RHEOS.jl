@@ -1,21 +1,77 @@
 #!/usr/bin/env julia
 
+# Fractional Zener Model
+function G_fraczener(t::Array{T,1}, params::Array{T,1}) where T<:Real
+    cₐ, a, cᵦ, β, cᵧ, γ = params
+
+    G = cᵦ*t.^(-β).*mittleff(a - β, 1 - β, -cᵦ*t.^(a - β)/cₐ) + cᵧ*t.^(-γ)/gamma(1 - γ)
+end
+
+function J_fraczener(t::Array{T,1}, params::Array{T,1}) where T<:Real
+    cₐ, a, cᵦ, β, cᵧ, γ = params
+
+    J = InverseLaplace.ILt(s -> 1/s^2 * (cₐ*s^a + cᵦ*s^β)/(cₐ*s^a*cᵦ*s^β + cᵧ*s^γ*(cₐ*s^a + cᵦ*s^β)))
+
+    return [J(t_val) for t_val in t]
+end
+
+function Gp_fraczener(ω::Array{T,1}, params::Array{T,1}) where T<:Real
+    cₐ, a, cᵦ, β, cᵧ, γ = params
+
+    denominator = (cₐ*ω.^a).^2 + (cᵦ*ω.^β).^2 + 2*(cₐ*ω.^a).*(cᵦ*ω.^β)*cos((a - β)*π/2)
+
+    numerator = ((cᵦ*ω.^β).^2).*(cₐ*ω.^a)*cos(a*π/2) + ((cₐ*ω.^a).^2).*(cᵦ*ω.^β)*cos(β*π/2)
+
+    Gp = numerator./denominator + cᵧ*ω.^γ*cos(γ*π/2)
+end
+
+function Gpp_fraczener(ω::Array{T,1}, params::Array{T,1}) where T<:Real
+    cₐ, a, cᵦ, β, cᵧ, γ = params
+
+    denominator = (cₐ*ω.^a).^2 + (cᵦ*ω.^β).^2 + 2*(cₐ*ω.^a).*(cᵦ*ω.^β)*cos((a - β)*π/2)
+
+    numerator = ((cᵦ*ω.^β).^2).*(cₐ*ω.^a)*sin(a*π/2) + ((cₐ*ω.^a).^2).*(cᵦ*ω.^β)*sin(β*π/2)
+
+    Gpp = numerator./denominator + cᵧ*ω.^γ*sin(γ*π/2)
+end
+
+FractionalZener() = RheologyModel(G_fraczener, J_fraczener, Gp_fraczener, Gpp_fraczener, [1.0, 0.7, 1.0, 0.5, 1.0, 0.2], ["model created with default parameters"])
+FractionalZener(params::Array{T, 1}) where T<:Real = RheologyModel(G_fraczener, J_fraczener, Gp_fraczener, Gpp_fraczener, params, ["model created by user with parameters $params"])
+
 # Fractional Standard Linear Solid in (Fractional) Maxwell Form
 function G_fracsls(t::Array{T,1}, params::Array{T,1}) where T<:Real
-    k₀, k₁, cₐ, a = params
+    cₐ, a, kᵦ, kᵧ = params
 
-    G = k₀ + k₁*mittleff.(a, -(k₁/cₐ)*t.^a)
+    G = kᵦ*mittleff.(a, -(kᵦ/cₐ)*t.^a) + kᵧ
 end
 
 function J_fracsls(t::Array{T,1}, params::Array{T,1}) where T<:Real
+    cₐ, a, kᵦ, kᵧ = params
 
+    J = InverseLaplace.ILt(s -> 1/s^2 * (cₐ*s^a + kᵦ)/(cₐ*s^a*kᵦ + kᵧ*(cₐ*s^a + kᵦ)))
+
+    return [J(t_val) for t_val in t]
 end
 
 function Gp_fracsls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
+    cₐ, a, kᵦ, kᵧ = params
+
+    denominator = (cₐ*ω.^a).^2 + kᵦ^2 + 2*(cₐ*ω.^a)*cᵦ*cos((a - 1)*π/2)
+
+    numerator = kᵦ^2*(cₐ*ω.^a)*cos(a*π/2) + ((cₐ*ω.^a).^2)*kᵦ
+
+    Gp = numerator./denominator + kᵧ
 
 end
 
 function Gpp_fracsls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
+    cₐ, a, kᵦ, kᵧ = params
+
+    denominator = (cₐ*ω.^a).^2 + kᵦ^2 + 2*(cₐ*ω.^a)*cᵦ*cos((a - 1)*π/2)
+
+    numerator = kᵦ^2*(cₐ*ω.^a)*sin(a*π/2)
+
+    Gpp = numerator./denominator 
 
 end
 
@@ -24,17 +80,17 @@ FractionalSLS(params::Array{T, 1}) where T<:Real = RheologyModel(G_fracsls, null
 
 # Standard Linear Solid in Maxwell Form
 function G_sls(t::Array{T,1}, params::Array{T,1}) where T<:Real
-    k₀, k₁, η₁ = params
+    kᵧ, kᵦ, η = params
 
-    G = k₀ + k₁*exp.(-t*k₁/η₁)
+    G = kᵧ + kᵦ*exp.(-t*kᵦ/η)
 end
 
 function J_sls(t::Array{T,1}, params::Array{T,1}) where T<:Real
-    k₀, k₁, η₁ = params
+    kᵧ, kᵦ, η = params
 
-    c₀ = 1/k₀
-    c₁ = k₁/(k₀*(k₀ + k₁))
-    τᵣ = η₁*(k₀ + k₁)/(k₀*k₁)
+    c₀ = 1/kᵧ
+    c₁ = kᵦ/(kᵧ*(kᵧ + kᵦ))
+    τᵣ = η*(kᵧ + kᵦ)/(kᵧ*kᵦ)
 
     J = c₀ - c₁*exp.(-t/τᵣ)
 end
