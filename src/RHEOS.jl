@@ -11,7 +11,7 @@ using uCSV
 using ImageFiltering
 using Interpolations
 using NLopt
-using JLD
+# using JLD
 using DataFrames
 import Base: +, -, *
 
@@ -26,7 +26,7 @@ export closestindex, deriv
 # definitions.jl
 export RheologyData, RheologyModel, RheologyModelTemp
 # IO.jl
-export fileload, savedata, loaddata, savemodel, loadmodel, exportdata
+export fileload #, savedata, loaddata, savemodel, loadmodel, exportdata
 # models.jl
 export null_modulus
 export SpringPot, Spring, Dashpot, SLS, FractionalSLS, FractionalKVspring, PowerLawPlateau
