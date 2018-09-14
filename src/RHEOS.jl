@@ -32,6 +32,7 @@ export null_modulus
 export SpringPot, Spring, Dashpot, SLS, FractionalSLS, FractionalKVspring, PowerLawPlateau
 export FractionalMaxwell, FractionalMaxwellSpring, FractionalMaxwellDashpot, Maxwell
 export FractionalSpecial
+export JeffreysPT
 export SLS2
 #  SLS, FractionalMaxwell, FractionalKelvinVoigt, FractionalSpecial, PowerLawPlateau
 # datagen.jl

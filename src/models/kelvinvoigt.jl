@@ -10,7 +10,7 @@ end
 function J_fractKV(t::Array{T,1}, params::Array{T,1}) where T<:Real
     cₐ, a, cᵦ, β = params
 
-    J = cₐ*t.^(a)*mittleff.(a - β, 1 + a, -cᵦ*t.^(a - β)/cₐ)
+    J = (t.^(a)/cₐ)*mittleff.(a - β, 1 + a, -cᵦ*t.^(a - β)/cₐ)
 end
 
 function Gp_fractKV(ω::Array{T,1}, params::Array{T,1}) where T<:Real
@@ -38,7 +38,7 @@ end
 function J_fractKVspring(t::Array{T,1}, params::Array{T,1}) where T<:Real
     cₐ, a, k = params
 
-    J = cₐ*t.^(a)*mittleff.(a - β, 1 + a, -cᵦ*t.^(a - β)/cₐ)
+    J = (t.^(a)/cₐ)*mittleff.(a - β, 1 + a, -cᵦ*t.^(a - β)/cₐ)
 end
 
 function Gp_fractKVspring(ω::Array{T,1}, params::Array{T,1}) where T<:Real
@@ -70,7 +70,7 @@ end
 function J_fractKVdashpot(t::Array{T,1}, params::Array{T,1}) where T<:Real
     η, cᵦ, β = params
 
-    J = η*t.*mittleff.(1 - β, 1 + 1, -cᵦ*t.^(1.0 - β)/η)
+    J = (t/η).*mittleff.(1 - β, 1 + 1, -cᵦ*t.^(1.0 - β)/η)
 end
 
 function Gp_fractKVdashpot(ω::Array{T,1}, params::Array{T,1}) where T<:Real

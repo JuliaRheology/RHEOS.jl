@@ -17,6 +17,9 @@ include(joinpath(models_directory, "zener.jl"))
 # fractional Special model
 include(joinpath(models_directory, "special.jl"))
 
+# poynting-thomson model and specialized forms (equivalent to Standard Linear Solid in Kelvin form)
+include(joinpath(models_directory, "poynting-thomson.jl"))
+
 # Plateau-d Power Law
 function G_platpow(t::Array{T,1}, params::Array{T,1}) where T<:Real
     Gᵩ, G₀, τ, α = params
