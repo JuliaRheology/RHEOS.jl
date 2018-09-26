@@ -29,8 +29,9 @@ export RheologyData, RheologyModel, RheologyModelTemp
 export fileload, savedata, loaddata, savemodel, loadmodel, exportdata
 # models.jl
 export null_modulus
-export SpringPot, Spring, Dashpot, SLS, FractionalSLS, FractionalKVspring, PowerLawPlateau
+export SpringPot, Spring, Dashpot, SLS, FractionalSLS, PowerLawPlateau
 export FractionalMaxwell, FractionalMaxwellSpring, FractionalMaxwellDashpot, Maxwell
+export FractionalKelvinVoigt, FractionalKVspring, FractionalKVdashpot, KelvinVoigt
 export FractionalSpecial
 export JeffreysPT
 export SLS2
