@@ -96,12 +96,28 @@ function J_sls(t::Array{T,1}, params::Array{T,1}) where T<:Real
 end
 
 function Gp_sls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
+    kᵧ, kᵦ, η = params
+
+    τ = η/kᵦ
+
+    denominator = 1 + τ^2*ω.^2
+    numerator = ω.^2*τ^2*kᵦ
+
+    Gp = numerator./denominator + kᵧ
 
 end
 
 function Gpp_sls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
+    kᵧ, kᵦ, η = params
+
+    τ = η/kᵦ
+
+    denominator = 1 + τ^2*ω.^2
+    numerator = ω*τ*kᵦ
+
+    Gpp = numerator./denominator
 
 end
 
-SLS() = RheologyModel(G_sls, J_sls, null_modulus, null_modulus, [1.0, 0.5, 1.0], ["model created with default parameters"])
-SLS(params::Array{T, 1}) where T<:Real = RheologyModel(G_sls, J_sls, null_modulus, null_modulus, params, ["model created by user with parameters $params"])
+SLS() = RheologyModel(G_sls, J_sls, Gp_sls, Gpp_sls, [1.0, 0.5, 1.0], ["model created with default parameters"])
+SLS(params::Array{T, 1}) where T<:Real = RheologyModel(G_sls, J_sls, Gp_sls, Gpp_sls, params, ["model created by user with parameters $params"])
