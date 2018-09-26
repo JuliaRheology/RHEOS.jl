@@ -24,12 +24,10 @@ RHEOS to better understand models' response.
 
 ## To do
 - [ ] Documentation
-- [ ] Implement corrected fractional models
 - [ ] Add G* complex modulus fitting
-- [ ] Test new model structure (G, G* and J combined)
 - [ ] Add tests
 - [ ] Add Sync Interpolation for going from variable to constant sample rate
-- [ ] Set up OS X CI on Travis
+- [ ] Set up OSX CI on Travis
 
 ## References & Included Dependencies
 #### [FastConv.jl](https://github.com/aamini/FastConv.jl)
