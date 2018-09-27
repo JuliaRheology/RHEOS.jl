@@ -12,16 +12,16 @@ Windows: [![Build Status](https://ci.appveyor.com/api/projects/status/github/Jul
 # RHEOS - RHEology, Open-Source
 *A suite of tools for analysing rheology data.*
 
-- Stress/Strain/Time data can be easily be fitted to a viscoelastic model.
+- Stress/Strain/Time data can be easily be fitted to a viscoelastic model
 
-- G'/G''/Frequency data can easily be fitted to a viscoelastic model.
+- G'/G''/Frequency data can easily be fitted to a viscoelastic model
 
-- Many standard and fractional viscoelastic models have already been implemented within RHEOS new ones can easily be added by users.
+- Many standard and fractional viscoelastic models have already been implemented within RHEOS new ones can easily be added by users
 
-- A fitted model can be used to predict the behaviour of the material under other loading conditions, enabling the fit/predict paradigm of model selection.
+- A fitted model can be used to predict the behaviour of the material under other loading conditions, enabling the fit/predict paradigm of model selection
 
 - Artificial loading conditions can be generated within
-RHEOS to better understand models' response. 
+RHEOS to better understand a model's response
 
 ## Installation
 
