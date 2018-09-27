@@ -24,7 +24,7 @@ export boltzconvolve
 # utility
 export closestindex, deriv
 # definitions.jl
-export RheologyData, RheologyModel, RheologyModelTemp
+export RheologyData, RheologyModel, RheologyModelTemp, RheologyDynamic
 # IO.jl
 export fileload, savedata, loaddata, savemodel, loadmodel, exportdata
 # models.jl
@@ -41,6 +41,7 @@ export stepgen, rampgen, singen, repeatdata, addnoise
 # processing.jl
 export var_resample, downsample, fixed_resample, smooth, mapbackdata
 export modelfit, modelpredict, modelstepfit, modelsteppredict
+export dynamicmodelfit, dynamicmodelpredict
 
 include("base.jl")
 include("definitions.jl")

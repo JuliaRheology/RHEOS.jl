@@ -300,3 +300,21 @@ struct RheologyModelTemp
     log::Array{String,1}
 
 end
+
+"""
+    RheologyDynamic(Gp::Vector{T<:Real}, Gpp::Vector{T<:Real}, ω::Vector{T<:Real}, log::Array{String,1})
+
+RheologyDynamic struct used for high level interaction with RHEOS
+fitting functions. 
+"""
+struct RheologyDynamic
+
+    # original data
+    Gp::Vector{T} where T<:Real
+    Gpp::Vector{T} where T<:Real
+    ω::Vector{T} where T<:Real
+
+    # operations applied, stores history of which functions (including arguments)
+    log::Array{String,1}
+
+end

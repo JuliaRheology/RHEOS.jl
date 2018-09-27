@@ -23,8 +23,8 @@ RHEOS to better understand models' response.
 - (optional) Set environment variable "JULIA_NUM_THREADS" equal to number of processor cores available
 
 ## To do
+- [ ] Add frequency domain fitting optimization
 - [ ] Documentation
-- [ ] Add G* complex modulus fitting
 - [ ] Add tests
 - [ ] Add Sync Interpolation for going from variable to constant sample rate
 - [ ] Set up OSX CI on Travis

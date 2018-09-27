@@ -447,3 +447,80 @@ function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Sy
     RheologyData(σ, ϵ, data.t, data.sampling, log)
 
 end
+
+function obj_dynamic(params::Vector{T},
+                     grad::Vector{T},
+                     ω::Vector{T},
+                     dataGp::Vector{T},
+                     dataGpp::Vector{T},
+                     modelGp::Function,
+                     modelGpp::Function;
+                     _insight::Bool = false) where T<:Real
+
+    if _insight
+        println("Current Parameters: ", params)
+    end
+
+    costGp = sum(0.5*(dataGp - modelGp(ω, params)).^2)
+    costGpp = sum(0.5*(dataGpp - modelGpp(ω, params)).^2)
+
+    cost = costGp + costGpp
+
+end
+
+function dynamicmodelfit(data::RheologyDynamic,
+                model::RheologyModel;
+                p0::Vector{T} = [-1.0],
+                lo::Vector{T} = [-1.0],
+                hi::Vector{T} = [-1.0],
+                verbose::Bool = false,
+                rel_tol::T = 1e-4) where T<:Real
+
+    # get initial paramaters
+    if quasinull(p0)
+        p0 = model.parameters
+    end 
+
+    # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
+    opt = Opt(:LN_SBPLX, length(p0))
+
+    # apply parameter boundaries if prescribed
+    if !quasinull(lo)
+        lower_bounds!(opt, lo)
+    end
+
+    if !quasinull(hi)
+        upper_bounds!(opt, hi)
+    end
+
+    # set relative tolerance
+    xtol_rel!(opt, rel_tol)
+
+    # set objective/cost function
+    min_objective!(opt, (params, grad) -> obj_dynamic(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
+
+    # timed fitting
+    tic()
+    (minf, minx, ret) = NLopt.optimize(opt, p0)
+    timetaken = toq()
+
+    # log fit details
+    modelname = string(model)
+    log = vcat(data.log, "Fitted Gp, Gpp of $modelname, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
+
+    RheologyModel(model.G, model.J, model.Gp, model.Gpp, minx, log)
+
+end
+
+function dynamicmodelpredict(data::RheologyDynamic, model::RheologyModel)
+
+    # get results
+    predGp = model.Gp(data.ω, model.parameters)
+    predGpp = model.Gpp(data.ω, model.parameters)
+
+    # store operation
+    log = vcat(data.log, "Predicted data from model:", model.log)
+
+    RheologyDynamic(predGp, predGpp, data.ω, log)
+
+end
