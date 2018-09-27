@@ -10,20 +10,27 @@ Windows: [![Build Status](https://ci.appveyor.com/api/projects/status/github/Jul
 [![License](https://img.shields.io/badge/License-MIT-ff69b2.svg?style=flat)](LICENSE.md)
 
 # RHEOS - RHEology, Open-Source
-A suite of tools for analysing rheology data. Stress/Strain/Time data can be easily be fitted to a viscoelastic model. (Commonly occuring
-standard and fractional viscoelastic models have alread been implemented within RHEOS — new ones can be added by users.) A fitted model can
-be used to predict the behaviour of the material under other loading conditions. Artificial loading conditions can be generated within
+*A suite of tools for analysing rheology data.*
+
+- Stress/Strain/Time data can be easily be fitted to a viscoelastic model.
+
+- G'/G''/Frequency data can easily be fitted to a viscoelastic model.
+
+- Many standard and fractional viscoelastic models have already been implemented within RHEOS new ones can easily be added by users.
+
+- A fitted model can be used to predict the behaviour of the material under other loading conditions, enabling the fit/predict paradigm of model selection.
+
+- Artificial loading conditions can be generated within
 RHEOS to better understand models' response. 
 
 ## Installation
 
-- Install Julia, version 0.6.3
-- From Julia REPL, type ```Pkg.clone("https://github.com/JuliaRheology/RHEOS.jl.git")```
-- Run ```julia TEMP_INSTALL.jl```, a script located in your RHEOS directory
-- (optional) Set environment variable "JULIA_NUM_THREADS" equal to number of processor cores available
+1. Install Julia, version 0.6
+2. From Julia REPL, type ```Pkg.clone("https://github.com/JuliaRheology/RHEOS.jl.git")```
+3. Run ```julia TEMP_INSTALL.jl```, a script located in your RHEOS directory
 
 ## To do
-- [ ] Add frequency domain fitting optimization
+- [ ] Add FFT fitting to handle singularities and sidestep Mittag-Leffler bottleneck
 - [ ] Documentation
 - [ ] Add tests
 - [ ] Add Sync Interpolation for going from variable to constant sample rate
@@ -35,13 +42,3 @@ RHEOS to better understand models' response.
 
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
 + R. Gorenflo, J. Loutchko and Y. Loutchko - *Computation of the Mittag-Leffler function and its derivative*,  Fract. Calc. Appl. Anal. **(2002)**
-
-#### [InverseLaplace.jl](https://github.com/jlapeyre/InverseLaplace.jl)
-+ J.A.C Weideman, Algorithms for Parameter Selection in the Weeks Method for Inverting the Laplace Transform, SIAM Journal on Scientific Computing, Vol. 21, pp. 111-128 **(1999)**
-
-+ Abate, J. and Valkó, P.P., Multi-precision Laplace transform inversion International Journal for Numerical Methods in Engineering, Vol. 60 (Iss. 5-7) pp 979–993 **(2004)**
-
-+ Valkó, P.P. and Abate, J., Comparison of Sequence Accelerators for the Gaver Method of Numerical Laplace Transform Inversion, Computers and Mathematics with Application, Vol. 48 (Iss.3-40) pp. 629-636 **(2004)**
-
-#### Fractional Zener, Fractional Maxwell and Fractional Kelvin-Voigt Models
-F. Mainardi, G. Spada - [*Creep, relaxation and viscosity properties for basic fractional models in rheology*](https://doi.org/10.1140/epjst/e2011-01387-1), Eur. Phys. J. Spec. Top. **(2011)**
