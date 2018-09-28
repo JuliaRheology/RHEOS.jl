@@ -7,7 +7,7 @@ function deriv_test_float()
 
     dy = 2*x
 
-    dy_numeric = deriv(y, x)
+    dy_numeric = RHEOS.derivCD(y, x)
 
     return sum((dy - dy_numeric).^2)
 
@@ -19,7 +19,7 @@ function deriv_test_int_simple()
 
     x = collect(1:10)
 
-    y = deriv(x)
+    y = RHEOS.derivCD(x)
 
     ysum = sum(y)
 
