@@ -468,13 +468,57 @@ function obj_dynamic(params::Vector{T},
 
 end
 
+function obj_dynamic_weighted(params::Vector{T},
+                            grad::Vector{T},
+                            ω::Vector{T},
+                            dataGp::Vector{T},
+                            dataGpp::Vector{T},
+                            modelGp::Function,
+                            modelGpp::Function,
+                            weights::Vector{T};
+                            _insight::Bool = false) where T<:Real
+
+    if _insight
+        println("Current Parameters: ", params)
+    end
+
+    costGp = sum(0.5*(dataGp - modelGp(ω, params)).^2)
+    costGpp = sum(0.5*(dataGpp - modelGpp(ω, params)).^2)
+
+    cost = weights[1]*costGp + weights[2]*costGpp
+
+end
+
+function obj_dynamic_autoweighted(params::Vector{T},
+                            grad::Vector{T},
+                            ω::Vector{T},
+                            dataGp::Vector{T},
+                            dataGpp::Vector{T},
+                            modelGp::Function,
+                            modelGpp::Function,
+                            meanGp::T,
+                            meanGpp::T;
+                            _insight::Bool = false) where T<:Real
+
+    if _insight
+        println("Current Parameters: ", params)
+    end
+
+    costGp = sum(0.5*(dataGp - modelGp(ω, params)).^2)
+    costGpp = sum(0.5*(dataGpp - modelGpp(ω, params)).^2)
+
+    cost = costGp/meanGp + costGpp/meanGpp
+
+end
+
 function dynamicmodelfit(data::RheologyDynamic,
                 model::RheologyModel;
                 p0::Vector{T} = [-1.0],
                 lo::Vector{T} = [-1.0],
                 hi::Vector{T} = [-1.0],
                 verbose::Bool = false,
-                rel_tol::T = 1e-4) where T<:Real
+                rel_tol::T = 1e-4,
+                weights::Union{String, Vector{T}}=[-1.0]) where T<:Real
 
     # get initial paramaters
     if quasinull(p0)
@@ -496,8 +540,19 @@ function dynamicmodelfit(data::RheologyDynamic,
     # set relative tolerance
     xtol_rel!(opt, rel_tol)
 
-    # set objective/cost function
-    min_objective!(opt, (params, grad) -> obj_dynamic(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
+    if weights==[-1.0]
+        # set objective/cost function
+        min_objective!(opt, (params, grad) -> obj_dynamic(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
+
+    elseif weights=="auto"
+        # set objective/cost function
+        min_objective!(opt, (params, grad) -> obj_dynamic_autoweighted(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, mean(data.Gp), mean(data.Gpp); _insight = verbose))
+
+    elseif weights!=[-1.0]
+        # set objective/cost function
+        min_objective!(opt, (params, grad) -> obj_dynamic_weighted(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, weights; _insight = verbose))
+    
+    end
 
     # timed fitting
     tic()
