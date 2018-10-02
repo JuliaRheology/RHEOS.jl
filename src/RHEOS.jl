@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-__precompile__()
+__precompile__(true)
 
 module RHEOS
 # installed using Pkg.clone from rheos-cambridge forked repos

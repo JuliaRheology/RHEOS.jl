@@ -537,24 +537,24 @@ function boltzintegral_nonsing(modulus::Function, time_series::Array{Float64,1},
 
 end
 
-"""
-    boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, params::Array{Float64,1}, prescribed_dot::Array{Float64,1})
+# """
+#     boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, params::Array{Float64,1}, prescribed_dot::Array{Float64,1})
 
-Calculate Boltzmann Superposition integral using direct integration method.
+# Calculate Boltzmann Superposition integral using direct integration method.
 
-This is much slower and slightly less accurate (depending on sample resolution)
-than the convolution method. However, it works for variable sample rate.
+# This is much slower and slightly less accurate (depending on sample resolution)
+# than the convolution method. However, it works for variable sample rate.
 
-Should be used when viscoelastic model contains a singularity and should be compared
-with [2:end] of reference array when fitting.
+# Should be used when viscoelastic model contains a singularity and should be compared
+# with [2:end] of reference array when fitting.
 
-# Arguments
+# # Arguments
 
-- `modulus`: Viscoelastic modulus function
-- `time_series`: The array of times
-- `params`: Parameters passed to viscoelastic modulus
-- `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
-"""
+# - `modulus`: Viscoelastic modulus function
+# - `time_series`: The array of times
+# - `params`: Parameters passed to viscoelastic modulus
+# - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
+# """
 # function boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, params::Array{Float64,1},
 #                     prescribed_dot::Array{Float64,1})::Array{Float64,1}
 
@@ -631,25 +631,25 @@ function boltzconvolve_nonsing(modulus::Function, time_series::Array{Float64,1},
 
 end
 
-"""
-    boltzconvolve_sing(modulus::Function, time_series::Array{Float64,1}, dt::Float64, params::Array{Float64,1}, prescribed_dot::Array{Float64,1})
+# """
+#     boltzconvolve_sing(modulus::Function, time_series::Array{Float64,1}, dt::Float64, params::Array{Float64,1}, prescribed_dot::Array{Float64,1})
 
-Calculate Boltzmann Superposition integral using convolution method.
+# Calculate Boltzmann Superposition integral using convolution method.
 
-This is much faster and slightly more accurate (depending on sample resolution)
-than the integral method. However, it works for constant sample rate.
+# This is much faster and slightly more accurate (depending on sample resolution)
+# than the integral method. However, it works for constant sample rate.
 
-Should be used when singularity exists in viscoelastic model and should be compared
-with [2:end] of reference array when fitting.
+# Should be used when singularity exists in viscoelastic model and should be compared
+# with [2:end] of reference array when fitting.
 
-# Arguments
+# # Arguments
 
-- `modulus`: Viscoelastic modulus function
-- `time_series`: The array of times
-- `dt`: Constant time step (sample period)
-- `params`: Parameters passed to viscoelastic modulus
-- `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
-"""
+# - `modulus`: Viscoelastic modulus function
+# - `time_series`: The array of times
+# - `dt`: Constant time step (sample period)
+# - `params`: Parameters passed to viscoelastic modulus
+# - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
+# """
 # function boltzconvolve_sing(modulus::Function, time_series::Array{Float64,1}, dt::Float64,
 #                         params::Array{Float64,1}, prescribed_dot::Array{Float64,1})::Array{Float64,1}
 

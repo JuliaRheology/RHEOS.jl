@@ -13,7 +13,8 @@ function J_fraczener(t::Array{T,1}, params::Array{T,1}) where T<:Real
     # Jbar(s) = (1/s^2)*(cₐ*s^a + cᵦ*s^β)/(cₐ*s^a*cᵦ*s^β + cᵧ*s^γ*(cₐ*s^a + cᵦ*s^β))
 
     # reverse engineered this one, seems to work OK - Check with Ale
-    Jbar(s) = (1/s^2)*(1 + (cₐ/cᵦ)*s^(a - β))/(cₐ + cᵧ*s^(-a) + (cᵧ*cₐ/cᵦ)*s^(γ-β))
+    # Jbar(s) = (1/s^2)*(1 + (cₐ/cᵦ)*s^(a - β))/(cₐ + cᵧ*s^(-a) + (cᵧ*cₐ/cᵦ)*s^(γ-β))
+    Jbar(s) = (1/s^2)*(1 + (cₐ/cᵦ)*s^(a - β))/(cₐ*s^a + cᵧ*s^γ + (cᵧ*cₐ/cᵦ)*s^(a + γ-β))
 
     J = InverseLaplace.ILt(s -> Jbar(s))
 

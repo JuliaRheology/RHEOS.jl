@@ -159,17 +159,17 @@ function repeatdata(self::RheologyData, n::Integer; t_trans = 0.0)
 end
 
 """
-    addnoise(self::RheologyData; amplitude::Float64 = 0.1, seed::Union{Int, Void} = nothing)
+    addnoise(self::RheologyData; amplitude::Float64 = 0.1, seed::Union{Int, Nothing} = nothing)
 
 Add random noise to artificially generated data.
 """
-function addnoise(self::RheologyData; amplitude::Float64 = 0.1, seed::Union{Int, Void} = nothing)
+function addnoise(self::RheologyData; amplitude::Float64 = 0.1, seed::Union{Int, Nothing} = nothing)
 
     @assert self.σ==self.ϵ "addnoise only works when σ==ϵ which is the state of RheologyData after being generated using the built-in RHEOS data generation functions"
 
     dataraw = self.σ
 
-    if typeof(seed)==Void
+    if typeof(seed)==Nothing
         # get random seed
         srand()
     elseif typeof(seed)<:Int
