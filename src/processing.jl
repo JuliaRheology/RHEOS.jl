@@ -551,8 +551,6 @@ function obj_dynamic_manual(params::Vector{T},
 
 end
 
-
-
 function dynamicmodelfit(data::RheologyDynamic,
                 model::RheologyModel;
                 p0::Vector{T} = [-1.0],
