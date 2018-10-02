@@ -30,7 +30,7 @@ show()
 
 # complicated test with noise
 stepup = stepgen(50.0, 25.0; stepsize = 0.05, t_trans = 2.5)
-osci = singen(50.0, 0.4; stepsize = 0.05, amplitude = 0.1)
+osci = singen(50.0, 0.2; stepsize = 0.05, amplitude = 0.1)
 rampup = rampgen(50.0, 25.0, 37.5; stepsize = 0.05)
 rampdown = rampgen(50.0, 37.5, 48.0; stepsize = 0.05, amplitude = -1.0)
 combined = osci*(rampup + rampdown) + stepup

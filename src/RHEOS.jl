@@ -24,22 +24,24 @@ export boltzconvolve
 # utility
 export closestindex, deriv
 # definitions.jl
-export RheologyData, RheologyModel, RheologyModelTemp
+export RheologyData, RheologyModel, RheologyModelTemp, RheologyDynamic
 # IO.jl
 export fileload #, savedata, loaddata, savemodel, loadmodel, exportdata
 # models.jl
 export null_modulus
-export SpringPot, Spring, Dashpot, SLS, FractionalSLS, FractionalKVspring, PowerLawPlateau
+export SpringPot, Spring, Dashpot
 export FractionalMaxwell, FractionalMaxwellSpring, FractionalMaxwellDashpot, Maxwell
+export FractionalKelvinVoigt, FractionalKVspring, FractionalKVdashpot, KelvinVoigt
+export FractionalZener, FractionalSLS, SLS
 export FractionalSpecial
 export JeffreysPT
-export SLS2
-#  SLS, FractionalMaxwell, FractionalKelvinVoigt, FractionalSpecial, PowerLawPlateau
+export SLS2, PowerLawPlateau
 # datagen.jl
 export stepgen, rampgen, singen, repeatdata, addnoise
 # processing.jl
 export var_resample, downsample, fixed_resample, smooth, mapbackdata
 export modelfit, modelpredict, modelstepfit, modelsteppredict
+export dynamicmodelfit, dynamicmodelpredict
 
 include("base.jl")
 include("definitions.jl")

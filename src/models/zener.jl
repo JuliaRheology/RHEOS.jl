@@ -4,13 +4,18 @@
 function G_fraczener(t::Array{T,1}, params::Array{T,1}) where T<:Real
     cₐ, a, cᵦ, β, cᵧ, γ = params
 
-    G = cᵦ*t.^(-β).*mittleff(a - β, 1 - β, -cᵦ*t.^(a - β)/cₐ) + cᵧ*t.^(-γ)/gamma(1 - γ)
+    G = cᵦ*t.^(-β).*mittleff.(a - β, 1 - β, -cᵦ*t.^(a - β)/cₐ) + cᵧ*t.^(-γ)/gamma(1 - γ)
 end
 
 function J_fraczener(t::Array{T,1}, params::Array{T,1}) where T<:Real
     cₐ, a, cᵦ, β, cᵧ, γ = params
 
-    J = InverseLaplace.ILt(s -> 1/s^2 * (cₐ*s^a + cᵦ*s^β)/(cₐ*s^a*cᵦ*s^β + cᵧ*s^γ*(cₐ*s^a + cᵦ*s^β)))
+    # Jbar(s) = (1/s^2)*(cₐ*s^a + cᵦ*s^β)/(cₐ*s^a*cᵦ*s^β + cᵧ*s^γ*(cₐ*s^a + cᵦ*s^β))
+
+    # reverse engineered this one, seems to work OK - Check with Ale
+    Jbar(s) = (1/s^2)*(1 + (cₐ/cᵦ)*s^(a - β))/(cₐ + cᵧ*s^(-a) + (cᵧ*cₐ/cᵦ)*s^(γ-β))
+
+    J = InverseLaplace.ILt(s -> Jbar(s))
 
     return [J(t_val) for t_val in t]
 end
@@ -48,7 +53,10 @@ end
 function J_fracsls(t::Array{T,1}, params::Array{T,1}) where T<:Real
     cₐ, a, kᵦ, kᵧ = params
 
-    J = InverseLaplace.ILt(s -> 1/s^2 * (cₐ*s^a + kᵦ)/(cₐ*s^a*kᵦ + kᵧ*(cₐ*s^a + kᵦ)))
+    # reverse engineered from fract_special - check with Ale
+    Jbar(s) = (1/s^2)*(1 + (cₐ/kᵦ)*s^a)/(cₐ + kᵧ*s^(-a) + (kᵧ*cₐ/kᵦ))
+
+    J = InverseLaplace.ILt(s -> Jbar(s))
 
     return [J(t_val) for t_val in t]
 end
@@ -56,7 +64,7 @@ end
 function Gp_fracsls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
     cₐ, a, kᵦ, kᵧ = params
 
-    denominator = (cₐ*ω.^a).^2 + kᵦ^2 + 2*(cₐ*ω.^a)*cᵦ*cos((a - 1)*π/2)
+    denominator = (cₐ*ω.^a).^2 + kᵦ^2 + 2*(cₐ*ω.^a)*kᵦ*cos(a*π/2)
 
     numerator = kᵦ^2*(cₐ*ω.^a)*cos(a*π/2) + ((cₐ*ω.^a).^2)*kᵦ
 
@@ -67,7 +75,7 @@ end
 function Gpp_fracsls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
     cₐ, a, kᵦ, kᵧ = params
 
-    denominator = (cₐ*ω.^a).^2 + kᵦ^2 + 2*(cₐ*ω.^a)*cᵦ*cos((a - 1)*π/2)
+    denominator = (cₐ*ω.^a).^2 + kᵦ^2 + 2*(cₐ*ω.^a)*kᵦ*cos(a*π/2)
 
     numerator = kᵦ^2*(cₐ*ω.^a)*sin(a*π/2)
 
@@ -75,8 +83,8 @@ function Gpp_fracsls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
 
 end
 
-FractionalSLS() = RheologyModel(G_fracsls, null_modulus, null_modulus, null_modulus, [0.5, 0.5, 1.0, 0.2], ["model created with default parameters"])
-FractionalSLS(params::Array{T, 1}) where T<:Real = RheologyModel(G_fracsls, null_modulus, null_modulus, null_modulus, params, ["model created by user with parameters $params"])
+FractionalSLS() = RheologyModel(G_fracsls, J_fracsls, Gp_fracsls, Gpp_fracsls, [0.5, 0.5, 1.0, 0.2], ["model created with default parameters"])
+FractionalSLS(params::Array{T, 1}) where T<:Real = RheologyModel(G_fracsls, J_fracsls, Gp_fracsls, Gpp_fracsls, params, ["model created by user with parameters $params"])
 
 # Standard Linear Solid in Maxwell Form
 function G_sls(t::Array{T,1}, params::Array{T,1}) where T<:Real
@@ -96,12 +104,28 @@ function J_sls(t::Array{T,1}, params::Array{T,1}) where T<:Real
 end
 
 function Gp_sls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
+    kᵧ, kᵦ, η = params
+
+    τ = η/kᵦ
+
+    denominator = 1 + τ^2*ω.^2
+    numerator = ω.^2*τ^2*kᵦ
+
+    Gp = numerator./denominator + kᵧ
 
 end
 
 function Gpp_sls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
+    kᵧ, kᵦ, η = params
+
+    τ = η/kᵦ
+
+    denominator = 1 + τ^2*ω.^2
+    numerator = ω*τ*kᵦ
+
+    Gpp = numerator./denominator
 
 end
 
-SLS() = RheologyModel(G_sls, J_sls, null_modulus, null_modulus, [1.0, 0.5, 1.0], ["model created with default parameters"])
-SLS(params::Array{T, 1}) where T<:Real = RheologyModel(G_sls, J_sls, null_modulus, null_modulus, params, ["model created by user with parameters $params"])
+SLS() = RheologyModel(G_sls, J_sls, Gp_sls, Gpp_sls, [1.0, 0.5, 1.0], ["model created with default parameters"])
+SLS(params::Array{T, 1}) where T<:Real = RheologyModel(G_sls, J_sls, Gp_sls, Gpp_sls, params, ["model created by user with parameters $params"])
