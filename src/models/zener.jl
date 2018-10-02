@@ -50,7 +50,7 @@ end
 function J_fracsls(t::Array{T,1}, params::Array{T,1}) where T<:Real
     cₐ, a, kᵦ, kᵧ = params
 
-    Jbar(s) = (1/s)*(cₐ*s^a + cᵦ*s^β)/(cₐ*s^a*cᵦ*s^β + cᵧ*s^γ*(cₐ*s^a + cᵦ*s^β))
+    Jbar(s) = (1/s)*(cₐ*s^a + kᵦ)/(cₐ*s^a*kᵦ + kᵧ*(cₐ*s^a + kᵦ))
 
     J = InverseLaplace.ILt(s -> Jbar(s))
 
