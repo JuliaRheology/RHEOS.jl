@@ -15,21 +15,6 @@ end
 
 @test deriv_test_float() < 1e-5
 
-function deriv_test_int_simple()
-
-    x = collect(1:10)
-
-    y = RHEOS.derivCD(x)
-
-    ysum = sum(y)
-
-    return ysum
-
-end
-
-@test deriv_test_int_simple() == 10
-@test typeof(deriv_test_int_simple()) <: Integer
-
 # # boltz integral / convole test (non-singular)
 # function nonsing_get_integral()
 

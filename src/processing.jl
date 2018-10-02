@@ -468,7 +468,69 @@ function obj_dynamic(params::Vector{T},
 
 end
 
-function obj_dynamic_weighted(params::Vector{T},
+function obj_dynamic_linear(params::Vector{T},
+                            grad::Vector{T},
+                            ω::Vector{T},
+                            dataGp::Vector{T},
+                            dataGpp::Vector{T},
+                            modelGp::Function,
+                            modelGpp::Function,
+                            meanGp::T,
+                            meanGpp::T;
+                            _insight::Bool = false) where T<:Real
+
+    if _insight
+        println("Current Parameters: ", params)
+    end
+
+    costGp = sum(0.5*(dataGp/meanGp - modelGp(ω, params)/meanGp).^2)
+    costGpp = sum(0.5*(dataGpp/meanGpp - modelGpp(ω, params)/meanGpp).^2)
+
+    cost = costGp + costGpp
+
+end
+
+function obj_dynamic_log(params::Vector{T},
+                     grad::Vector{T},
+                     ω::Vector{T},
+                     dataGp::Vector{T},
+                     dataGpp::Vector{T},
+                     modelGp::Function,
+                     modelGpp::Function;
+                     _insight::Bool = false) where T<:Real
+
+    if _insight
+        println("Current Parameters: ", params)
+    end
+
+    costGp = sum(0.5*(log(dataGp) - log(modelGp(ω, params))).^2)
+    costGpp = sum(0.5*(log(dataGpp) - log(modelGpp(ω, params))).^2)
+
+    cost = costGp + costGpp
+
+end
+
+function obj_dynamic_global(params::Vector{T},
+                     grad::Vector{T},
+                     ω::Vector{T},
+                     dataGp::Vector{T},
+                     dataGpp::Vector{T},
+                     modelGp::Function,
+                     modelGpp::Function;
+                     _insight::Bool = false) where T<:Real
+
+    if _insight
+        println("Current Parameters: ", params)
+    end
+
+    costGp = sum(0.5*(((dataGp - modelGp(ω, params))./dataGp).^2))
+    costGpp = sum(0.5*(((dataGpp - modelGpp(ω, params))./dataGpp).^2))
+
+    cost = costGp + costGpp
+
+end
+
+function obj_dynamic_manual(params::Vector{T},
                             grad::Vector{T},
                             ω::Vector{T},
                             dataGp::Vector{T},
@@ -489,27 +551,7 @@ function obj_dynamic_weighted(params::Vector{T},
 
 end
 
-function obj_dynamic_autoweighted(params::Vector{T},
-                            grad::Vector{T},
-                            ω::Vector{T},
-                            dataGp::Vector{T},
-                            dataGpp::Vector{T},
-                            modelGp::Function,
-                            modelGpp::Function,
-                            meanGp::T,
-                            meanGpp::T;
-                            _insight::Bool = false) where T<:Real
 
-    if _insight
-        println("Current Parameters: ", params)
-    end
-
-    costGp = sum(0.5*(dataGp - modelGp(ω, params)).^2)
-    costGpp = sum(0.5*(dataGpp - modelGpp(ω, params)).^2)
-
-    cost = costGp/meanGp + costGpp/meanGpp
-
-end
 
 function dynamicmodelfit(data::RheologyDynamic,
                 model::RheologyModel;
@@ -518,7 +560,7 @@ function dynamicmodelfit(data::RheologyDynamic,
                 hi::Vector{T} = [-1.0],
                 verbose::Bool = false,
                 rel_tol::T = 1e-4,
-                weights::Union{String, Vector{T}}=[-1.0]) where T<:Real
+                weights::Union{String, Vector{T}}="log") where T<:Real
 
     # get initial paramaters
     if quasinull(p0)
@@ -540,18 +582,22 @@ function dynamicmodelfit(data::RheologyDynamic,
     # set relative tolerance
     xtol_rel!(opt, rel_tol)
 
-    if weights==[-1.0]
-        # set objective/cost function
+    # set objective/cost function
+    if weights=="none"
         min_objective!(opt, (params, grad) -> obj_dynamic(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
 
-    elseif weights=="auto"
-        # set objective/cost function
-        min_objective!(opt, (params, grad) -> obj_dynamic_autoweighted(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, mean(data.Gp), mean(data.Gpp); _insight = verbose))
+    elseif weights=="linear"
+        min_objective!(opt, (params, grad) -> obj_dynamic_linear(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, mean(data.Gp), mean(data.Gpp); _insight = verbose))
 
-    elseif weights!=[-1.0]
-        # set objective/cost function
-        min_objective!(opt, (params, grad) -> obj_dynamic_weighted(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, weights; _insight = verbose))
-    
+    elseif weights=="log"
+        min_objective!(opt, (params, grad) -> obj_dynamic_log(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
+
+    elseif weights=="global"
+        min_objective!(opt, (params, grad) -> obj_dynamic_global(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
+
+    elseif typeof(weights)==Vector{T} && length(weights)==2
+        min_objective!(opt, (params, grad) -> obj_dynamic_manual(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, weights; _insight = verbose))
+
     end
 
     # timed fitting
