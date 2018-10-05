@@ -1,13 +1,13 @@
 #!/usr/bin/env julia
-using RHEOS
-using PyPlot
+# using RHEOS
+# using PyPlot
 
-# # get data
-# sine = singen(800.0, 1/50; phase = -90.0)
-# ramp = rampgen(800.0, 10.0, 400.0) - rampgen(825.0, 400.0, 800.0)
-# data = ramp*sine
+# get data
+sine = singen(800.0, 1/50; phase = -90.0)
+ramp = rampgen(800.0, 10.0, 400.0) - rampgen(825.0, 400.0, 800.0)
+data = ramp*sine
 
-# sls_predicted = modelpredict(data, SLS([844.152, 2043.98, 5.15527]), :G)
+sls_predicted = modelpredict(data, SLS([844.152, 2043.98, 5.15527]), :G)
 # springpot_predicted = modelpredict(data, SpringPot([2997.7, 0.281836]), :G)
 
 # fig, ax = subplots()
@@ -31,15 +31,15 @@ using PyPlot
 # ax[:legend](loc="best")
 # show()
 
-# get data
-step = stepgen(50.0, 25.0; stepsize = 0.01)
-data = repeatdata(step, 5)
+# # get data
+# step = stepgen(50.0, 25.0; stepsize = 0.01)
+# data = repeatdata(step, 5)
 
-springpot_predicted = modelpredict(data, SpringPot(), :J)
-fractionalSpecial_predicted = modelpredict(data, FractionalSpecial(), :J)
+# springpot_predicted = modelpredict(data, SpringPot(), :J)
+# fractionalSpecial_predicted = modelpredict(data, FractionalSpecial(), :J)
 
-fig, ax = subplots()
-ax[:plot](springpot_predicted.t, springpot_predicted.ϵ, "--", label="springpot")
-ax[:plot](fractionalSpecial_predicted.t, fractionalSpecial_predicted.ϵ, "--", label="fractional SLS")
-ax[:legend](loc="best")
-show()
+# fig, ax = subplots()
+# ax[:plot](springpot_predicted.t, springpot_predicted.ϵ, "--", label="springpot")
+# ax[:plot](fractionalSpecial_predicted.t, fractionalSpecial_predicted.ϵ, "--", label="fractional SLS")
+# ax[:legend](loc="best")
+# show()

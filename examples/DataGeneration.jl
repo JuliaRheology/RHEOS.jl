@@ -28,7 +28,7 @@ bar = repeatdata(foo, 5)
 plot(bar.t, bar.ϵ, "--")
 show()
 
-# complicated test with noise
+# # complicated test with noise
 stepup = stepgen(50.0, 25.0; stepsize = 0.05, t_trans = 2.5)
 osci = singen(50.0, 0.2; stepsize = 0.05, amplitude = 0.1)
 rampup = rampgen(50.0, 25.0, 37.5; stepsize = 0.05)
@@ -38,4 +38,5 @@ repeated = repeatdata(combined, 3)
 noisyrepeated = addnoise(repeated; amplitude = 0.01, seed = 1)
 plot(repeated.t, repeated.ϵ)
 plot(noisyrepeated.t, noisyrepeated.ϵ, alpha = 0.7)
+
 show()

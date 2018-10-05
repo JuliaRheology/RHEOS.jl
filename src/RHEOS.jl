@@ -2,18 +2,22 @@
 __precompile__(true)
 
 module RHEOS
-# installed using Pkg.clone from rheos-cambridge forked repos
+
+# install using `add` from rheos-cambridge forked repos
 using MittLeffLite
 using FastConv
+
 # install using Pkg.add from Julia central package repository
 using InverseLaplace
 using uCSV
 using ImageFiltering
 using Interpolations
 using NLopt
-# using JLD
 using DataFrames
+
+# Base and stdlib imports
 import Base: +, -, *
+import Random
 
 ######################################################
 # debug

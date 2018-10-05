@@ -18,7 +18,7 @@ function stepgen(t_total::Float64,
     # for smooth transition
     if t_trans>0.0
         k = 10.0/t_trans
-        data = baseval + amplitude./(1 + exp.(-k*(t-t_on)))
+        data = baseval .+ amplitude./(1 .+ exp.(-k*(t.-t_on)))
     # discrete jump
     elseif t_trans==0.0
         for (i, t_i) in enumerate(t)
@@ -50,7 +50,7 @@ function rampgen(t_total::Float64,
 
     m = amplitude/(t_stop - t_start)
 
-    data = baseval + zeros(length(t))
+    data = baseval .+ zeros(length(t))
 
     for (i, v) in enumerate(t)
 
@@ -81,7 +81,7 @@ function singen(t_total::Float64,
 
     t = collect(0.0:stepsize:t_total)
 
-    data = baseval + zeros(length(t))
+    data = baseval .+ zeros(length(t))
 
     for (i, v) in enumerate(t)
 
@@ -171,14 +171,14 @@ function addnoise(self::RheologyData; amplitude::Float64 = 0.1, seed::Union{Int,
 
     if typeof(seed)==Nothing
         # get random seed
-        srand()
+        Random.seed!()
     elseif typeof(seed)<:Int
         # use specified seed
         @assert seed>=0 "Seed must be non-negative"
-        srand(seed)
+        Random.seed!(seed)
     end
 
-    data = dataraw + amplitude*(2*rand(Float64, length(dataraw)) - 1)
+    data = dataraw .+ amplitude*(2*rand(Float64, length(dataraw)) .- 1)
 
     log = vcat(self.log, ["added noise of amplitude $amplitude, with seed $seed"])
 
