@@ -139,6 +139,13 @@ git-tree-sha1 = "29cda58afbf62f35b1a094882ad6c745a47b2eaa"
 uuid = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 version = "0.2.4"
 
+[[FastConv]]
+git-tree-sha1 = "47566b3f9892b1f6c7b368f477967ce1f4abd4e0"
+repo-rev = "master"
+repo-url = "https://github.com/JuliaRheology/FastConv.jl"
+uuid = "22083eb0-c898-11e8-0742-69fd56cef0e9"
+version = "0.1.0"
+
 [[FixedPointNumbers]]
 deps = ["Pkg", "Test"]
 git-tree-sha1 = "b8045033701c3b10bf2324d7203404be7aef88ba"
