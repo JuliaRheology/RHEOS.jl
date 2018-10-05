@@ -14,9 +14,13 @@ function J_fractspecial(t::Array{T,1}, params::Array{T,1}) where T<:Real
     a = η/cᵦ
     b = k*η/cᵦ
 
-    J = InverseLaplace.ILt( s -> 1/s^2 * ((1+a*s^(1-β)) / (η+k/s+b*s^(-β)) ))
+    Jbar(s) = (1/s^2)*(1+a*s^(1-β))/(η+k/s+b*s^(-β))
 
-    return [J(t_val) for t_val in t]
+    # method gives NaN at time 0.0
+    # J = InverseLaplace.ILt(s -> Jbar(s))
+    # return [J(t_val) for t_val in t]
+
+    return InverseLaplace.talbotarr(s -> Jbar(s), t)
 
 end
 
