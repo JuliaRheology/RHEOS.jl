@@ -14,7 +14,7 @@ function stepgen(t_total::Float64,
 
     t = collect(0.0:stepsize:t_total)
 
-    data = Array{Float64,1}(length(t))
+    data = Array{Float64,1}(undef, length(t))
     # for smooth transition
     if t_trans>0.0
         k = 10.0/t_trans
