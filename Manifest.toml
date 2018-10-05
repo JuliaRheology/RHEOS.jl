@@ -238,12 +238,12 @@ uuid = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
 version = "0.3.1"
 
 [[MittLeffLite]]
-deps = ["QuadGK"]
-git-tree-sha1 = "3edf0bc3aea11e03687e846a484cb7aeaaeae661"
+deps = ["QuadGK", "SpecialFunctions"]
+git-tree-sha1 = "6f452df3b16ea008262c0ca3c71c348e85ad0e53"
 repo-rev = "master"
 repo-url = "https://github.com/JuliaRheology/MittLeffLite.jl"
-uuid = "c9f015b2-c89f-11e8-158d-cfe7402896c2"
-version = ""
+uuid = "c44f7210-c8ca-11e8-0508-2b84df03947e"
+version = "0.1.0"
 
 [[Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
