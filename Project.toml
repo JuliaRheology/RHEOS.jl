@@ -1,0 +1,6 @@
+authors = ["Louis Kaplan <louis.kaplan@slcu.cam.ac.uk>"]
+name = "RHEOS"
+uuid = "728860ae-c896-11e8-0b91-0f38ecad5046"
+version = "0.1.0"
+
+[deps]
