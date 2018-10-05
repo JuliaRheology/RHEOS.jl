@@ -10,11 +10,15 @@ end
 function J_fraczener(t::Array{T,1}, params::Array{T,1}) where T<:Real
     cₐ, a, cᵦ, β, cᵧ, γ = params
 
+<<<<<<< HEAD
     # Jbar(s) = (1/s^2)*(cₐ*s^a + cᵦ*s^β)/(cₐ*s^a*cᵦ*s^β + cᵧ*s^γ*(cₐ*s^a + cᵦ*s^β))
 
     # reverse engineered this one, seems to work OK - Check with Ale
     # Jbar(s) = (1/s^2)*(1 + (cₐ/cᵦ)*s^(a - β))/(cₐ + cᵧ*s^(-a) + (cᵧ*cₐ/cᵦ)*s^(γ-β))
     Jbar(s) = (1/s^2)*(1 + (cₐ/cᵦ)*s^(a - β))/(cₐ*s^a + cᵧ*s^γ + (cᵧ*cₐ/cᵦ)*s^(a + γ-β))
+=======
+    Jbar(s) = (1/s)*(cₐ*s^a + cᵦ*s^β)/(cₐ*s^a*cᵦ*s^β + cᵧ*s^γ*(cₐ*s^a + cᵦ*s^β))
+>>>>>>> master
 
     J = InverseLaplace.ILt(s -> Jbar(s))
 
@@ -54,8 +58,7 @@ end
 function J_fracsls(t::Array{T,1}, params::Array{T,1}) where T<:Real
     cₐ, a, kᵦ, kᵧ = params
 
-    # reverse engineered from fract_special - check with Ale
-    Jbar(s) = (1/s^2)*(1 + (cₐ/kᵦ)*s^a)/(cₐ + kᵧ*s^(-a) + (kᵧ*cₐ/kᵦ))
+    Jbar(s) = (1/s)*(cₐ*s^a + kᵦ)/(cₐ*s^a*kᵦ + kᵧ*(cₐ*s^a + kᵦ))
 
     J = InverseLaplace.ILt(s -> Jbar(s))
 
@@ -89,13 +92,13 @@ FractionalSLS(params::Array{T, 1}) where T<:Real = RheologyModel(G_fracsls, J_fr
 
 # Standard Linear Solid in Maxwell Form
 function G_sls(t::Array{T,1}, params::Array{T,1}) where T<:Real
-    kᵧ, kᵦ, η = params
+    η, kᵦ, kᵧ = params
 
     G = kᵧ + kᵦ*exp.(-t*kᵦ/η)
 end
 
 function J_sls(t::Array{T,1}, params::Array{T,1}) where T<:Real
-    kᵧ, kᵦ, η = params
+    η, kᵦ, kᵧ = params
 
     c₀ = 1/kᵧ
     c₁ = kᵦ/(kᵧ*(kᵧ + kᵦ))
@@ -105,7 +108,7 @@ function J_sls(t::Array{T,1}, params::Array{T,1}) where T<:Real
 end
 
 function Gp_sls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
-    kᵧ, kᵦ, η = params
+    η, kᵦ, kᵧ = params
 
     τ = η/kᵦ
 
@@ -117,7 +120,7 @@ function Gp_sls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
 end
 
 function Gpp_sls(ω::Array{T,1}, params::Array{T,1}) where T<:Real
-    kᵧ, kᵦ, η = params
+    η, kᵦ, kᵧ = params
 
     τ = η/kᵦ
 

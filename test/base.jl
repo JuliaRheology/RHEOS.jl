@@ -13,7 +13,7 @@ function deriv_test_float()
 
 end
 
-@test deriv_test_float() < 1e-5
+@test deriv_test_float() < 1e-3
 
 # # boltz integral / convole test (non-singular)
 # function nonsing_get_integral()
