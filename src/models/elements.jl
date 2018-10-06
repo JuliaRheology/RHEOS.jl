@@ -27,7 +27,7 @@ function Gpp_springpot(ω::T, params::Vector{T}) where T<:Real
 
     Gpp = cᵦ*(ω^β)*sin(π*β/2)
 end
-Gp_springpot(ω::Vector{T}, params::Vector{T}) where T<:Real = Gp_springpot.(ω, (params,))
+Gpp_springpot(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_springpot.(ω, (params,))
 
 SpringPot() = RheologyModel(G_springpot, J_springpot, Gp_springpot, Gpp_springpot, [2.0, 0.5], ["model created with default parameters"])
 SpringPot(params::Vector{T}) where T<:Real = RheologyModel(G_springpot, J_springpot, Gp_springpot, Gpp_springpot, params, ["model created by user with parameters $params"])
