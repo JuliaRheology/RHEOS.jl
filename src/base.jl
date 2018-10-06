@@ -73,24 +73,25 @@ backward difference. Assumes y==0 at a previous point, i.e.
 y is 'at rest'. Captures instantaneous loading where derivCD will not.
 """
 function derivBD(y::Array{T,1}, x::Array{T,1}) where T<:Real
-
     # assert y and x arrays are same length
     @assert length(y)==length(x) "X and Y Array lengths must match."
 
+    # get length
+    N = length(x)
+
     # initialise zero array of length y
     ydot = similar(y)
-    @inbounds for i in eachindex(y)
-        if i==start(eachindex(y))
-            # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
-            # this is a physical assumption that material is at rest before first data point.
-            ydot[i] = (y[1] - 0.0)/(x[2] - x[1]) 
-        else
-            # backward difference for rest of array
-            ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
-        end
-    end
-    ydot
 
+    # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
+    # this is a physical assumption that material is at rest before first data point.
+    @inbounds ydot[1] = (y[1] - 0.0)/(x[2] - x[1]) 
+
+    # backwards difference method for rest of points
+    @inbounds for i in 2:N
+        ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
+    end
+
+    ydot
 end
 
 function quasinull(x::Array{Float64,1})
