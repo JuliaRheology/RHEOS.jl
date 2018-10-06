@@ -256,10 +256,10 @@ function var_resample(tᵢ::Array{T,1}, yᵢ::Array{T,1}, pcntdownsample::T, min
             # get y, dy/dx, d2y/dx2 normalised for sweeps
             yNorm = y/maximum(abs.(y))
 
-            dy = deriv(y, x)
+            dy = derivBD(y, x)
             dyNorm = dy/maximum(abs.(dy))
 
-            ddy = deriv(dy, x)
+            ddy = derivBD(dy, x)
             ddyNorm = ddy/maximum(abs.(ddy))
 
             # sweep through array, testing every consecutive pair of elements
@@ -524,7 +524,7 @@ function boltzintegral_nonsing(modulus::Function, time_series::Array{Float64,1},
     @inbounds for (i,v) in enumerate(time_mod)
         # generate integral for each time step
         τ = time_mod[1:i]
-        Modulus_arg = v - τ
+        Modulus_arg = v .- τ
         Modulusᵢ = modulus(Modulus_arg, params)
         df_dtᵢ = prescribed_dot_mod[1:i]
         intergrand = Modulusᵢ.*df_dtᵢ
@@ -591,7 +591,7 @@ function boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, pa
     @inbounds for (i,v) in enumerate(time_mod)
         # generate integral for each time step
         τ = time_mod[1:i]
-        Modulus_arg = v - τ
+        Modulus_arg = v .- τ
         Modulus_arg[end] = init_offset
         Modulusᵢ = modulus(Modulus_arg, params)
         df_dtᵢ = prescribed_dot_mod[1:i]
