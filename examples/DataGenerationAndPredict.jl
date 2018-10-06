@@ -8,7 +8,7 @@ ramp = rampgen(800.0, 10.0, 400.0) - rampgen(825.0, 400.0, 800.0)
 data = ramp*sine
 
 sls_predicted = modelpredict(data, SLS([844.152, 2043.98, 5.15527]), :G)
-# springpot_predicted = modelpredict(data, SpringPot([2997.7, 0.281836]), :G)
+springpot_predicted = modelpredict(data, SpringPot([2997.7, 0.281836]), :G)
 
 # fig, ax = subplots()
 # ax[:plot](data.t, data.σ, "-", label="original")

@@ -15,6 +15,8 @@ using Interpolations
 using NLopt
 using DataFrames
 
+import SpecialFunctions.gamma
+
 # Base and stdlib imports
 import Base: +, -, *
 import Random
