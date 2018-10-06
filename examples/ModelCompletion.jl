@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
-using RHEOS
-using PyPlot
+# using RHEOS
+# using PyPlot
 
 filedir = "../data/rheologyData1_incomplete.csv"
 
