@@ -21,12 +21,12 @@ lb = [0.0, 0.0]
 ub = [Inf, 1.0]
 springpot_fit = modelfit(data_resampled, SpringPot(), :G; lo=lb, hi=ub)
 
-# get curves based on models fitted
+# # get curves based on models fitted
 sls_predicted = modelpredict(data_resampled, sls_fit, :G)
 springpot_predicted = modelpredict(data_resampled, springpot_fit, :G)
 
 # plot all data
 plot(data_resampled.t, data_resampled.σ)
-plot(springpot_predicted.t, springpot_predicted.σ, "--")
 plot(sls_predicted.t, sls_predicted.σ)
+plot(springpot_predicted.t, springpot_predicted.σ, "--")
 show()

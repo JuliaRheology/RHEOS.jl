@@ -19,21 +19,24 @@ fileDir = "../data/rheologyData1.csv"
 dataforprocessing = fileload(["time","stress","strain"], fileDir)
 ```
 """
-function fileload(colnames::Array{String,1}, filedir::String)::RheologyData
+function fileload(colnames::Array{String,1}, filedir::String)
+
+    # get length 
+    N = length(colnames)
 
     # check colnames length is correct
-    @assert length(colnames)==3 || length(colnames)==2 "Two or three column names required, one of each: 'stress', 'strain' and 'time'."
+    @assert N==3 || N==2 "Two or three column names required, one of each: 'stress', 'strain' and 'time'."
 
     # init types helper
-    types = [Float64 for i = 1:length(colnames)]
+    types = [Float64 for i = 1:N]
 
     # read data from file
     (datacsv, head_out) = uCSV.read(filedir; delim=',', types=types)
 
     # generate RheologyData struct and output
-    if length(colnames)==3
+    if N==3
         return RheologyData(colnames, datacsv[1], datacsv[2], datacsv[3]; filedir = filedir)
-    elseif length(colnames)==2
+    elseif N==2
         return RheologyData(colnames, datacsv[1], datacsv[2]; filedir = filedir)
     end
 end

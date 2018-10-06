@@ -25,7 +25,7 @@ RHEOS to better understand a model's response
 
 ## Installation
 
-1. Install Julia, version 0.6
+1. Install Julia, version 1.0.1
 2. From Julia REPL, type ```Pkg.clone("https://github.com/JuliaRheology/RHEOS.jl.git")```
 3. Run ```julia TEMP_INSTALL.jl```, a script located in your RHEOS directory
 

@@ -306,7 +306,7 @@ Find the index of the array element closest to val.
 function closestindex(x::Array{T,1} where T<:Real, val::Real)
 
     # intialise closest match variable, assuming best match is index 1
-    ibest = start(eachindex(x))
+    ibest = 1
 
     # diff between value and current element
     dxbest = abs(x[ibest]-val)
@@ -450,15 +450,15 @@ function fixed_resample(x::Array{Float64,1}, y::Array{Float64,1},
         if direction[i]=="up"
             for k in boundaries[i]:(boundaries[i+1]-1)
                 # starting element
-                append!(xᵦ,x[k])
-                append!(yᵦ,yInterp[x[k]])
+                append!(xᵦ, x[k])
+                append!(yᵦ, yInterp[x[k]])
 
                 # dx increment up
                 Δ = (x[k+1]-x[k])/elperiods[i]
                 for N in 1:(elperiods[i]-1)
                     # add N increments to starting element
-                    append!(xᵦ,x[k]+N*Δ)
-                    append!(yᵦ,yInterp[x[k]+N*Δ])
+                    append!(xᵦ, x[k]+N*Δ)
+                    append!(yᵦ, yInterp[x[k]+N*Δ])
                 end
             end
 

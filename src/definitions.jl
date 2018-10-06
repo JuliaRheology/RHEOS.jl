@@ -33,7 +33,7 @@ Constructor function for RheologyData struct, if stress/strain arrays have NaN v
 have 1 or 2 samples of NaN at beginning) then deletes these and starts at the first non-NaN sample, also readjusts time start to 
 t = 0 to account for NaNs and and negative time values at beginning of data recording.
 """
-function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}, data3::Array{Float64,1}=zeros(length(data2)); filedir::String="none", log::Array{String,1}=Array{String}(0))::RheologyData
+function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}, data3::Array{Float64,1}=zeros(length(data2)); filedir::String="none", log::Array{String,1}=Array{String}(undef, 0))::RheologyData
 
     # checks
     @assert length(data1)==length(data2) "Data arrays must be same length"

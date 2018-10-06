@@ -222,7 +222,7 @@ function modelfit(data::RheologyData,
 
     # TEMP - CHECK WITH ALE AND ALEXANDRE BUT IS DEFINITELY NECESSARY
     # time must start at 0 for convolution to work properly!
-    t_zeroed = data.t - minimum(data.t)
+    t_zeroed = data.t .- minimum(data.t)
 
     # use correct method for derivative
     if diff_method=="BD"
@@ -240,21 +240,19 @@ function modelfit(data::RheologyData,
         measured = data.σ
     end
 
-    # start fit
-    tic()
-    (minf, minx, ret) = leastsquares_init(p0,
-                                          lo, 
-                                          hi,
-                                          modulus, 
-                                          t_zeroed, 
-                                          dt, 
-                                          dcontrolled,
-                                          measured; 
-                                          insight = verbose,
-                                          sampling = data.sampling, 
-                                          singularity = sing,
-                                          _rel_tol = rel_tol)
-    timetaken = toq()
+    # fit
+    (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed leastsquares_init(p0,
+                                                                                    lo, 
+                                                                                    hi,
+                                                                                    modulus, 
+                                                                                    t_zeroed, 
+                                                                                    dt, 
+                                                                                    dcontrolled,
+                                                                                    measured; 
+                                                                                    insight = verbose,
+                                                                                    sampling = data.sampling, 
+                                                                                    singularity = sing,
+                                                                                    _rel_tol = rel_tol)
 
     modulusname = string(modulus)
 
