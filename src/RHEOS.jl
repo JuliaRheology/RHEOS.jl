@@ -3,15 +3,6 @@ __precompile__(true)
 
 module RHEOS
 
-# bundled dependencies from rheos-cambridge forked repos
-cd("..")
-MittLeffLiteDir = joinpath(@__DIR__, "..", "deps", "MittLeffLite", "src", "MittLeffLite.jl")
-include(MittLeffLiteDir)
-using MittLeffLite
-FastConvDir = joinpath(@__DIR__, "..", "deps", "FastConv", "src", "FastConv.jl")
-include(FastConvDir)
-using FastConv
-
 # installed from Julia package repository
 using InverseLaplace
 using uCSV
@@ -27,13 +18,8 @@ import Base: +, -, *
 import Random
 
 ######################################################
-# debug
-export trapz, G_springpot, G_spring
-export boltzintegral_sing, boltzintegral_nonsing
-export boltzconvolve
-
 # utility
-export closestindex, deriv
+export closestindex, derivBD, derivCD
 # definitions.jl
 export RheologyData, RheologyModel, RheologyModelTemp, RheologyDynamic
 # IO.jl
@@ -54,13 +40,18 @@ export var_resample, downsample, fixed_resample, smooth, mapbackdata
 export modelfit, modelpredict, modelstepfit, modelsteppredict
 export dynamicmodelfit, dynamicmodelpredict
 
+######################################################
+# bundled dependencies from rheos-cambridge forked repos
+MittLeffLiteDir = joinpath(@__DIR__, "..", "deps", "MittLeffLite", "MittLeffLite.jl")
+include(MittLeffLiteDir)
+FastConvDir = joinpath(@__DIR__, "..", "deps", "FastConv", "FastConv.jl")
+include(FastConvDir)
+
 include("base.jl")
 include("definitions.jl")
 include("IO.jl")
 include("modeldatabase.jl")
 include("datagen.jl")
 include("processing.jl")
-
 ######################################################
-
 end

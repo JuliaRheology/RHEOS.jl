@@ -1,4 +1,5 @@
-export convn, fastconv
+using Base.Cartesian
+import DSP.conv
 
 ##############################################
 # Generic convn function using direct method for computing convolutions: 
@@ -26,21 +27,6 @@ export convn, fastconv
         end
     end
 end
-
-# direct version (do not check if threshold is satisfied)
-@generated function fastconv(E::Array{T,N}, k::Array{T,N}) where {T,N}
-    quote
-
-        retsize = [size(E)...] + [size(k)...] - 1
-        retsize = tuple(retsize...)
-        ret = zeros(T, retsize)
-
-        convn!(ret,E,k)
-        return ret
-
-    end
-end
-
 
 # in place helper operation to speedup memory allocations 
 @generated function convn!(out::Array{T}, E::Array{T,N}, k::Array{T,N}) where {T,N}
