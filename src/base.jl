@@ -12,7 +12,7 @@ Array based trapezoidal integration of y with respect to x.
 Limits of integration defined by the start and end points of the arrays. 'init'
 keyword argument is used for setting an initial condition.
 """
-function trapz(y::Array{T,1}, x::Array{T,1}; init::T=0.0) where T<:Real
+function trapz(y::Vector{T}, x::Vector{T}; init::T=0.0) where T<:Real
 
     n = length(x)
 
@@ -40,27 +40,31 @@ end
 Given two arrays of data, x and y, calculate dy/dx using central difference
 method and forward and backward difference for array boundaries.
 """
-function derivCD(y::Array{T,1}, x::Array{T,1}) where T<:Real
+function derivCD(y::Vector{T}, x::Vector{T}) where T<:Real
+
+    # get length
+    N = length(x)
 
     # assert y and x arrays are same length
-    @assert length(y)==length(x) "X and Y Array lengths must match."
+    @assert length(y)==N "X and Y Array lengths must match."
 
     # initialise zero array of length y
     ydot = similar(y)
-    @inbounds for i in eachindex(y)
-        if i==start(eachindex(y))
-            # forward difference for lower boundary
-            ydot[i] = (y[i+1] - y[i])/(x[i+1] - x[i])
-        elseif i==length(y)
-            # backward difference for upper boundary
-            ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
-        else
-            # central difference with uneven spacing for general case of constant or variable sample rate
-            Δx₁ = x[i] - x[i-1]
-            Δx₂ = x[i+1] - x[i]
-            ydot[i] = (y[i+1]*Δx₁^2 + (Δx₂^2 - Δx₁^2)*y[i] - y[i-1]*Δx₂^2)/(Δx₁*Δx₂*(Δx₁ + Δx₂))
-        end
+
+    # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
+    # this is a physical assumption that material is at rest before first data point.
+    @inbounds ydot[1] = (y[1] - 0.0)/(x[2] - x[1]) 
+
+    # central difference with uneven spacing for general case of constant or variable sample rate
+    @inbounds for i in 2:(N-1)
+        Δx₁ = x[i] - x[i-1]
+        Δx₂ = x[i+1] - x[i]
+        ydot[i] = (y[i+1]*Δx₁^2 + (Δx₂^2 - Δx₁^2)*y[i] - y[i-1]*Δx₂^2)/(Δx₁*Δx₂*(Δx₁ + Δx₂))
     end
+
+    # 1st order backwards difference for last element
+    ydot[N] = (y[N] - y[N-1])/(x[N] - x[N-1])
+
     ydot
 
 end
@@ -72,12 +76,13 @@ Given two arrays of data, x and y, calculate dy/dx using 1st order
 backward difference. Assumes y==0 at a previous point, i.e.
 y is 'at rest'. Captures instantaneous loading where derivCD will not.
 """
-function derivBD(y::Array{T,1}, x::Array{T,1}) where T<:Real
-    # assert y and x arrays are same length
-    @assert length(y)==length(x) "X and Y Array lengths must match."
+function derivBD(y::Vector{T}, x::Vector{T}) where T<:Real
 
     # get length
     N = length(x)
+
+    # assert y and x arrays are same length
+    @assert length(y)==N "X and Y Array lengths must match."
 
     # initialise zero array of length y
     ydot = similar(y)
@@ -104,7 +109,7 @@ function quasinull(x::Array{Float64,1})
 
 end
 
-function constantcheck(t::Array{T,1} where T<:Real)
+function constantcheck(t::Vector{T} where T<:Real)
 
     diff = round.(t[2:end]-t[1:end-1]; digits=4)
     # check if any element is not equal to 1st element
@@ -112,7 +117,7 @@ function constantcheck(t::Array{T,1} where T<:Real)
     
 end
 
-function sampleratecompare(t1::Array{T,1}, t2::Array{T,1}) where T<:Real
+function sampleratecompare(t1::Vector{T}, t2::Vector{T}) where T<:Real
 
     @assert constantcheck(t1) "Sample-rate of both arguments must be constant, first argument is non-constant"
     @assert constantcheck(t2) "Sample-rate of both arguments must be constant, second argument is non-constant"
@@ -157,7 +162,7 @@ Smooth a signal using a Gaussian kernel.
 Essentially a low pass filter with frequencies of 1/τ being cut to approximately
 half power. For other pad types available see ImageFiltering documentation.
 """
-function smoothgauss(yArray::Array{T,1} where T<:Real, τ::Real, samplerate::Real; pad::String="replicate")
+function smoothgauss(yArray::Vector{T} where T<:Real, τ::Real, samplerate::Real; pad::String="replicate")
 
     # get standard deviation for Gaussian kernel
     σ = getsigma(τ, samplerate)
@@ -196,7 +201,7 @@ See source code for more implementation details.
 - `minperiod`: Minimum allowed distance between x array points, recommended to set > 0.0 to something like dx/10.0 to avoid algorithm over-focusing on a particular region.
 - `minsamplenum = 25`: (Optional) number of initial, equally spaced seed samples required for algorithm to initialise.
 """
-function var_resample(tᵢ::Array{T,1}, yᵢ::Array{T,1}, pcntdownsample::T, minperiod::T; minsamplenum::Int64 = 25) where T<:Real
+function var_resample(tᵢ::Vector{T}, yᵢ::Vector{T}, pcntdownsample::T, minperiod::T; minsamplenum::Int64 = 25) where T<:Real
 
     @assert length(tᵢ)==length(yᵢ) "X and Y arrays must have same length."
 
@@ -303,7 +308,7 @@ end
 
 Find the index of the array element closest to val.
 """
-function closestindex(x::Array{T,1} where T<:Real, val::Real)
+function closestindex(x::Vector{T} where T<:Real, val::Real)
 
     # intialise closest match variable, assuming best match is index 1
     ibest = 1
@@ -329,7 +334,7 @@ end
 Uses `closestindex` iteratively to find closest index for each value in `vals` array,
 returns array of indices.
 """
-closestindices(x::Array{T,1}, vals::Array{T,1}) where T<:Real = broadcast(closestindex, (x,), vals)
+closestindices(x::Vector{T}, vals::Vector{T}) where T<:Real = broadcast(closestindex, (x,), vals)
 
 """
     mapback(xᵦ::Array{Float64,1}, x::Array{Float64,1})
@@ -892,7 +897,7 @@ function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Floa
 
 end
 
-function obj_step_nonsing(params::Array{T,1}, grad::Array{T,1}, modulus::Function, t::Array{T,1}, prescribed::T, measured::Array{T,1}; _insight=false) where T<:Number
+function obj_step_nonsing(params::Vector{T}, grad::Vector{T}, modulus::Function, t::Vector{T}, prescribed::T, measured::Vector{T}; _insight=false) where T<:Number
     if _insight
         println("Current Parameters: ", params)
     end
@@ -902,7 +907,7 @@ function obj_step_nonsing(params::Array{T,1}, grad::Array{T,1}, modulus::Functio
     cost = sum(0.5*(measured - estimated).^2)
 end
 
-function obj_step_sing(params::Array{T,1}, grad::Array{T,1}, modulus::Function, t::Array{T,1}, prescribed::T, measured::Array{T,1}; _insight=false) where T<:Number
+function obj_step_sing(params::Vector{T}, grad::Vector{T}, modulus::Function, t::Vector{T}, prescribed::T, measured::Vector{T}; _insight=false) where T<:Number
     if _insight
         println("Current Parameters: ", params)
     end
