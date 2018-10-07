@@ -3,11 +3,16 @@ __precompile__(true)
 
 module RHEOS
 
-# install using `add` from rheos-cambridge forked repos
+# bundled dependencies from rheos-cambridge forked repos
+cd("..")
+MittLeffLiteDir = joinpath(@__DIR__, "..", "deps", "MittLeffLite", "src", "MittLeffLite.jl")
+include(MittLeffLiteDir)
 using MittLeffLite
+FastConvDir = joinpath(@__DIR__, "..", "deps", "FastConv", "src", "FastConv.jl")
+include(FastConvDir)
 using FastConv
 
-# install using Pkg.add from Julia central package repository
+# installed from Julia package repository
 using InverseLaplace
 using uCSV
 using ImageFiltering
