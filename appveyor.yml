@@ -1,23 +1,14 @@
 environment:
   matrix:
-  # - julia_version: 0.7
-  - julia_version: 1.0
-  # - julia_version: latest
+  - julia_version: 1.0.1
 
 platform:
   - x86 # 32-bit
   - x64 # 64-bit
 
-## uncomment the following lines to allow failures on nightly julia
-## (tests will run but not make your overall status red)
-#matrix:
-#  allow_failures:
-#  - julia_version: latest
-
 branches:
   only:
     - master
-    # - /release-.*/
 
 notifications:
   - provider: Email
@@ -35,3 +26,4 @@ build_script:
 test_script:
   - echo "%JL_TEST_SCRIPT%"
 - C:\julia\bin\julia -e "%JL_TEST_SCRIPT%"
+
