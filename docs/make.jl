@@ -15,7 +15,8 @@ makedocs(modules=[RHEOS],
          )
 
 deploydocs(
-    repo = "github.com:JuliaRheology/RHEOS.jl.git",
+    repo = "github.com/JuliaRheology/RHEOS.jl.git",
+    osname = "linux",
     julia = "1.0.1",
     deps = nothing,
     make = nothing,
