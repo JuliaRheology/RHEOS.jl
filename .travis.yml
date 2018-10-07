@@ -13,9 +13,9 @@ julia:
 notifications:
   email: false
 
-after_success:
-  - julia --project=coverage/ -e 'using Pkg; Pkg.instantiate()'
-  - julia --project=coverage/ coverage/coverage.jl
+# after_success:
+  # - julia --project=coverage/ -e 'using Pkg; Pkg.instantiate()'
+  # - julia --project=coverage/ coverage/coverage.jl
 
 jobs:
   include:
@@ -26,4 +26,4 @@ jobs:
         - julia -e 'import Pkg; Pkg.add("Documenter")'
         - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
         - julia --project=docs/ docs/make.jl
-after_success: skip
+# after_success: skip

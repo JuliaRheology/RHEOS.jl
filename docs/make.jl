@@ -14,10 +14,10 @@ makedocs(modules=[RHEOS],
          ]
          )
 
-deploydocs(
-    repo = "github.com:rheos-cambridge/RHEOS.jl.git",
-    julia = "0.6.3",
-    deps = nothing,
-    make = nothing,
-    target = "build"
-)
+# deploydocs(
+#     repo = "github.com:JuliaRheology/RHEOS.jl.git",
+#     julia = "1.0.1",
+#     deps = nothing,
+#     make = nothing,
+#     target = "build"
+# )
