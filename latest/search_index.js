@@ -57,6 +57,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#[NLopt.jl](http://ab-initio.mit.edu/nlopt)-1",
+    "page": "Home",
+    "title": "NLopt.jl",
+    "category": "section",
+    "text": ""
+},
+
+{
     "location": "index.html#References-1",
     "page": "Home",
     "title": "References",
@@ -69,7 +77,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "If you use RHEOS in your work, please consider citing the following papers",
     "category": "section",
-    "text": "S. G. Johnson -  The NLopt nonlinear-optimization package, http://ab-initio.mit.edu/nlopt\nR. Gorenflo, J. Loutchko and Y. Loutchko - Computation of the Mittag-Leffler function and its derivative,  Fract. Calc. Appl. Anal. (2002)\nA. Alexander, B. Horn and A. Edelman - Accelerated Convolutions for Efficient Multi-Scale Time to Contact Computation in Julia, arXiv preprint arXiv:1612.08825 (2016)"
+    "text": "J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah - Julia: A Fresh Approach to Numerical Computing, SIAM Review, doi: 10.1137/141000671. (2017)"
 },
 
 {
