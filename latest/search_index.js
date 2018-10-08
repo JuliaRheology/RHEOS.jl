@@ -9,11 +9,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#RHEOS.jl-Documentation-1",
+    "location": "index.html#RHEOS.jl-1",
     "page": "Home",
-    "title": "RHEOS.jl Documentation",
+    "title": "RHEOS.jl",
     "category": "section",
-    "text": "RHEOS, an abbreviation of Rheology Open Source, is a Julia package which provides tools for analysis of rheology data and generation of new viscoelastic models. It features a large array of standard and fractional linear viscoelastic models - new ones can be easily added by the user. It can also be used as an educational tool to demonstrate the qualitative behaviour of various viscoelastic models. "
+    "text": ""
+},
+
+{
+    "location": "index.html#Overview-1",
+    "page": "Home",
+    "title": "Overview",
+    "category": "section",
+    "text": "RHEOS, an abbreviation of Rheology Open Source, is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:G\'/G\'\'/Frequency data can easily be fitted to a viscoelastic model\nMany standard and fractional viscoelastic models have already been implemented within RHEOS new ones can easily be added by users\nA fitted model can be used to predict the behaviour of the material under other loading conditions, enabling the fit/predict paradigm of model selection\nArtificial loading conditions can be generated withinRHEOS to better understand a model\'s response"
 },
 
 {
@@ -21,15 +29,47 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Installation",
     "category": "section",
-    "text": "Install Julia, version 1.0.1\nFrom Julia REPL, enter pkg mode by pressing ]\nRun the command add \"https://github.com/JuliaRheology/RHEOS.jl\""
+    "text": "Install Julia, version 1.0.1\nFrom Julia REPL, enter pkg mode by pressing ]\n(Optional) Enable desired Project.toml environment\nRun the command add \"https://github.com/JuliaRheology/RHEOS.jl\""
 },
 
 {
-    "location": "index.html#Program-Structure-1",
+    "location": "index.html#Included-Dependencies-1",
     "page": "Home",
-    "title": "Program Structure",
+    "title": "Included Dependencies",
     "category": "section",
     "text": ""
+},
+
+{
+    "location": "index.html#[FastConv.jl](https://github.com/aamini/FastConv.jl)-1",
+    "page": "Home",
+    "title": "FastConv.jl",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "index.html#[MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)-1",
+    "page": "Home",
+    "title": "MittagLeffler.jl",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "index.html#References-1",
+    "page": "Home",
+    "title": "References",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "index.html#If-you-use-RHEOS-in-your-work,-please-consider-citing-the-following-papers-1",
+    "page": "Home",
+    "title": "If you use RHEOS in your work, please consider citing the following papers",
+    "category": "section",
+    "text": "S. G. Johnson -  The NLopt nonlinear-optimization package, http://ab-initio.mit.edu/nlopt\nR. Gorenflo, J. Loutchko and Y. Loutchko - Computation of the Mittag-Leffler function and its derivative,  Fract. Calc. Appl. Anal. (2002)\nA. Alexander, B. Horn and A. Edelman - Accelerated Convolutions for Efficient Multi-Scale Time to Contact Computation in Julia, arXiv preprint arXiv:1612.08825 (2016)"
 },
 
 {
