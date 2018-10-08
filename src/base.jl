@@ -537,7 +537,9 @@ function boltzintegral_nonsing(modulus::Function, time_series::Array{Float64,1},
     end
 
     # fix initial point 
-    I[2] = (prescribed_dot[1]*modulus([0.0], params)*(time_series[2] - time_series[1]))[1]
+    # I[2] = (prescribed_dot[1]*modulus([0.0], params)*(time_series[2] - time_series[1]))[1]
+    # to catch weird bug in InverseLaplace
+    I[2] = (prescribed_dot[1]*modulus(time_series, params)*(time_series[2] - time_series[1]))[1]
     
     return I[2:end]
 
