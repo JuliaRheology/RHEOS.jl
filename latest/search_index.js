@@ -57,11 +57,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#[NLopt.jl](http://ab-initio.mit.edu/nlopt)-1",
+    "location": "index.html#Citation-1",
     "page": "Home",
-    "title": "NLopt.jl",
+    "title": "Citation",
     "category": "section",
-    "text": ""
+    "text": "If you use RHEOS in your work, please consider citing the following paper TBA"
 },
 
 {
@@ -69,15 +69,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "References",
     "category": "section",
-    "text": ""
-},
-
-{
-    "location": "index.html#If-you-use-RHEOS-in-your-work,-please-consider-citing-the-following-papers-1",
-    "page": "Home",
-    "title": "If you use RHEOS in your work, please consider citing the following papers",
-    "category": "section",
-    "text": "J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah - Julia: A Fresh Approach to Numerical Computing, SIAM Review, doi: 10.1137/141000671. (2017)"
+    "text": "S. G. Johnson, The NLopt nonlinear-optimization package, http://ab-initio.mit.edu/nlopt\nJ. Bezanson, A. Edelman, S. Karpinski, V. B. Shah - Julia: A Fresh Approach to Numerical Computing, SIAM Review, doi: 10.1137/141000671. (2017)"
 },
 
 {
