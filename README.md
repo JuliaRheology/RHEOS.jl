@@ -10,8 +10,6 @@ Windows: [![Build Status](https://ci.appveyor.com/api/projects/status/github/Jul
 [![License](https://img.shields.io/badge/License-MIT-ff69b2.svg?style=flat)](LICENSE.md)
 
 # RHEOS - RHEology, Open-Source
-
-## Overview
 RHEOS, an abbreviation of Rheology Open Source, is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:
 
 - Stress/Strain/Time data can be easily be fitted to a viscoelastic model
