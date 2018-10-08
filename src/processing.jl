@@ -384,18 +384,16 @@ function modelstepfit(data::RheologyData,
     end
 
     # start fit
-    tic()
-    (minf, minx, ret) = leastsquares_stepinit(p0,
-                                              lo, 
-                                              hi,
-                                              modulus, 
-                                              data.t, 
-                                              controlled,
-                                              measured; 
-                                              insight = verbose,
-                                              singularity = sing,
-                                              _rel_tol = rel_tol)
-    timetaken = toq()
+    (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed leastsquares_stepinit(p0,
+                                                                                        lo, 
+                                                                                        hi,
+                                                                                        modulus, 
+                                                                                        data.t, 
+                                                                                        controlled,
+                                                                                        measured; 
+                                                                                        insight = verbose,
+                                                                                        singularity = sing,
+                                                                                        _rel_tol = rel_tol)
 
     modulusname = string(modulus)
 
@@ -423,11 +421,11 @@ function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Sy
     # get predicted
     if !sing
         predicted = zeros(length(data.t))
-        predicted[stepon_el:end] = controlled*modulus(data.t[stepon_el:end] - step_on, model.parameters)
+        predicted[stepon_el:end] = controlled*modulus(data.t[stepon_el:end] .- step_on, model.parameters)
 
     elseif sing
         predicted = zeros(length(data.t))
-        predicted[(stepon_el + 1):end] = controlled*modulus(data.t[(stepon_el + 1):end] - step_on, model.parameters)
+        predicted[(stepon_el + 1):end] = controlled*modulus(data.t[(stepon_el + 1):end] .- step_on, model.parameters)
 
     end
 

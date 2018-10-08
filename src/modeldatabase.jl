@@ -35,7 +35,7 @@ function G_2SLS(t::Array{T,1}, params::Array{T,1}) where T<:Real
 
     G₀, G₁, η₁, G₂, η₂ = params
 
-    G = G₀ + G₁*exp.(-t*G₁/η₁) + G₂*exp.(-t*G₂/η₂)
+    G = G₀ .+ G₁*exp.(-t*G₁/η₁) + G₂*exp.(-t*G₂/η₂)
 
 end
 

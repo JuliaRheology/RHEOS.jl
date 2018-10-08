@@ -25,10 +25,12 @@ RHEOS to better understand a model's response
 
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
 
-#### [NLopt.jl](http://ab-initio.mit.edu/nlopt)
+## Citation
+If you use RHEOS in your work, please consider citing the following paper
+*TBA*
 
 ## References
-#### If you use RHEOS in your work, please consider citing the following papers
+
++ S. G. Johnson, The NLopt nonlinear-optimization package, http://ab-initio.mit.edu/nlopt
 
 + J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah - *Julia: A Fresh Approach to Numerical Computing*, SIAM Review, doi: 10.1137/141000671. (2017)
-
