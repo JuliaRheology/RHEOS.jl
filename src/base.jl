@@ -213,8 +213,8 @@ function var_resample(tᵢ::Vector{T}, yᵢ::Vector{T}, pcntdownsample::T, minpe
     yInterp = Interpolations.interpolate((tᵢ,), yᵢ, Interpolations.Gridded(Interpolations.Linear()))
 
     # initialise arrays for resampled data
-    xInit = zeros(Float64, minsamplenum)
-    yInit = zeros(Float64, minsamplenum)
+    xInit = zeros(T, minsamplenum)
+    yInit = zeros(T, minsamplenum)
 
     # variables for generating correct intervals during initial sweep
     minsamplenum -= 1 # correction due integer rounding
@@ -231,7 +231,7 @@ function var_resample(tᵢ::Vector{T}, yᵢ::Vector{T}, pcntdownsample::T, minpe
     end
 
     # send initial resampled arrays to a dict for more convenient mutability
-    xyDict = Dict{Float64, Float64}(xInit[i] => yInit[i] for i in 1:length(xInit))
+    xyDict = Dict{T, T}(xInit[i] => yInit[i] for i in 1:length(xInit))
 
     ## set up while loop variables
     maxIter = 400 # max number of iterations/sweeps for a particular alpha
