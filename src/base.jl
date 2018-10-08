@@ -201,7 +201,7 @@ See source code for more implementation details.
 - `minperiod`: Minimum allowed distance between x array points, recommended to set > 0.0 to something like dx/10.0 to avoid algorithm over-focusing on a particular region.
 - `minsamplenum = 25`: (Optional) number of initial, equally spaced seed samples required for algorithm to initialise.
 """
-function var_resample(tᵢ::Vector{T}, yᵢ::Vector{T}, pcntdownsample::T, minperiod::T; minsamplenum::Int64 = 25) where T<:Real
+function var_resample(tᵢ::Vector{T}, yᵢ::Vector{T}, pcntdownsample::T, minperiod::T; minsamplenum::Integer = 25) where T<:Real
 
     @assert length(tᵢ)==length(yᵢ) "X and Y arrays must have same length."
 
