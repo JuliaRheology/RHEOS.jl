@@ -633,7 +633,7 @@ function boltzconvolve_nonsing(modulus::Function, time_series::Array{Float64,1},
                         params::Array{Float64,1}, prescribed_dot::Array{Float64,1})::Array{Float64,1}
 
     Modulus = modulus(time_series, params)
-    β = FastConv.convn(Modulus, prescribed_dot)
+    β = convn(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
     β = β[1:length(time_series)]*dt
 
@@ -665,7 +665,7 @@ end
 #     len = length(time_series)-1
 #     Modulus = modulus(time_series, params)
 #     # fast convolution, ignoring initial singularity
-#     β = FastConv.convn(Modulus[2:end], prescribed_dot[1:end])
+#     β = convn(Modulus[2:end], prescribed_dot[1:end])
 #     # pick out relevant elements (1st half) and multiply by dt
 #     β = β[1:len]*dt
 
@@ -676,7 +676,7 @@ function boltzconvolve(modulus::Function, time_series::Array{Float64,1}, dt::Flo
 
     Modulus = modulus(time_series, params)
     # fast convolution
-    β = FastConv.convn(Modulus, prescribed_dot)
+    β = convn(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
     β = β[1:length(time_series)]*dt
 

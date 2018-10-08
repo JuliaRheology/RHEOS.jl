@@ -30,11 +30,13 @@ RHEOS to better understand a model's response
 3. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
 
 ## To do
-- [ ] Add FFT fitting to handle singularities and sidestep Mittag-Leffler bottleneck
+- [ ] Implement derived singularity approximation
+- [ ] Generate data for examples to use
+- [ ] Add 'easy' functionalization of generated data (for e.g. digitized data load)
 - [ ] Documentation
-- [ ] Add tests
+- [ ] Increase Test Coverage
+- [ ] Add FFT fitting to handle singularities and sidestep Mittag-Leffler bottleneck
 - [ ] Add Sync Interpolation for going from variable to constant sample rate
-- [ ] Set up OSX CI on Travis
 
 ## References & Included Dependencies
 #### [FastConv.jl](https://github.com/aamini/FastConv.jl)
