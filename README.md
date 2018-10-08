@@ -43,11 +43,10 @@ RHEOS to better understand a model's response
 
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
 
+#### [NLopt.jl](http://ab-initio.mit.edu/nlopt)
+
 ## References
 #### If you use RHEOS in your work, please consider citing the following papers
 
-+ S. G. Johnson -  *The NLopt nonlinear-optimization package*, http://ab-initio.mit.edu/nlopt
++ J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah - *Julia: A Fresh Approach to Numerical Computing*, SIAM Review, doi: 10.1137/141000671. (2017)
 
-+ R. Gorenflo, J. Loutchko and Y. Loutchko - *Computation of the Mittag-Leffler function and its derivative*,  Fract. Calc. Appl. Anal. **(2002)**
-
-+ A. Alexander, B. Horn and A. Edelman - *Accelerated Convolutions for Efficient Multi-Scale Time to Contact Computation in Julia*, arXiv preprint arXiv:1612.08825 **(2016)**
