@@ -10,7 +10,9 @@ Windows: [![Build Status](https://ci.appveyor.com/api/projects/status/github/Jul
 [![License](https://img.shields.io/badge/License-MIT-ff69b2.svg?style=flat)](LICENSE.md)
 
 # RHEOS - RHEology, Open-Source
-*A suite of tools for analysing rheology data.*
+
+## Overview
+RHEOS, an abbreviation of Rheology Open Source, is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:
 
 - Stress/Strain/Time data can be easily be fitted to a viscoelastic model
 
@@ -24,10 +26,10 @@ Windows: [![Build Status](https://ci.appveyor.com/api/projects/status/github/Jul
 RHEOS to better understand a model's response
 
 ## Installation
-
 1. Install Julia, version 1.0.1
 2. From Julia REPL, enter pkg mode by pressing ```]```
-3. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
+3. (Optional) Enable desired Project.toml environment
+4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
 
 ## To do
 - [ ] Implement derived singularity approximation
@@ -38,9 +40,16 @@ RHEOS to better understand a model's response
 - [ ] Add FFT fitting to handle singularities and sidestep Mittag-Leffler bottleneck
 - [ ] Add Sync Interpolation for going from variable to constant sample rate
 
-## References & Included Dependencies
+## Included Dependencies
 #### [FastConv.jl](https://github.com/aamini/FastConv.jl)
-+ A. Alexander, B. Horn and A. Edelman - *Accelerated Convolutions for Efficient Multi-Scale Time to Contact Computation in Julia*, arXiv preprint arXiv:1612.08825 **(2016)**
 
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
+
+## References
+#### If you use RHEOS in your work, please consider citing the following papers
+
++ S. G. Johnson -  *The NLopt nonlinear-optimization package*, http://ab-initio.mit.edu/nlopt
+
 + R. Gorenflo, J. Loutchko and Y. Loutchko - *Computation of the Mittag-Leffler function and its derivative*,  Fract. Calc. Appl. Anal. **(2002)**
+
++ A. Alexander, B. Horn and A. Edelman - *Accelerated Convolutions for Efficient Multi-Scale Time to Contact Computation in Julia*, arXiv preprint arXiv:1612.08825 **(2016)**

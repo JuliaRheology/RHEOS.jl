@@ -1,15 +1,22 @@
-# RHEOS.jl Documentation
+# RHEOS.jl 
 
-RHEOS, an abbreviation of Rheology Open Source, is a Julia package which provides tools for analysis of rheology data and generation of new viscoelastic models. It features a large array of standard and fractional linear viscoelastic models - new ones can be easily added by the user. It can also be used as an educational tool to demonstrate the qualitative behaviour of various viscoelastic models. 
+## Overview
 
-# Installation
+RHEOS, an abbreviation of Rheology Open Source, is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:
+
+- G'/G''/Frequency data can easily be fitted to a viscoelastic model
+
+- Many standard and fractional viscoelastic models have already been implemented within RHEOS new ones can easily be added by users
+
+- A fitted model can be used to predict the behaviour of the material under other loading conditions, enabling the fit/predict paradigm of model selection
+
+- Artificial loading conditions can be generated within
+RHEOS to better understand a model's response
+
+## Installation
 
 1. Install Julia, version 1.0.1
 2. From Julia REPL, enter pkg mode by pressing ```]```
-3. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
-
-# Program Structure
-
-
-
+3. (Optional) Enable desired Project.toml environment
+4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
 
