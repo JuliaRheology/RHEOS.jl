@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
-using RHEOS
-using PyPlot
+# using RHEOS
+# using PyPlot
 
 # get data
 sine = singen(800.0, 1/50; phase = -90.0)
