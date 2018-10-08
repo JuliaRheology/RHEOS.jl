@@ -24,8 +24,8 @@ function trapz(y::Vector{T}, x::Vector{T}; init::T=0.0) where T<:Real
     if n==1; return r; end
     
     # trapezoidal rule
-    for i in 2:length(x)
-        @inbounds r += (y[i-1] + y[i])*(x[i] - x[i-1])
+    @inbounds for i in 2:length(x)
+        r += (y[i-1] + y[i])*(x[i] - x[i-1])
     end
 
     # return summation
