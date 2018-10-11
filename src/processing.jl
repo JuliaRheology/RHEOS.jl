@@ -499,8 +499,8 @@ function obj_dynamic_log(params::Vector{T},
         println("Current Parameters: ", params)
     end
 
-    costGp = sum(0.5*(log(dataGp) - log(modelGp(ω, params))).^2)
-    costGpp = sum(0.5*(log(dataGpp) - log(modelGpp(ω, params))).^2)
+    costGp = sum(0.5*(log.(dataGp) - log.(modelGp(ω, params))).^2)
+    costGpp = sum(0.5*(log.(dataGpp) - log.(modelGpp(ω, params))).^2)
 
     cost = costGp + costGpp
 
@@ -544,7 +544,6 @@ function obj_dynamic_manual(params::Vector{T},
     costGpp = sum(0.5*(dataGpp - modelGpp(ω, params)).^2)
 
     cost = weights[1]*costGp + weights[2]*costGpp
-
 end
 
 function dynamicmodelfit(data::RheologyDynamic,
@@ -595,9 +594,11 @@ function dynamicmodelfit(data::RheologyDynamic,
     end
 
     # timed fitting
-    tic()
+    # (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed NLopt.optimize(opt, p0)
     (minf, minx, ret) = NLopt.optimize(opt, p0)
-    timetaken = toq()
+    timetaken = -1.0
+
+    println(ret)
 
     # log fit details
     modelname = string(model)

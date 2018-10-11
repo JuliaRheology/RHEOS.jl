@@ -16,6 +16,7 @@ import SpecialFunctions.gamma
 # Base and stdlib imports
 import Base: +, -, *
 import Random
+import Statistics.mean
 
 ######################################################
 # utility
