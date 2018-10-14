@@ -114,7 +114,15 @@ function constantcheck(t::Vector{T} where T<:Real)
     diff = round.(t[2:end]-t[1:end-1]; digits=4)
     # check if any element is not equal to 1st element
     check = !any(x -> x != diff[1], diff)
-    
+
+end
+
+function getsampleperiod(t::Vector{T} where T<:Real)
+
+    @assert constantcheck(t) "Sample-rate must be constant"
+
+    rate = t[2]-t[1]
+
 end
 
 function sampleratecompare(t1::Vector{T}, t2::Vector{T}) where T<:Real
@@ -122,10 +130,10 @@ function sampleratecompare(t1::Vector{T}, t2::Vector{T}) where T<:Real
     @assert constantcheck(t1) "Sample-rate of both arguments must be constant, first argument is non-constant"
     @assert constantcheck(t2) "Sample-rate of both arguments must be constant, second argument is non-constant"
 
-    diff1 = round.(t1[2:end]-t1[1:end-1]; digits=4)
-    diff2 = round.(t2[2:end]-t2[1:end-1]; digits=4)
+    diff1 = getsampleperiod(t1)
+    diff2 = getsampleperiod(t2)
 
-    diff1[1] == diff2[1]
+    diff1 == diff2
 
 end
 
@@ -143,13 +151,11 @@ faster will be increasingly cut. Called by smoothgauss function.
 """
 function getsigma(τ::Real, samplerate::Real)
 
-    # smoothing frequency to reduce to half power
+    # get freq, reduce to half power and generate gaussian std. deviation
     smoothfreq = 1.0/τ
 
-    # reduce to half power
     sF_halfpower = smoothfreq/sqrt(2.0*log(2.0))
 
-    # calculate std deviation and return
     σ = samplerate/(2.0*π*sF_halfpower)
 
 end
@@ -162,7 +168,11 @@ Smooth a signal using a Gaussian kernel.
 Essentially a low pass filter with frequencies of 1/τ being cut to approximately
 half power. For other pad types available see ImageFiltering documentation.
 """
-function smoothgauss(yArray::Vector{T} where T<:Real, τ::Real, samplerate::Real; pad::String="replicate")
+function smoothgauss(yArray::Vector{T}, tArray::Vector{T}, τ::T; pad::String="replicate") where T<:Real
+
+    @assert constantcheck(tArray) "Sample-rate must be constant"
+
+    samplerate = 1/getsampleperiod(tArray)
 
     # get standard deviation for Gaussian kernel
     σ = getsigma(τ, samplerate)

@@ -1,6 +1,3 @@
-using Base.Cartesian
-import DSP.conv
-
 ##############################################
 # Generic convn function using direct method for computing convolutions: 
 # Accelerated Convolutions for Efficient Multi-Scale Time to Contact Computation in Julia

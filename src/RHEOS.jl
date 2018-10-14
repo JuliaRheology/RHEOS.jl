@@ -13,6 +13,9 @@ using DataFrames
 
 import SpecialFunctions.gamma
 
+using Base.Cartesian
+import DSP.conv
+
 # Base and stdlib imports
 import Base: +, -, *
 import Random
