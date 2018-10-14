@@ -22,8 +22,6 @@ import Random
 import Statistics.mean
 
 ######################################################
-# utility
-export closestindex, derivBD, derivCD
 # definitions.jl
 export RheologyData, RheologyModel, RheologyModelTemp, RheologyDynamic
 # IO.jl
