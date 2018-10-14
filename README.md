@@ -4,7 +4,7 @@
 </a>
 </div>
 
-Linux: [![Build Status](https://travis-ci.org/JuliaRheology/RHEOS.jl.svg?branch=master)](https://travis-ci.org/JuliaRheology/RHEOS.jl) &nbsp; 
+Linux: [![Build Status](https://travis-ci.org/JuliaRheology/RHEOS.jl.svg?branch=master)](https://travis-ci.org/JuliaRheology/RHEOS.jl) &nbsp;
 Windows: [![Build Status](https://ci.appveyor.com/api/projects/status/github/JuliaRheology/RHEOS.jl?branch=master&svg=true)](https://ci.appveyor.com/project/JuliaRheology/RHEOS-jl) &nbsp;
 [![Latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaRheology.github.io/RHEOS.jl/latest) &nbsp;
 [![License](https://img.shields.io/badge/License-MIT-ff69b2.svg?style=flat)](LICENSE.md)
@@ -44,11 +44,13 @@ RHEOS to better understand a model's response
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
 
 ## Citation
-If you use RHEOS in your work, please consider citing the following paper
-*TBA*
+If you use RHEOS in your work, please consider citing the following paper:
+**TBA**
 
 ## References
 
-+ S. G. Johnson, The NLopt nonlinear-optimization package, http://ab-initio.mit.edu/nlopt
++ W. N. Findley, J. S. Lai, K. Onaran — *Creep and Relaxation of Nonlinear Viscoelastic Materials (with an Introduction to Linear Viscoelasticity)*, Dover Publications, New York. (1976)
 
-+ J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah - *Julia: A Fresh Approach to Numerical Computing*, SIAM Review, doi: 10.1137/141000671. (2017)
++ S. G. Johnson — *The NLopt nonlinear-optimization package*, http://ab-initio.mit.edu/nlopt
+
++ J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah — *Julia: A Fresh Approach to Numerical Computing*, SIAM Review, doi: 10.1137/141000671. (2017)
