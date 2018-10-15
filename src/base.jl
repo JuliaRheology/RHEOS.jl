@@ -401,14 +401,12 @@ function downsample(boundaries::Vector{T}, elperiods::Vector{T}) where T<:Intege
     @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
 
     # initialise indices array
-    indices = zeros(Int64,0)
+    indices = zeros(Integer, 0)
 
     # loop through, skipping elements as required
     for i in 1:length(boundaries)-1
-
         # get indices for this 'section'
         indicesCur = boundaries[i]:elperiods[i]:boundaries[i+1]
-
         # append
         append!(indices, collect(indicesCur))
     end
