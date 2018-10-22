@@ -11,13 +11,13 @@ G_fraczener(t::Vector{T}, params::Vector{T}) where T<:Real = G_fraczener.(t, (pa
 function J_fraczener(t::Vector{T}, params::Vector{T}) where T<:Real
     cₐ, a, cᵦ, β, cᵧ, γ = params
 
-    Jbar(s) = (1/s)*(cₐ*s^a + cᵦ*s^β)/(cₐ*s^a*cᵦ*s^β + cᵧ*s^γ*(cₐ*s^a + cᵦ*s^β))
+    Ĵ(s) = (1/s)*(cₐ*s^a + cᵦ*s^β)/(cₐ*s^a*cᵦ*s^β + cᵧ*s^γ*(cₐ*s^a + cᵦ*s^β))
 
     # method gives NaN at time 0.0
     # J = InverseLaplace.ILt(s -> Jbar(s))
     # return [J(t_val) for t_val in t]
 
-    return InverseLaplace.talbotarr(s -> Jbar(s), t)
+    return InverseLaplace.talbotarr(s -> Ĵ(s), t)
 end
 
 function Gp_fraczener(ω::T, params::Vector{T}) where T<:Real
@@ -56,13 +56,13 @@ G_fracsls(t::Vector{T}, params::Vector{T}) where T<:Real = G_fracsls.(t, (params
 function J_fracsls(t::Vector{T}, params::Vector{T}) where T<:Real
     cₐ, a, kᵦ, kᵧ = params
 
-    Jbar(s) = (1/s)*(cₐ*s^a + kᵦ)/(cₐ*s^a*kᵦ + kᵧ*(cₐ*s^a + kᵦ))
-    
+    Ĵ(s) = (1/s)*(cₐ*s^a + kᵦ)/(cₐ*s^a*kᵦ + kᵧ*(cₐ*s^a + kᵦ))
+
     # method gives NaN at time 0.0
-    # J = InverseLaplace.ILt(s -> Jbar(s))
+    # J = InverseLaplace.ILt(s -> Ĵ(s))
     # return [J(t_val) for t_val in t]
 
-    return InverseLaplace.talbotarr(s -> Jbar(s), t)
+    return InverseLaplace.talbotarr(s -> Ĵ(s), t)
 end
 
 function Gp_fracsls(ω::T, params::Vector{T}) where T<:Real
@@ -83,7 +83,7 @@ function Gpp_fracsls(ω::T, params::Vector{T}) where T<:Real
 
     numerator = kᵦ^2*(cₐ*ω^a)*sin(a*π/2)
 
-    Gpp = numerator/denominator 
+    Gpp = numerator/denominator
 end
 Gpp_fracsls(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_fracsls.(ω, (params,))
 

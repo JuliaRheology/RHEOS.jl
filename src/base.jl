@@ -498,7 +498,7 @@ function singularitytest(modulus::Function, params::Array{T, 1}; t1::T=0.0) wher
 
     startval = modulus([t1], params)[1]
 
-    if startval == NaN || startval == Inf
+    if isnan(startval) || startval == Inf
         return true
     else
         return false

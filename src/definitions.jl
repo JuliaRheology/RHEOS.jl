@@ -6,7 +6,7 @@
 RheologyData struct used for high level interaction with RHEOS
 preprocessing and fitting functions. Initialise an instance directly or
 indirectly. If data is in three column, comma separated CSV file then
-fileload function can be used, which calls the RheologyData outer constructor method. 
+fileload function can be used, which calls the RheologyData outer constructor method.
 If not, load data in according to format and call RheologyData outer constructor method.
 """
 struct RheologyData
@@ -30,7 +30,7 @@ end
     RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}[, data3::Array{Float64,1}; filedir::String="none", log::Array{String,1}=Array{String}(0)])::RheologyData
 
 Constructor function for RheologyData struct, if stress/strain arrays have NaN values at the beginning (some datasets
-have 1 or 2 samples of NaN at beginning) then deletes these and starts at the first non-NaN sample, also readjusts time start to 
+have 1 or 2 samples of NaN at beginning) then deletes these and starts at the first non-NaN sample, also readjusts time start to
 t = 0 to account for NaNs and and negative time values at beginning of data recording.
 """
 function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}, data3::Array{Float64,1}=zeros(length(data2)); filedir::String="none", log::Array{String,1}=Array{String}(undef, 0))::RheologyData
@@ -102,7 +102,7 @@ function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2:
 
     # return class with all fields initialised
     RheologyData(σ, ϵ, t, sampling, log)
-    
+
 end
 
 function RheologyData(data::Array{T,1}, t::Array{T,1}, log::Array{String,1}) where T<:Real
@@ -242,7 +242,7 @@ function *(self::RheologyData, operand::Real)
 end
 
 function *(operand::Real, self::RheologyData)
-    
+
     # multiplication commutes so call function as defined for opposite operand order
     return self*operand
 
@@ -273,11 +273,11 @@ function null_modulus(t::Array{T,1}, params::Array{T, 1}) where T<:Real
     return [-1.0]
 end
 
-RheologyModel(;G::Function = null_modulus, 
-               J::Function = null_modulus, 
-               Gp::Function = null_modulus, 
-               Gpp::Function = null_modulus, 
-               params::Array{T,1} where T<:Real = [-1.0], 
+RheologyModel(;G::Function = null_modulus,
+               J::Function = null_modulus,
+               Gp::Function = null_modulus,
+               Gpp::Function = null_modulus,
+               params::Array{T,1} where T<:Real = [-1.0],
                log::Array{String,1} = ["model created by user with parameters $params"]) = RheologyModel(G, J, Gp, Gpp, params, log)
 
 """
@@ -305,7 +305,7 @@ end
     RheologyDynamic(Gp::Vector{T<:Real}, Gpp::Vector{T<:Real}, ω::Vector{T<:Real}, log::Array{String,1})
 
 RheologyDynamic struct used for high level interaction with RHEOS
-fitting functions. 
+fitting functions.
 """
 struct RheologyDynamic
 

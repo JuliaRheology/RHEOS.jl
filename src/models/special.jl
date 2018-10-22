@@ -14,13 +14,13 @@ function J_fractspecial(t::Vector{T}, params::Vector{T}) where T<:Real
     a = η/cᵦ
     b = k*η/cᵦ
 
-    Jbar(s) = (1/s^2)*(1+a*s^(1-β))/(η+k/s+b*s^(-β))
+    Ĵ(s) = (1/s^2)*(1+a*s^(1-β))/(η+k/s+b*s^(-β))
 
     # method gives NaN at time 0.0
     # J = InverseLaplace.ILt(s -> Jbar(s))
     # return [J(t_val) for t_val in t]
 
-    return InverseLaplace.talbotarr(s -> Jbar(s), t)
+    return InverseLaplace.talbotarr(s -> Ĵ(s), t)
 end
 
 function Gp_fractspecial(ω::T, params::Vector{T}) where T<:Real
@@ -42,6 +42,6 @@ function Gpp_fractspecial(ω::T, params::Vector{T}) where T<:Real
     Gpp = numerator/denominator
 end
 Gpp_fractspecial(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_fractspecial.(ω, (params,))
-                
+
 FractionalSpecial() = RheologyModel(G_fractspecial, J_fractspecial, Gp_fractspecial, Gpp_fractspecial, [1.0, 1.0, 0.2, 1.0], ["model created with default parameters"])
 FractionalSpecial(params::Vector{T}) where T<:Real = RheologyModel(G_fractspecial, J_fractspecial, Gp_fractspecial, Gpp_fractspecial, params, ["model created by user with parameters $params"])
