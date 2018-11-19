@@ -1,32 +1,27 @@
 #!/usr/bin/env julia
-# using PyPlot
-# using RHEOS
+using PyPlot
+using RHEOS
 
-filedir = "../data/rheologyData1.csv"
+filedir = "DataComplete.csv"
 
-data_raw = fileload(["time","stress","strain"], filedir)
-
-# data_resampled = var_resample(data_raw, :σ, 0.1; _mapback = false)
-# data_resampled = downsample(data_raw, [0.0, 40.0], [3])
-# data_resampled = fixed_resample(data_raw, [0.0, 20.0, 41.0], [8, 25], ["up", "down"])
-data_resampled = fixed_resample(data_raw, [0.0, 40.0], [8], ["up"])
-# data_resampled = smooth(data_raw, 5.0)
-# data_resampled = mapbackdata(data_resampled, data_raw)
+data = fileload(["stress","strain", "time"], filedir)
 
 # SLS fit
-sls_fit = modelfit(data_resampled, SLS(), :G)
+sls_fit = modelfit(data, SLS(), :G)
 
-# Spring-pot fit
-lb = [0.0, 0.0]
-ub = [Inf, 1.0]
-springpot_fit = modelfit(data_resampled, SpringPot(), :G; lo=lb, hi=ub)
+# Spring-pot fit: cₐ, a, kᵦ, kᵧ
+lb = [0.1, 0.01, 0.1, 0.1]
+ub = [Inf, 0.99, Inf, Inf]
+fractsls_fit = modelfit(data, FractionalSLS([2.0, 0.5, 0.5, 0.7]), :G; lo=lb, hi=ub, rel_tol=1e-5, verbose=true)
 
 # # get curves based on models fitted
-sls_predicted = modelpredict(data_resampled, sls_fit, :G)
-springpot_predicted = modelpredict(data_resampled, springpot_fit, :G)
+sls_predicted = modelpredict(data, sls_fit, :G)
+fractsls_predicted = modelpredict(data, fractsls_fit, :G)
 
 # plot all data
-plot(data_resampled.t, data_resampled.σ)
-plot(sls_predicted.t, sls_predicted.σ)
-plot(springpot_predicted.t, springpot_predicted.σ, "--")
+fig, ax = subplots()
+ax[:plot](data.t, data.σ, label="Data", color="black")
+ax[:plot](sls_predicted.t, sls_predicted.σ, label="SLS")
+ax[:plot](fractsls_predicted.t, fractsls_predicted.σ, "--", label="Fractional SLS")
+ax[:legend](loc="best")
 show()
