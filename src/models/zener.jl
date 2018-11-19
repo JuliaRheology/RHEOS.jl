@@ -13,8 +13,8 @@ function J_fraczener(t::Vector{T}, params::Vector{T}) where T<:Real
 
     Ĵ(s) = (1/s)*(cₐ*s^a + cᵦ*s^β)/(cₐ*s^a*cᵦ*s^β + cᵧ*s^γ*(cₐ*s^a + cᵦ*s^β))
 
-    # method gives NaN at time 0.0
-    # J = InverseLaplace.ILt(s -> Jbar(s))
+    # # method gives NaN at time 0.0
+    # J = InverseLaplace.ILt(s -> Ĵ(s))
     # return [J(t_val) for t_val in t]
 
     return InverseLaplace.talbotarr(s -> Ĵ(s), t)

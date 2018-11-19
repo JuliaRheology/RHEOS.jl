@@ -38,7 +38,7 @@ export SLS2, PowerLawPlateau
 # datagen.jl
 export stepgen, rampgen, singen, repeatdata, addnoise
 # processing.jl
-export var_resample, downsample, fixed_resample, smooth, mapbackdata
+export var_resample, downsample, fixed_resample, smooth, mapbackdata, zerotime
 export modelfit, modelpredict, modelstepfit, modelsteppredict
 export dynamicmodelfit, dynamicmodelpredict
 

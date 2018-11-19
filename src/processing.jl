@@ -178,6 +178,12 @@ function mapbackdata(self_new::RheologyData, self_original::RheologyData)
 
 end
 
+function zerotime(self::RheologyData)
+
+    return RheologyData(self.σ, self.ϵ, self.t .- minimum(self.t), self.sampling, vcat(self.log, ["Normalized time to start at 0.0"]))
+
+end
+
 ##########################
 #~ Processing Functions ~#
 ##########################
