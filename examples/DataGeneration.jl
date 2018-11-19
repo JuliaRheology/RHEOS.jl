@@ -1,9 +1,8 @@
 #!/usr/bin/env julia
-# using RHEOS
-# using PyPlot
+using RHEOS
+using PyPlot
 
 # Produces exactly the same result if ϵ is replace with σ as generated data is placed in both
-
 # step test
 foo = stepgen(1000.0, 100.0)
 bar = stepgen(1000.0, 500.0)
