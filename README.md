@@ -20,11 +20,10 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 
 - A fitted model can be used to predict the behaviour of the material under other loading conditions, enabling the fit/predict paradigm of model selection
 
-- Artificial loading conditions can be generated within
-RHEOS to better understand a model's response
+- Artificial loading conditions can be generated within RHEOS to better understand a model's response
 
 ## Installation
-1. Install Julia, version 1.0.1
+1. Install Julia, version 1.0.2
 2. From Julia REPL, enter pkg mode by pressing ```]```
 3. (Optional) Enable desired Project.toml environment
 4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
