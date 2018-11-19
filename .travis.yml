@@ -20,7 +20,6 @@ jobs:
         - julia -e "using Pkg; Pkg.add(\"Test\"); Pkg.test(\"RHEOS\")"
       after_success: skip
 
-  include:
     - stage: "Documentation"
       julia: 1.0.2
       os: linux
