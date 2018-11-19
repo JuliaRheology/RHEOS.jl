@@ -1,7 +1,7 @@
 var documenterSearchIndex = {"docs": [
 
 {
-    "location": "index.html#",
+    "location": "#",
     "page": "Home",
     "title": "Home",
     "category": "page",
@@ -9,7 +9,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#RHEOS.jl-1",
+    "location": "#RHEOS.jl-1",
     "page": "Home",
     "title": "RHEOS.jl",
     "category": "section",
@@ -17,23 +17,23 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#Overview-1",
+    "location": "#Overview-1",
     "page": "Home",
     "title": "Overview",
     "category": "section",
-    "text": "RHEOS, an abbreviation of Rheology Open Source, is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:G\'/G\'\'/Frequency data can easily be fitted to a viscoelastic model\nMany standard and fractional viscoelastic models have already been implemented within RHEOS new ones can easily be added by users\nA fitted model can be used to predict the behaviour of the material under other loading conditions, enabling the fit/predict paradigm of model selection\nArtificial loading conditions can be generated withinRHEOS to better understand a model\'s response"
+    "text": "RHEOS, an abbreviation of Rheology Open Source, is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:Stress/Strain/Time data can be easily be fitted to a viscoelastic model\nG\'/G\'\'/Frequency data can easily be fitted to a viscoelastic model\nMany standard and fractional viscoelastic models have already been implemented within RHEOS new ones can easily be added by users\nA fitted model can be used to predict the behaviour of the material under other loading conditions, enabling the fit/predict paradigm of model selection\nArtificial loading conditions can be generated within RHEOS to better understand a model\'s response"
 },
 
 {
-    "location": "index.html#Installation-1",
+    "location": "#Installation-1",
     "page": "Home",
     "title": "Installation",
     "category": "section",
-    "text": "Install Julia, version 1.0.1\nFrom Julia REPL, enter pkg mode by pressing ]\n(Optional) Enable desired Project.toml environment\nRun the command add \"https://github.com/JuliaRheology/RHEOS.jl\""
+    "text": "Install Julia, version 1.0.2\nFrom Julia REPL, enter pkg mode by pressing ]\n(Optional) Enable desired Project.toml environment\nRun the command add \"https://github.com/JuliaRheology/RHEOS.jl\""
 },
 
 {
-    "location": "index.html#Included-Dependencies-1",
+    "location": "#Included-Dependencies-1",
     "page": "Home",
     "title": "Included Dependencies",
     "category": "section",
@@ -41,7 +41,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#[FastConv.jl](https://github.com/aamini/FastConv.jl)-1",
+    "location": "#[FastConv.jl](https://github.com/aamini/FastConv.jl)-1",
     "page": "Home",
     "title": "FastConv.jl",
     "category": "section",
@@ -49,7 +49,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#[MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)-1",
+    "location": "#[MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)-1",
     "page": "Home",
     "title": "MittagLeffler.jl",
     "category": "section",
@@ -57,7 +57,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#Citation-1",
+    "location": "#Citation-1",
     "page": "Home",
     "title": "Citation",
     "category": "section",
@@ -65,15 +65,15 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#References-1",
+    "location": "#References-1",
     "page": "Home",
     "title": "References",
     "category": "section",
-    "text": "S. G. Johnson, The NLopt nonlinear-optimization package, http://ab-initio.mit.edu/nlopt\nJ. Bezanson, A. Edelman, S. Karpinski, V. B. Shah - Julia: A Fresh Approach to Numerical Computing, SIAM Review, doi: 10.1137/141000671. (2017)"
+    "text": "W. N. Findley, J. S. Lai, K. Onaran — Creep and Relaxation of Nonlinear Viscoelastic Materials (with an Introduction to Linear Viscoelasticity), Dover Publications, New York. (1976)\nS. G. Johnson — The NLopt nonlinear-optimization package, http://ab-initio.mit.edu/nlopt\nJ. Bezanson, A. Edelman, S. Karpinski, V. B. Shah — Julia: A Fresh Approach to Numerical Computing, SIAM Review, doi: 10.1137/141000671. (2017)"
 },
 
 {
-    "location": "keytypes.html#",
+    "location": "keytypes/#",
     "page": "Rheology Types",
     "title": "Rheology Types",
     "category": "page",
@@ -81,7 +81,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "keytypes.html#Rheology-Data-1",
+    "location": "keytypes/#Rheology-Data-1",
     "page": "Rheology Types",
     "title": "Rheology Data",
     "category": "section",
@@ -89,7 +89,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "keytypes.html#Data-Structure-1",
+    "location": "keytypes/#Data-Structure-1",
     "page": "Rheology Types",
     "title": "Data Structure",
     "category": "section",
@@ -97,7 +97,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "keytypes.html#Model-Structure-1",
+    "location": "keytypes/#Model-Structure-1",
     "page": "Rheology Types",
     "title": "Model Structure",
     "category": "section",
@@ -105,7 +105,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "keytypes.html#Generated-Data-Structure-1",
+    "location": "keytypes/#Generated-Data-Structure-1",
     "page": "Rheology Types",
     "title": "Generated Data Structure",
     "category": "section",
@@ -113,7 +113,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "preprocessing.html#RHEOS.var_resample-Tuple{RheologyData,Symbol,Float64}",
+    "location": "preprocessing/#RHEOS.var_resample-Tuple{RheologyData,Symbol,Float64}",
     "page": "Preprocessing",
     "title": "RHEOS.var_resample",
     "category": "method",
@@ -121,7 +121,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "preprocessing.html#RHEOS.downsample-Tuple{RheologyData,Array{Float64,1},Array{Int64,1}}",
+    "location": "preprocessing/#RHEOS.downsample-Tuple{RheologyData,Array{Float64,1},Array{Int64,1}}",
     "page": "Preprocessing",
     "title": "RHEOS.downsample",
     "category": "method",
@@ -129,7 +129,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "preprocessing.html#RHEOS.fixed_resample-Tuple{RheologyData,Array{Float64,1},Array{Int64,1},Array{String,1}}",
+    "location": "preprocessing/#RHEOS.fixed_resample-Tuple{RheologyData,Array{Float64,1},Array{Int64,1},Array{String,1}}",
     "page": "Preprocessing",
     "title": "RHEOS.fixed_resample",
     "category": "method",
@@ -137,7 +137,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "preprocessing.html#RHEOS.smooth-Tuple{RheologyData,Float64}",
+    "location": "preprocessing/#RHEOS.smooth-Tuple{RheologyData,Float64}",
     "page": "Preprocessing",
     "title": "RHEOS.smooth",
     "category": "method",
@@ -145,7 +145,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "preprocessing.html#",
+    "location": "preprocessing/#",
     "page": "Preprocessing",
     "title": "Preprocessing",
     "category": "page",
@@ -153,7 +153,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "fitpredict.html#",
+    "location": "fitpredict/#",
     "page": "Fit and Predict",
     "title": "Fit and Predict",
     "category": "page",
@@ -161,7 +161,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "loadsave.html#",
+    "location": "loadsave/#",
     "page": "Save and Load",
     "title": "Save and Load",
     "category": "page",
