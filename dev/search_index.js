@@ -161,6 +161,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "loadsave/#RHEOS.loaddata-Tuple{String}",
+    "page": "Save and Load",
+    "title": "RHEOS.loaddata",
+    "category": "method",
+    "text": "loaddata(filedir::String)\n\nConvenience function loads RheologyData.\n\n\n\n\n\n"
+},
+
+{
     "location": "loadsave/#",
     "page": "Save and Load",
     "title": "Save and Load",
