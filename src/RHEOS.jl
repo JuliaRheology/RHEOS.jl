@@ -10,6 +10,7 @@ using ImageFiltering
 using Interpolations
 using NLopt
 using DataFrames
+using JLD2
 
 import SpecialFunctions.gamma
 
@@ -23,9 +24,9 @@ import Statistics.mean
 
 ######################################################
 # definitions.jl
-export RheologyData, RheologyModel, RheologyModelTemp, RheologyDynamic
+export RheologyData, RheologyModel, RheologyDynamic
 # IO.jl
-export fileload #, savedata, loaddata, savemodel, loadmodel, exportdata
+export fileload, savedata, loaddata, savemodel, loadmodel, exportdata
 # models.jl
 export null_modulus
 export SpringPot, Spring, Dashpot

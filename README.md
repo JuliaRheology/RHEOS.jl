@@ -30,7 +30,6 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 
 ## To do
 - [ ] Implement derived singularity approximation
-- [ ] Generate data for examples to use
 - [ ] Add 'easy' functionalization of generated data (for e.g. digitized data load)
 - [ ] Documentation
 - [ ] Increase Test Coverage

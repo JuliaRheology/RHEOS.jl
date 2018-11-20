@@ -281,27 +281,6 @@ RheologyModel(;G::Function = null_modulus,
                log::Array{String,1} = ["model created by user with parameters $params"]) = RheologyModel(G, J, Gp, Gpp, params, log)
 
 """
-TEMPORARY STRUCT AS A WORKAROUND FOR THIS JLD ISSUE, FUNCTIONS or STRUCTS CONTAINING
-FUNCTIONS CANNOT BE SAVED. SEE https://github.com/JuliaIO/JLD.jl/issues/57 FOR MORE
-INFORMATION.
-"""
-struct RheologyModelTemp
-
-    G::String
-
-    J::String
-
-    Gp::String
-
-    Gpp::String
-
-    parameters::Array{T,1} where T<:Real
-
-    log::Array{String,1}
-
-end
-
-"""
     RheologyDynamic(Gp::Vector{T<:Real}, Gpp::Vector{T<:Real}, ω::Vector{T<:Real}, log::Array{String,1})
 
 RheologyDynamic struct used for high level interaction with RHEOS

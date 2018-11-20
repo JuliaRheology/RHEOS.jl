@@ -41,162 +41,77 @@ function fileload(colnames::Array{String,1}, filedir::String)
     end
 end
 
-# """
-#     savedata(self::RheologyData; filedir::String = "", ext = "_RheologyData.jld")
+"""
+    savedata(self::RheologyData; filedir::String = "", ext = "_RheologyData.jld")
 
-# Save RheologyData object using JLD format. Save file directory
-# must be specified. If data was loaded from disk using fileload
-# or the full RheologyData constructor then filedir argument can 
-# be set to empty string "" which will try to use the original file 
-# dir concatenated with the optional ext string argument  - e.g. 
-# "/originalpathto/file.csv_RheologyData.jld".
-# """
-# function savedata(self::RheologyData; filedir::String = "", ext = "_RheologyData.jld")
+Save RheologyData object using JLD format. Save file directory
+must be specified. If data was loaded from disk using fileload
+or the full RheologyData constructor then filedir argument can 
+be set to empty string "" which will try to use the original file 
+dir concatenated with the optional ext string argument  - e.g. 
+"/originalpathto/file.csv_RheologyData.jld".
+"""
+function savedata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".jld2")
 
-#     if filedir == ""
-#         if self.log[2] == "none"
-#             error("No file directory provided in savedata method or embedded in RheologyData object.")
+    fulldir = string(filedir, ext)
 
-#         else
-#             _filedir = self.log[2]
+    @save fulldir self 
 
-#         end
+end
 
-#     else
-#         _filedir = filedir
+"""
+    loaddata(filedir::String)
 
-#     end
+Convenience function loads RheologyData.
+"""
+function loaddata(filedir::String)
 
-#     fulldir = string(_filedir, ext)
+    @load filedir self
 
-#     jldopen(fulldir, "w") do file
-#         # register RHEOS module (with RheologyData type) to JLD
-#         addrequire(file, RHEOS)
-#         # write self to file
-#         write(file, "self", self)
-#     end
+    return self
 
-# end
+end
 
-# """
-#     loaddata(filedir::String)
+"""
+    savemodel(self::RheologyModel; filedir::String = "", ext = "")
+"""
+function savemodel(self::RheologyModel, filedir::String; ext = ".jld2")
 
-# Convenience function loads RheologyData.
-# """
-# function loaddata(filedir::String)
-#     # load in result
-#     loaded_data = load(filedir)
-#     # return
-#     loaded_data["self"]
+    fulldir = string(filedir, ext)
 
-# end
+    @save fulldir self 
 
-# """
-#     savemodel(self::RheologyModel; filedir::String = "", ext = "")
-# """
-# function savemodel(self::RheologyModel; filedir::String = "", ext = "")
+end
 
-#     #########################################################################
-#     #=
-#     TEMPORARY STRUCT AS A WORKAROUND FOR THIS JLD ISSUE, FUNCTIONS or STRUCTS CONTAINING
-#     FUNCTIONS CANNOT BE SAVED. SEE https://github.com/JuliaIO/JLD.jl/issues/57 FOR MORE
-#     INFORMATION. 
-#     =#
-#     self = RheologyModelTemp(string(self.modulus), self.parameters, self.log)
-#     #########################################################################
+function loadmodel(filedir::String)
 
-#     if filedir == ""
-#         if self.log[2] == "none"
-#             error("No file directory provided in savedata method or embedded in RheologyModel object.")
+    @load filedir self
 
-#         else
-#             _filedir = self.log[2]
+    return self
 
-#         end
+end
 
-#     else
-#         _filedir = filedir
+"""
+    exportdata(self::RheologyData; filedir::String = "", ext = ".csv")
 
-#     end
+Export RheologyData to csv format. Exports three columns in order: stress, strain, time.
+Useful for plotting/analysis in other software.
+"""
+function exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".csv")
 
-#     if ext == ""
-#         _ext = string("_", string(self.modulus), ".jld")
+    fulldir = string(filedir, ext)
 
-#     else
-#         _ext = ext
+    if typeof(self)==RheologyData
+        fulldata_array = hcat(self.σ, self.ϵ, self.t)
+        fulldata_frame = convert(DataFrame, fulldata_array)
+        names!(fulldata_frame, [:stress, :strain, :time])
+        uCSV.write(fulldir, fulldata_frame)
 
-#     end
+    elseif typeof(self)==RheologyDynamic
+        fulldata_array = hcat(self.Gp, self.Gpp, self.ω)
+        fulldata_frame = convert(DataFrame, fulldata_array)
+        names!(fulldata_frame, [:Gp, :Gpp, :frequency])
+        uCSV.write(fulldir, fulldata_frame)
 
-#     fulldir = string(_filedir, _ext)
-
-#     jldopen(fulldir, "w") do file
-#         # register RHEOS module (with RheologyModel type) to JLD
-#         addrequire(file, RHEOS)
-#         # write self to file
-#         write(file, "self", self)
-#     end
-
-# end
-
-# """
-#     loadmodel(filedir::String)
-
-# Convenience function loads RheologyModel from disk.
-# """
-# function loadmodel(filedir::String)
-
-#     # load in result
-#     loaded_data = load(filedir)
-
-#     #########################################################################
-#     #=
-#     TEMPORARY STRUCT AS A WORKAROUND FOR THIS JLD ISSUE, FUNCTIONS or STRUCTS CONTAINING
-#     FUNCTIONS CANNOT BE SAVED. SEE https://github.com/JuliaIO/JLD.jl/issues/57 FOR MORE
-#     INFORMATION. 
-#     =#
-#     self_text = loaded_data["self"]
-
-#     self_proper = RheologyModel(getfield(Main, Symbol(self_text.modulus[7:end])), self_text.parameters, self_text.log)
-
-#     # can substitute for below line when issue is resolved
-#     # loaded_data["self"]
-#     ######################################################################### 
-
-# end
-
-# """
-#     exportdata(self::RheologyData; filedir::String = "", ext = "_mod.csv")
-
-# Export RheologyData to csv format. Exports three columns in order: stress, strain, time.
-# Useful for plotting/analysis in other software.
-# """
-# function exportdata(self::RheologyData; filedir::String = "", ext = "_mod.csv")
-
-#     if filedir == ""
-#         if self.log[2] == "none"
-#             error("No file directory provided in savedata method or embedded in RheologyData object.")
-
-#         else
-#             _filedir = self.log[2]
-
-#         end
-
-#     else
-#         _filedir = filedir
-
-#     end
-
-#     fulldir = string(_filedir, ext)
-
-#     fulldata_array = hcat(self.σ, self.ϵ, self.t)
-
-#     fulldata_frame = convert(DataFrame, fulldata_array)
-
-#     names!(fulldata_frame, [:stress, :strain, :time])
-
-#     # array to write
-#     # fulldata = [self.σ, self.ϵ, self.t]
-
-#     uCSV.write(fulldir, fulldata_frame)
-
-# end
+    end
+end
