@@ -2,9 +2,9 @@
 #   http://www.mkdocs.org/user-guide/configuration/
 
 site_name:        RHEOS.jl
-#repo_url:         https://github.com/USER_NAME/PACKAGE_NAME.jl
-#site_description: Description...
-#site_author:      USER_NAME
+repo_url:         https://github.com/JuliaRheology/RHEOS.jl
+site_description: RHEOS Documentation
+site_author:      moustachio-belvedere
 
 theme: readthedocs
 
@@ -24,4 +24,4 @@ markdown_extensions:
 docs_dir: 'build'
 
 pages:
-  - Home: index.md
+  - Home: 01_index.md

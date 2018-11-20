@@ -45,11 +45,6 @@ function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2:
     local ϵ::Array{Float64,1} = zeros(length(data1))
     local t::Array{Float64,1} = zeros(length(data1))
 
-    # occurence flags
-    local stress_present::Bool = false
-    local strain_present::Bool = false
-    local time_present::Bool = false
-
     for (i, v) in enumerate(colnames)
         if v == "stress"
             σ = data[i]
@@ -295,5 +290,40 @@ struct RheologyDynamic
 
     # operations applied, stores history of which functions (including arguments)
     log::Array{String,1}
+
+end
+
+function RheologyDynamic(colnames::Array{String,1}, data1::Array{T,1}, data2::Array{T,1}, data3::Array{T,1}; filedir::String="none", log::Array{String,1}=Array{String}(undef, 0)) where T<: Real
+
+    # checks
+    @assert length(data1)==length(data2) "Data arrays must be same length"
+    @assert length(data1)==length(data3) "Data arrays must be same length"
+
+    # get data in correct variables
+    data = [data1, data2, data3]
+    local Gp::Array{T,1} = zeros(length(data1))
+    local Gpp::Array{T,1} = zeros(length(data1))
+    local ω::Array{T,1} = zeros(length(data1))
+
+    for (i, v) in enumerate(colnames)
+        if v == "Gp"
+            Gp = data[i]
+        elseif v == "Gpp"
+            Gpp = data[i]
+        elseif v == "frequency"
+            ω = data[i]
+        else
+            @assert false "Incorrect Column Names"
+        end
+    end
+
+    # set up log for three cases, file dir given, derived from other data so filedir
+    # in log already, no file name or log given.
+    if filedir != "none" || length(log)==0
+        push!(log, string("complete data loaded from:", filedir))
+    end
+
+    # return class with all fields initialised
+    RheologyDynamic(Gp, Gpp, ω, log)
 
 end

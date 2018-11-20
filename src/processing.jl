@@ -586,7 +586,9 @@ function dynamicmodelfit(data::RheologyDynamic,
         min_objective!(opt, (params, grad) -> obj_dynamic(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
 
     elseif weights=="linear"
-        min_objective!(opt, (params, grad) -> obj_dynamic_linear(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, mean(data.Gp), mean(data.Gpp); _insight = verbose))
+        meanGp = sum(data.Gp)/length(data.Gp)
+        meanGpp = sum(data.Gp)/length(data.Gp)
+        min_objective!(opt, (params, grad) -> obj_dynamic_linear(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, meanGp, meanGpp; _insight = verbose))
 
     elseif weights=="log"
         min_objective!(opt, (params, grad) -> obj_dynamic_log(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))

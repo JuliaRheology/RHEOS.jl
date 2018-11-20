@@ -19,26 +19,37 @@ fileDir = "../data/rheologyData1.csv"
 dataforprocessing = fileload(["time","stress","strain"], fileDir)
 ```
 """
-function fileload(colnames::Array{String,1}, filedir::String)
+function fileload(colnames::Array{String,1}, filedir::String; delimiter=',')
 
     # get length 
     N = length(colnames)
 
-    # check colnames length is correct
-    @assert N==3 || N==2 "Two or three column names required, one of each: 'stress', 'strain' and 'time'."
+    if "time" in colnames
+        # check colnames length is correct
+        @assert N==3 || N==2 "Two or three column names required, one of each: \"stress\", \"strain\" and \"time\"."
 
-    # init types helper
-    types = [Float64 for i = 1:N]
+        # read data from file
+        data = readdlm(filedir, delimiter)
 
-    # read data from file
-    (datacsv, head_out) = uCSV.read(filedir; delim=',', types=types)
+        # generate RheologyData struct and output
+        if N==3
+            return RheologyData(colnames, data[:, 1], data[:, 2], data[:, 3]; filedir = filedir)
+        elseif N==2
+            return RheologyData(colnames, data[:, 1], data[:, 2]; filedir = filedir)
+        end
+    
+    elseif "frequency" in colnames
+        # check colnames length is correct
+        @assert N==3 "Three column names required, one of each: \"Gp\", \"Gpp\" and \"frequency\"."
 
-    # generate RheologyData struct and output
-    if N==3
-        return RheologyData(colnames, datacsv[1], datacsv[2], datacsv[3]; filedir = filedir)
-    elseif N==2
-        return RheologyData(colnames, datacsv[1], datacsv[2]; filedir = filedir)
+        # read data from file
+        data = readdlm(filedir, delimiter)
+
+        # generate RheologyDynamic struct and output
+        return RheologyDynamic(colnames, data[:, 1], data[:, 2], data[:, 3]; filedir=filedir)
+
     end
+
 end
 
 """
@@ -94,24 +105,24 @@ end
 """
     exportdata(self::RheologyData; filedir::String = "", ext = ".csv")
 
-Export RheologyData to csv format. Exports three columns in order: stress, strain, time.
+Export RheologyData to csv format. Exports three columns in order: stress, strain, time. Or: Gp, Gpp, frequency for oscillatory data.
 Useful for plotting/analysis in other software.
 """
-function exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".csv")
+function exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".csv", delimiter=',')
 
     fulldir = string(filedir, ext)
 
     if typeof(self)==RheologyData
         fulldata_array = hcat(self.σ, self.ϵ, self.t)
-        fulldata_frame = convert(DataFrame, fulldata_array)
-        names!(fulldata_frame, [:stress, :strain, :time])
-        uCSV.write(fulldir, fulldata_frame)
+        open(fulldir, "w") do io
+            writedlm(fulldir, fulldata_array, delimiter)
+        end
+            
 
     elseif typeof(self)==RheologyDynamic
         fulldata_array = hcat(self.Gp, self.Gpp, self.ω)
-        fulldata_frame = convert(DataFrame, fulldata_array)
-        names!(fulldata_frame, [:Gp, :Gpp, :frequency])
-        uCSV.write(fulldir, fulldata_frame)
-
+        open(fulldir, "w") do io
+            writedlm(fulldir, fulldata_array, delimiter)
+        end
     end
 end
