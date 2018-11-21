@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
 # using PyPlot
-# using RHEOS
+using RHEOS
 
 filedir = "DataComplete.csv"
 

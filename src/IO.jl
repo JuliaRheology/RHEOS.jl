@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 """
-    fileload(colnames::Array{String,1}, filedir::String)
+    importdata(colnames::Array{String,1}, filedir::String)
 
 Load data from a CSV file (three columns, comma seperated). Columns must
 be identified by providing an array of strings which tell the function
@@ -16,13 +16,15 @@ subsequent high level operations within RHEOS.
 fileDir = "../data/rheologyData1.csv"
 
 # load the data into RheologyData struct
-dataforprocessing = fileload(["time","stress","strain"], fileDir)
+dataforprocessing = importdata(["time","stress","strain"], fileDir)
 ```
 """
-function fileload(colnames::Array{String,1}, filedir::String; delimiter=',')
+function importdata(colnames::Array{String,1}, filedir::String; delimiter=',')
 
     # get length 
     N = length(colnames)
+
+    @assert ("frequency" in colnames)||("time" in colnames) "Data must contain \"time\" or \"frequency\" "
 
     if "time" in colnames
         # check colnames length is correct
@@ -50,6 +52,30 @@ function fileload(colnames::Array{String,1}, filedir::String; delimiter=',')
 
     end
 
+end
+
+"""
+    exportdata(self::RheologyData; filedir::String = "", ext = ".csv")
+
+Export RheologyData to csv format. Exports three columns in order: stress, strain, time. Or: Gp, Gpp, frequency for oscillatory data.
+Useful for plotting/analysis in other software.
+"""
+function exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".csv", delimiter=',')
+
+    fulldir = string(filedir, ext)
+
+    if typeof(self)==RheologyData
+        fulldata_array = hcat(self.σ, self.ϵ, self.t)
+        open(fulldir, "w") do io
+            writedlm(fulldir, fulldata_array, delimiter)
+        end
+            
+    elseif typeof(self)==RheologyDynamic
+        fulldata_array = hcat(self.Gp, self.Gpp, self.ω)
+        open(fulldir, "w") do io
+            writedlm(fulldir, fulldata_array, delimiter)
+        end
+    end
 end
 
 """
@@ -100,29 +126,4 @@ function loadmodel(filedir::String)
 
     return self
 
-end
-
-"""
-    exportdata(self::RheologyData; filedir::String = "", ext = ".csv")
-
-Export RheologyData to csv format. Exports three columns in order: stress, strain, time. Or: Gp, Gpp, frequency for oscillatory data.
-Useful for plotting/analysis in other software.
-"""
-function exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".csv", delimiter=',')
-
-    fulldir = string(filedir, ext)
-
-    if typeof(self)==RheologyData
-        fulldata_array = hcat(self.σ, self.ϵ, self.t)
-        open(fulldir, "w") do io
-            writedlm(fulldir, fulldata_array, delimiter)
-        end
-            
-
-    elseif typeof(self)==RheologyDynamic
-        fulldata_array = hcat(self.Gp, self.Gpp, self.ω)
-        open(fulldir, "w") do io
-            writedlm(fulldir, fulldata_array, delimiter)
-        end
-    end
 end

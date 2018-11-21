@@ -18,7 +18,7 @@ import DelimitedFiles: readdlm, writedlm
 # definitions.jl
 export RheologyData, RheologyModel, RheologyDynamic
 # IO.jl
-export fileload, savedata, loaddata, savemodel, loadmodel, exportdata
+export importdata, exportdata, savedata, loaddata, savemodel, loadmodel
 # models.jl
 export null_modulus
 export SpringPot, Spring, Dashpot

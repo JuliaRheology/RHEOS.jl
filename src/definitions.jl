@@ -33,7 +33,7 @@ Constructor function for RheologyData struct, if stress/strain arrays have NaN v
 have 1 or 2 samples of NaN at beginning) then deletes these and starts at the first non-NaN sample, also readjusts time start to
 t = 0 to account for NaNs and and negative time values at beginning of data recording.
 """
-function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}, data3::Array{Float64,1}=zeros(length(data2)); filedir::String="none", log::Array{String,1}=Array{String}(undef, 0))::RheologyData
+function RheologyData(colnames::Array{String,1}, data1::Array{T,1}, data2::Array{T,1}, data3::Array{T,1}=zeros(length(data2)); filedir::String="none", log::Array{String,1}=Array{String}(undef, 0)) where T<:Real
 
     # checks
     @assert length(data1)==length(data2) "Data arrays must be same length"
@@ -41,9 +41,9 @@ function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2:
 
     # get data in correct variables
     data = [data1, data2, data3]
-    local σ::Array{Float64,1} = zeros(length(data1))
-    local ϵ::Array{Float64,1} = zeros(length(data1))
-    local t::Array{Float64,1} = zeros(length(data1))
+    σ = Array{T}(undef, 0)
+    ϵ = Array{T}(undef, 0)
+    t = Array{T}(undef, 0)
 
     for (i, v) in enumerate(colnames)
         if v == "stress"
@@ -57,10 +57,8 @@ function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2:
         end
     end
 
-    # define as local so it can be accessed in subsequent scopes
-    local newstartingval::Integer
-
     # test for NaNs
+    newstartingval = 1
     for i in 1:length(σ)
         if !isnan(σ[i]) && !isnan(ϵ[i])
             newstartingval = i
@@ -94,11 +92,11 @@ function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2:
 
 end
 
-function RheologyData(σ::Array{T,1}, ϵ::Array{T,1}, t::Array{T,1}; log_entry::String="manually created.") where T<:Real
+function RheologyData(σ::Array{T,1}, ϵ::Array{T,1}, t::Array{T,1}; log::Array{String,1}=["Manually Created."]) where T<:Real
 
     sampling = constantcheck(t) ? "constant" : "variable"
 
-    RheologyData(σ, ϵ, t, sampling, [log_entry])
+    RheologyData(σ, ϵ, t, sampling, log)
 
 end
 
@@ -295,7 +293,7 @@ struct RheologyDynamic
 
 end
 
-function RheologyDynamic(colnames::Array{String,1}, data1::Array{T,1}, data2::Array{T,1}, data3::Array{T,1}; filedir::String="none", log::Array{String,1}=Array{String}(undef, 0)) where T<: Real
+function RheologyDynamic(colnames::Array{String,1}, data1::Array{T,1}, data2::Array{T,1}, data3::Array{T,1}; filedir::String="none", log::Array{String,1}=Array{String}(undef, 0)) where T<:Real
 
     # checks
     @assert length(data1)==length(data2) "Data arrays must be same length"
@@ -303,9 +301,9 @@ function RheologyDynamic(colnames::Array{String,1}, data1::Array{T,1}, data2::Ar
 
     # get data in correct variables
     data = [data1, data2, data3]
-    local Gp::Array{T,1} = zeros(length(data1))
-    local Gpp::Array{T,1} = zeros(length(data1))
-    local ω::Array{T,1} = zeros(length(data1))
+    Gp = Array{T}(undef, 0)
+    Gpp = Array{T}(undef, 0)
+    ω = Array{T}(undef, 0)
 
     for (i, v) in enumerate(colnames)
         if v == "Gp"
@@ -325,9 +323,15 @@ function RheologyDynamic(colnames::Array{String,1}, data1::Array{T,1}, data2::Ar
         push!(log, string("complete data loaded from:", filedir))
     end
 
+
+
     # return class with all fields initialised
     RheologyDynamic(Gp, Gpp, ω, log)
 
 end
 
-# function RheologyDynamic(ω
+function RheologyDynamic(Gp::Array{T,1}, Gpp::Array{T,1}, ω::Array{T,1}; log::Array{String,1}=["Manually Created."]) where T<:Real
+
+    RheologyDynamic(Gp, Gpp, ω, log)
+
+end

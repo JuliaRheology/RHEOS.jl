@@ -141,8 +141,8 @@ function smooth(self::RheologyData, τ::Float64; pad::String="replicate")
     Σ = getsigma(τ, samplerate)
 
     # smooth signal and return
-    σ = imfilter(self.σ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
-    ϵ = imfilter(self.ϵ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
+    σ = Base.invokelatest(imfilter, self.σ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
+    ϵ = Base.invokelatest(imfilter, self.ϵ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
 
     # add record of operation applied
     log = vcat(self.log, "smooth - τ: $τ")
