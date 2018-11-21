@@ -17,9 +17,9 @@ makedocs(modules=[RHEOS],
          ]
          )
 
-# deploydocs(
-#     repo = "github.com/JuliaRheology/RHEOS.jl.git",
-#     deps = nothing,
-#     make = nothing,
-#     target = "build"
-# )
+deploydocs(
+    repo = "github.com/JuliaRheology/RHEOS.jl.git",
+    deps = nothing,
+    make = nothing,
+    target = "build"
+)
