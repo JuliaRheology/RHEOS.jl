@@ -2,6 +2,7 @@
 
 This page contains examples which demonstrate all the model fitting capabilities of RHEOS.
 
+```
 using RHEOS
 
 filedir = "DataComplete.csv"
@@ -27,3 +28,4 @@ ax[:plot](sls_predicted.t, sls_predicted.σ, label="SLS")
 ax[:plot](fractsls_predicted.t, fractsls_predicted.σ, "--", label="Fractional SLS")
 ax[:legend](loc="best")
 show()
+```
