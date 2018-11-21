@@ -165,17 +165,20 @@ Add random noise to artificially generated data.
 """
 function addnoise(self::RheologyData; amplitude::Float64 = 0.1, seed::Union{Int, Nothing} = nothing)
 
+    # conditional loading of random as this is the only RHEOS function which requires it
+    @eval import Random: seed!, rand
+
     @assert self.σ==self.ϵ "addnoise only works when σ==ϵ which is the state of RheologyData after being generated using the built-in RHEOS data generation functions"
 
     dataraw = self.σ
 
     if typeof(seed)==Nothing
         # get random seed
-        Random.seed!()
+        seed!()
     elseif typeof(seed)<:Int
         # use specified seed
         @assert seed>=0 "Seed must be non-negative"
-        Random.seed!(seed)
+        seed!(seed)
     end
 
     data = dataraw .+ amplitude*(2*rand(Float64, length(dataraw)) .- 1)

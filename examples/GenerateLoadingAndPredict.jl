@@ -24,18 +24,6 @@ data = repeatdata(step, 3)
 sls_predicted = modelpredict(data, SLS(), :G)
 fractSLS_predicted = modelpredict(data, FractionalSLS([2.0, 0.5, 0.5, 0.7]), :G)
 
-open("DataComplete.csv", "w") do f
-    for i in 1:length(fractSLS_predicted.t)
-        write(f, string(fractSLS_predicted.σ[i], ", ", fractSLS_predicted.ϵ[i], ", ", fractSLS_predicted.t[i], "\n"))
-    end
-end
-
-open("DataIncomplete.csv", "w") do f
-    for i in 1:length(fractSLS_predicted.t)
-        write(f, string(fractSLS_predicted.ϵ[i], ", ", fractSLS_predicted.t[i], "\n"))
-    end
-end
-
 fig, ax = subplots()
 ax[:plot](data.t, data.σ, "-", label="original")
 ax[:plot](sls_predicted.t, sls_predicted.σ, "-", label="SLS")

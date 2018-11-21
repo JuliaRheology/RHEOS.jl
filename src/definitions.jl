@@ -87,16 +87,18 @@ function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2:
         push!(log, filedir)
     end
 
-    # Check if time vector is equally spaced
-    constant = constantcheck(t)
-    if constant
-       sampling = "constant"
-    elseif !constant
-       sampling = "variable"
-    end
+    sampling = constantcheck(t) ? "constant" : "variable"
 
     # return class with all fields initialised
     RheologyData(σ, ϵ, t, sampling, log)
+
+end
+
+function RheologyData(σ::Array{T,1}, ϵ::Array{T,1}, t::Array{T,1}; log_entry::String="manually created.") where T<:Real
+
+    sampling = constantcheck(t) ? "constant" : "variable"
+
+    RheologyData(σ, ϵ, t, sampling, [log_entry])
 
 end
 
@@ -327,3 +329,5 @@ function RheologyDynamic(colnames::Array{String,1}, data1::Array{T,1}, data2::Ar
     RheologyDynamic(Gp, Gpp, ω, log)
 
 end
+
+# function RheologyDynamic(ω

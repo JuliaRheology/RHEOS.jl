@@ -129,27 +129,25 @@ end
 
 Smooth data using a Gaussian Kernel to time scale τ (approximately half power).
 
-Smooths both σ and ϵ.
+Smooths both σ and ϵ. Essentially a low pass filter with frequencies of 1/τ being cut to approximately
+half power. For other pad types available see ImageFiltering documentation.
 """
-function smooth(self::RheologyData, τ::Float64)
+function smooth(self::RheologyData, τ::Float64; pad::String="replicate")
 
-    @assert self.sampling=="constant" "Sample rate must be constant for Gaussian smoothing kernel to function properly"
+    @eval import ImageFiltering: imfilter, Kernel
 
-    t = self.t
+    # get sample-rate and Gaussian kernel (std. dev)
+    samplerate = 1.0/getsampleperiod(self.t)
+    Σ = getsigma(τ, samplerate)
 
-    # get constant sample period
-    dt = t[2] - t[1]
-
-    # sample rate
-    samplerate = 1.0/dt;
-
-    σ = smoothgauss(self.σ, τ, samplerate)
-    ϵ = smoothgauss(self.ϵ, τ, samplerate)
+    # smooth signal and return
+    σ = imfilter(self.σ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
+    ϵ = imfilter(self.ϵ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
 
     # add record of operation applied
     log = vcat(self.log, "smooth - τ: $τ")
 
-    self_new = RheologyData(σ, ϵ, t, self.sampling, log)
+    self_new = RheologyData(σ, ϵ, self.t, self.sampling, log)
 
 end
 

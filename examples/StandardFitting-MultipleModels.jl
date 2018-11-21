@@ -4,6 +4,7 @@ using RHEOS
 
 filedir = "DataComplete.csv"
 
+# repeated step loading generated with FractionalSLS([2.0, 0.5, 0.5, 0.7])
 data = fileload(["stress","strain", "time"], filedir)
 
 # SLS fit

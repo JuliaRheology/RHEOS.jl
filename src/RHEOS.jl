@@ -5,21 +5,15 @@ module RHEOS
 
 # installed from Julia package repository
 using InverseLaplace
-using ImageFiltering
-using Interpolations
 using NLopt
 using JLD2
-
 import DSP.conv
-
 # Base and stdlib imports
 using Base.Cartesian
 import SpecialFunctions.gamma
 import Base: +, -, *
-import Random
-using DelimitedFiles: readdlm, writedlm
+import DelimitedFiles: readdlm, writedlm
 
-#removed stats.mean, ucsv and dataframes
 ######################################################
 # definitions.jl
 export RheologyData, RheologyModel, RheologyDynamic

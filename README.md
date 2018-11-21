@@ -29,11 +29,12 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
 
 ## To do
-- [ ] Implement derived singularity approximation
-- [ ] Add 'easy' functionalization of generated data (for e.g. digitized data load)
 - [ ] Documentation
 - [ ] Increase Test Coverage
+- [ ] Implement derived singularity approximation
+- [ ] Add default constraints for fractional models for convenience in broad parameter searches
 - [ ] Add FFT fitting to handle singularities and sidestep Mittag-Leffler bottleneck
+- [ ] Test integration-by-parts singularity handling
 - [ ] Add Sync Interpolation for going from variable to constant sample rate
 
 ## Included Dependencies

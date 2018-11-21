@@ -161,28 +161,6 @@ function getsigma(τ::Real, samplerate::Real)
 end
 
 """
-    smoothgauss(yArray, τ, samplerate[; pad="replicate"])
-
-Smooth a signal using a Gaussian kernel.
-
-Essentially a low pass filter with frequencies of 1/τ being cut to approximately
-half power. For other pad types available see ImageFiltering documentation.
-"""
-function smoothgauss(yArray::Vector{T}, tArray::Vector{T}, τ::T; pad::String="replicate") where T<:Real
-
-    @assert constantcheck(tArray) "Sample-rate must be constant"
-
-    samplerate = 1/getsampleperiod(tArray)
-
-    # get standard deviation for Gaussian kernel
-    σ = getsigma(τ, samplerate)
-
-    # smooth signal and return
-    smooth = ImageFiltering.imfilter(yArray, ImageFiltering.Kernel.reflect(ImageFiltering.Kernel.gaussian((σ,))), pad)
-
-end
-
-"""
     var_resample(tᵢ, yᵢ, pcntdownsample, minperiod[; minsamplenum = 25])
 
 Convert a fixed sample rate array to a variable sample rate, with sampling points
@@ -211,6 +189,24 @@ See source code for more implementation details.
 - `minperiod`: Minimum allowed distance between x array points, recommended to set > 0.0 to something like dx/10.0 to avoid algorithm over-focusing on a particular region.
 - `minsamplenum = 25`: (Optional) number of initial, equally spaced seed samples required for algorithm to initialise.
 """
+
+    
+# using Interpolations
+
+    
+# using Interpolations
+
+    
+# using Interpolations
+
+    
+# using Interpolations
+
+    
+# using Interpolations
+
+
+
 function var_resample(tᵢ::Vector{T}, yᵢ::Vector{T}, pcntdownsample::T, minperiod::T; minsamplenum::Integer = 25) where T<:Real
 
     @assert length(tᵢ)==length(yᵢ) "X and Y arrays must have same length."
