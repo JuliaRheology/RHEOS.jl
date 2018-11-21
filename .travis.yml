@@ -13,13 +13,6 @@ notifications:
 
 jobs:
   include:
-    - stage: "Testing"
-      julia: 1.0.2
-      os: linux
-      script:
-        - julia -e "using Pkg; Pkg.add(\"Test\"); Pkg.test(\"RHEOS\")"
-      after_success: skip
-
     - stage: "Documentation"
       julia: 1.0.2
       os: linux
@@ -27,3 +20,12 @@ jobs:
         - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
         - julia --project=docs/ docs/make.jl
       after_success: skip
+      
+    - stage: "Testing"
+      julia: 1.0.2
+      os: linux
+      script:
+        - julia -e "using Pkg; Pkg.add(\"Test\"); Pkg.test(\"RHEOS\")"
+      after_success: skip
+
+
