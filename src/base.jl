@@ -189,25 +189,9 @@ See source code for more implementation details.
 - `minperiod`: Minimum allowed distance between x array points, recommended to set > 0.0 to something like dx/10.0 to avoid algorithm over-focusing on a particular region.
 - `minsamplenum = 25`: (Optional) number of initial, equally spaced seed samples required for algorithm to initialise.
 """
-
-    
-# using Interpolations
-
-    
-# using Interpolations
-
-    
-# using Interpolations
-
-    
-# using Interpolations
-
-    
-# using Interpolations
-
-
-
 function var_resample(tᵢ::Vector{T}, yᵢ::Vector{T}, pcntdownsample::T, minperiod::T; minsamplenum::Integer = 25) where T<:Real
+
+    @eval import Interpolations: interpolate, Gridded, Linear
 
     @assert length(tᵢ)==length(yᵢ) "X and Y arrays must have same length."
 
@@ -216,7 +200,7 @@ function var_resample(tᵢ::Vector{T}, yᵢ::Vector{T}, pcntdownsample::T, minpe
 
     # interpolated, callable versions of y and z arrays. No need to interpolate
     # t as it is linear (fixed dt, monotonically increasing)
-    yInterp = Interpolations.interpolate((tᵢ,), yᵢ, Interpolations.Gridded(Interpolations.Linear()))
+    yInterp = Base.invokelatest(interpolate, (tᵢ,), yᵢ, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
 
     # initialise arrays for resampled data
     xInit = zeros(T, minsamplenum)
@@ -438,12 +422,14 @@ function fixed_resample(x::Vector{T}, y::Vector{T},
                         boundaries::Vector{U}, elperiods::Vector{U},
                         direction::Array{String,1}) where T<:Real where U<:Integer
 
+    @eval import Interpolations: interpolate, Gridded, Linear
+
     # assert correct function signature
     @assert length(x)==length(y) "X and Y arrays must have same length."
     @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
 
     # y as callable interpolations, used for upsampled regions
-    yInterp = Interpolations.interpolate((x,), y, Interpolations.Gridded(Interpolations.Linear()))
+    yInterp = Base.invokelatest(interpolate, (x,), y, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
 
     # initialise resampled arrays as empty
     xᵦ = zeros(Float64,0)

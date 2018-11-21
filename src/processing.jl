@@ -22,15 +22,13 @@ See help docstring for `var_resample` for more details on algorithm implementati
 """
 function var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float64; _mapback::Bool = false)
 
+    @eval import Interpolations: interpolate, Gridded, Linear
+
     # enforce minimum period of original period/10
     _minperiod = (self.t[2] - self.t[1])/10.0
 
     # get time resampled with respect to refvar
     (tᵦ, dummy)  = var_resample(self.t, getfield(self, refvar), pcntdownsample, _minperiod)
-
-    local σ::Array{Float64,1}
-    local ϵ::Array{Float64,1}
-    local t::Array{Float64,1}
 
     if _mapback
         # get mapped indices wrt original
@@ -42,14 +40,13 @@ function var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float6
         
     elseif !_mapback
         # interpolate with respect to t
-        σ_interp = Interpolations.interpolate((self.t,), self.σ, Interpolations.Gridded(Interpolations.Linear()))
-        ϵ_interp = Interpolations.interpolate((self.t,), self.ϵ, Interpolations.Gridded(Interpolations.Linear()))
-        t_interp = Interpolations.interpolate((self.t,), self.t, Interpolations.Gridded(Interpolations.Linear()))
+        σ_interp = Base.invokelatest(interpolate, (self.t,), self.σ, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
+        ϵ_interp = Base.invokelatest(interpolate, (self.t,), self.σ, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
 
         # resample all using new timepoints tᵦ
         σ = σ_interp[tᵦ]
         ϵ = ϵ_interp[tᵦ]
-        t = t_interp[tᵦ]
+        t = tᵦ
     end
 
     # change sampling type to variable
