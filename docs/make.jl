@@ -13,6 +13,7 @@ makedocs(modules=[RHEOS],
              "Preprocessing Tools" => "preprocessing.md",
              "File I/O" => "fileIO.md",
              "Models" => "models.md",
+             "More Examples" => "moreexamples.md"
              "API" => "API.md"
          ]
          )

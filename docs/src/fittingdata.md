@@ -1,31 +1,38 @@
 # Fitting Data
 
-This page contains examples which demonstrate all the model fitting capabilities of RHEOS.
+This page is a tutorial on how to fit viscoelastic models to data using RHEOS. If you want to try out the code below, it can all be run from the Julia REPL but **note that the importing data functions will only work if you are using the 'RHEOS/examples' folder as your working directory as that's where the example data files are stored**.
 
+## Tensile/Compression Data
+
+This section is for standard viscoelastic tensile or compression tests where time, stress and strain data are available.
+
+First, we need to load in RHEOS
 ```
 using RHEOS
+```
+RHEOS has a convenience function for importing data from CSV files. The default column delimiter is ',' but an alternative can be specified as a keyword argument. The row delimiter is a newline character ('\n'). For standard viscoelastic testing data RHEOS expects either stress, strain and time data, just stress and time, or just strain and time. The order of the columns is specified as the first argument in the function `importdata`. The second argument is the directory of the file, as shown below.
+```
+data = importdata(["stress","strain", "time"], "DataComplete.csv")
+```
+In this tutorial, our data file `DataComplete.csv` is in the same directory as our Julia script so we can just use its relative directory. 
 
-filedir = "DataComplete.csv"
+Let's fit a Standard Linear Solid viscoelastic model via its relaxation modulus, G, as our data is from a stress relaxation test. The first argument is our data, the second argument tells RHEOS which model to fit and the final argument tells RHEOS whether to fit the model using a relaxation modulus (:G) or creep modulus (:J).
+```
+fitted_SLS_model = modelfit(data, SLS(), :G)
+```
+Our first fitted model is not contained in the `fitted_SLS_model` variable.
 
-data = fileload(["stress","strain", "time"], filedir)
-
-# SLS fit
-sls_fit = modelfit(data, SLS(), :G)
-
-# Spring-pot fit: cₐ, a, kᵦ, kᵧ
+Next, we'll fit a fractional Standard Linear Solid model (the only difference from the above model is that the dash-pot is replaced by a spring-pot). This time we'll also add upper and lower bounds on the model parameters. This is highly recommended for fractional models in particular as values less than 0 or greater than 1 for the spring-pot parameter are unphysical and can cause errors in the Mittag-Leffler function used.
+```
 lb = [0.1, 0.01, 0.1, 0.1]
 ub = [Inf, 0.99, Inf, Inf]
-fractsls_fit = modelfit(data, FractionalSLS([2.0, 0.5, 0.5, 0.7]), :G; lo=lb, hi=ub, rel_tol=1e-5, verbose=true)
-
-# # get curves based on models fitted
-sls_predicted = modelpredict(data, sls_fit, :G)
-fractsls_predicted = modelpredict(data, fractsls_fit, :G)
-
-# plot all data
-fig, ax = subplots()
-ax[:plot](data.t, data.σ, label="Data", color="black")
-ax[:plot](sls_predicted.t, sls_predicted.σ, label="SLS")
-ax[:plot](fractsls_predicted.t, fractsls_predicted.σ, "--", label="Fractional SLS")
-ax[:legend](loc="best")
-show()
+fractsls_fit = modelfit(data, FractionalSLS(), :G; lo=lb, hi=ub)
 ```
+Note the two keyword arguments used --- `lo` and `hi` for the lower and upper parameter boundaries respectively. The special argument `Inf` for the three of the parameters' upper bounds represent a type of infinity such that the parameters can be as large as required by the optimisation algorithm.
+
+For a full list of available keyword arguments and features of the `modelfit` function, see the relevant part of the API section.
+
+## Complex Modulus and Frequency Data
+
+RHEOS can also fit models to dynamic mechanical analysis data from oscillatory tests. The `importdata` function can be used here but with the column names `Gp` for the storage modulus, `Gpp` for the loss modulus and `frequency` for the frequency column. RHEOS will detect the `frequency` string and know from this to load the data into a `RheologyDynamic` data type.
+
