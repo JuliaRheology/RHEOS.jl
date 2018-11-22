@@ -32,6 +32,7 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 - [ ] Documentation
 - [ ] Increase Test Coverage
 - [ ] Implement derived singularity approximation
+- [ ] Remove "sampling" field from RheologyData, add tests where required
 - [ ] Add default constraints for fractional models for convenience in broad parameter searches
 - [ ] Add FFT fitting to handle singularities and sidestep Mittag-Leffler bottleneck
 - [ ] Test integration-by-parts singularity handling

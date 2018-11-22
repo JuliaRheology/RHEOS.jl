@@ -5,7 +5,7 @@
 #############################
 
 """
-    var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float64; mapback::Bool = false)
+    variableresample(self::RheologyData, refvar::Symbol, pcntdownsample::Real; mapback::Bool = false)
 
 Convert a fixed sample rate array to a variable sample rate, with sampling points
 added according to a relative change in chosen variable `refvar`, 1st derivative
@@ -18,9 +18,20 @@ length vs original length after processing has finished. If data is noisy, may
 benefit from sending smoothed signal to this algorithm and either using mapback
 function or interpolating onto unsmoothed data.
 
-See help docstring for `var_resample` for more details on algorithm implementation.
+Algorithm works as follows. 25 initial samples are generated evenly spread. After this, 
+the array is repeatedly sweeped, anywhere Δy, Δdy/dx, Δd2y/dx2 is greater than a threshold, α,
+a new sample is created at the midpoint of the two tested points. This is allowed to
+happen a maximum of 400 times, after which α is decreased and the process starts again.
+This macro process continues until the desired pcntdownsample ratio has been reached.
+
+# Arguments
+
+- `self`: RheologyData instance
+- `refvar`: The data whose derivatives will determine sample densities
+- `pcntdownsample`: Approximate ratio of new samples to old samples
+- `_mapback = false`: (Optional) Determines whether resampled points should 'snap' to closest original points
 """
-function var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float64; _mapback::Bool = false)
+function variableresample(self::RheologyData, refvar::Symbol, pcntdownsample::Real; _mapback::Bool = false)
 
     @eval import Interpolations: interpolate, Gridded, Linear
 
@@ -60,17 +71,20 @@ function var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float6
 end
 
 """
-    downsample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1})
+    downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer) 
 
-High-level RheologyData interface to downsample in base.jl. Boundaries are floating point times which are then converted to the closest elements.
+Boundaries are floating point times which are then converted to the closest elements. Works by just
+reducing on indices. For example, time_boundaries could be [0.0, 10.0, 100.0] and elperiods could be
+[2, 4]. So new data would take every 2nd element from 0.0 seconds to 10.0 seconds, then every 4th element
+from 10.0 seconds to 100.0 seconds.
 """
-function downsample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1})
+function downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer) 
 
     # convert boundaries from times to element indicies
     boundaries = closestindices(self.t, time_boundaries)
 
     # get downsampled indices
-    indices = downsample(boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
+    indices = downsample(boundaries, elperiods)
 
     # downsample data
     σ = self.σ[indices]
@@ -93,11 +107,15 @@ function downsample(self::RheologyData, time_boundaries::Array{Float64,1}, elper
 end
 
 """
-    fixed_resample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
+    fixedresample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{K} where K<:Integer, direction::Vector{String})
 
-High-level RheologyData interface to fixed_resample in base.jl
+Resample data with new sample rate(s).
+
+Whereas downsample can only reduce the sample rate by not taking every array element,
+fixedresample can also upsample. Whether to up or down sample for a given section is known
+from the `direction` argument.
 """
-function fixed_resample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
+function fixedresample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{K} where K<:Integer, direction::Vector{String})
 
     # convert boundaries from times to element indicies
     boundaries = closestindices(self.t, time_boundaries)
@@ -122,14 +140,14 @@ function fixed_resample(self::RheologyData, time_boundaries::Array{Float64,1}, e
 end
 
 """
-    smooth(self::RheologyData, τ::Float64)
+    smooth(self::RheologyData, τ::Real; pad::String="replicate")
 
 Smooth data using a Gaussian Kernel to time scale τ (approximately half power).
 
 Smooths both σ and ϵ. Essentially a low pass filter with frequencies of 1/τ being cut to approximately
 half power. For other pad types available see ImageFiltering documentation.
 """
-function smooth(self::RheologyData, τ::Float64; pad::String="replicate")
+function smooth(self::RheologyData, τ::Real; pad::String="replicate")
 
     @eval import ImageFiltering: imfilter, Kernel
 
@@ -173,6 +191,11 @@ function mapbackdata(self_new::RheologyData, self_original::RheologyData)
 
 end
 
+"""
+    function zerotime(self::RheologyData)
+
+Convenience function to normalize time such that the starting time is 0.0
+"""
 function zerotime(self::RheologyData)
 
     return RheologyData(self.σ, self.ϵ, self.t .- minimum(self.t), self.sampling, vcat(self.log, ["Normalized time to start at 0.0"]))
@@ -184,7 +207,7 @@ end
 ##########################
 
 """
-    modelfit(data::RheologyData, modulus::Function[, p0::Array{Float64,1}, lo::Array{Float64,1}, hi::Array{Float64,1}; verbose::Bool = false])
+    modelfit(data::RheologyData, model::RheologyModel, modtouse::Symbol; p0::Vector{T} = [-1.0], lo::Vector{T} = [-1.0], hi::Vector{T} = [-1.0], verbose::Bool = false, rel_tol = 1e-4, diff_method="BD") where T<:Real
 
 Fit RheologyData struct to model and return a fitted model as a RheologyModel object.
 
@@ -200,12 +223,12 @@ Fit RheologyData struct to model and return a fitted model as a RheologyModel ob
 function modelfit(data::RheologyData,
                   model::RheologyModel,
                   modtouse::Symbol;
-                  p0::Array{Float64,1} = [-1.0],
-                  lo::Array{Float64,1} = [-1.0],
-                  hi::Array{Float64,1} = [-1.0],
+                  p0::Vector{T} = [-1.0],
+                  lo::Vector{T} = [-1.0],
+                  hi::Vector{T} = [-1.0],
                   verbose::Bool = false,
                   rel_tol = 1e-4,
-                  diff_method="BD")::RheologyModel
+                  diff_method="BD") where T<:Real
 
     # get modulus function
     modulus = getfield(model, modtouse)

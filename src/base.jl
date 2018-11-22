@@ -352,29 +352,6 @@ function mapback(x₁::Vector{T}, x₀::Vector{T}; return_indices=true) where T<
     end
 end
 
-"""
-    downsample(boundaries, elperiods)
-
-Reduce indices.
-
-Can be applied to the whole array using boundaries
-[1,length(array_to_downsample)] or using different spacers for different parts
-of the data.
-
-# Example
-
-```julia-repl
-julia> x = collect(1.0:1.0:15.0);
-
-julia> newIndices = downsample([1,5,11,length(x)], [2,3,1]);
-
-julia> println(x)
-[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0]
-
-julia> println(x[newIndices])
-[1.0, 3.0, 5.0, 8.0, 11.0, 12.0, 13.0, 14.0, 15.0]
-```
-"""
 function downsample(boundaries::Vector{T}, elperiods::Vector{T}) where T<:Integer
 
     # assert correct function signature
