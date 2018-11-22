@@ -4,7 +4,7 @@ using PyPlot
 
 filedir = "DataIncomplete.csv"
 
-data = fileload(["strain", "time"], filedir)
+data = importdata(["strain", "time"], filedir)
 
 model = SLS([500.0, 100.0, 50.0])
 

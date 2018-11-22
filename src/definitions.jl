@@ -1,19 +1,22 @@
 #!/usr/bin/env julia
 
 """
-    RheologyData(σ::Vector{T,1}, ϵ::Vector{T,1}, t::Vector{T,1}, sampling::String, log::Vector{String}) where T<:Real
+    RheologyData(σ::Vector{T}, ϵ::Vector{T}, t::Vector{T}, sampling::String, log::Vector{String}) where T<:Real
 
-RheologyData struct used for high level interaction with RHEOS
-preprocessing and fitting functions. Initialise an instance directly or
-indirectly. If data is in three column, comma separated CSV file then
-fileload function can be used, which calls the RheologyData outer constructor method.
-If not, load data in according to format and call RheologyData outer constructor method.
+RheologyData struct contains stress, strain and time data.
 
-sampling type. "constant" by default. Use of `var_resample`, `downsample`
-with more than one section or `fixed_resample` with more than one section
-overrides to "variable".
+If preferred, an instance can be generated manually by just providing the three data
+vectors in the right order, sampling type will be checked automatically. If loading
+partial data (either stress or strain), fill the other vector as a vector of zeros
+of the same length as the others.
 
-operations applied, stores history of which functions (including arguments)
+# Fields
+
+- σ: stress
+- ϵ: strain
+- t: time
+- sampling: sampling type, either "constant" or "variable"
+- log: a log of struct's events, e.g. preprocessing
 """
 struct RheologyData{T<:Real}
 
@@ -27,13 +30,6 @@ struct RheologyData{T<:Real}
 
 end
 
-"""
-    RheologyData(colnames::Vector{String}, data1::Vector{T,1}, data2::Vector{T,1}[, data3::Vector{T,1}; filedir::String="none", log::Vector{String}=Array{String}(0)]) where T<:Real
-
-Constructor function for RheologyData struct, if stress/strain arrays have NaN values at the beginning (some datasets
-have 1 or 2 samples of NaN at beginning) then deletes these and starts at the first non-NaN sample, also readjusts time start to
-t = 0 to account for NaNs and and negative time values at beginning of data recording.
-"""
 function RheologyData(colnames::Vector{String}, data1::Vector{T}, data2::Vector{T}, data3::Vector{T}=zeros(length(data2)); filedir::String="none", log::Vector{String}=Array{String}(undef, 0)) where T<:Real
 
     # checks
@@ -245,9 +241,22 @@ function *(operand::Real, self::RheologyData)
 end
 
 """
-    RheologyModel(G, J, Gp, Gpp, log)
+    RheologyModel(G::T, J::T, Gp::T, Gpp::T, parameters::Vector{S<:Real} log::Vector{String}) where T<:Function
 
-Struct which contains model's moduli, parameters, and log of activity.
+RheologyModel contains a model's various moduli, parameters, and log of activity.
+
+For incomplete models, an alternative constructor is available where all arguments
+are keyword arguments and moduli not provided default to a null modulus which
+always returns [-1.0].
+
+# Fields
+
+- G: Relaxation modulus
+- J: Creep modulus
+- Gp: Storage modulus
+- Gpp: Loss modulus
+- parameters: Used for predicting and as default starting parameters in fitting
+- log: a log of struct's events, e.g. what file it was fitted to
 """
 struct RheologyModel
 
@@ -277,10 +286,19 @@ RheologyModel(;G::Function = null_modulus,
                log::Vector{String} = ["model created by user with parameters $params"]) = RheologyModel(G, J, Gp, Gpp, params, log)
 
 """
-    RheologyDynamic(Gp::Vector{T<:Real}, Gpp::Vector{T<:Real}, ω::Vector{T<:Real}, log::Vector{String})
+    RheologyDynamic(Gp::Vector{T}, Gpp::Vector{T}, ω::Vector{T}, log::Vector{String}) where T<:Real
 
-RheologyDynamic struct used for high level interaction with RHEOS
-fitting functions.
+RheologyDynamic contains storage modulus, loss modulus and frequency data.
+
+If preferred, an instance can be generated manually by just providing the three data
+vectors in the right order.
+
+# Fields
+
+- Gp: storage modulus
+- Gpp: loss modulus
+- ω: frequency
+- log: a log of struct's events, e.g. preprocessing
 """
 struct RheologyDynamic{T<:Real}
 
