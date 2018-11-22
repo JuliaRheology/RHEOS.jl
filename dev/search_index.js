@@ -85,7 +85,23 @@ var documenterSearchIndex = {"docs": [
     "page": "Fitting Data",
     "title": "Fitting Data",
     "category": "section",
-    "text": "This page contains examples which demonstrate all the model fitting capabilities of RHEOS.using RHEOS\n\nfiledir = \"DataComplete.csv\"\n\ndata = fileload([\"stress\",\"strain\", \"time\"], filedir)\n\n# SLS fit\nsls_fit = modelfit(data, SLS(), :G)\n\n# Spring-pot fit: cₐ, a, kᵦ, kᵧ\nlb = [0.1, 0.01, 0.1, 0.1]\nub = [Inf, 0.99, Inf, Inf]\nfractsls_fit = modelfit(data, FractionalSLS([2.0, 0.5, 0.5, 0.7]), :G; lo=lb, hi=ub, rel_tol=1e-5, verbose=true)\n\n# # get curves based on models fitted\nsls_predicted = modelpredict(data, sls_fit, :G)\nfractsls_predicted = modelpredict(data, fractsls_fit, :G)\n\n# plot all data\nfig, ax = subplots()\nax[:plot](data.t, data.σ, label=\"Data\", color=\"black\")\nax[:plot](sls_predicted.t, sls_predicted.σ, label=\"SLS\")\nax[:plot](fractsls_predicted.t, fractsls_predicted.σ, \"--\", label=\"Fractional SLS\")\nax[:legend](loc=\"best\")\nshow()"
+    "text": "This page is a tutorial on how to fit viscoelastic models to data using RHEOS. If you want to try out the code below, it can all be run from the Julia REPL but note that the importing data functions will only work if you are using the \'RHEOS/examples\' folder as your working directory as that\'s where the example data files are stored."
+},
+
+{
+    "location": "fittingdata/#Stress/Strain/Time-Data-1",
+    "page": "Fitting Data",
+    "title": "Stress/Strain/Time Data",
+    "category": "section",
+    "text": "This section is for standard viscoelastic tensile or compression tests where time, stress and strain data are available.First, we need to load in RHEOSusing RHEOSRHEOS has a convenience function for importing data from CSV files. The default column delimiter is \',\' but an alternative can be specified as a keyword argument. The row delimiter is a newline character (\'\\n\'). For standard viscoelastic testing data RHEOS expects either stress, strain and time data, just stress and time, or just strain and time. The order of the columns is specified as the first argument in the function importdata. The second argument is the directory of the file, as shown below.data = importdata([\"stress\",\"strain\", \"time\"], \"DataComplete.csv\")Now we have all our data stored in the variable data which is of type RheologyData. (In this tutorial, our data file DataComplete.csv is in the same directory as our Julia script so we can just use its relative directory.)Let\'s fit a Standard Linear Solid viscoelastic model via its relaxation modulus, G, as our data is from a stress relaxation test. The first argument is our data, the second argument tells RHEOS which model to fit and the final argument tells RHEOS whether to fit the model using a relaxation modulus (:G) or creep modulus (:J).fitted_SLS_model = modelfit(data, SLS(), :G)Our first fitted model is not contained in the fitted_SLS_model variable which is an instance of the RheologyModel data type.Next, we\'ll fit a fractional Standard Linear Solid model (the only difference from the above model is that the dash-pot is replaced by a spring-pot). This time we\'ll also add upper and lower bounds on the model parameters. This is highly recommended for fractional models in particular as values less than 0 or greater than 1 for the spring-pot parameter are unphysical and can cause errors in the Mittag-Leffler function used.lb = [0.1, 0.01, 0.1, 0.1]\nub = [Inf, 0.99, Inf, Inf]\nfitted_fractSLS_model = modelfit(data, FractionalSLS(), :G; lo=lb, hi=ub)Note the two keyword arguments used – lo and hi for the lower and upper parameter boundaries respectively. The special argument Inf for the three of the parameters\' upper bounds represent a type of infinity such that the parameters can be as large as required by the optimisation algorithm.For a full list of keyword arguments and features of the modelfit function, see the relevant part of the API section. Models included in RHEOS are also listed in the API section, and discussed in more detail in the Models section."
+},
+
+{
+    "location": "fittingdata/#G*/ω-Data-1",
+    "page": "Fitting Data",
+    "title": "G*/ω Data",
+    "category": "section",
+    "text": "RHEOS can also fit models to dynamic mechanical analysis data from oscillatory tests. The importdata function can again be used here but with the column names Gp for the storage modulus, Gpp for the loss modulus and frequency for the frequency column. RHEOS will detect the frequency string and know to load the data into a RheologyDynamic data type. Assuming RHEOS has already been imported, let\'s load in our data file:data = importdata([\"Gp\",\"Gpp\", \"Frequency\"], \"FrequencyData.csv\")As this is dynamic mechanical testing data it is an instance of the RheologyDynamic data type. As before, we\'ll try and fit the data to a Standard Linear Solid model – but this time we need to use the dynamicmodelfit function.fitted_SLS_model = dynamicmodelfit(data, SLS())Note that we do not have to specify whether we are fitting via the creep or relaxation modulus as RHEOS always fits dynamic data to the complex (dynamic) modulus. Let\'s also try to fit the data to a fractional Standard Linear Solid model:lb = [0.1, 0.01, 0.1, 0.1]\nub = [Inf, 0.99, Inf, Inf]\nfitted_fractSLS_model = dynamicmodelfit(data, FractionalSLS(); lo=lb, hi=ub)For more information on the dynamicmodelfit function, see the API section."
 },
 
 {
@@ -169,6 +185,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "moreexamples/#",
+    "page": "More Examples",
+    "title": "More Examples",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "moreexamples/#More-Examples-1",
+    "page": "More Examples",
+    "title": "More Examples",
+    "category": "section",
+    "text": ""
+},
+
+{
     "location": "API/#",
     "page": "API",
     "title": "API",
@@ -185,67 +217,43 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "API/#Data-Structure-1",
+    "location": "API/#RHEOS.RheologyData",
     "page": "API",
-    "title": "Data Structure",
+    "title": "RHEOS.RheologyData",
+    "category": "type",
+    "text": "RheologyData(σ::Vector{T}, ϵ::Vector{T}, t::Vector{T}, sampling::String, log::Vector{String}) where T<:Real\n\nRheologyData struct contains stress, strain and time data.\n\nIf preferred, an instance can be generated manually by just providing the three data vectors in the right order, sampling type will be checked automatically. If loading partial data (either stress or strain), fill the other vector as a vector of zeros of the same length as the others.\n\nFields\n\nσ: stress\nϵ: strain\nt: time\nsampling: sampling type, either \"constant\" or \"variable\"\nlog: a log of struct\'s events, e.g. preprocessing\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.RheologyDynamic",
+    "page": "API",
+    "title": "RHEOS.RheologyDynamic",
+    "category": "type",
+    "text": "RheologyDynamic(Gp::Vector{T}, Gpp::Vector{T}, ω::Vector{T}, log::Vector{String}) where T<:Real\n\nRheologyDynamic contains storage modulus, loss modulus and frequency data.\n\nIf preferred, an instance can be generated manually by just providing the three data vectors in the right order.\n\nFields\n\nGp: storage modulus\nGpp: loss modulus\nω: frequency\nlog: a log of struct\'s events, e.g. preprocessing\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.RheologyModel",
+    "page": "API",
+    "title": "RHEOS.RheologyModel",
+    "category": "type",
+    "text": "RheologyModel(G::T, J::T, Gp::T, Gpp::T, parameters::Vector{S<:Real} log::Vector{String}) where T<:Function\n\nRheologyModel contains a model\'s various moduli, parameters, and log of activity.\n\nFor incomplete models, an alternative constructor is available where all arguments are keyword arguments and moduli not provided default to a null modulus which always returns [-1.0].\n\nFields\n\nG: Relaxation modulus\nJ: Creep modulus\nGp: Storage modulus\nGpp: Loss modulus\nparameters: Used for predicting and as default starting parameters in fitting\nlog: a log of struct\'s events, e.g. what file it was fitted to\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS-Types-1",
+    "page": "API",
+    "title": "RHEOS Types",
     "category": "section",
-    "text": "RheologyData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, sampling::String, log::Array{String,1})RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}[, data3::Array{Float64,1}; filedir::String=\"none\", log::Array{String,1}=Array{String}(0)])"
+    "text": "RheologyData\nRheologyDynamic\nRheologyModel"
 },
 
 {
-    "location": "API/#Model-Structure-1",
+    "location": "API/#Preprocessing-Functions-1",
     "page": "API",
-    "title": "Model Structure",
+    "title": "Preprocessing Functions",
     "category": "section",
-    "text": "RheologyModel(name::Function, parameters::Array{Float64,1}[, log::Array{String,1}])"
-},
-
-{
-    "location": "API/#RHEOS.var_resample-Tuple{RheologyData,Symbol,Float64}",
-    "page": "API",
-    "title": "RHEOS.var_resample",
-    "category": "method",
-    "text": "var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float64; mapback::Bool = false)\n\nConvert a fixed sample rate array to a variable sample rate, with sampling points added according to a relative change in chosen variable refvar, 1st derivative of refvar and 2nd derivative of refvar (WRT time). Usually chosen as the measured variable, so :σ for a stress relaxation test and :ϵ for a creep test.\n\nCurrently only variable downsampling supported. pcntdown sample is approximate, works well in some cases and very poorly in others. If required, compare resampled length vs original length after processing has finished. If data is noisy, may benefit from sending smoothed signal to this algorithm and either using mapback function or interpolating onto unsmoothed data.\n\nSee help docstring for var_resample for more details on algorithm implementation.\n\n\n\n\n\n"
-},
-
-{
-    "location": "API/#RHEOS.downsample-Tuple{RheologyData,Array{Float64,1},Array{Int64,1}}",
-    "page": "API",
-    "title": "RHEOS.downsample",
-    "category": "method",
-    "text": "downsample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1})\n\nHigh-level RheologyData interface to downsample in base.jl. Boundaries are floating point times which are then converted to the closest elements.\n\n\n\n\n\n"
-},
-
-{
-    "location": "API/#RHEOS.fixed_resample-Tuple{RheologyData,Array{Float64,1},Array{Int64,1},Array{String,1}}",
-    "page": "API",
-    "title": "RHEOS.fixed_resample",
-    "category": "method",
-    "text": "fixed_resample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})\n\nHigh-level RheologyData interface to fixed_resample in base.jl\n\n\n\n\n\n"
-},
-
-{
-    "location": "API/#RHEOS.smooth-Tuple{RheologyData,Float64}",
-    "page": "API",
-    "title": "RHEOS.smooth",
-    "category": "method",
-    "text": "smooth(self::RheologyData, τ::Float64)\n\nSmooth data using a Gaussian Kernel to time scale τ (approximately half power).\n\nSmooths both σ and ϵ. Essentially a low pass filter with frequencies of 1/τ being cut to approximately half power. For other pad types available see ImageFiltering documentation.\n\n\n\n\n\n"
-},
-
-{
-    "location": "API/#RHEOS.loaddata-Tuple{String}",
-    "page": "API",
-    "title": "RHEOS.loaddata",
-    "category": "method",
-    "text": "loaddata(filedir::String)\n\nConvenience function loads RheologyData.\n\n\n\n\n\n"
-},
-
-{
-    "location": "API/#Generated-Data-Structure-1",
-    "page": "API",
-    "title": "Generated Data Structure",
-    "category": "section",
-    "text": "RheologyArtificial(data::Array{Float64,1}, t::Array{Float64,1}, stepsize::Float64, log::Array{String,1})modelfit(data::RheologyData, modulus::Function[, p0::Array{Float64,1}, lo::Array{Float64,1}, hi::Array{Float64,1}; verbose::Bool = false])modelpredict(data::RheologyData, model::RheologyModel)modelfit(data::RheologyData, modulus::Function[, p0::Array{Float64,1}, lo::Array{Float64,1}, hi::Array{Float64,1}; verbose::Bool = false])modelpredict(data::RheologyData, model::RheologyModel)var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float64; mapback::Bool = false)downsample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1})\nfixed_resample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})smooth(self::RheologyData, τ::Float64)function mapbackdata(self_new::RheologyData, self_original::RheologyData)savedata(self::RheologyData; filedir::String = \"\", ext = \"_RheologyData.jld\")loaddata(filedir::String)savemodel(self::RheologyModel; filedir::String = \"\", ext = \"\")loadmodel(filedir::String)exportdata(self::RheologyData; filedir::String = \"\", ext = \"_mod.csv\")"
+    "text": ""
 },
 
 ]}
