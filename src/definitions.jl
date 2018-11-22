@@ -1,39 +1,40 @@
 #!/usr/bin/env julia
 
 """
-    RheologyData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, sampling::String, log::Array{String,1})
+    RheologyData(σ::Vector{T,1}, ϵ::Vector{T,1}, t::Vector{T,1}, sampling::String, log::Vector{String}) where T<:Real
 
 RheologyData struct used for high level interaction with RHEOS
 preprocessing and fitting functions. Initialise an instance directly or
 indirectly. If data is in three column, comma separated CSV file then
 fileload function can be used, which calls the RheologyData outer constructor method.
 If not, load data in according to format and call RheologyData outer constructor method.
+
+sampling type. "constant" by default. Use of `var_resample`, `downsample`
+with more than one section or `fixed_resample` with more than one section
+overrides to "variable".
+
+operations applied, stores history of which functions (including arguments)
 """
-struct RheologyData
+struct RheologyData{T<:Real}
 
-    # original data
-    σ::Array{Float64,1}
-    ϵ::Array{Float64,1}
-    t::Array{Float64,1}
+    σ::Vector{T}
+    ϵ::Vector{T}
+    t::Vector{T}
 
-    # sampling type. "constant" by default. Use of `var_resample`, `downsample`
-    # with more than one section or `fixed_resample` with more than one section
-    # overrides to "variable".
     sampling::String
 
-    # operations applied, stores history of which functions (including arguments)
-    log::Array{String,1}
+    log::Vector{String}
 
 end
 
 """
-    RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}[, data3::Array{Float64,1}; filedir::String="none", log::Array{String,1}=Array{String}(0)])::RheologyData
+    RheologyData(colnames::Vector{String}, data1::Vector{T,1}, data2::Vector{T,1}[, data3::Vector{T,1}; filedir::String="none", log::Vector{String}=Array{String}(0)]) where T<:Real
 
 Constructor function for RheologyData struct, if stress/strain arrays have NaN values at the beginning (some datasets
 have 1 or 2 samples of NaN at beginning) then deletes these and starts at the first non-NaN sample, also readjusts time start to
 t = 0 to account for NaNs and and negative time values at beginning of data recording.
 """
-function RheologyData(colnames::Array{String,1}, data1::Array{T,1}, data2::Array{T,1}, data3::Array{T,1}=zeros(length(data2)); filedir::String="none", log::Array{String,1}=Array{String}(undef, 0)) where T<:Real
+function RheologyData(colnames::Vector{String}, data1::Vector{T}, data2::Vector{T}, data3::Vector{T}=zeros(length(data2)); filedir::String="none", log::Vector{String}=Array{String}(undef, 0)) where T<:Real
 
     # checks
     @assert length(data1)==length(data2) "Data arrays must be same length"
@@ -41,9 +42,9 @@ function RheologyData(colnames::Array{String,1}, data1::Array{T,1}, data2::Array
 
     # get data in correct variables
     data = [data1, data2, data3]
-    σ = Array{T}(undef, 0)
-    ϵ = Array{T}(undef, 0)
-    t = Array{T}(undef, 0)
+    σ = Vector{T}(undef, 0)
+    ϵ = Vector{T}(undef, 0)
+    t = Vector{T}(undef, 0)
 
     for (i, v) in enumerate(colnames)
         if v == "stress"
@@ -92,7 +93,7 @@ function RheologyData(colnames::Array{String,1}, data1::Array{T,1}, data2::Array
 
 end
 
-function RheologyData(σ::Array{T,1}, ϵ::Array{T,1}, t::Array{T,1}; log::Array{String,1}=["Manually Created."]) where T<:Real
+function RheologyData(σ::Vector{T}, ϵ::Vector{T}, t::Vector{T}; log::Vector{String}=["Manually Created."]) where T<:Real
 
     sampling = constantcheck(t) ? "constant" : "variable"
 
@@ -100,7 +101,7 @@ function RheologyData(σ::Array{T,1}, ϵ::Array{T,1}, t::Array{T,1}; log::Array{
 
 end
 
-function RheologyData(data::Array{T,1}, t::Array{T,1}, log::Array{String,1}) where T<:Real
+function RheologyData(data::Vector{T}, t::Vector{T}, log::Vector{String}) where T<:Real
     # used when generating data so always constant
     RheologyData(data, data, t, "constant", log)
 
@@ -258,13 +259,13 @@ struct RheologyModel
 
     Gpp::Function
 
-    parameters::Array{T,1} where T<:Real
+    parameters::Vector{T} where T<:Real
 
-    log::Array{String,1}
+    log::Vector{String}
 
 end
 
-function null_modulus(t::Array{T,1}, params::Array{T, 1}) where T<:Real
+function null_modulus(t::Vector{T}, params::Array{T, 1}) where T<:Real
     return [-1.0]
 end
 
@@ -272,28 +273,28 @@ RheologyModel(;G::Function = null_modulus,
                J::Function = null_modulus,
                Gp::Function = null_modulus,
                Gpp::Function = null_modulus,
-               params::Array{T,1} where T<:Real = [-1.0],
-               log::Array{String,1} = ["model created by user with parameters $params"]) = RheologyModel(G, J, Gp, Gpp, params, log)
+               params::Vector{T} where T<:Real = [-1.0],
+               log::Vector{String} = ["model created by user with parameters $params"]) = RheologyModel(G, J, Gp, Gpp, params, log)
 
 """
-    RheologyDynamic(Gp::Vector{T<:Real}, Gpp::Vector{T<:Real}, ω::Vector{T<:Real}, log::Array{String,1})
+    RheologyDynamic(Gp::Vector{T<:Real}, Gpp::Vector{T<:Real}, ω::Vector{T<:Real}, log::Vector{String})
 
 RheologyDynamic struct used for high level interaction with RHEOS
 fitting functions.
 """
-struct RheologyDynamic
+struct RheologyDynamic{T<:Real}
 
     # original data
-    Gp::Vector{T} where T<:Real
-    Gpp::Vector{T} where T<:Real
-    ω::Vector{T} where T<:Real
+    Gp::Vector{T}
+    Gpp::Vector{T}
+    ω::Vector{T}
 
     # operations applied, stores history of which functions (including arguments)
-    log::Array{String,1}
+    log::Vector{String}
 
 end
 
-function RheologyDynamic(colnames::Array{String,1}, data1::Array{T,1}, data2::Array{T,1}, data3::Array{T,1}; filedir::String="none", log::Array{String,1}=Array{String}(undef, 0)) where T<:Real
+function RheologyDynamic(colnames::Vector{String}, data1::Vector{T}, data2::Vector{T}, data3::Vector{T}; filedir::String="none", log::Vector{String}=Array{String}(undef, 0)) where T<:Real
 
     # checks
     @assert length(data1)==length(data2) "Data arrays must be same length"
@@ -330,7 +331,7 @@ function RheologyDynamic(colnames::Array{String,1}, data1::Array{T,1}, data2::Ar
 
 end
 
-function RheologyDynamic(Gp::Array{T,1}, Gpp::Array{T,1}, ω::Array{T,1}; log::Array{String,1}=["Manually Created."]) where T<:Real
+function RheologyDynamic(Gp::Vector{T}, Gpp::Vector{T}, ω::Vector{T}; log::Vector{String}=["Manually Created."]) where T<:Real
 
     RheologyDynamic(Gp, Gpp, ω, log)
 

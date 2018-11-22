@@ -26,13 +26,26 @@ Next, we'll fit a fractional Standard Linear Solid model (the only difference fr
 ```
 lb = [0.1, 0.01, 0.1, 0.1]
 ub = [Inf, 0.99, Inf, Inf]
-fractsls_fit = modelfit(data, FractionalSLS(), :G; lo=lb, hi=ub)
+fitted_fractSLS_model = modelfit(data, FractionalSLS(), :G; lo=lb, hi=ub)
 ```
-Note the two keyword arguments used --- `lo` and `hi` for the lower and upper parameter boundaries respectively. The special argument `Inf` for the three of the parameters' upper bounds represent a type of infinity such that the parameters can be as large as required by the optimisation algorithm.
+Note the two keyword arguments used -- `lo` and `hi` for the lower and upper parameter boundaries respectively. The special argument `Inf` for the three of the parameters' upper bounds represent a type of infinity such that the parameters can be as large as required by the optimisation algorithm.
 
-For a full list of available keyword arguments and features of the `modelfit` function, see the relevant part of the API section.
+For a full list of keyword arguments and features of the `modelfit` function, see the relevant part of the API section. Models included in RHEOS are also listed in the API section, and discussed in more detail in the Models section.
 
 ## Complex Modulus and Frequency Data
 
-RHEOS can also fit models to dynamic mechanical analysis data from oscillatory tests. The `importdata` function can be used here but with the column names `Gp` for the storage modulus, `Gpp` for the loss modulus and `frequency` for the frequency column. RHEOS will detect the `frequency` string and know from this to load the data into a `RheologyDynamic` data type.
-
+RHEOS can also fit models to dynamic mechanical analysis data from oscillatory tests. The `importdata` function can again be used here but with the column names `Gp` for the storage modulus, `Gpp` for the loss modulus and `frequency` for the frequency column. RHEOS will detect the `frequency` string and know to load the data into a `RheologyDynamic` data type. Assuming RHEOS has already been imported, let's load in our data file:
+```
+data = importdata(["Gp","Gpp", "Frequency"], "FrequencyData.csv")
+```
+As before, we'll try and fit the data to a Standard Linear Solid model -- but this time we need to use the `dynamicmodelfit` function.
+```
+fitted_SLS_model = dynamicmodelfit(data, SLS())
+```
+Note that we do not have to specify whether we are fitting via the creep or relaxation modulus as RHEOS always fits dynamic data to the complex (dynamic) modulus. Let's also try to fit the data to a fractional Standard Linear Solid model:
+```
+lb = [0.1, 0.01, 0.1, 0.1]
+ub = [Inf, 0.99, Inf, Inf]
+fitted_fractSLS_model = dynamicmodelfit(data, FractionalSLS(); lo=lb, hi=ub)
+```
+For more information on the `dynamicmodelfit` function, see the API section.
