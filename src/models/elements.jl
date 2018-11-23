@@ -29,8 +29,13 @@ function Gpp_springpot(ω::T, params::Vector{T}) where T<:Real
 end
 Gpp_springpot(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_springpot.(ω, (params,))
 
-SpringPot() = RheologyModel(G_springpot, J_springpot, Gp_springpot, Gpp_springpot, [2.0, 0.5], ["model created with default parameters"])
+"""
+    SpringPot([params::Vector{T}]) where T<:Real
+
+Single springpot element.
+"""
 SpringPot(params::Vector{T}) where T<:Real = RheologyModel(G_springpot, J_springpot, Gp_springpot, Gpp_springpot, params, ["model created by user with parameters $params"])
+SpringPot() = RheologyModel(G_springpot, J_springpot, Gp_springpot, Gpp_springpot, [2.0, 0.5], ["model created with default parameters"])
 
 # Spring
 function G_spring(t::T, params::Vector{T}) where T<:Real
@@ -61,8 +66,13 @@ function Gpp_spring(ω::T, params::Vector{T}) where T<:Real
 end
 Gpp_spring(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_spring.(ω, (params,))
 
-Spring() = RheologyModel(G_spring, J_spring, Gp_spring, Gpp_spring, [1.0], ["model created with default parameters"])
+"""
+    Spring([params::Vector{T}]) where T<:Real
+
+Single spring element.
+"""
 Spring(params::Vector{T}) where T<:Real = RheologyModel(G_spring, J_spring, Gp_spring, Gpp_spring, params, ["model created by user with parameters $params"])
+Spring() = RheologyModel(G_spring, J_spring, Gp_spring, Gpp_spring, [1.0], ["model created with default parameters"])
 
 # Dashpot
 function G_dashpot(t::T, params::Vector{T}) where T<:Real
@@ -91,5 +101,10 @@ function Gpp_dashpot(ω::T, params::Vector{T}) where T<:Real
 end
 Gpp_dashpot(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_dashpot.(ω, (params,))
 
-DashPot() = RheologyModel(null_modulus, J_dashpot, Gp_dashpot, Gpp_dashpot, [1.0], ["model created with default parameters"])
+"""
+    DashPot([params::Vector{T}]) where T<:Real
+
+Single dashpot element.
+"""
 DashPot(params::Vector{T}) where T<:Real = RheologyModel(null_modulus, J_dashpot, Gp_dashpot, Gpp_dashpot, params, ["model created by user with parameters $params"])
+DashPot() = RheologyModel(null_modulus, J_dashpot, Gp_dashpot, Gpp_dashpot, [1.0], ["model created with default parameters"])

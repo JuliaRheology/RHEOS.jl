@@ -1,23 +1,19 @@
 #!/usr/bin/env julia
 
 """
-    importdata(colnames::Array{String,1}, filedir::String)
+    importdata(colnames::Array{String,1}, filedir::String; delimiter=',')
 
-Load data from a CSV file (three columns, comma seperated). Columns must
+Load data from a CSV file (two/three columns, comma seperated by default but
+delimiter can be specified in the `delimiter` keyword argument). Columns must
 be identified by providing an array of strings which tell the function
-which data (stress, strain or time) is contained in each column. This is
-used to construct a RheologyData struct, which provides the basis for
-subsequent high level operations within RHEOS.
+which data is contained in each column. 
 
-# Example
-
-```jldoctest
-# directory path to the file
-fileDir = "../data/rheologyData1.csv"
-
-# load the data into RheologyData struct
-dataforprocessing = importdata(["time","stress","strain"], fileDir)
-```
+Can be used to construct either a RheologyData instance or a RheologyDynamic
+instance. Function detects whether "time" or "frequency" has been included
+and proceeds accordingly. For oscillatory data, all three columns (Gp, Gpp, Frequency)
+must be provided. For regular viscoelastic data two or three columns can be provided
+but time must always be provided. I.e. either stress/strain/time, stress/time or 
+strain/time.
 """
 function importdata(colnames::Array{String,1}, filedir::String; delimiter=',')
 
@@ -55,9 +51,13 @@ function importdata(colnames::Array{String,1}, filedir::String; delimiter=',')
 end
 
 """
-    exportdata(self::RheologyData; filedir::String = "", ext = ".csv")
+    exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".csv", delimiter=',')
 
-Export RheologyData to csv format. Exports three columns in order: stress, strain, time. Or: Gp, Gpp, frequency for oscillatory data.
+Export RheologyData or RheologyDynamic type to csv format. Exports three columns in order: 
+stress, strain, time for standard viscoelastic data. Or: Gp, Gpp, frequency for oscillatory data.
+File extension can be modified using the `ext` keyword argument. As with `importdata`, the delimiter
+can also be set by keyword argument.
+
 Useful for plotting/analysis in other software.
 """
 function exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".csv", delimiter=',')
@@ -79,14 +79,10 @@ function exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String;
 end
 
 """
-    savedata(self::RheologyData; filedir::String = "", ext = "_RheologyData.jld")
+    savedata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".jld2")
 
-Save RheologyData object using JLD format. Save file directory
-must be specified. If data was loaded from disk using fileload
-or the full RheologyData constructor then filedir argument can 
-be set to empty string "" which will try to use the original file 
-dir concatenated with the optional ext string argument  - e.g. 
-"/originalpathto/file.csv_RheologyData.jld".
+Save RheologyData or RheologyDynamic object using JLD2 format reuse in 
+a later Julia session.
 """
 function savedata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".jld2")
 
@@ -99,7 +95,7 @@ end
 """
     loaddata(filedir::String)
 
-Convenience function loads RheologyData.
+Loads RheologyData or RheologyDynamic object from a jld2 file.
 """
 function loaddata(filedir::String)
 
@@ -110,7 +106,9 @@ function loaddata(filedir::String)
 end
 
 """
-    savemodel(self::RheologyModel; filedir::String = "", ext = "")
+    savemodel(self::RheologyModel, filedir::String; ext = ".jld2")
+
+Save RheologyModel object using JLD2 format reuse in a later Julia session.
 """
 function savemodel(self::RheologyModel, filedir::String; ext = ".jld2")
 
@@ -120,6 +118,11 @@ function savemodel(self::RheologyModel, filedir::String; ext = ".jld2")
 
 end
 
+"""
+    loaddata(filedir::String)
+
+Loads RheologyModel from a JLD2 file.
+"""
 function loadmodel(filedir::String)
 
     @load filedir self

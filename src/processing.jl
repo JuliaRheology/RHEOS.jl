@@ -214,11 +214,14 @@ Fit RheologyData struct to model and return a fitted model as a RheologyModel ob
 # Arguments
 
 - `data`: RheologyData struct containing all data
-- `modulus`: E.g. G_SLS, J_springpot etc. See base_models.jl for full list
-- `p0`: Initial parameters to use in fit
+- `model`: RheologyModel containing moduli and default (initial) parameters
+- `modtouse`: :G for relaxation modulus, :J for creep modulus
+- `p0`: Initial parameters to use in fit (uses 'model' parameters if none given)
 - `lo`: Lower bounds for parameters
-- `hi`: Higher bounds for parameters
+- `hi`: Upper bounds for parameters
 - `verbose`: If true, prints parameters on each optimisation iteration
+- `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
+- `diff_method`: Set finite difference formula to use for derivative, currently "BD" or "CD"
 """
 function modelfit(data::RheologyData,
                   model::RheologyModel,
@@ -287,11 +290,15 @@ function modelfit(data::RheologyData,
 end
 
 """
-    modelpredict(data::RheologyData, model::RheologyModel)
+    modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; diff_method="BD")
 
-Given data and model and parameters, predict new dataset based on both.
+Given data and model, return new dataset based on model parameters and using the
+modulus specified by 'modtouse'; either creep modulus (:J, only returned strain is new) or 
+relaxation modulus (:G, only returned stress is new). 'diff_method' sets finite difference for 
+calculating the derivative used in the hereditary integral and can be either backwards difference
+("BD") or central difference ("CD").
 """
-function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; diff_method="BD")::RheologyData
+function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; diff_method="BD")
 
     # get modulus
     modulus = getfield(model, modtouse)
@@ -378,6 +385,25 @@ function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol
 
 end
 
+"""
+    modelstepfit(data::RheologyData, model::RheologyModel, modtouse::Symbol; p0::Vector{T} = [-1.0], lo::Vector{T} = [-1.0], hi::Vector{T} = [-1.0], verbose::Bool = false, rel_tol = 1e-4) where T<:Real
+
+Same as 'modelfit' except assumes a step loading. If this assumption is appropriate for the data
+then fitting can be sped up greatly by use of this function. If modtouse is :G, relaxation modulus,
+then the first element of the strain is assumed to be the amplitude of the step. If modtouse is :j,
+creep modulus, then the first element of the stress is assumed to be the amplitude of the step.
+
+# Arguments
+
+- `data`: RheologyData struct containing all data
+- `model`: RheologyModel containing moduli and default (initial) parameters
+- `modtouse`: :G for relaxation modulus, :J for creep modulus
+- `p0`: Initial parameters to use in fit (uses 'model' parameters if none given)
+- `lo`: Lower bounds for parameters
+- `hi`: Upper bounds for parameters
+- `verbose`: If true, prints parameters on each optimisation iteration
+- `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
+"""
 function modelstepfit(data::RheologyData,
                   model::RheologyModel,
                   modtouse::Symbol;
@@ -427,7 +453,13 @@ function modelstepfit(data::RheologyData,
 
 end
 
-function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; step_on::Real = 0.0)::RheologyData
+"""
+    modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; step_on::Real = 0.0)
+
+Same as modelpredict but assumes a step loading with step starting at 'step_on'. Singularities are bypassed
+by adding 1 to the index of the singular element. 
+"""
+function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; step_on::Real = 0.0)
 
     # get modulus
     modulus = getfield(model, modtouse)
@@ -570,6 +602,28 @@ function obj_dynamic_manual(params::Vector{T},
     cost = weights[1]*costGp + weights[2]*costGpp
 end
 
+"""
+    dynamicmodelfit(data::RheologyDynamic, model::RheologyModel; p0::Vector{T} = [-1.0], lo::Vector{T} = [-1.0], hi::Vector{T} = [-1.0], verbose::Bool = false, rel_tol = 1e-4) where T<:Real
+
+Fits model to the frequency/loss+storage moduli data.
+
+All arguments are as described below. The 'weights' argument some more information.
+As this fitting procedure is fitting two functions simultaneously (the storage
+and loss moduli), if left untransformed the fit would tend to favour the 
+modulus which is larger in magnitude and not fit the other modulus well. To avoid this,
+RHEOS offers a number of data transforms which can be used. 
+
+# Arguments
+
+- `data`: RheologyDynamic struct containing all data
+- `model`: RheologyModel containing moduli and default (initial) parameters
+- `p0`: Initial parameters to use in fit (uses 'model' parameters if none given)
+- `lo`: Lower bounds for parameters
+- `hi`: Upper bounds for parameters
+- `verbose`: If true, prints parameters on each optimisation iteration
+- `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
+- `weights`: Weighting mode for storage and loss modulus (see above)
+"""
 function dynamicmodelfit(data::RheologyDynamic,
                 model::RheologyModel;
                 p0::Vector{T} = [-1.0],
@@ -634,6 +688,13 @@ function dynamicmodelfit(data::RheologyDynamic,
 
 end
 
+"""
+    dynamicmodelpredict(data::RheologyDynamic, model::RheologyModel)
+
+Given dynamic rheology data and model, return new dataset based on model parameters.
+Returns another RheologyDynamic instance with the predicted Gp and Gpp based on the
+frequencies and model parameters.
+"""
 function dynamicmodelpredict(data::RheologyDynamic, model::RheologyModel)
 
     # get results

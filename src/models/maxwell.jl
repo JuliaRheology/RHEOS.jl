@@ -37,8 +37,13 @@ function Gpp_fractmaxwell(ω::T, params::Vector{T}) where T<:Real
 end
 Gpp_fractmaxwell(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_fractmaxwell.(ω, (params,))
 
-FractionalMaxwell() = RheologyModel(G_fractmaxwell, J_fractmaxwell, Gp_fractmaxwell, Gpp_fractmaxwell, [2.0, 0.2, 1.0, 0.5], ["model created with default parameters"])
+"""
+    FractionalMaxwell([params::Vector{T}]) where T<:Real
+
+Two springpots in series.
+"""
 FractionalMaxwell(params::Vector{T}) where T<:Real = RheologyModel(G_fractmaxwell, J_fractmaxwell, Gp_fractmaxwell, Gpp_fractmaxwell, params, ["model created by user with parameters $params"])
+FractionalMaxwell() = RheologyModel(G_fractmaxwell, J_fractmaxwell, Gp_fractmaxwell, Gpp_fractmaxwell, [2.0, 0.2, 1.0, 0.5], ["model created with default parameters"])
 
 # Fractional Maxwell Model (β=0, second spring-pot specialized to spring)
 function G_fractmaxwell_spring(t::T, params::Vector{T}) where T<:Real
@@ -82,8 +87,13 @@ function Gpp_fractmaxwell_spring(ω::T, params::Vector{T}) where T<:Real
 end
 Gpp_fractmaxwell_spring(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_fractmaxwell_spring.(ω, (params,))
 
-FractionalMaxwellSpring() = RheologyModel(G_fractmaxwell_spring, J_fractmaxwell_spring, Gp_fractmaxwell_spring, Gpp_fractmaxwell_spring, [2.0, 0.2, 1.0], ["model created with default parameters"])
+"""
+    FractionalMaxwellSpring([params::Vector{T}]) where T<:Real
+
+A springpot and spring in series.
+"""
 FractionalMaxwellSpring(params::Vector{T}) where T<:Real = RheologyModel(G_fractmaxwell_spring, J_fractmaxwell_spring, Gp_fractmaxwell_spring, Gpp_fractmaxwell_spring, params, ["model created by user with parameters $params"])
+FractionalMaxwellSpring() = RheologyModel(G_fractmaxwell_spring, J_fractmaxwell_spring, Gp_fractmaxwell_spring, Gpp_fractmaxwell_spring, [2.0, 0.2, 1.0], ["model created with default parameters"])
 
 # Fractional Maxwell Model (α=0, first spring-pot specialized to dash-pot)
 function G_fractmaxwell_dashpot(t::T, params::Vector{T}) where T<:Real
@@ -122,8 +132,13 @@ function Gpp_fractmaxwell_dashpot(ω::T, params::Vector{T}) where T<:Real
 end
 Gpp_fractmaxwell_dashpot(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_fractmaxwell_dashpot.(ω, (params,))
 
-FractionalMaxwellDashpot() = RheologyModel(G_fractmaxwell_dashpot, J_fractmaxwell_dashpot, Gp_fractmaxwell_dashpot, Gpp_fractmaxwell_dashpot, [2.0, 1.0, 0.5], ["model created with default parameters"])
+"""
+    FractionalMaxwellDashpot([params::Vector{T}]) where T<:Real
+
+A springpot and dashpot in series.
+"""
 FractionalMaxwellDashpot(params::Vector{T}) where T<:Real = RheologyModel(G_fractmaxwell_dashpot, J_fractmaxwell_dashpot, Gp_fractmaxwell_dashpot, Gpp_fractmaxwell_dashpot, params, ["model created by user with parameters $params"])
+FractionalMaxwellDashpot() = RheologyModel(G_fractmaxwell_dashpot, J_fractmaxwell_dashpot, Gp_fractmaxwell_dashpot, Gpp_fractmaxwell_dashpot, [2.0, 1.0, 0.5], ["model created with default parameters"])
 
 # Maxwell Model (From Findley, Lai, Onaran for comparison/debug)
 function G_maxwell(t::T, params::Vector{T}) where T<:Real
@@ -162,5 +177,10 @@ function Gpp_maxwell(ω::T, params::Vector{T}) where T<:Real
 end
 Gpp_maxwell(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_maxwell.(ω, (params,))
 
-Maxwell() = RheologyModel(G_maxwell, J_maxwell, Gp_maxwell, Gpp_maxwell, [2.0, 1.0], ["model created with default parameters"])
+"""
+    Maxwell([params::Vector{T}]) where T<:Real
+
+A spring and dashpot in series.
+"""
 Maxwell(params::Vector{T}) where T<:Real = RheologyModel(G_maxwell, J_maxwell, Gp_maxwell, Gpp_maxwell, params, ["model created by user with parameters $params"])
+Maxwell() = RheologyModel(G_maxwell, J_maxwell, Gp_maxwell, Gpp_maxwell, [2.0, 1.0], ["model created with default parameters"])

@@ -10,7 +10,7 @@ First, we need to load in RHEOS
 ```
 using RHEOS
 ```
-RHEOS has a convenience function for importing data from CSV files. The default column delimiter is ',' but an alternative can be specified as a keyword argument. The row delimiter is a newline character ('\n'). For standard viscoelastic testing data RHEOS expects either stress, strain and time data, just stress and time, or just strain and time. The order of the columns is specified as the first argument in the function `importdata`. The second argument is the directory of the file, as shown below.
+RHEOS has a convenience function for importing data from CSV files. The default column delimiter is ',' but an alternative can be specified as a keyword argument. The row delimiter is a newline character ('\n'). For standard viscoelastic testing data RHEOS expects either stress, strain and time data, just stress and time, or just strain and time. The order of the columns is specified as the first argument in the function [`importdata`](@ref). The second argument is the directory of the file, as shown below.
 ```
 data = importdata(["stress","strain", "time"], "DataComplete.csv")
 ```
@@ -30,7 +30,7 @@ fitted_fractSLS_model = modelfit(data, FractionalSLS(), :G; lo=lb, hi=ub)
 ```
 Note the two keyword arguments used -- `lo` and `hi` for the lower and upper parameter boundaries respectively. The special argument `Inf` for the three of the parameters' upper bounds represent a type of infinity such that the parameters can be as large as required by the optimisation algorithm.
 
-For a full list of keyword arguments and features of the `modelfit` function, see the relevant part of the API section. Models included in RHEOS are also listed in the API section, and discussed in more detail in the Models section.
+For a full list of keyword arguments and features of the [`modelfit`](@ref) function, see the relevant part of the [API](@ref) section. Models included in RHEOS are also listed in the [API](@ref) section, and discussed in more detail in the Models section.
 
 ## G*/ω Data
 
@@ -48,4 +48,4 @@ lb = [0.1, 0.01, 0.1, 0.1]
 ub = [Inf, 0.99, Inf, Inf]
 fitted_fractSLS_model = dynamicmodelfit(data, FractionalSLS(); lo=lb, hi=ub)
 ```
-For more information on the `dynamicmodelfit` function, see the API section.
+For more information on the [`dynamicmodelfit`](@ref) function, see the [API](@ref) section.

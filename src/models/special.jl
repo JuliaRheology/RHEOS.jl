@@ -43,5 +43,10 @@ function Gpp_fractspecial(ω::T, params::Vector{T}) where T<:Real
 end
 Gpp_fractspecial(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_fractspecial.(ω, (params,))
 
-FractionalSpecial() = RheologyModel(G_fractspecial, J_fractspecial, Gp_fractspecial, Gpp_fractspecial, [1.0, 1.0, 0.2, 1.0], ["model created with default parameters"])
+"""
+    FractionalSpecial([params::Vector{T}]) where T<:Real
+
+A springpot and dashpot in series, both in parallel with a spring.
+"""
 FractionalSpecial(params::Vector{T}) where T<:Real = RheologyModel(G_fractspecial, J_fractspecial, Gp_fractspecial, Gpp_fractspecial, params, ["model created by user with parameters $params"])
+FractionalSpecial() = RheologyModel(G_fractspecial, J_fractspecial, Gp_fractspecial, Gpp_fractspecial, [1.0, 1.0, 0.2, 1.0], ["model created with default parameters"])
