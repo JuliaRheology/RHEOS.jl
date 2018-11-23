@@ -185,19 +185,171 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "moreexamples/#",
-    "page": "More Examples",
-    "title": "More Examples",
-    "category": "page",
-    "text": ""
+    "location": "models/#Models-included-in-RHEOS-1",
+    "page": "Models",
+    "title": "Models included in RHEOS",
+    "category": "section",
+    "text": "Severa models (i.e. their relaxation modulus, creep modulus and complex modulus) already implemented in RHEOS. Their constructors are listed below. Note that the params argument is always optional, as represented by their containment in square barckets. If left blank then the model\'s default parameters are used. Additional models are forthcoming."
 },
 
 {
-    "location": "moreexamples/#More-Examples-1",
-    "page": "More Examples",
-    "title": "More Examples",
+    "location": "models/#RHEOS.Spring",
+    "page": "Models",
+    "title": "RHEOS.Spring",
+    "category": "function",
+    "text": "Spring([params::Vector{T}]) where T<:Real\n\nSingle spring element.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#RHEOS.DashPot",
+    "page": "Models",
+    "title": "RHEOS.DashPot",
+    "category": "function",
+    "text": "DashPot([params::Vector{T}]) where T<:Real\n\nSingle dashpot element.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#RHEOS.SpringPot",
+    "page": "Models",
+    "title": "RHEOS.SpringPot",
+    "category": "function",
+    "text": "SpringPot([params::Vector{T}]) where T<:Real\n\nSingle springpot element.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#Elements-1",
+    "page": "Models",
+    "title": "Elements",
     "category": "section",
-    "text": ""
+    "text": "Spring\nDashPot\nSpringPot"
+},
+
+{
+    "location": "models/#RHEOS.FractionalMaxwell",
+    "page": "Models",
+    "title": "RHEOS.FractionalMaxwell",
+    "category": "function",
+    "text": "FractionalMaxwell([params::Vector{T}]) where T<:Real\n\nTwo springpots in series.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#RHEOS.FractionalMaxwellSpring",
+    "page": "Models",
+    "title": "RHEOS.FractionalMaxwellSpring",
+    "category": "function",
+    "text": "FractionalMaxwellSpring([params::Vector{T}]) where T<:Real\n\nA springpot and spring in series.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#RHEOS.FractionalMaxwellDashpot",
+    "page": "Models",
+    "title": "RHEOS.FractionalMaxwellDashpot",
+    "category": "function",
+    "text": "FractionalMaxwellDashpot([params::Vector{T}]) where T<:Real\n\nA springpot and dashpot in series.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#RHEOS.Maxwell",
+    "page": "Models",
+    "title": "RHEOS.Maxwell",
+    "category": "function",
+    "text": "Maxwell([params::Vector{T}]) where T<:Real\n\nA spring and dashpot in series.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#Maxwell-Type-1",
+    "page": "Models",
+    "title": "Maxwell Type",
+    "category": "section",
+    "text": "FractionalMaxwell\nFractionalMaxwellSpring\nFractionalMaxwellDashpot\nMaxwell"
+},
+
+{
+    "location": "models/#RHEOS.FractionalKelvinVoigt",
+    "page": "Models",
+    "title": "RHEOS.FractionalKelvinVoigt",
+    "category": "function",
+    "text": "FractionalKelvinVoigt([params::Vector{T}]) where T<:Real\n\nTwo springpots in parallel.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#RHEOS.FractionalKVspring",
+    "page": "Models",
+    "title": "RHEOS.FractionalKVspring",
+    "category": "function",
+    "text": "FractionalKVspring([params::Vector{T}]) where T<:Real\n\nA springpot and spring in parallel.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#RHEOS.FractionalKVdashpot",
+    "page": "Models",
+    "title": "RHEOS.FractionalKVdashpot",
+    "category": "function",
+    "text": "FractionalKVdashpot([params::Vector{T}]) where T<:Real\n\nA springpot and dashpot in parallel.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#RHEOS.KelvinVoigt",
+    "page": "Models",
+    "title": "RHEOS.KelvinVoigt",
+    "category": "function",
+    "text": "KelvinVoigt([params::Vector{T}]) where T<:Real\n\nA spring and dashpot in parallel.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#Kelvin-Voigt-Type-1",
+    "page": "Models",
+    "title": "Kelvin-Voigt Type",
+    "category": "section",
+    "text": "FractionalKelvinVoigt\nFractionalKVspring\nFractionalKVdashpot\nKelvinVoigt"
+},
+
+{
+    "location": "models/#RHEOS.FractionalZener",
+    "page": "Models",
+    "title": "RHEOS.FractionalZener",
+    "category": "function",
+    "text": "FractionalZener([params::Vector{T}]) where T<:Real\n\n2 springpots in series, both in parallel with a springpot.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#RHEOS.FractionalSLS",
+    "page": "Models",
+    "title": "RHEOS.FractionalSLS",
+    "category": "function",
+    "text": "FractionalSLS([params::Vector{T}]) where T<:Real\n\nA springpot and spring in series, both in parallel with a spring.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#RHEOS.FractionalSpecial",
+    "page": "Models",
+    "title": "RHEOS.FractionalSpecial",
+    "category": "function",
+    "text": "FractionalSpecial([params::Vector{T}]) where T<:Real\n\nA springpot and dashpot in series, both in parallel with a spring.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#RHEOS.SLS",
+    "page": "Models",
+    "title": "RHEOS.SLS",
+    "category": "function",
+    "text": "SLS(params::Vector{T}) where T<:Real\n\nA spring and dashpot in series, both in parallel with a spring.\n\n\n\n\n\n"
+},
+
+{
+    "location": "models/#Zener-Type-1",
+    "page": "Models",
+    "title": "Zener Type",
+    "category": "section",
+    "text": "FractionalZener\nFractionalSLS\nFractionalSpecial\nSLS"
+},
+
+{
+    "location": "models/#Creating-your-own-model-1",
+    "page": "Models",
+    "title": "Creating your own model",
+    "category": "section",
+    "text": "If you know some (or all) of the moduli for a model that you would like use but hasn\'t already been implemented in RHEOS, this section will explain how to quickly import these moduli into a RheologyModel object for use with other parts of RHEOS. For the sake of example, we will use the relaxation modulus, storage modulus and loss modulus of the Standard Linear Solid model as defined in RHEOS.function G_sls(t::Vector{T}, params::Vector{T}) where T<:Real\n    η, kᵦ, kᵧ = params\n\n    G = kᵧ .+ kᵦ*exp.(-t*kᵦ/η)\nend\n\nfunction Gp_sls(ω::Vector{T}, params::Vector{T}) where T<:Real\n    η, kᵦ, kᵧ = params\n\n    τ = η/kᵦ\n\n    denominator = 1 .+ (τ^2)*(ω.^2)\n    numerator = (ω.^2)*(τ^2)*kᵦ\n\n    Gp = numerator./denominator .+ kᵧ\nend\n\nfunction Gpp_sls(ω::{T}, params::Vector{T}) where T<:Real\n    η, kᵦ, kᵧ = params\n\n    τ = η/kᵦ\n\n    denominator = 1 .+ (τ^2)*(ω.^2)\n    numerator = ω*τ*kᵦ\n\n    Gpp = numerator./denominator\nendNow we have the our moduli defined as Julia functions we can store them, along with some (optional) default parameters, in a RheologyModel struct in the following way.our_model = RheologyModel(G = G_sls, Gp = Gp_sls, Gpp = Gpp_sls, params = [1.0, 0.5, 1.0])Now we can fit this model to data and use it to make predictions."
 },
 
 {
@@ -213,7 +365,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "API",
     "category": "section",
-    "text": ""
+    "text": "This page is a list of all types and functions defined by RHEOS that are intended for general use."
 },
 
 {
@@ -249,11 +401,227 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "API/#RHEOS.downsample",
+    "page": "API",
+    "title": "RHEOS.downsample",
+    "category": "function",
+    "text": "downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer)\n\nBoundaries are floating point times which are then converted to the closest elements. Works by just reducing on indices. For example, time_boundaries could be [0.0, 10.0, 100.0] and elperiods could be [2, 4]. So new data would take every 2nd element from 0.0 seconds to 10.0 seconds, then every 4th element from 10.0 seconds to 100.0 seconds.\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.fixedresample",
+    "page": "API",
+    "title": "RHEOS.fixedresample",
+    "category": "function",
+    "text": "fixedresample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{K} where K<:Integer, direction::Vector{String})\n\nResample data with new sample rate(s).\n\nWhereas downsample can only reduce the sample rate by not taking every array element, fixedresample can also upsample. Whether to up or down sample for a given section is known from the direction argument.\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.variableresample",
+    "page": "API",
+    "title": "RHEOS.variableresample",
+    "category": "function",
+    "text": "variableresample(self::RheologyData, refvar::Symbol, pcntdownsample::Real; mapback::Bool = false)\n\nConvert a fixed sample rate array to a variable sample rate, with sampling points added according to a relative change in chosen variable refvar, 1st derivative of refvar and 2nd derivative of refvar (WRT time). Usually chosen as the measured variable, so :σ for a stress relaxation test and :ϵ for a creep test.\n\nCurrently only variable downsampling supported. pcntdown sample is approximate, works well in some cases and very poorly in others. If required, compare resampled length vs original length after processing has finished. If data is noisy, may benefit from sending smoothed signal to this algorithm and either using mapback function or interpolating onto unsmoothed data.\n\nAlgorithm works as follows. 25 initial samples are generated evenly spread. After this,  the array is repeatedly sweeped, anywhere Δy, Δdy/dx, Δd2y/dx2 is greater than a threshold, α, a new sample is created at the midpoint of the two tested points. This is allowed to happen a maximum of 400 times, after which α is decreased and the process starts again. This macro process continues until the desired pcntdownsample ratio has been reached.\n\nArguments\n\nself: RheologyData instance\nrefvar: The data whose derivatives will determine sample densities\npcntdownsample: Approximate ratio of new samples to old samples\n_mapback = false: (Optional) Determines whether resampled points should \'snap\' to closest original points\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.smooth",
+    "page": "API",
+    "title": "RHEOS.smooth",
+    "category": "function",
+    "text": "smooth(self::RheologyData, τ::Real; pad::String=\"replicate\")\n\nSmooth data using a Gaussian Kernel to time scale τ (approximately half power).\n\nSmooths both σ and ϵ. Essentially a low pass filter with frequencies of 1/τ being cut to approximately half power. For other pad types available see ImageFiltering documentation.\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.zerotime",
+    "page": "API",
+    "title": "RHEOS.zerotime",
+    "category": "function",
+    "text": "function zerotime(self::RheologyData)\n\nConvenience function to normalize time such that the starting time is 0.0\n\n\n\n\n\n"
+},
+
+{
     "location": "API/#Preprocessing-Functions-1",
     "page": "API",
     "title": "Preprocessing Functions",
     "category": "section",
+    "text": "downsample\nfixedresample\nvariableresample\nsmooth\nzerotime"
+},
+
+{
+    "location": "API/#RHEOS.modelfit",
+    "page": "API",
+    "title": "RHEOS.modelfit",
+    "category": "function",
+    "text": "modelfit(data::RheologyData, model::RheologyModel, modtouse::Symbol; p0::Vector{T} = [-1.0], lo::Vector{T} = [-1.0], hi::Vector{T} = [-1.0], verbose::Bool = false, rel_tol = 1e-4, diff_method=\"BD\") where T<:Real\n\nFit RheologyData struct to model and return a fitted model as a RheologyModel object.\n\nArguments\n\ndata: RheologyData struct containing all data\nmodel: RheologyModel containing moduli and default (initial) parameters\nmodtouse: :G for relaxation modulus, :J for creep modulus\np0: Initial parameters to use in fit (uses \'model\' parameters if none given)\nlo: Lower bounds for parameters\nhi: Upper bounds for parameters\nverbose: If true, prints parameters on each optimisation iteration\nrel_tol: Relative tolerance of optimization, see NLOpt docs for more details\ndiff_method: Set finite difference formula to use for derivative, currently \"BD\" or \"CD\"\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.modelpredict",
+    "page": "API",
+    "title": "RHEOS.modelpredict",
+    "category": "function",
+    "text": "modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; diff_method=\"BD\")\n\nGiven data and model, return new dataset based on model parameters and using the modulus specified by \'modtouse\'; either creep modulus (:J, only returned strain is new) or  relaxation modulus (:G, only returned stress is new). \'diff_method\' sets finite difference for  calculating the derivative used in the hereditary integral and can be either backwards difference (\"BD\") or central difference (\"CD\").\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.modelstepfit",
+    "page": "API",
+    "title": "RHEOS.modelstepfit",
+    "category": "function",
+    "text": "modelstepfit(data::RheologyData, model::RheologyModel, modtouse::Symbol; p0::Vector{T} = [-1.0], lo::Vector{T} = [-1.0], hi::Vector{T} = [-1.0], verbose::Bool = false, rel_tol = 1e-4) where T<:Real\n\nSame as \'modelfit\' except assumes a step loading. If this assumption is appropriate for the data then fitting can be sped up greatly by use of this function. If modtouse is :G, relaxation modulus, then the first element of the strain is assumed to be the amplitude of the step. If modtouse is :j, creep modulus, then the first element of the stress is assumed to be the amplitude of the step.\n\nArguments\n\ndata: RheologyData struct containing all data\nmodel: RheologyModel containing moduli and default (initial) parameters\nmodtouse: :G for relaxation modulus, :J for creep modulus\np0: Initial parameters to use in fit (uses \'model\' parameters if none given)\nlo: Lower bounds for parameters\nhi: Upper bounds for parameters\nverbose: If true, prints parameters on each optimisation iteration\nrel_tol: Relative tolerance of optimization, see NLOpt docs for more details\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.modelsteppredict",
+    "page": "API",
+    "title": "RHEOS.modelsteppredict",
+    "category": "function",
+    "text": "modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; step_on::Real = 0.0)\n\nSame as modelpredict but assumes a step loading with step starting at \'step_on\'. Singularities are bypassed by adding 1 to the index of the singular element. \n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.dynamicmodelfit",
+    "page": "API",
+    "title": "RHEOS.dynamicmodelfit",
+    "category": "function",
+    "text": "dynamicmodelfit(data::RheologyDynamic, model::RheologyModel; p0::Vector{T} = [-1.0], lo::Vector{T} = [-1.0], hi::Vector{T} = [-1.0], verbose::Bool = false, rel_tol = 1e-4) where T<:Real\n\nFits model to the frequency/loss+storage moduli data.\n\nAll arguments are as described below. The \'weights\' argument some more information. As this fitting procedure is fitting two functions simultaneously (the storage and loss moduli), if left untransformed the fit would tend to favour the  modulus which is larger in magnitude and not fit the other modulus well. To avoid this, RHEOS offers a number of data transforms which can be used. \n\nArguments\n\ndata: RheologyDynamic struct containing all data\nmodel: RheologyModel containing moduli and default (initial) parameters\np0: Initial parameters to use in fit (uses \'model\' parameters if none given)\nlo: Lower bounds for parameters\nhi: Upper bounds for parameters\nverbose: If true, prints parameters on each optimisation iteration\nrel_tol: Relative tolerance of optimization, see NLOpt docs for more details\nweights: Weighting mode for storage and loss modulus (see above)\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.dynamicmodelpredict",
+    "page": "API",
+    "title": "RHEOS.dynamicmodelpredict",
+    "category": "function",
+    "text": "dynamicmodelpredict(data::RheologyDynamic, model::RheologyModel)\n\nGiven dynamic rheology data and model, return new dataset based on model parameters. Returns another RheologyDynamic instance with the predicted Gp and Gpp based on the frequencies and model parameters.\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#Fitting-and-Predicting-Functions-1",
+    "page": "API",
+    "title": "Fitting and Predicting Functions",
+    "category": "section",
+    "text": "modelfit\nmodelpredict\nmodelstepfit\nmodelsteppredict\ndynamicmodelfit\ndynamicmodelpredict"
+},
+
+{
+    "location": "API/#RHEOS.stepgen",
+    "page": "API",
+    "title": "RHEOS.stepgen",
+    "category": "function",
+    "text": "stepgen(t_total::Real, t_on::Real; t_trans::Real = 0.0, amplitude::Real = 1.0, baseval::Real = 0.0, stepsize::Real = 1.0)\n\nGenerate RheologyData struct with a step loading. If t_trans is 0.0 then the step is instantaneous, otherwise the step is approximated by a logistic function approximately centered at t_on.\n\nArguments\n\nt_total: Total time length of data\nt_on: Step on time\nt_trans: Step transition time\namplitude: Step height (in addition to baseval)\nbaseval: Initial amplitude before step\nstepsize: Time sampling period\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.rampgen",
+    "page": "API",
+    "title": "RHEOS.rampgen",
+    "category": "function",
+    "text": "rampgen(t_total::Real, t_start::Real, t_stop::Real; amplitude::Real = 1.0, baseval::Real = 0.0, stepsize::Real = 1.0)\n\nGenerate RheologyData struct with a ramp function.\n\nArguments\n\nt_total: Total time length of data\nt_start: Time for starting ramp\nt_stop: Time of stopping ramp\namplitude: Height reached by ramp in time tstop-tstart\nbaseval: Initial amplitude before ramp started\nstepsize: Time sampling period\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.singen",
+    "page": "API",
+    "title": "RHEOS.singen",
+    "category": "function",
+    "text": "singen(t_total::Real, frequency::Real; t_start::Real = 0.0, phase::Real = 0.0, amplitude::Real = 1.0, baseval::Real = 0.0, stepsize::Real = 1.0)\n\nGenerate RheologyData struct with a sinusoidal loading.\n\nArguments\n\nt_total: Total time length of data\nfrequency: Frequency of oscillation (Hz)\nt_start: Time for oscillation to begin\nphase: Phase of oscillation (radians)\namplitude: Amplitude of oscillation\nbaseval: Initial amplitude before oscillation started\nstepsize: Time sampling period\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.repeatdata",
+    "page": "API",
+    "title": "RHEOS.repeatdata",
+    "category": "function",
+    "text": "repeatdata(self::RheologyData, n::Integer)\n\nRepeat a given RheologyData data set n times.\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.addnoise",
+    "page": "API",
+    "title": "RHEOS.addnoise",
+    "category": "function",
+    "text": "addnoise(self::RheologyData; amplitude::Real = 0.1, seed::Union{Int, Nothing} = nothing)\n\nAdd random noise to RheologyData loading data. If reproducibility is required, always use the same number in the seed keyword argument.\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#Data-Generation-Functions-1",
+    "page": "API",
+    "title": "Data Generation Functions",
+    "category": "section",
+    "text": "stepgen\nrampgen\nsingen\nrepeatdata\naddnoise"
+},
+
+{
+    "location": "API/#RHEOS.importdata",
+    "page": "API",
+    "title": "RHEOS.importdata",
+    "category": "function",
+    "text": "importdata(colnames::Array{String,1}, filedir::String; delimiter=\',\')\n\nLoad data from a CSV file (two/three columns, comma seperated by default but delimiter can be specified in the delimiter keyword argument). Columns must be identified by providing an array of strings which tell the function which data is contained in each column. \n\nCan be used to construct either a RheologyData instance or a RheologyDynamic instance. Function detects whether \"time\" or \"frequency\" has been included and proceeds accordingly. For oscillatory data, all three columns (Gp, Gpp, Frequency) must be provided. For regular viscoelastic data two or three columns can be provided but time must always be provided. I.e. either stress/strain/time, stress/time or  strain/time.\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.exportdata",
+    "page": "API",
+    "title": "RHEOS.exportdata",
+    "category": "function",
+    "text": "exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = \".csv\", delimiter=\',\')\n\nExport RheologyData or RheologyDynamic type to csv format. Exports three columns in order:  stress, strain, time for standard viscoelastic data. Or: Gp, Gpp, frequency for oscillatory data. File extension can be modified using the ext keyword argument. As with importdata, the delimiter can also be set by keyword argument.\n\nUseful for plotting/analysis in other software.\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.savedata",
+    "page": "API",
+    "title": "RHEOS.savedata",
+    "category": "function",
+    "text": "savedata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = \".jld2\")\n\nSave RheologyData or RheologyDynamic object using JLD2 format reuse in  a later Julia session.\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.loaddata",
+    "page": "API",
+    "title": "RHEOS.loaddata",
+    "category": "function",
+    "text": "loaddata(filedir::String)\n\nLoads RheologyData or RheologyDynamic object from a jld2 file.\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.savemodel",
+    "page": "API",
+    "title": "RHEOS.savemodel",
+    "category": "function",
+    "text": "savemodel(self::RheologyModel, filedir::String; ext = \".jld2\")\n\nSave RheologyModel object using JLD2 format reuse in a later Julia session.\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.loadmodel",
+    "page": "API",
+    "title": "RHEOS.loadmodel",
+    "category": "function",
+    "text": "loaddata(filedir::String)\n\nLoads RheologyModel from a JLD2 file.\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#File-I/O-1",
+    "page": "API",
+    "title": "File I/O",
+    "category": "section",
+    "text": "importdata\nexportdata\nsavedata\nloaddata\nsavemodel\nloadmodel"
+},
+
+{
+    "location": "moreexamples/#",
+    "page": "More Examples",
+    "title": "More Examples",
+    "category": "page",
     "text": ""
+},
+
+{
+    "location": "moreexamples/#More-Examples-1",
+    "page": "More Examples",
+    "title": "More Examples",
+    "category": "section",
+    "text": "The following examples combine multiple elements of RHEOS into scripts which are likely to resemble common workflows. In addition to RHEOS, some of them use the PyPlot package for plotting. All of the examples below are also stored in the RHEOS directory in the \'examples\' folder."
 },
 
 ]}
