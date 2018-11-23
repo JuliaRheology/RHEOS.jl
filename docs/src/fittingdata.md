@@ -12,9 +12,9 @@ using RHEOS
 ```
 RHEOS has a convenience function for importing data from CSV files. The default column delimiter is ',' but an alternative can be specified as a keyword argument. The row delimiter is a newline character ('\n'). For standard viscoelastic testing data RHEOS expects either stress, strain and time data, just stress and time, or just strain and time. The order of the columns is specified as the first argument in the function [`importdata`](@ref). The second argument is the directory of the file, as shown below.
 ```
-data = importdata(["stress","strain", "time"], "DataComplete.csv")
+data = importdata(["stress","strain", "time"], "DataRelaxation.csv")
 ```
-Now we have all our data stored in the variable `data` which is of type [`RheologyData`](@ref). (In this tutorial, our data file `DataComplete.csv` is in the same directory as our Julia script so we can just use its relative directory.)
+Now we have all our data stored in the variable `data` which is of type [`RheologyData`](@ref). (In this tutorial, our data file `DataRelaxation.csv` is in the same directory as our Julia script so we can just use its relative directory.)
 
 Let's fit a Standard Linear Solid viscoelastic model via its relaxation modulus, G, as our data is from a stress relaxation test. The first argument is our data, the second argument tells RHEOS which model to fit and the final argument tells RHEOS whether to fit the model using a relaxation modulus (:G) or creep modulus (:J).
 ```

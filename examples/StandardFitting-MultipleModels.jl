@@ -2,7 +2,7 @@
 using PyPlot
 using RHEOS
 
-filedir = "DataComplete.csv"
+filedir = "DataRelaxation.csv"
 
 # repeated step loading generated with FractionalSLS([2.0, 0.5, 0.5, 0.7])
 data = importdata(["stress","strain", "time"], filedir)

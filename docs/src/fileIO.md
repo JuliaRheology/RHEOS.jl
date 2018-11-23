@@ -2,9 +2,9 @@
 
 ## CSV Import/Export
 
-In the [Fitting Data](@ref) section we saw how to import data from csv files. As a brief overview of that functionality, the 3 lines below demonstrate how to import stress/strain/time data, partial strain/time data, and G'/G''/frequency data. Note that if you want to try and run this code exactly as shown below, the data files used in these examples are stored in the 'RHEOS/examples' directory.
+In the [Fitting Data](@ref) section we saw how to import data from csv files. As a brief overview of that functionality, the 3 lines below demonstrate how to import stress/strain/time data, partial strain/time data, and G'/G''/frequency data. The columns can be in any order but need to specified by the first argument array of strings shown below. Note that if you want to try and run this code exactly as shown below, the data files used in these examples are stored in the 'RHEOS/examples' directory.
 ```
-data = importdata(["stress","strain", "time"], "DataComplete.csv")
+data = importdata(["stress","strain", "time"], "DataRelaxation.csv")
 
 data_incomplete = importdata(["strain", "time"], "DataIncomplete.csv")
 
