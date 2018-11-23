@@ -43,7 +43,10 @@ Again we see that the fractional SLS model has yielded a far better prediction, 
 
 ## Frequency Data
 
-Although it is very similar to the above, for completeness this section briefly describes how to predict frequency-based rheology data.
+Although it is very similar to the above, for completeness this section demonstrates how to predict frequency-based rheology data.
 ```
+frequency_data = importdata(["Gp", "Gpp", "frequency"], "FrequencyData.csv")
 
+freq_fractSLS_predicted = dynamicmodelpredict(frequency_data, fitted_fractSLS_model)
 ```
+See the [`dynamicmodelpredict`](@ref) for more information on the function itself.
