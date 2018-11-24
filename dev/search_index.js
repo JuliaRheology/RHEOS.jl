@@ -85,7 +85,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Fitting Data",
     "title": "Fitting Data",
     "category": "section",
-    "text": "This page is a tutorial on how to fit viscoelastic models to data using RHEOS. If you want to try out the code below, it can all be run from the Julia REPL but note that the importing data functions will only work if you are using the \'RHEOS/examples\' folder as your working directory as that\'s where the example data files are stored."
+    "text": "This page is a tutorial on how to fit viscoelastic models to data using RHEOS. If you want to try out the code below, it can all be run from the Julia REPL but note that importing the data exactly as shown will only work if you are using the \'RHEOS/examples\' folder as your working directory as that\'s where the example data files are stored and the directories used are relative."
 },
 
 {
@@ -113,9 +113,9 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "predictingresponse/#Predicting-Responsess-1",
+    "location": "predictingresponse/#Predicting-Responses-1",
     "page": "Predicting Responses",
-    "title": "Predicting Responsess",
+    "title": "Predicting Responses",
     "category": "section",
     "text": ""
 },
@@ -125,7 +125,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Predicting Responses",
     "title": "Stress/Strain/Time Data",
     "category": "section",
-    "text": "Now that we know how to import data and fit new models to it, let\'s try and make some predictions based on those fitted model parameters. We will use our data imported and models fitted_SLS_model and fitted_fractSLS_model as fitted in the previous section. First we\'ll use model prediction to see how well the models were fitted to the relaxation data.SLS_predicted = modelpredict(data, fitted_SLS_model, :G)\n\nfractSLS_predicted = modelpredict(data, fitted_fractSLS_model, :G)Now we have the predicted data, we can plot. Any plotting library can be used but the example code below uses the PyPlot Julia package.fig, ax = subplots()\nax[:plot](data.t, data.σ, label=\"Data\", color=\"black\")\nax[:plot](SLS_predicted.t, SLS_predicted.σ, label=\"SLS\")\nax[:plot](fractSLS_predicted.t, fractSLS_predicted.σ, \"--\", label=\"Fractional SLS\")\nax[:legend](loc=\"best\")\nshow()(Image: relaxation prediction) We can see from the above plot that the fractional Standard Linear Solid model has yielded a much better fit than that regular Standard Linear Solid. Now we also have creep data generated using the same model. Let\'s see how well our fitted models perform making predictions on a completely different type of data.creep_data = importdata([\"stress\", \"strain\", \"time\"], \"DataCreep.csv\")\n\ncreep_SLS_predicted = modelpredict(creep_data, fitted_SLS_model, :J)\n\ncreep_fractSLS_predicted = modelpredict(creep_data, fitted_fractSLS_model, :J)Note the two differences in the modelpredict function calls. In the first argument we are predicting based on the creep data so we use the creep data we imported in the first line of the above code block. In the third argument we use the argument :J instead of :G to make predictions based on the creep modulus, not the relaxation modulus as before. Plotting the above but strain this time not stress as it\'s using the creep modulus:fig, ax = subplots()\nax[:plot](creep_data.t, creep_data.ϵ, label=\"Creep Data\", color=\"black\")\nax[:plot](creep_SLS_predicted.t, creep_SLS_predicted.ϵ, label=\"SLS\")\nax[:plot](creep_fractSLS_predicted.t, creep_fractSLS_predicted.ϵ, \"--\", label=\"Fractional SLS\")\nax[:legend](loc=\"best\")\nshow()(Image: creep prediction)Again we see that the fractional SLS model has yielded a far better prediction, even on data not seen during the fitting stage."
+    "text": "Now that we know how to import datasets and fit models to them, let\'s try and make some predictions based on fitted model parameters. We will use our data imported and models fitted_SLS_model and fitted_fractSLS_model as fitted in the previous section. First we\'ll use model prediction to see how well the models were fitted to the relaxation data.SLS_predicted = modelpredict(data, fitted_SLS_model, :G)\n\nfractSLS_predicted = modelpredict(data, fitted_fractSLS_model, :G)Now we have the predicted data, we can plot. Any plotting library can be used but the example code below uses the PyPlot Julia package.using PyPlot\n\nfig, ax = subplots()\nax[:plot](data.t, data.σ, label=\"Data\", color=\"black\")\nax[:plot](SLS_predicted.t, SLS_predicted.σ, label=\"SLS\")\nax[:plot](fractSLS_predicted.t, fractSLS_predicted.σ, \"--\", label=\"Fractional SLS\")\nax[:legend](loc=\"best\")\nshow()(Image: relaxation prediction) We can see from the above plot that the fractional Standard Linear Solid model has yielded a much better fit than that regular Standard Linear Solid. Now we also have creep data generated using the same model. Let\'s see how well our fitted models perform making predictions on a completely different type of data.creep_data = importdata([\"stress\", \"strain\", \"time\"], \"DataCreep.csv\")\n\ncreep_SLS_predicted = modelpredict(creep_data, fitted_SLS_model, :J)\n\ncreep_fractSLS_predicted = modelpredict(creep_data, fitted_fractSLS_model, :J)Note the two differences in the modelpredict function calls. In the first argument we are predicting based on the creep data so we use the creep data we imported in the first line of the above code block. In the third argument we use the argument :J instead of :G to make predictions based on the creep modulus, not the relaxation modulus as before. Plotting the above but strain this time not stress as it\'s using the creep modulus:fig, ax = subplots()\nax[:plot](creep_data.t, creep_data.ϵ, label=\"Creep Data\", color=\"black\")\nax[:plot](creep_SLS_predicted.t, creep_SLS_predicted.ϵ, label=\"SLS\")\nax[:plot](creep_fractSLS_predicted.t, creep_fractSLS_predicted.ϵ, \"--\", label=\"Fractional SLS\")\nax[:legend](loc=\"best\")\nshow()(Image: creep prediction)Again we see that the fractional SLS model has yielded a far better prediction, even on data not seen during the fitting stage."
 },
 
 {
@@ -138,31 +138,47 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "generatingdata/#",
-    "page": "Generating Loading",
-    "title": "Generating Loading",
+    "page": "Generating Loading - Under Construction",
+    "title": "Generating Loading - Under Construction",
     "category": "page",
     "text": ""
 },
 
 {
     "location": "generatingdata/#Generating-Data-1",
-    "page": "Generating Loading",
+    "page": "Generating Loading - Under Construction",
     "title": "Generating Data",
+    "category": "section",
+    "text": "RHEOS has several convenience functions for generating arbitrarily complex loading patterns. These may be particularly useful for investigating the responses of viscoelastic models with which users are unfamiliar. This section will demonstrate how to use them. It should be noted at the outset that the way these functions are currently implemented, they generate the same loading in both stress and strain with the expectation that users will then use one or other to make predictions. If it is detected that stress and strain are not the same arrays, or use different sample rates, then these data generation functions will raise an error. As all the structs generated are of RheologyData type, the same addition, subtraction and multiplication overloaded methods can be used for real data. When adding two RheologyData structs and one is longer than the other (in time), the shorter one will be extended by keeping the last values of that shorter struct\'s data constant for the rest of time. Adding, subtracting and multiplying will raise an error if the data do not have the same sample rate. All plots here are generated using the PyPlot Julia package."
+},
+
+{
+    "location": "generatingdata/#Step,-Ramp-and-Oscillatory-Loading-1",
+    "page": "Generating Loading - Under Construction",
+    "title": "Step, Ramp and Oscillatory Loading",
+    "category": "section",
+    "text": "The code below uses stepgen to create one step starting at 100 seconds (with total duration of 1000 seconds) and another step starting at 500 seconds lasting the same total duration. The second step is then subtracted from the first to create a new combined loading pattern as shown in the plots below.foo = stepgen(1000.0, 100.0)\n\nbar = stepgen(1000.0, 500.0)\n\nbaz = foo - bar(Image: step gif)"
+},
+
+{
+    "location": "generatingdata/#Repeated-Loading,-Adding-Noise-1",
+    "page": "Generating Loading - Under Construction",
+    "title": "Repeated Loading, Adding Noise",
     "category": "section",
     "text": ""
 },
 
 {
     "location": "preprocessing/#",
-    "page": "Preprocessing Tools",
-    "title": "Preprocessing Tools",
+    "page": "Preprocessing Tools - Under Construction",
+    "title": "Preprocessing Tools - Under Construction",
     "category": "page",
     "text": ""
 },
 
 {
     "location": "preprocessing/#Preprocessing-Tools-1",
-    "page": "Preprocessing Tools",
+    "page": "Preprocessing Tools - Under Construction",
     "title": "Preprocessing Tools",
     "category": "section",
     "text": ""
@@ -381,7 +397,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Models",
     "title": "Creating your own model",
     "category": "section",
-    "text": "If you know some (or all) of the moduli for a model that you would like use but hasn\'t already been implemented in RHEOS, this section will explain how to quickly import these moduli into a RheologyModel object for use with other parts of RHEOS. For the sake of example, we will use the relaxation modulus, storage modulus and loss modulus of the Standard Linear Solid model as defined in RHEOS.function G_sls(t::Vector{T}, params::Vector{T}) where T<:Real\n    η, kᵦ, kᵧ = params\n\n    G = kᵧ .+ kᵦ*exp.(-t*kᵦ/η)\nend\n\nfunction Gp_sls(ω::Vector{T}, params::Vector{T}) where T<:Real\n    η, kᵦ, kᵧ = params\n\n    τ = η/kᵦ\n\n    denominator = 1 .+ (τ^2)*(ω.^2)\n    numerator = (ω.^2)*(τ^2)*kᵦ\n\n    Gp = numerator./denominator .+ kᵧ\nend\n\nfunction Gpp_sls(ω::{T}, params::Vector{T}) where T<:Real\n    η, kᵦ, kᵧ = params\n\n    τ = η/kᵦ\n\n    denominator = 1 .+ (τ^2)*(ω.^2)\n    numerator = ω*τ*kᵦ\n\n    Gpp = numerator./denominator\nendNow we have the our moduli defined as Julia functions we can store them, along with some (optional) default parameters, in a RheologyModel struct in the following way.our_model = RheologyModel(G = G_sls, Gp = Gp_sls, Gpp = Gpp_sls, params = [1.0, 0.5, 1.0])Now we can fit this model to data and use it to make predictions."
+    "text": "If you know some (or all) of the moduli for a model that you would like use but hasn\'t already been implemented in RHEOS, this section will explain how to quickly import these moduli into a RheologyModel object for use with other parts of RHEOS. For the sake of example, we will use the relaxation modulus, storage modulus and loss modulus of the Standard Linear Solid model as defined in RHEOS.function G_sls(t::Vector{T}, params::Vector{T}) where T<:Real\n    η, kᵦ, kᵧ = params\n\n    G = kᵧ .+ kᵦ*exp.(-t*kᵦ/η)\nend\n\nfunction Gp_sls(ω::Vector{T}, params::Vector{T}) where T<:Real\n    η, kᵦ, kᵧ = params\n\n    τ = η/kᵦ\n\n    denominator = 1 .+ (τ^2)*(ω.^2)\n    numerator = (ω.^2)*(τ^2)*kᵦ\n\n    Gp = numerator./denominator .+ kᵧ\nend\n\nfunction Gpp_sls(ω::{T}, params::Vector{T}) where T<:Real\n    η, kᵦ, kᵧ = params\n\n    τ = η/kᵦ\n\n    denominator = 1 .+ (τ^2)*(ω.^2)\n    numerator = ω*τ*kᵦ\n\n    Gpp = numerator./denominator\nendNow we have the our moduli defined as Julia functions we can store them, along with some (optional) default parameters, in a RheologyModel struct in the following way.our_model = RheologyModel(G = G_sls, Gp = Gp_sls, Gpp = Gpp_sls, params = [1.0, 0.5, 1.0])Now we can fit this model to data and use it to make predictions. Any moduli not included in this final step will default to a null_modulus which always returns the array [-1.0]."
 },
 
 {
