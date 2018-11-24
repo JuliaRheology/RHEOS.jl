@@ -30,6 +30,11 @@ bar = fixedresample(foo, [0.0, 5.0, 8.0, 10.0], [2, 1, 4], ["down", "down", "up"
 
 ## Variable Resampling
 Although still in a somewhat experimental stage, RHEOS has a variable resampling function, [`variableresample`](@ref) which attempts to focus the sampled points on regions of rapid change in the 0th, 1st and 2nd derivatives of the data. This may be useful for focusing on the model fits in the most dynamic regions of the data. See below for a minimal example of use and plotted outcome. See the [API](@ref) for more detailed look at function arguments.
+```
+foo = singen(2, 0.5; stepsize=0.01)
+
+bar = variableresample(foo, :σ, 0.5)
+```
 ![variableresample](assets/variableresample.png)
 
 ## Smoothing
