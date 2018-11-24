@@ -149,7 +149,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Generating Loading - Under Construction",
     "title": "Generating Data",
     "category": "section",
-    "text": "RHEOS has several convenience functions for generating arbitrarily complex loading patterns. These may be particularly useful for investigating the responses of viscoelastic models with which users are unfamiliar. This section will demonstrate how to use them. It should be noted at the outset that the way these functions are currently implemented, they generate the same loading in both stress and strain with the expectation that users will then use one or other to make predictions. If it is detected that stress and strain are not the same arrays, or use different sample rates, then these data generation functions will raise an error. As all the structs generated are of RheologyData type, the same addition, subtraction and multiplication overloaded methods can be used for real data. When adding two RheologyData structs and one is longer than the other (in time), the shorter one will be extended by keeping the last values of that shorter struct\'s data constant for the rest of time. Adding, subtracting and multiplying will raise an error if the data do not have the same sample rate. All plots here are generated using the PyPlot Julia package."
+    "text": "RHEOS has several convenience functions for generating arbitrarily complex loading patterns. These may be particularly useful for investigating the responses of viscoelastic models with which users are unfamiliar. This section will demonstrate how to use them. It should be noted at the outset that the way these functions are currently implemented, they generate the same loading in both stress and strain with the expectation that users will then use one or other to make predictions. As all the structs generated are of RheologyData type, the same addition, subtraction and multiplication overloaded methods can be used for real data. When adding two RheologyData structs and one is longer than the other (in time), the shorter one will be extended by keeping the last values of that shorter struct\'s data constant for the rest of time. Adding, subtracting and multiplying will raise an error if the data do not have the same sample rate. All plots here are generated using the PyPlot Julia package."
 },
 
 {
@@ -165,7 +165,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Generating Loading - Under Construction",
     "title": "Repeated Loading, Adding Noise",
     "category": "section",
-    "text": ""
+    "text": "The repeatdata function currently only works if the stress and strain arrays contain the same data (as is produced by all the data generation functions)."
 },
 
 {
@@ -553,11 +553,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "API/#RHEOS.linegen",
+    "page": "API",
+    "title": "RHEOS.linegen",
+    "category": "function",
+    "text": "linegen(t_total::Real; stepsize::Real = 1.0)\n\nGenerate RheologyData struct with a simple line loading of height 1.0.\n\nArguments\n\nt_total: Total time length of data\nstepsize: Time sampling period\n\n\n\n\n\n"
+},
+
+{
     "location": "API/#RHEOS.stepgen",
     "page": "API",
     "title": "RHEOS.stepgen",
     "category": "function",
-    "text": "stepgen(t_total::Real, t_on::Real; t_trans::Real = 0.0, amplitude::Real = 1.0, baseval::Real = 0.0, stepsize::Real = 1.0)\n\nGenerate RheologyData struct with a step loading. If t_trans is 0.0 then the step is instantaneous, otherwise the step is approximated by a logistic function approximately centered at t_on.\n\nArguments\n\nt_total: Total time length of data\nt_on: Step on time\nt_trans: Step transition time\namplitude: Step height (in addition to baseval)\nbaseval: Initial amplitude before step\nstepsize: Time sampling period\n\n\n\n\n\n"
+    "text": "stepgen(t_total::Real, t_on::Real; t_trans::Real = 0.0, stepsize::Real = 1.0)\n\nGenerate RheologyData struct with a step loading of height 1.0. If t_trans is 0.0 then  the step is instantaneous, otherwise the step is approximated by a logistic function  approximately centered at t_on.\n\nArguments\n\nt_total: Total time length of data\nt_on: Step on time\nt_trans: Step transition time\nstepsize: Time sampling period\n\n\n\n\n\n"
 },
 
 {
@@ -565,7 +573,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "RHEOS.rampgen",
     "category": "function",
-    "text": "rampgen(t_total::Real, t_start::Real, t_stop::Real; amplitude::Real = 1.0, baseval::Real = 0.0, stepsize::Real = 1.0)\n\nGenerate RheologyData struct with a ramp function.\n\nArguments\n\nt_total: Total time length of data\nt_start: Time for starting ramp\nt_stop: Time of stopping ramp\namplitude: Height reached by ramp in time tstop-tstart\nbaseval: Initial amplitude before ramp started\nstepsize: Time sampling period\n\n\n\n\n\n"
+    "text": "rampgen(t_total::Real, t_start::Real, t_stop::Real; amplitude::Real = 1.0, baseval::Real = 0.0, stepsize::Real = 1.0)\n\nGenerate RheologyData struct with a ramp function. Reaches amplitude of 1.0 at t_stop.\n\nArguments\n\nt_total: Total time length of data\nt_start: Time for starting ramp\nt_stop: Time of stopping ramp\nstepsize: Time sampling period\n\n\n\n\n\n"
 },
 
 {
@@ -573,7 +581,15 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "RHEOS.singen",
     "category": "function",
-    "text": "singen(t_total::Real, frequency::Real; t_start::Real = 0.0, phase::Real = 0.0, amplitude::Real = 1.0, baseval::Real = 0.0, stepsize::Real = 1.0)\n\nGenerate RheologyData struct with a sinusoidal loading.\n\nArguments\n\nt_total: Total time length of data\nfrequency: Frequency of oscillation (Hz)\nt_start: Time for oscillation to begin\nphase: Phase of oscillation (radians)\namplitude: Amplitude of oscillation\nbaseval: Initial amplitude before oscillation started\nstepsize: Time sampling period\n\n\n\n\n\n"
+    "text": "singen(t_total::Real, frequency::Real; t_start::Real = 0.0, phase::Real = 0.0, stepsize::Real = 1.0)\n\nGenerate RheologyData struct with a sinusoidal loading of amplitude 1.0.\n\nArguments\n\nt_total: Total time length of data\nfrequency: Frequency of oscillation (Hz)\nt_start: Time for oscillation to begin\nphase: Phase of oscillation (radians)\nstepsize: Time sampling period\n\n\n\n\n\n"
+},
+
+{
+    "location": "API/#RHEOS.noisegen",
+    "page": "API",
+    "title": "RHEOS.noisegen",
+    "category": "function",
+    "text": "noisegen(t_total::Real; seed::Union{Int, Nothing} = nothing, stepsize::Real = 1.0)\n\nGenerate uniform random noise of maximum amplitude +/- 1.0. If reproducibility is required,  always use the same number in the seed keyword argument with the same non-negative integer.\n\nArguments\n\nt_total: Total time length of data\nseed: Seed used for random number generation\nbaseval: Initial amplitude before oscillation started\nstepsize: Time sampling period\n\n\n\n\n\n"
 },
 
 {
@@ -585,19 +601,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "API/#RHEOS.addnoise",
-    "page": "API",
-    "title": "RHEOS.addnoise",
-    "category": "function",
-    "text": "addnoise(self::RheologyData; amplitude::Real = 0.1, seed::Union{Int, Nothing} = nothing)\n\nAdd random noise to RheologyData loading data. If reproducibility is required, always use the same number in the seed keyword argument.\n\n\n\n\n\n"
-},
-
-{
     "location": "API/#Data-Generation-Functions-1",
     "page": "API",
     "title": "Data Generation Functions",
     "category": "section",
-    "text": "stepgen\nrampgen\nsingen\nrepeatdata\naddnoise"
+    "text": "linegen\nstepgen\nrampgen\nsingen\nnoisegen\nrepeatdata"
 },
 
 {
