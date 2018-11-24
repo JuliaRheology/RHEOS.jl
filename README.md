@@ -43,7 +43,6 @@ RHEOS is fully documented, with comprehensive tutorials that assume minimal know
 4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
 
 ## To do
-- [ ] Documentation
 - [ ] Increase Test Coverage
 - [ ] Implement derived singularity approximation
 - [ ] Remove "sampling" field from RheologyData, add tests where required
