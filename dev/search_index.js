@@ -229,7 +229,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessing Tools",
     "title": "Smoothing",
     "category": "section",
-    "text": "Lastly, RHEOS provides a smoothing function, smooth. The first argument is the data to smooth and the second argument is the (very) approximate time scale of smoothing. (It uses Gaussian smoothing and can be thought of as a low pass filter for information occuring on time scales shorter than the 2nd argument). The padding can be changed using a keyword argument if desired, see API for more details. The example below smooths out some noisy data.foo = rampgen(200.0, 0.0, 100.0; stepsize = 0.1) - rampgen(200.0, 100.0, 200.0; stepsize = 0.1)\n\nbar = foo + 0.1*noisegen(200.0; stepsize=0.1)\n\nbaz = smooth(bar, 10.0)(Image: smooth)"
+    "text": "Lastly, RHEOS provides a smoothing function, smooth. The first argument is the data to smooth and the second argument is the (very) approximate time scale of smoothing. (It uses Gaussian smoothing and can be thought of as a low pass filter for information occuring on time scales shorter than the 2nd argument). The padding can be changed using a keyword argument if desired, see API and ImageFiltering.jl Documentation for more details. The example below smooths out some noisy data.foo = rampgen(200.0, 0.0, 100.0; stepsize = 0.1) - rampgen(200.0, 100.0, 200.0; stepsize = 0.1)\n\nbar = foo + 0.1*noisegen(200.0; stepsize=0.1)\n\nbaz = smooth(bar, 10.0)(Image: smooth)"
 },
 
 {
