@@ -33,7 +33,7 @@ Although still in a somewhat experimental stage, RHEOS has a variable resampling
 ![variableresample](assets/variableresample.png)
 
 ## Smoothing
-Lastly, RHEOS provides a smoothing function, [`smooth`](@ref). The first argument is the data to smooth and the second argument is the (very) approximate time scale of smoothing. (It uses Gaussian smoothing and can be thought of as a low pass filter for information occuring on time scales shorter than the 2nd argument). The padding can be changed using a keyword argument if desired, see [API](@ref) for more details. The example below smooths out some noisy data.
+Lastly, RHEOS provides a smoothing function, [`smooth`](@ref). The first argument is the data to smooth and the second argument is the (very) approximate time scale of smoothing. (It uses Gaussian smoothing and can be thought of as a low pass filter for information occuring on time scales shorter than the 2nd argument). The padding can be changed using a keyword argument if desired, see [API](@ref) and [ImageFiltering.jl Documentation](https://juliaimages.github.io/ImageFiltering.jl/stable/function_reference.html) for more details. The example below smooths out some noisy data.
 ```
 foo = rampgen(200.0, 0.0, 100.0; stepsize = 0.1) - rampgen(200.0, 100.0, 200.0; stepsize = 0.1)
 
