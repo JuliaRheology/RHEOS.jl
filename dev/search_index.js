@@ -25,6 +25,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "#Documentation-1",
+    "page": "Home",
+    "title": "Documentation",
+    "category": "section",
+    "text": "The sections in this documentation each aim to provide tutorials in different elements of RHEOS. The API section is a comprehensive list of RHEOS types and functions brief descriptions of their use. For corrections or further questions, please create an issue on the Github repository."
+},
+
+{
     "location": "#Installation-1",
     "page": "Home",
     "title": "Installation",
