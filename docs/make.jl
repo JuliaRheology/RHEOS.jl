@@ -3,7 +3,7 @@ using Documenter, RHEOS
 makedocs(modules=[RHEOS],
          doctest=false, clean=true,
          format =:html,
-         sitename="RHEOS.jl", # try making this a blank string!
+         sitename=" ",
          authors="Louis Kaplan",
          pages = [
              "Home" => "index.md",

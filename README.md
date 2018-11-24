@@ -22,6 +22,16 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 
 - Artificial loading conditions can be generated within RHEOS to better understand a model's response
 
+## Code Example
+The code below, demonstrate how simple it is to load in data, fit a model and then predict its response using RHEOS.
+```
+data = importdata(["stress","strain", "time"], "DataRelaxation.csv")
+
+fitted_SLS_model = modelfit(data, SLS(), :G)
+
+SLS_predicted = modelpredict(data, fitted_SLS_model, :G)
+```
+
 ## Installation
 1. Install Julia, version 1.0.2
 2. From Julia REPL, enter pkg mode by pressing ```]```
