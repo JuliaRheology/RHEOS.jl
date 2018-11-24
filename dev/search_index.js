@@ -181,7 +181,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Generating Data",
     "title": "A More Complicated Example",
     "category": "section",
-    "text": "Below is an example which uses almost all of the RHEOS data generation functionality together in one example.## Combined Example\n\n# generate a single step at 25 seconds\nstepup = stepgen(50.0, 25.0; stepsize = 0.05, t_trans = 2.5)\n\n# generate an oscillation which starts fading in at 25.5 seconds and has faded out by 49.5 seconds\nosci = 0.1*singen(50.0, 0.2; stepsize = 0.05)\nrampup = rampgen(50.0, 25.5, 37.5; stepsize = 0.05)\nrampdown = -rampgen(50.0, 37.5, 49.5; stepsize = 0.05)\n\n# combine the step and faded oscillation\ncombined = osci*(rampup + rampdown) + stepup\n\n# repeat this three times\nrepeated = repeatdata(combined, 3)\n\n# add some white noise with amplitude of 0.01\nnoisyrepeated = repeated + 0.01*noisegen(150.0; seed = 1, stepsize = 0.05)which, when plotted, produces the following (Image: complicated)we cam zoom in to a stepped region to see the noise more clearly (Image: complicatedzoom)"
+    "text": "Below is an example which uses almost all of the RHEOS data generation functionality together in one example.# generate a single step at 25 seconds\nstepup = stepgen(50.0, 25.0; stepsize = 0.05, t_trans = 2.5)\n\n# generate an oscillation which starts fading in at 25.5 seconds and has faded out by 49.5 seconds\nosci = 0.1*singen(50.0, 0.2; stepsize = 0.05)\nrampup = rampgen(50.0, 25.5, 37.5; stepsize = 0.05)\nrampdown = -rampgen(50.0, 37.5, 49.5; stepsize = 0.05)\n\n# combine the step and faded oscillation\ncombined = osci*(rampup + rampdown) + stepup\n\n# repeat this three times\nrepeated = repeatdata(combined, 3)\n\n# add some white noise with amplitude of 0.01\nnoisyrepeated = repeated + 0.01*noisegen(150.0; seed = 1, stepsize = 0.05)which, when plotted, produces the following (Image: complicated)we cam zoom in to a stepped region to see the noise more clearly (Image: complicatedzoom)"
 },
 
 {
@@ -221,7 +221,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessing Tools",
     "title": "Variable Resampling",
     "category": "section",
-    "text": "Although still in a somewhat experimental stage, RHEOS has a variable resampling function, variableresample which attempts to focus the sampled points on regions of rapid change in the 0th, 1st and 2nd derivatives of the data. This may be useful for focusing on the model fits in the most dynamic regions of the data. See below for a minimal example of use and plotted outcome. See the API for more detailed look at function arguments. (Image: variableresample)"
+    "text": "Although still in a somewhat experimental stage, RHEOS has a variable resampling function, variableresample which attempts to focus the sampled points on regions of rapid change in the 0th, 1st and 2nd derivatives of the data. This may be useful for focusing on the model fits in the most dynamic regions of the data. See below for a minimal example of use and plotted outcome. See the API for more detailed look at function arguments.foo = singen(2, 0.5; stepsize=0.01)\n\nbar = variableresample(foo, :σ, 0.5)(Image: variableresample)"
 },
 
 {
