@@ -18,11 +18,11 @@ of the same length as the others.
 - sampling: sampling type, either "constant" or "variable"
 - log: a log of struct's events, e.g. preprocessing
 """
-struct RheologyData{T<:Real}
+struct RheologyData
 
-    σ::Vector{T}
-    ϵ::Vector{T}
-    t::Vector{T}
+    σ::Vector{T} where T<:Real
+    ϵ::Vector{T} where T<:Real
+    t::Vector{T} where T<:Real
 
     sampling::String
 
@@ -274,7 +274,7 @@ struct RheologyModel
 
 end
 
-function null_modulus(t::Vector{T}, params::Array{T, 1}) where T<:Real
+function null_modulus(t::Vector{T}, params::Vector{T}) where T<:Real
     return [-1.0]
 end
 
@@ -300,12 +300,12 @@ vectors in the right order.
 - ω: frequency
 - log: a log of struct's events, e.g. preprocessing
 """
-struct RheologyDynamic{T<:Real}
+struct RheologyDynamic
 
     # original data
-    Gp::Vector{T}
-    Gpp::Vector{T}
-    ω::Vector{T}
+    Gp::Vector{T} where T<:Real
+    Gpp::Vector{T} where T<:Real
+    ω::Vector{T} where T<:Real
 
     # operations applied, stores history of which functions (including arguments)
     log::Vector{String}

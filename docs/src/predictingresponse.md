@@ -1,15 +1,17 @@
-# Predicting Responsess
+# Predicting Responses
 
 ## Stress/Strain/Time Data
 
-Now that we know how to import data and fit new models to it, let's try and make some predictions based on those fitted model parameters. We will use our `data` imported and models `fitted_SLS_model` and `fitted_fractSLS_model` as fitted in the previous section. First we'll use model prediction to see how well the models were fitted to the relaxation data.
+Now that we know how to import datasets and fit models to them, let's try and make some predictions based on fitted model parameters. We will use our `data` imported and models `fitted_SLS_model` and `fitted_fractSLS_model` as fitted in the previous section. First we'll use model prediction to see how well the models were fitted to the relaxation data.
 ```
 SLS_predicted = modelpredict(data, fitted_SLS_model, :G)
 
 fractSLS_predicted = modelpredict(data, fitted_fractSLS_model, :G)
 ```
-Now we have the predicted data, we can plot. Any plotting library can be used but the example code below uses the PyPlot Julia package.
+Now we have the predicted data, we can plot. Any plotting library can be used but the example code below uses the [PyPlot Julia package](https://github.com/JuliaPy/PyPlot.jl).
 ```
+using PyPlot
+
 fig, ax = subplots()
 ax[:plot](data.t, data.σ, label="Data", color="black")
 ax[:plot](SLS_predicted.t, SLS_predicted.σ, label="SLS")

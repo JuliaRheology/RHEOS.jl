@@ -1,6 +1,6 @@
 # Fitting Data
 
-This page is a tutorial on how to fit viscoelastic models to data using RHEOS. If you want to try out the code below, it can all be run from the Julia REPL but **note that the importing data functions will only work if you are using the 'RHEOS/examples' folder as your working directory as that's where the example data files are stored**.
+This page is a tutorial on how to fit viscoelastic models to data using RHEOS. If you want to try out the code below, it can all be run from the Julia REPL but **note that importing the data exactly as shown will only work if you are using the 'RHEOS/examples' folder as your working directory as that's where the example data files are stored and the directories used are relative**.
 
 ## Stress/Strain/Time Data
 
