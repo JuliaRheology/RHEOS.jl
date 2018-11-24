@@ -3,7 +3,6 @@
 This page is a tutorial on how to fit viscoelastic models to data using RHEOS. If you want to try out the code below, it can all be run from the Julia REPL but **note that importing the data exactly as shown will only work if you are using the 'RHEOS/examples' folder as your working directory as that's where the example data files are stored and the directories used are relative**.
 
 ## Stress/Strain/Time Data
-
 This section is for standard viscoelastic tensile or compression tests where time, stress and strain data are available.
 
 First, we need to load in RHEOS
@@ -33,7 +32,6 @@ Note the two keyword arguments used -- `lo` and `hi` for the lower and upper par
 For a full list of keyword arguments and features of the [`modelfit`](@ref) function, see the relevant part of the [API](@ref) section. Models included in RHEOS are also listed in the [API](@ref) section, and discussed in more detail in the Models section.
 
 ## G*/ω Data
-
 RHEOS can also fit models to dynamic mechanical analysis data from oscillatory tests. The `importdata` function can again be used here but with the column names `Gp` for the storage modulus, `Gpp` for the loss modulus and `frequency` for the frequency column. RHEOS will detect the `frequency` string and know to load the data into a [`RheologyDynamic`](@ref) data type. Assuming RHEOS has already been imported, let's load in our data file:
 ```
 data = importdata(["Gp","Gpp", "Frequency"], "FrequencyData.csv")

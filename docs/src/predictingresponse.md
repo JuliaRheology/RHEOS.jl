@@ -1,7 +1,6 @@
 # Predicting Responses
 
 ## Stress/Strain/Time Data
-
 Now that we know how to import datasets and fit models to them, let's try and make some predictions based on fitted model parameters. We will use our `data` imported and models `fitted_SLS_model` and `fitted_fractSLS_model` as fitted in the previous section. First we'll use model prediction to see how well the models were fitted to the relaxation data.
 ```
 SLS_predicted = modelpredict(data, fitted_SLS_model, :G)
@@ -44,7 +43,6 @@ show()
 Again we see that the fractional SLS model has yielded a far better prediction, even on data not seen during the fitting stage.
 
 ## Frequency Data
-
 Although it is very similar to the above, for completeness this section demonstrates how to predict frequency-based rheology data.
 ```
 frequency_data = importdata(["Gp", "Gpp", "frequency"], "FrequencyData.csv")

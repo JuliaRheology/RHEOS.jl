@@ -34,7 +34,7 @@ SLS_predicted = modelpredict(data, fitted_SLS_model, :G)
 
 ## Documentation
 
-RHEOS is fully documented, with comprehensive tutorials that assume minimal knowledge about programming or the Julia language. The can be accessed by clicking [here](https://juliarheology.github.io/RHEOS.jl/latest/) or the blue 'docs' badge near the top of this page (just below the RHEOS logo).
+RHEOS is fully documented, with comprehensive tutorials that assume minimal knowledge about programming and the Julia language. The documentation can be accessed by [clicking here](https://juliarheology.github.io/RHEOS.jl/latest/) or the blue 'docs' badge near the top of this page (just below the RHEOS logo).
 
 ## Installation
 1. Install Julia, version 1.0.2

@@ -7,7 +7,6 @@ It should be noted at the outset that the way these functions are currently impl
 As all the structs generated are of [`RheologyData`](@ref) type, the same addition, subtraction and multiplication overloaded methods can be used for real data. When adding two [`RheologyData`](@ref) structs and one is longer than the other (in time), the shorter one will be extended by keeping the last values of that shorter struct's data constant for the rest of time. Adding, subtracting and multiplying will raise an error if the data do not have the same sample rate. All plots here are generated using the [PyPlot Julia package](https://github.com/JuliaPy/PyPlot.jl).
 
 ## Step, Ramp and Oscillatory Loading
-
 The code below uses [`stepgen`](@ref) to create one step starting at 100 seconds (with total duration of 1000 seconds) and another step starting at 500 seconds lasting the same total duration. The first argument of [`stepgen`](@ref) determines the total length in seconds. The second step is then subtracted from the first to create a new combined loading pattern as shown in the plots below. 
 ```
 foo = stepgen(1000, 100)
@@ -39,7 +38,6 @@ baz = foo*bar
 ![osci](assets/osci.png)
 
 ## Repeated Loading, Adding Noise
-
 For repeated loading, RHEOS provides a convenience function that can loop loading patterns a specified number of times. Similar to the step function, [`repeatdata`](@ref) also offers a `t_trans` keyword argument which determines the transition between the end of one loop and the start of the next. If `t_trans=0` then the transition is instantaneous, if not the transition occurs by logistic function with approximate transition time `t_trans`. The [`repeatdata`](@ref) function currently only works if the stress and strain arrays contain the same data (as is produced by all the data generation functions). Below we use our most recently defined `baz` variable (the oscillatory loading multiplied by the two ramps) to demonstrate.
 ```
 repeatedbaz = repeatdata(baz, 3)
@@ -55,7 +53,6 @@ baz = foo + bar
 ![noise](assets/noise.png)
 
 ## A More Complicated Example
-
 Below is an example which uses almost all of the RHEOS data generation functionality together in one example.
 ```
 ## Combined Example

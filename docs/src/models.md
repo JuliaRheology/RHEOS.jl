@@ -1,7 +1,6 @@
 # Models
 
 ## Models included in RHEOS
-
 Severa models (i.e. their relaxation modulus, creep modulus and complex modulus) already implemented in RHEOS. Their constructors are listed below. Note that the `params` argument is always optional, as represented by their containment in square barckets. If left blank then the model's default parameters are used. Additional models are forthcoming.
 
 ### Elements
@@ -36,7 +35,6 @@ SLS
 ```
 
 ## Creating your own model
-
 If you know some (or all) of the moduli for a model that you would like use but hasn't already been implemented in RHEOS, this section will explain how to quickly import these moduli into a [`RheologyModel`](@ref) object for use with other parts of RHEOS. For the sake of example, we will use the relaxation modulus, storage modulus and loss modulus of the Standard Linear Solid model as defined in RHEOS.
 ```
 function G_sls(t::Vector{T}, params::Vector{T}) where T<:Real

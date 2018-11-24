@@ -31,7 +31,7 @@ This macro process continues until the desired pcntdownsample ratio has been rea
 - `pcntdownsample`: Approximate ratio of new samples to old samples
 - `_mapback = false`: (Optional) Determines whether resampled points should 'snap' to closest original points
 """
-function variableresample(self::RheologyData, refvar::Symbol, pcntdownsample::Real; _mapback::Bool = false)
+function variableresample(self::RheologyData, refvar::Symbol, pcntdownsample::Real; _mapback::Bool = true)
 
     @eval import Interpolations: interpolate, Gridded, Linear
 
@@ -147,7 +147,7 @@ Smooth data using a Gaussian Kernel to time scale τ (approximately half power).
 Smooths both σ and ϵ. Essentially a low pass filter with frequencies of 1/τ being cut to approximately
 half power. For other pad types available see ImageFiltering documentation.
 """
-function smooth(self::RheologyData, τ::Real; pad::String="replicate")
+function smooth(self::RheologyData, τ::Real; pad::String="reflect")
 
     @eval import ImageFiltering: imfilter, Kernel
 

@@ -1,7 +1,6 @@
 # File I/O
 
 ## CSV Import/Export
-
 In the [Fitting Data](@ref) section we saw how to import data from csv files. As a brief overview of that functionality, the 3 lines below demonstrate how to import stress/strain/time data, partial strain/time data, and G'/G''/frequency data. The columns can be in any order but need to specified by the first argument array of strings shown below. Note that if you want to try and run this code exactly as shown below, the data files used in these examples are stored in the 'RHEOS/examples' directory.
 ```
 data = importdata(["stress","strain", "time"], "DataRelaxation.csv")
@@ -21,7 +20,6 @@ exportdata(data_dynamic, "exported_dynamic_data")
 The '.csv' extension will automatically be added (and can be modified if needs be through use of a keyword argument). The delimiter can also be changed if necessary. See [API](@ref) section for information on this.
 
 ## Native Julia data files (JLD2)
-
 When using RHEOS and doing all subsequent analysis and plotting in Julia, it is convenient to be able to store native Julia objects to disk so that they can be loaded in to subsequent Julia sessions. RHEOS provides two pairs of convenience functions to facilitate this: [`savedata`](@ref) and [`loaddata`](@ref), [`savemodel`](@ref) and [`loadmodel`](@ref). Using our data imported above we can demonstrate saving and loading data (it is exactly the same process for both RHEOS data types).
 ```
 savedata(data, "imported_data")

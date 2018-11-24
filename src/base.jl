@@ -191,7 +191,7 @@ See source code for more implementation details.
 """
 function var_resample(tᵢ::Vector{T}, yᵢ::Vector{T}, pcntdownsample::T, minperiod::T; minsamplenum::Integer = 25) where T<:Real
 
-    @eval import Interpolations: interpolate, Gridded, Linear
+    @eval using Interpolations
 
     @assert length(tᵢ)==length(yᵢ) "X and Y arrays must have same length."
 
@@ -203,16 +203,16 @@ function var_resample(tᵢ::Vector{T}, yᵢ::Vector{T}, pcntdownsample::T, minpe
     yInterp = Base.invokelatest(interpolate, (tᵢ,), yᵢ, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
 
     # initialise arrays for resampled data
-    xInit = zeros(T, minsamplenum)
-    yInit = zeros(T, minsamplenum)
+    xInit = zeros(T, minsamplenum + 1)
+    yInit = zeros(T, minsamplenum + 1)
 
     # variables for generating correct intervals during initial sweep
-    minsamplenum -= 1 # correction due integer rounding
     modNum = div(originalSize, minsamplenum)
 
     # initial sweep
     initCounter = 1
-    @inbounds for i in 1:originalSize
+    # @inbounds for i in 1:originalSize
+    for i in 1:originalSize
         if mod(i-1, modNum) == 0
             xInit[initCounter] = tᵢ[i]
             yInit[initCounter] = yᵢ[i]
@@ -399,7 +399,7 @@ function fixed_resample(x::Vector{T}, y::Vector{T},
                         boundaries::Vector{U}, elperiods::Vector{U},
                         direction::Array{String,1}) where T<:Real where U<:Integer
 
-    @eval import Interpolations: interpolate, Gridded, Linear
+    @eval using Interpolations
 
     # assert correct function signature
     @assert length(x)==length(y) "X and Y arrays must have same length."
