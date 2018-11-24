@@ -28,7 +28,7 @@ savedata(data, "imported_data")
 
 loaded_data = loaddata("imported_data.jld2")
 ```
-The [`savedata`](@ref) function will automatically append a '.jld2' to the filename when saving but this can be modified if necessary through a keyword argument.
+The [`savedata`](@ref) function will automatically append a '.jld2' to the filename when saving but this can be modified if necessary through a keyword argument. [`savedata`](@ref) and [`loaddata`](@ref) work on both [`RheologyData`](@ref) and  [`RheologyDynamic`](@ref) objects.
 
 Lastly, let's create a Standard Linear Solid model object with default parameters, save that to disk and load it again.
 ```
