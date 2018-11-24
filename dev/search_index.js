@@ -197,6 +197,38 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessing Tools",
     "title": "Preprocessing Tools",
     "category": "section",
+    "text": "RHEOS offers several preprocessing functions which may come in useful. This page is intended to be a brief tutorial of their use. For detailed descriptions of functions and their optional arguments, see the API section."
+},
+
+{
+    "location": "preprocessing/#Downsampling-1",
+    "page": "Preprocessing Tools",
+    "title": "Downsampling",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "preprocessing/#Upsampling-and-Downsampling-1",
+    "page": "Preprocessing Tools",
+    "title": "Upsampling and Downsampling",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "preprocessing/#Variable-Resampling-1",
+    "page": "Preprocessing Tools",
+    "title": "Variable Resampling",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "preprocessing/#Smoothing-1",
+    "page": "Preprocessing Tools",
+    "title": "Smoothing",
+    "category": "section",
     "text": ""
 },
 
