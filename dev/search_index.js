@@ -146,15 +146,15 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "generatingdata/#",
-    "page": "Generating Loading",
-    "title": "Generating Loading",
+    "page": "Generating Data",
+    "title": "Generating Data",
     "category": "page",
     "text": ""
 },
 
 {
     "location": "generatingdata/#Generating-Data-1",
-    "page": "Generating Loading",
+    "page": "Generating Data",
     "title": "Generating Data",
     "category": "section",
     "text": "RHEOS has several convenience functions for generating arbitrarily complex loading patterns. These may be particularly useful for investigating the responses of viscoelastic models with which users are unfamiliar. This section will demonstrate how to use them. It should be noted at the outset that the way these functions are currently implemented, they generate the same loading in both stress and strain with the expectation that users will then use one or other to make predictions. As all the structs generated are of RheologyData type, the same addition, subtraction and multiplication overloaded methods can be used for real data. When adding two RheologyData structs and one is longer than the other (in time), the shorter one will be extended by keeping the last values of that shorter struct\'s data constant for the rest of time. Adding, subtracting and multiplying will raise an error if the data do not have the same sample rate. All plots here are generated using the PyPlot Julia package."
@@ -162,7 +162,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "generatingdata/#Step,-Ramp-and-Oscillatory-Loading-1",
-    "page": "Generating Loading",
+    "page": "Generating Data",
     "title": "Step, Ramp and Oscillatory Loading",
     "category": "section",
     "text": "The code below uses stepgen to create one step starting at 100 seconds (with total duration of 1000 seconds) and another step starting at 500 seconds lasting the same total duration. The first argument of stepgen determines the total length in seconds. The second step is then subtracted from the first to create a new combined loading pattern as shown in the plots below. foo = stepgen(1000, 100)\n\nbar = stepgen(1000, 500)\n\nbaz = foo - bar(Image: step gif)The above example uses an \'instantaneous\' step. However, a logistic functional transition can be used by adding a non-zero t_trans keyword argument. Next we\'ll generate ramp loading using rampgen. The arguments in order are the total time length (as before), the time to start the ramp and the time to stop the ramp.foo = rampgen(1000, 100, 200)\n\nbar = rampgen(1000, 500, 700)\n\nbaz = 2*foo - bar(Image: ramp)And finally some oscillatory loading, ramp loading, and oscillatory loading multiplied by the ramp loading. The first argument of singen is the total time length, the second is the frequency in hertz, and the keyword argument is phase in radians.foo = singen(1000, 1/50; phase = -π/2)\n\nbar = rampgen(1000, 10, 400) - rampgen(1000, 400, 800)\n\nbaz = foo*bar(Image: osci)"
@@ -170,7 +170,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "generatingdata/#Repeated-Loading,-Adding-Noise-1",
-    "page": "Generating Loading",
+    "page": "Generating Data",
     "title": "Repeated Loading, Adding Noise",
     "category": "section",
     "text": "For repeated loading, RHEOS provides a convenience function that can loop loading patterns a specified number of times. Similar to the step function, repeatdata also offers a t_trans keyword argument which determines the transition between the end of one loop and the start of the next. If t_trans=0 then the transition is instantaneous, if not the transition occurs by logistic function with approximate transition time t_trans. The repeatdata function currently only works if the stress and strain arrays contain the same data (as is produced by all the data generation functions). Below we use our most recently defined baz variable (the oscillatory loading multiplied by the two ramps) to demonstrate.repeatedbaz = repeatdata(baz, 3)(Image: repeatedbaz)Finally, we can add uniform white noise to the data using the noisegen function. The below example demonstrates this on a simple step.foo = stepgen(100, 50)\nbar = 0.01*noisegen(100)\nbaz = foo + bar(Image: noise)"
@@ -178,7 +178,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "generatingdata/#A-More-Complicated-Example-1",
-    "page": "Generating Loading",
+    "page": "Generating Data",
     "title": "A More Complicated Example",
     "category": "section",
     "text": "Below is an example which uses almost all of the RHEOS data generation functionality together in one example.## Combined Example\n\n# generate a single step at 25 seconds\nstepup = stepgen(50.0, 25.0; stepsize = 0.05, t_trans = 2.5)\n\n# generate an oscillation which starts fading in at 25.5 seconds and has faded out by 49.5 seconds\nosci = 0.1*singen(50.0, 0.2; stepsize = 0.05)\nrampup = rampgen(50.0, 25.5, 37.5; stepsize = 0.05)\nrampdown = -rampgen(50.0, 37.5, 49.5; stepsize = 0.05)\n\n# combine the step and faded oscillation\ncombined = osci*(rampup + rampdown) + stepup\n\n# repeat this three times\nrepeated = repeatdata(combined, 3)\n\n# add some white noise with amplitude of 0.01\nnoisyrepeated = repeated + 0.01*noisegen(150.0; seed = 1, stepsize = 0.05)which, when plotted, produces the following (Image: complicated)we cam zoom in to a stepped region to see the noise more clearly (Image: complicatedzoom)"
@@ -197,7 +197,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessing Tools",
     "title": "Preprocessing Tools",
     "category": "section",
-    "text": "RHEOS offers several preprocessing functions which may come in useful. This page is intended to be a brief tutorial of their use. For detailed descriptions of functions and their optional arguments, see the API section."
+    "text": "RHEOS offers several preprocessing functions; this page is intended to be a brief tutorial of their use. For detailed descriptions of functions and their optional arguments, see the API section. This section uses some of the data generation functions discussed in more detail in the Generating Data section."
 },
 
 {
@@ -205,7 +205,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessing Tools",
     "title": "Downsampling",
     "category": "section",
-    "text": ""
+    "text": "To simply downsample data by taking every nth sample, the downsample function can be used. In the below example, every 2nd element is taken.foo = stepgen(10, 5)\n\nbar = downsample(foo, [0.0, 10.0], [2])(Image: downsample1)More than 1 section of downsampling can be defined. For example, the below code takes every 2nd element from time=0.0 seconds to time=5.0 seconds and after that it takes every element. Note that as there are now two different sample rates, the data set is considered as having \'variable\' sampling by RHEOS which adds a computational cost to fitting operations.foo = stepgen(10, 5)\n\nbar = downsample(foo, [0.0, 5.0, 10.0], [2, 1])(Image: downsample2)"
 },
 
 {
@@ -213,7 +213,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessing Tools",
     "title": "Upsampling and Downsampling",
     "category": "section",
-    "text": ""
+    "text": "The fixedresample is similar to the downsample function but also allows for upsampling. The syntax is almost the same but it requires an addition argument to tell RHEOS whether it should upsample or downsample for that section. Below is an example with three distinct sampling regions, the first two regions are downsampled and the third region is upsampled.foo = stepgen(10, 5)\n\nbar = fixedresample(foo, [0.0, 5.0, 8.0, 10.0], [2, 1, 4], [\"down\", \"down\", \"up\"])(Image: fixedresample)"
 },
 
 {
@@ -221,7 +221,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessing Tools",
     "title": "Variable Resampling",
     "category": "section",
-    "text": ""
+    "text": "Although still in a somewhat experimental stage, RHEOS has a variable resampling function, variableresample which attempts to focus the sampled points on regions of rapid change in the 0th, 1st and 2nd derivatives of the data. This may be useful for focusing on the model fits in the most dynamic regions of the data. See below for a minimal example of use and plotted outcome. See the API for more detailed look at function arguments. (Image: variableresample)"
 },
 
 {
@@ -229,7 +229,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Preprocessing Tools",
     "title": "Smoothing",
     "category": "section",
-    "text": ""
+    "text": "Lastly, RHEOS provides a smoothing function, smooth. The first argument is the data to smooth and the second argument is the (very) approximate time scale of smoothing. (It uses Gaussian smoothing and can be thought of as a low pass filter for information occuring on time scales shorter than the 2nd argument). The padding can be changed using a keyword argument if desired, see API for more details. The example below smooths out some noisy data.foo = rampgen(200.0, 0.0, 100.0; stepsize = 0.1) - rampgen(200.0, 100.0, 200.0; stepsize = 0.1)\n\nbar = foo + 0.1*noisegen(200.0; stepsize=0.1)\n\nbaz = smooth(bar, 10.0)(Image: smooth)"
 },
 
 {
