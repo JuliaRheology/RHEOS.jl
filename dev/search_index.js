@@ -285,7 +285,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Models",
     "title": "Models included in RHEOS",
     "category": "section",
-    "text": "Severa models (i.e. their relaxation modulus, creep modulus and complex modulus) already implemented in RHEOS. Their constructors are listed below. Note that the params argument is always optional, as represented by their containment in square barckets. If left blank then the model\'s default parameters are used. Additional models are forthcoming."
+    "text": "Several models (i.e. their relaxation modulus, creep modulus and complex modulus) already implemented in RHEOS. Their constructors are listed below. Note that the params argument is always optional, as represented by their containment in square barckets. If left blank then the model\'s default parameters are used. Additional models are forthcoming."
 },
 
 {
