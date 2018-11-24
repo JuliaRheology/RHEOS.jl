@@ -2,7 +2,7 @@
 
 RHEOS has several convenience functions for generating arbitrarily complex loading patterns. These may be particularly useful for investigating the responses of viscoelastic models with which users are unfamiliar. This section will demonstrate how to use them. 
 
-It should be noted at the outset that the way these functions are currently implemented, they generate the same loading in both stress and strain with the expectation that users will then use one or other to make predictions. If it is detected that stress and strain are not the same arrays, or use different sample rates, then these data generation functions will raise an error. 
+It should be noted at the outset that the way these functions are currently implemented, they generate the same loading in both stress and strain with the expectation that users will then use one or other to make predictions. 
 
 As all the structs generated are of [`RheologyData`](@ref) type, the same addition, subtraction and multiplication overloaded methods can be used for real data. When adding two [`RheologyData`](@ref) structs and one is longer than the other (in time), the shorter one will be extended by keeping the last values of that shorter struct's data constant for the rest of time. Adding, subtracting and multiplying will raise an error if the data do not have the same sample rate. All plots here are generated using the [PyPlot Julia package](https://github.com/JuliaPy/PyPlot.jl).
 
@@ -19,3 +19,5 @@ baz = foo - bar
 ![step gif](assets/stepgif.gif)
 
 ## Repeated Loading, Adding Noise
+
+The [`repeatdata`](@ref) function currently only works if the stress and strain arrays contain the same data (as is produced by all the data generation functions).

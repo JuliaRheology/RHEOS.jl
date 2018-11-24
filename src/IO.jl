@@ -64,13 +64,15 @@ function exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String;
 
     fulldir = string(filedir, ext)
 
-    if typeof(self)==RheologyData
+    subtype = eltype(self)
+
+    if typeof(self)==RheologyData{subtype}
         fulldata_array = hcat(self.σ, self.ϵ, self.t)
         open(fulldir, "w") do io
             writedlm(fulldir, fulldata_array, delimiter)
         end
             
-    elseif typeof(self)==RheologyDynamic
+    elseif typeof(self)==RheologyDynamic{subtype}
         fulldata_array = hcat(self.Gp, self.Gpp, self.ω)
         open(fulldir, "w") do io
             writedlm(fulldir, fulldata_array, delimiter)

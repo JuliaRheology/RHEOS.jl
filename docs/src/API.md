@@ -30,11 +30,12 @@ dynamicmodelpredict
 
 ## Data Generation Functions
 ```@docs
+linegen
 stepgen
 rampgen
 singen
+noisegen
 repeatdata
-addnoise
 ```
 
 ## File I/O

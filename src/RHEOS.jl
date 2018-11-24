@@ -10,6 +10,7 @@ using JLD2
 import DSP.conv
 # Base and stdlib imports
 using Base.Cartesian
+import Base.eltype
 import SpecialFunctions.gamma
 import Base: +, -, *
 import DelimitedFiles: readdlm, writedlm
@@ -29,7 +30,7 @@ export FractionalSpecial
 export JeffreysPT
 export SLS2, PowerLawPlateau
 # datagen.jl
-export stepgen, rampgen, singen, repeatdata, addnoise
+export linegen, stepgen, rampgen, singen, noisegen, repeatdata
 # processing.jl
 export variableresample, downsample, fixedresample, smooth, zerotime
 export modelfit, modelpredict, modelstepfit, modelsteppredict

@@ -18,17 +18,19 @@ of the same length as the others.
 - sampling: sampling type, either "constant" or "variable"
 - log: a log of struct's events, e.g. preprocessing
 """
-struct RheologyData
+struct RheologyData{T<:Real}
 
-    σ::Vector{T} where T<:Real
-    ϵ::Vector{T} where T<:Real
-    t::Vector{T} where T<:Real
+    σ::Vector{T}
+    ϵ::Vector{T}
+    t::Vector{T}
 
     sampling::String
 
     log::Vector{String}
 
 end
+
+eltype(::RheologyData{T}) where T = T
 
 function RheologyData(colnames::Vector{String}, data1::Vector{T}, data2::Vector{T}, data3::Vector{T}=zeros(length(data2)); filedir::String="none", log::Vector{String}=Array{String}(undef, 0)) where T<:Real
 
@@ -221,6 +223,18 @@ function *(self1::RheologyData, self2::RheologyData)
 
 end
 
+function -(self::RheologyData)
+    
+    ϵ = -self.ϵ
+    σ = -self.σ
+
+    # log
+    log = vcat(self.log, ["multiplied by -1"])
+
+    RheologyData(σ, ϵ, self.t, "constant", log)
+
+end
+
 function *(self::RheologyData, operand::Real)
 
     ϵ = self.ϵ*operand
@@ -300,17 +314,19 @@ vectors in the right order.
 - ω: frequency
 - log: a log of struct's events, e.g. preprocessing
 """
-struct RheologyDynamic
+struct RheologyDynamic{T<:Real}
 
     # original data
-    Gp::Vector{T} where T<:Real
-    Gpp::Vector{T} where T<:Real
-    ω::Vector{T} where T<:Real
+    Gp::Vector{T}
+    Gpp::Vector{T}
+    ω::Vector{T}
 
     # operations applied, stores history of which functions (including arguments)
     log::Vector{String}
 
 end
+
+eltype(::RheologyDynamic{T}) where T = T
 
 function RheologyDynamic(colnames::Vector{String}, data1::Vector{T}, data2::Vector{T}, data3::Vector{T}; filedir::String="none", log::Vector{String}=Array{String}(undef, 0)) where T<:Real
 
