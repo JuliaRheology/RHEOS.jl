@@ -56,7 +56,7 @@ baz = foo + bar
 
 ## A More Complicated Example
 
-Below is an example which uses almost all of the RHEOS data generation functionality in one example.
+Below is an example which uses almost all of the RHEOS data generation functionality together in one example.
 ```
 ## Combined Example
 
