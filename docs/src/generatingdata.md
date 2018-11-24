@@ -72,8 +72,8 @@ repeated = repeatdata(combined, 3)
 # add some white noise with amplitude of 0.01
 noisyrepeated = repeated + 0.01*noisegen(150.0; seed = 1, stepsize = 0.05)
 ```
-which, when plotted, produces the following
+which, when plotted, produces the following:
 ![complicated](assets/combined_full.png)
 
-we cam zoom in to a stepped region to see the noise more clearly
+We can zoom in to a stepped region to see the noise more clearly
 ![complicatedzoom](assets/combined_zoomed.png)
