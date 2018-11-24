@@ -155,18 +155,18 @@ function noisegen(t_total::Real; seed::Union{Int, Nothing} = nothing, stepsize::
 
     t = collect(0.0:stepsize:t_total)
 
-    if seed==nothing
-        # get random seed
-        seed!()
-    else
+    if seed!=nothing
         # use specified seed
         @assert seed>=0 "Seed integer must be non-negative"
+        log = ["noisegen: seed: $seed, stepsize: $stepsize"]
         seed!(seed)
+    else
+        log = ["noisegen: seed: nothing, stepsize: $stepsize"]
     end
 
     data = (2*rand(eltype(t), length(t)) .- 1)
 
-    log = ["noisegen: seed $seed, stepsize: $stepsize"]
+    
 
     RheologyData(data, t, log)
 
