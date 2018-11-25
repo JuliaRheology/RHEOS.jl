@@ -9,9 +9,9 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "#RHEOS.jl-1",
+    "location": "#RHEOS-RHEology-Open-Source-1",
     "page": "Home",
-    "title": "RHEOS.jl",
+    "title": "RHEOS - RHEology Open Source",
     "category": "section",
     "text": ""
 },
@@ -21,7 +21,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Overview",
     "category": "section",
-    "text": "RHEOS, an abbreviation of Rheology Open Source, is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:Stress/Strain/Time data can be easily be fitted to a viscoelastic model\nG\'/G\'\'/Frequency data can easily be fitted to a viscoelastic model\nMany standard and fractional viscoelastic models have already been implemented within RHEOS new ones can easily be added by users\nA fitted model can be used to predict the behaviour of the material under other loading conditions, enabling the fit/predict paradigm of model selection\nArtificial loading conditions can be generated within RHEOS to better understand a model\'s response"
+    "text": "RHEOS is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:Stress/Strain/Time data can be easily be fitted to a viscoelastic model\nG\'/G\'\'/Frequency data can easily be fitted to a viscoelastic model\nMany standard and fractional viscoelastic models have already been implemented within RHEOS new ones can easily be added by users\nA fitted model can be used to predict the behaviour of the material under other loading conditions, enabling the fit/predict paradigm of model selection\nArtificial loading conditions can be generated within RHEOS to better understand a model\'s response"
 },
 
 {
@@ -29,7 +29,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Documentation",
     "category": "section",
-    "text": "The sections in this documentation each aim to provide tutorials in different elements of RHEOS. The API section is a comprehensive list of RHEOS types and functions brief descriptions of their use. For corrections or further questions, please create an issue on the Github repository."
+    "text": "The sections in this documentation each aim to provide tutorials in different elements of RHEOS. The API section is a comprehensive list of RHEOS types and functions brief descriptions of their use. For corrections or further questions, please create an issue on the Github repository. Note that whenever you restart your Julia session you will have to reload RHEOS by typing using RHEOS, to avoid repetition this line is not included in every piece of example code."
 },
 
 {
