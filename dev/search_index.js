@@ -29,7 +29,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Documentation",
     "category": "section",
-    "text": "The sections in this documentation each aim to provide tutorials in different elements of RHEOS. The API section is a comprehensive list of RHEOS types and functions brief descriptions of their use. For corrections or further questions, please create an issue on the Github repository. Note that whenever you restart your Julia session you will have to reload RHEOS by typing using RHEOS, to avoid repetition this line is not included in every piece of example code."
+    "text": "The sections in this documentation each aim to provide tutorials in different elements of RHEOS. The API section is a comprehensive list of RHEOS types and functions, and brief descriptions of their use. For corrections or further questions, please create an issue on the Github repository. Note that whenever you restart your Julia session you will have to reload RHEOS by typing using RHEOS, to avoid repetition this line is not included in every piece of example code."
 },
 
 {
