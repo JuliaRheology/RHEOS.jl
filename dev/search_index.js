@@ -433,11 +433,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "models/#RHEOS.SLS2",
+    "page": "Models",
+    "title": "RHEOS.SLS2",
+    "category": "function",
+    "text": "SLS2(params::Vector{T}) where T<:Real\n\nA spring in parallel to two Maxwell branches (G\' and G\'\' temporary missing).\n\n\n\n\n\n"
+},
+
+{
     "location": "models/#Zener-Type-1",
     "page": "Models",
     "title": "Zener Type",
     "category": "section",
-    "text": "FractionalZener\nFractionalSLS\nFractionalSpecial\nSLS"
+    "text": "FractionalZener\nFractionalSLS\nFractionalSpecial\nSLS\nSLS2"
 },
 
 {
