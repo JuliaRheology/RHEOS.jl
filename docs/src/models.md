@@ -32,6 +32,7 @@ FractionalZener
 FractionalSLS
 FractionalSpecial
 SLS
+SLS2
 ```
 
 ## Creating your own model
@@ -70,4 +71,3 @@ Now we have the our moduli defined as Julia functions we can store them, along w
 our_model = RheologyModel(G = G_sls, Gp = Gp_sls, Gpp = Gpp_sls, params = [1.0, 0.5, 1.0])
 ```
 Now we can fit this model to data and use it to make predictions. Any moduli not included in this final step will default to a `null_modulus` which always returns the array `[-1.0]`.
-
