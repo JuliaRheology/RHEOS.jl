@@ -36,3 +36,10 @@ savemodel(model, "saved_model")
 
 loaded_model = loadmodel("saved_model.jld2")
 ```
+
+## Custom-formatted Data Import
+If your data doesn't fit into the CSV format required by `importdata` and you don't want to reformat it, you may want to write your own code to load the data into your Julia session. Once you have the data, you can simply call the appropriate `RheologyData` outer constructor as follows:
+```
+data = RheologyData(σ, ϵ, t)
+```
+where `σ`, `ϵ` and `t` are arrays of a `Real` subtype that you must provide.
