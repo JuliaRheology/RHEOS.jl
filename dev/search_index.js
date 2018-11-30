@@ -265,6 +265,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "fileIO/#Custom-formatted-Data-Import-1",
+    "page": "File I/O",
+    "title": "Custom-formatted Data Import",
+    "category": "section",
+    "text": "If your data doesn\'t fit into the CSV format required by importdata and you don\'t want to reformat it, you may want to write your own code to load the data into your Julia session. Once you have the data, you can simply call the appropriate RheologyData outer constructor as follows:data = RheologyData(σ, ϵ, t)where σ, ϵ and t are arrays of a Real subtype that you must provide."
+},
+
+{
     "location": "models/#",
     "page": "Models",
     "title": "Models",
