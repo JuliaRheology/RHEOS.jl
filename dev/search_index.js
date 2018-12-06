@@ -185,48 +185,48 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "preprocessing/#",
-    "page": "Preprocessing Tools",
-    "title": "Preprocessing Tools",
+    "location": "samplingandfiltering/#",
+    "page": "Sampling and Filtering",
+    "title": "Sampling and Filtering",
     "category": "page",
     "text": ""
 },
 
 {
-    "location": "preprocessing/#Preprocessing-Tools-1",
-    "page": "Preprocessing Tools",
-    "title": "Preprocessing Tools",
+    "location": "samplingandfiltering/#Sampling-and-Filtering-1",
+    "page": "Sampling and Filtering",
+    "title": "Sampling and Filtering",
     "category": "section",
-    "text": "RHEOS offers several preprocessing functions; this page is intended to be a brief tutorial of their use. For detailed descriptions of functions and their optional arguments, see the API section. This section uses some of the data generation functions discussed in more detail in the Generating Data section."
+    "text": "RHEOS offers several functions for sampling and filtering; this page is intended to be a brief tutorial of their use. For detailed descriptions of functions and their optional arguments, see the API section. This section uses some of the data generation functions discussed in more detail in the Generating Data section."
 },
 
 {
-    "location": "preprocessing/#Downsampling-1",
-    "page": "Preprocessing Tools",
+    "location": "samplingandfiltering/#Downsampling-1",
+    "page": "Sampling and Filtering",
     "title": "Downsampling",
     "category": "section",
     "text": "To simply downsample data by taking every nth sample, the downsample function can be used. In the below example, every 2nd element is taken.foo = stepgen(10, 5)\n\nbar = downsample(foo, [0.0, 10.0], [2])(Image: downsample1)More than 1 section of downsampling can be defined. For example, the below code takes every 2nd element from time=0.0 seconds to time=5.0 seconds and after that it takes every element. Note that as there are now two different sample rates, the data set is considered as having \'variable\' sampling by RHEOS which adds a computational cost to fitting operations.foo = stepgen(10, 5)\n\nbar = downsample(foo, [0.0, 5.0, 10.0], [2, 1])(Image: downsample2)"
 },
 
 {
-    "location": "preprocessing/#Upsampling-and-Downsampling-1",
-    "page": "Preprocessing Tools",
+    "location": "samplingandfiltering/#Upsampling-and-Downsampling-1",
+    "page": "Sampling and Filtering",
     "title": "Upsampling and Downsampling",
     "category": "section",
     "text": "The fixedresample is similar to the downsample function but also allows for upsampling. The syntax is almost the same but it requires an addition argument to tell RHEOS whether it should upsample or downsample for that section. Below is an example with three distinct sampling regions, the first two regions are downsampled and the third region is upsampled.foo = stepgen(10, 5)\n\nbar = fixedresample(foo, [0.0, 5.0, 8.0, 10.0], [2, 1, 4], [\"down\", \"down\", \"up\"])(Image: fixedresample)"
 },
 
 {
-    "location": "preprocessing/#Variable-Resampling-1",
-    "page": "Preprocessing Tools",
+    "location": "samplingandfiltering/#Variable-Resampling-1",
+    "page": "Sampling and Filtering",
     "title": "Variable Resampling",
     "category": "section",
     "text": "Although still in a somewhat experimental stage, RHEOS has a variable resampling function, variableresample which attempts to focus the sampled points on regions of rapid change in the 0th, 1st and 2nd derivatives of the data. This may be useful for focusing on the model fits in the most dynamic regions of the data. See below for a minimal example of use and plotted outcome. See the API for more detailed look at function arguments.foo = singen(2, 0.5; stepsize=0.01)\n\nbar = variableresample(foo, :σ, 0.5)(Image: variableresample)"
 },
 
 {
-    "location": "preprocessing/#Smoothing-1",
-    "page": "Preprocessing Tools",
+    "location": "samplingandfiltering/#Smoothing-1",
+    "page": "Sampling and Filtering",
     "title": "Smoothing",
     "category": "section",
     "text": "Lastly, RHEOS provides a smoothing function, smooth. The first argument is the data to smooth and the second argument is the (very) approximate time scale of smoothing. (It uses Gaussian smoothing and can be thought of as a low pass filter for information occuring on time scales shorter than the 2nd argument). The padding can be changed using a keyword argument if desired, see API and ImageFiltering.jl Documentation for more details. The example below smooths out some noisy data.foo = rampgen(200.0, 0.0, 100.0; stepsize = 0.1) - rampgen(200.0, 100.0, 200.0; stepsize = 0.1)\n\nbar = foo + 0.1*noisegen(200.0; stepsize=0.1)\n\nbaz = smooth(bar, 10.0)(Image: smooth)"
@@ -553,9 +553,9 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "API/#Preprocessing-Functions-1",
+    "location": "API/#Sampling-and-Filtering-Functions-1",
     "page": "API",
-    "title": "Preprocessing Functions",
+    "title": "Sampling and Filtering Functions",
     "category": "section",
     "text": "downsample\nfixedresample\nvariableresample\nsmooth\nzerotime"
 },
