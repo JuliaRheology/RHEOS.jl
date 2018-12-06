@@ -9,7 +9,7 @@ RheologyDynamic
 RheologyModel
 ```
 
-## Preprocessing Functions
+## Sampling and Filtering Functions
 ```@docs
 downsample
 fixedresample

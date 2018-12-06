@@ -1,6 +1,6 @@
-# Preprocessing Tools
+# Sampling and Filtering
 
-RHEOS offers several preprocessing functions; this page is intended to be a brief tutorial of their use. For detailed descriptions of functions and their optional arguments, see the [API](@ref) section. This section uses some of the data generation functions discussed in more detail in the [Generating Data](@ref) section.
+RHEOS offers several functions for sampling and filtering; this page is intended to be a brief tutorial of their use. For detailed descriptions of functions and their optional arguments, see the [API](@ref) section. This section uses some of the data generation functions discussed in more detail in the [Generating Data](@ref) section.
 
 ## Downsampling
 To simply downsample data by taking every nth sample, the [`downsample`](@ref) function can be used. In the below example, every 2nd element is taken.

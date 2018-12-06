@@ -25,10 +25,14 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 ## Code Example
 The code below demonstrates how simple it is to load in data, fit a model and then predict its response using RHEOS.
 ```
+# load in data from CSV using RHEOS convenience function
 data = importdata(["stress","strain", "time"], "DataRelaxation.csv")
 
+# fit a Standard Linear Solid model to the data via its relaxation modulus, G
 fitted_SLS_model = modelfit(data, SLS(), :G)
 
+# based on the original strain data and the SLS model fitted in the line above
+# predict the stress using the SLS relaxation modulus
 SLS_predicted = modelpredict(data, fitted_SLS_model, :G)
 ```
 
