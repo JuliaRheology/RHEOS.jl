@@ -3,21 +3,22 @@ using Documenter, RHEOS
 makedocs(modules=[RHEOS],
          doctest=false, clean=true,
          format =:html,
-         sitename="RHEOS.jl",
+         sitename=" ",
          authors="Louis Kaplan",
          pages = [
              "Home" => "index.md",
-             "Rheology Types" => "keytypes.md",
-             "Preprocessing" => "preprocessing.md",
-             "Fit and Predict" => "fitpredict.md",
-             "Save and Load" => "loadsave.md"
+             "Fitting Data" => "fittingdata.md",
+             "Predicting Responses" => "predictingresponse.md",
+             "Generating Data" => "generatingdata.md",
+             "Sampling and Filtering" => "samplingandfiltering.md",
+             "File I/O" => "fileIO.md",
+             "Models" => "models.md",
+             "API" => "API.md"
          ]
          )
 
 deploydocs(
     repo = "github.com/JuliaRheology/RHEOS.jl.git",
-    osname = "linux",
-    julia = "1.0.1",
     deps = nothing,
     make = nothing,
     target = "build"

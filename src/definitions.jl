@@ -1,39 +1,38 @@
 #!/usr/bin/env julia
 
 """
-    RheologyData(σ::Array{Float64,1}, ϵ::Array{Float64,1}, t::Array{Float64,1}, sampling::String, log::Array{String,1})
+    RheologyData(σ::Vector{T}, ϵ::Vector{T}, t::Vector{T}, sampling::String, log::Vector{String}) where T<:Real
 
-RheologyData struct used for high level interaction with RHEOS
-preprocessing and fitting functions. Initialise an instance directly or
-indirectly. If data is in three column, comma separated CSV file then
-fileload function can be used, which calls the RheologyData outer constructor method. 
-If not, load data in according to format and call RheologyData outer constructor method.
+RheologyData struct contains stress, strain and time data.
+
+If preferred, an instance can be generated manually by just providing the three data
+vectors in the right order, sampling type will be checked automatically. If loading
+partial data (either stress or strain), fill the other vector as a vector of zeros
+of the same length as the others.
+
+# Fields
+
+- σ: stress
+- ϵ: strain
+- t: time
+- sampling: sampling type, either "constant" or "variable"
+- log: a log of struct's events, e.g. preprocessing
 """
-struct RheologyData
+struct RheologyData{T<:Real}
 
-    # original data
-    σ::Array{Float64,1}
-    ϵ::Array{Float64,1}
-    t::Array{Float64,1}
+    σ::Vector{T}
+    ϵ::Vector{T}
+    t::Vector{T}
 
-    # sampling type. "constant" by default. Use of `var_resample`, `downsample`
-    # with more than one section or `fixed_resample` with more than one section
-    # overrides to "variable".
     sampling::String
 
-    # operations applied, stores history of which functions (including arguments)
-    log::Array{String,1}
+    log::Vector{String}
 
 end
 
-"""
-    RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}[, data3::Array{Float64,1}; filedir::String="none", log::Array{String,1}=Array{String}(0)])::RheologyData
+eltype(::RheologyData{T}) where T = T
 
-Constructor function for RheologyData struct, if stress/strain arrays have NaN values at the beginning (some datasets
-have 1 or 2 samples of NaN at beginning) then deletes these and starts at the first non-NaN sample, also readjusts time start to 
-t = 0 to account for NaNs and and negative time values at beginning of data recording.
-"""
-function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2::Array{Float64,1}, data3::Array{Float64,1}=zeros(length(data2)); filedir::String="none", log::Array{String,1}=Array{String}(undef, 0))::RheologyData
+function RheologyData(colnames::Vector{String}, data1::Vector{T}, data2::Vector{T}, data3::Vector{T}=zeros(length(data2)); filedir::String="none", log::Vector{String}=Array{String}(undef, 0)) where T<:Real
 
     # checks
     @assert length(data1)==length(data2) "Data arrays must be same length"
@@ -41,14 +40,9 @@ function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2:
 
     # get data in correct variables
     data = [data1, data2, data3]
-    local σ::Array{Float64,1} = zeros(length(data1))
-    local ϵ::Array{Float64,1} = zeros(length(data1))
-    local t::Array{Float64,1} = zeros(length(data1))
-
-    # occurence flags
-    local stress_present::Bool = false
-    local strain_present::Bool = false
-    local time_present::Bool = false
+    σ = Vector{T}(undef, 0)
+    ϵ = Vector{T}(undef, 0)
+    t = Vector{T}(undef, 0)
 
     for (i, v) in enumerate(colnames)
         if v == "stress"
@@ -62,10 +56,8 @@ function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2:
         end
     end
 
-    # define as local so it can be accessed in subsequent scopes
-    local newstartingval::Integer
-
     # test for NaNs
+    newstartingval = 1
     for i in 1:length(σ)
         if !isnan(σ[i]) && !isnan(ϵ[i])
             newstartingval = i
@@ -92,20 +84,22 @@ function RheologyData(colnames::Array{String,1}, data1::Array{Float64,1}, data2:
         push!(log, filedir)
     end
 
-    # Check if time vector is equally spaced
-    constant = constantcheck(t)
-    if constant
-       sampling = "constant"
-    elseif !constant
-       sampling = "variable"
-    end
+    sampling = constantcheck(t) ? "constant" : "variable"
 
     # return class with all fields initialised
     RheologyData(σ, ϵ, t, sampling, log)
-    
+
 end
 
-function RheologyData(data::Array{T,1}, t::Array{T,1}, log::Array{String,1}) where T<:Real
+function RheologyData(σ::Vector{T}, ϵ::Vector{T}, t::Vector{T}; log::Vector{String}=["Manually Created."]) where T<:Real
+
+    sampling = constantcheck(t) ? "constant" : "variable"
+
+    RheologyData(σ, ϵ, t, sampling, log)
+
+end
+
+function RheologyData(data::Vector{T}, t::Vector{T}, log::Vector{String}) where T<:Real
     # used when generating data so always constant
     RheologyData(data, data, t, "constant", log)
 
@@ -229,6 +223,18 @@ function *(self1::RheologyData, self2::RheologyData)
 
 end
 
+function -(self::RheologyData)
+    
+    ϵ = -self.ϵ
+    σ = -self.σ
+
+    # log
+    log = vcat(self.log, ["multiplied by -1"])
+
+    RheologyData(σ, ϵ, self.t, "constant", log)
+
+end
+
 function *(self::RheologyData, operand::Real)
 
     ϵ = self.ϵ*operand
@@ -242,16 +248,29 @@ function *(self::RheologyData, operand::Real)
 end
 
 function *(operand::Real, self::RheologyData)
-    
+
     # multiplication commutes so call function as defined for opposite operand order
     return self*operand
 
 end
 
 """
-    RheologyModel(G, J, Gp, Gpp, log)
+    RheologyModel(G::T, J::T, Gp::T, Gpp::T, parameters::Vector{S<:Real} log::Vector{String}) where T<:Function
 
-Struct which contains model's moduli, parameters, and log of activity.
+RheologyModel contains a model's various moduli, parameters, and log of activity.
+
+For incomplete models, an alternative constructor is available where all arguments
+are keyword arguments and moduli not provided default to a null modulus which
+always returns [-1.0].
+
+# Fields
+
+- G: Relaxation modulus
+- J: Creep modulus
+- Gp: Storage modulus
+- Gpp: Loss modulus
+- parameters: Used for predicting and as default starting parameters in fitting
+- log: a log of struct's events, e.g. what file it was fitted to
 """
 struct RheologyModel
 
@@ -263,58 +282,91 @@ struct RheologyModel
 
     Gpp::Function
 
-    parameters::Array{T,1} where T<:Real
+    parameters::Vector{T} where T<:Real
 
-    log::Array{String,1}
+    log::Vector{String}
 
 end
 
-function null_modulus(t::Array{T,1}, params::Array{T, 1}) where T<:Real
+function null_modulus(t::Vector{T}, params::Vector{T}) where T<:Real
     return [-1.0]
 end
 
-RheologyModel(;G::Function = null_modulus, 
-               J::Function = null_modulus, 
-               Gp::Function = null_modulus, 
-               Gpp::Function = null_modulus, 
-               params::Array{T,1} where T<:Real = [-1.0], 
-               log::Array{String,1} = ["model created by user with parameters $params"]) = RheologyModel(G, J, Gp, Gpp, params, log)
+RheologyModel(;G::Function = null_modulus,
+               J::Function = null_modulus,
+               Gp::Function = null_modulus,
+               Gpp::Function = null_modulus,
+               params::Vector{T} where T<:Real = [-1.0],
+               log::Vector{String} = ["model created by user with parameters $params"]) = RheologyModel(G, J, Gp, Gpp, params, log)
 
 """
-TEMPORARY STRUCT AS A WORKAROUND FOR THIS JLD ISSUE, FUNCTIONS or STRUCTS CONTAINING
-FUNCTIONS CANNOT BE SAVED. SEE https://github.com/JuliaIO/JLD.jl/issues/57 FOR MORE
-INFORMATION.
+    RheologyDynamic(Gp::Vector{T}, Gpp::Vector{T}, ω::Vector{T}, log::Vector{String}) where T<:Real
+
+RheologyDynamic contains storage modulus, loss modulus and frequency data.
+
+If preferred, an instance can be generated manually by just providing the three data
+vectors in the right order.
+
+# Fields
+
+- Gp: storage modulus
+- Gpp: loss modulus
+- ω: frequency
+- log: a log of struct's events, e.g. preprocessing
 """
-struct RheologyModelTemp
+struct RheologyDynamic{T<:Real}
 
-    G::String
+    # original data
+    Gp::Vector{T}
+    Gpp::Vector{T}
+    ω::Vector{T}
 
-    J::String
-
-    Gp::String
-
-    Gpp::String
-
-    parameters::Array{T,1} where T<:Real
-
-    log::Array{String,1}
+    # operations applied, stores history of which functions (including arguments)
+    log::Vector{String}
 
 end
 
-"""
-    RheologyDynamic(Gp::Vector{T<:Real}, Gpp::Vector{T<:Real}, ω::Vector{T<:Real}, log::Array{String,1})
+eltype(::RheologyDynamic{T}) where T = T
 
-RheologyDynamic struct used for high level interaction with RHEOS
-fitting functions. 
-"""
-struct RheologyDynamic
+function RheologyDynamic(colnames::Vector{String}, data1::Vector{T}, data2::Vector{T}, data3::Vector{T}; filedir::String="none", log::Vector{String}=Array{String}(undef, 0)) where T<:Real
 
-    # original data
-    Gp::Vector{T} where T<:Real
-    Gpp::Vector{T} where T<:Real
-    ω::Vector{T} where T<:Real
+    # checks
+    @assert length(data1)==length(data2) "Data arrays must be same length"
+    @assert length(data1)==length(data3) "Data arrays must be same length"
 
-    # operations applied, stores history of which functions (including arguments)
-    log::Array{String,1}
+    # get data in correct variables
+    data = [data1, data2, data3]
+    Gp = Array{T}(undef, 0)
+    Gpp = Array{T}(undef, 0)
+    ω = Array{T}(undef, 0)
+
+    for (i, v) in enumerate(colnames)
+        if v == "Gp"
+            Gp = data[i]
+        elseif v == "Gpp"
+            Gpp = data[i]
+        elseif v == "frequency"
+            ω = data[i]
+        else
+            @assert false "Incorrect Column Names"
+        end
+    end
+
+    # set up log for three cases, file dir given, derived from other data so filedir
+    # in log already, no file name or log given.
+    if filedir != "none" || length(log)==0
+        push!(log, string("complete data loaded from:", filedir))
+    end
+
+
+
+    # return class with all fields initialised
+    RheologyDynamic(Gp, Gpp, ω, log)
+
+end
+
+function RheologyDynamic(Gp::Vector{T}, Gpp::Vector{T}, ω::Vector{T}; log::Vector{String}=["Manually Created."]) where T<:Real
+
+    RheologyDynamic(Gp, Gpp, ω, log)
 
 end

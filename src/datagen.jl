@@ -1,104 +1,181 @@
 #!/usr/bin/env julia
 
 """
-    stepgen(t_total::Float64, t_on::Float64; t_trans::Float64 = (t_total - t_on)/100.0, amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 1.0)
+    linegen(t_total::Real; stepsize::Real = 1.0)
 
-Generate RheologyData struct with a step function approximated by a logisitic function.
+Generate RheologyData struct with a simple line loading of height 1.0.
+
+# Arguments
+
+- `t_total`: Total time length of data
+- `stepsize`: Time sampling period
 """
-function stepgen(t_total::Float64, 
-                  t_on::Float64;
-                  t_trans::Float64 = 0.0,
-                  amplitude::Float64 = 1.0,
-                  baseval::Float64 = 0.0,
-                  stepsize::Float64 = 1.0)
+function linegen(t_total::Real; stepsize::Real = 1.0)
 
     t = collect(0.0:stepsize:t_total)
 
-    data = Array{Float64,1}(undef, length(t))
+    data = zeros(eltype(t), length(t)) .+ 1.0
+
+    RheologyData(data, t, ["linegen: t_total: $t_total, stepsize: $stepsize"])
+
+end
+
+"""
+    stepgen(t_total::Real, t_on::Real; t_trans::Real = 0.0, stepsize::Real = 1.0)
+
+Generate RheologyData struct with a step loading of height 1.0. If `t_trans` is 0.0 then 
+the step is instantaneous, otherwise the step is approximated by a logistic function 
+approximately centered at `t_on`.
+
+# Arguments
+
+- `t_total`: Total time length of data
+- `t_on`: Step on time
+- `t_trans`: Step transition time
+- `stepsize`: Time sampling period
+"""
+function stepgen(t_total::Real, 
+                  t_on::Real;
+                  t_trans::Real = 0.0,
+                  stepsize::Real = 1.0)
+
+    t = collect(0.0:stepsize:t_total)
+
+    data = similar(t)
     # for smooth transition
     if t_trans>0.0
         k = 10.0/t_trans
-        data = baseval .+ amplitude./(1 .+ exp.(-k*(t.-t_on)))
+        data = 1.0./(1 .+ exp.(-k*(t.-t_on)))
     # discrete jump
     elseif t_trans==0.0
         for (i, t_i) in enumerate(t)
             if t_i>=t_on
-                data[i] = baseval + amplitude
+                data[i] = 1.0
             elseif t_i<t_on
-                data[i] = baseval
+                data[i] = 0.0
             end
         end
     end
 
-    RheologyData(data, t, ["stepgen: t_total: $t_total, t_on: $t_on, t_trans: $t_trans, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
+    RheologyData(data, t, ["stepgen: t_total: $t_total, t_on: $t_on, t_trans: $t_trans, stepsize: $stepsize"])
 
 end
 
 """
-    rampgen(t_total::Float64, t_start::Float64, t_stop::Float64; amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 1.0)
+    rampgen(t_total::Real, t_start::Real, t_stop::Real; amplitude::Real = 1.0, baseval::Real = 0.0, stepsize::Real = 1.0)
 
-Generate RheologyData struct with a ramp function.
+Generate RheologyData struct with a ramp function. Reaches amplitude of 1.0 at t_stop.
+
+# Arguments
+
+- `t_total`: Total time length of data
+- `t_start`: Time for starting ramp
+- `t_stop`: Time of stopping ramp
+- `stepsize`: Time sampling period
 """
-function rampgen(t_total::Float64,
-                  t_start::Float64,
-                  t_stop::Float64;
-                  amplitude::Float64 = 1.0,
-                  baseval::Float64 = 0.0,
-                  stepsize::Float64 = 1.0)
+function rampgen(t_total::Real,
+                  t_start::Real,
+                  t_stop::Real;
+                  stepsize::Real = 1.0)
 
     t = collect(0.0:stepsize:t_total)
 
-    m = amplitude/(t_stop - t_start)
+    # line form is "load = m*t + c"
+    m = 1.0/(t_stop - t_start)
+    c = -1.0*t_start/(t_stop - t_start)
 
-    data = baseval .+ zeros(length(t))
+    data = zeros(length(t))
 
     for (i, v) in enumerate(t)
 
         if t_start<=v<t_stop
-            data[i] += data[i-1] + stepsize*m
+            data[i] += m*v + c
         elseif v>=t_stop
-            data[i] = amplitude
+            data[i] = 1.0
         end
 
     end
 
-    RheologyData(data, t, ["rampgen: t_total: $t_total, t_start: $t_start, t_stop: $t_stop, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
+    RheologyData(data, t, ["rampgen: t_total: $t_total, t_start: $t_start, t_stop: $t_stop, stepsize: $stepsize"])
 
 end
 
 """
-    singen(t_total::Float64, frequency::Float64; t_start::Float64 = 0.0, phase::Float64 = 0.0, amplitude::Float64 = 1.0, baseval::Float64 = 0.0, stepsize::Float64 = 1.0)
+    singen(t_total::Real, frequency::Real; t_start::Real = 0.0, phase::Real = 0.0, stepsize::Real = 1.0)
 
-Generate RheologyData struct with a sinusoidal function.
+Generate RheologyData struct with a sinusoidal loading of amplitude 1.0.
+
+# Arguments
+
+- `t_total`: Total time length of data
+- `frequency`: Frequency of oscillation (Hz)
+- `t_start`: Time for oscillation to begin
+- `phase`: Phase of oscillation (radians)
+- `stepsize`: Time sampling period
 """
-function singen(t_total::Float64,
-                frequency::Float64;
-                t_start::Float64 = 0.0,
-                phase::Float64 = 0.0,
-                amplitude::Float64 = 1.0,
-                baseval::Float64 = 0.0,
-                stepsize::Float64 = 1.0)
+function singen(t_total::Real,
+                frequency::Real;
+                t_start::Real = 0.0,
+                phase::Real = 0.0,
+                stepsize::Real = 1.0)
 
     t = collect(0.0:stepsize:t_total)
 
-    data = baseval .+ zeros(length(t))
+    data = zeros(length(t))
 
     for (i, v) in enumerate(t)
 
         if v>=t_start
-            data[i] += amplitude*sin(2*π*frequency*(v - t_start) + phase)
+            data[i] = sin(2*π*frequency*(v - t_start) + phase)
         end
 
     end
 
-    RheologyData(data, t, ["singen: t_total: $t_total, frequency: $frequency, t_start: $t_start, phase: $phase, amplitude: $amplitude, baseval: $baseval, stepsize: $stepsize"])
+    RheologyData(data, t, ["singen: t_total: $t_total, frequency: $frequency, t_start: $t_start, phase: $phase, stepsize: $stepsize"])
+
+end
+
+"""
+    noisegen(t_total::Real; seed::Union{Int, Nothing} = nothing, stepsize::Real = 1.0)
+
+Generate uniform random noise of maximum amplitude +/- 1.0. If reproducibility is required, 
+always use the same number in the `seed` keyword argument with the same non-negative integer.
+
+# Arguments
+
+- `t_total`: Total time length of data
+- `seed`: Seed used for random number generation
+- `baseval`: Initial amplitude before oscillation started
+- `stepsize`: Time sampling period
+"""
+function noisegen(t_total::Real; seed::Union{Int, Nothing} = nothing, stepsize::Real = 1.0)
+
+    # conditional loading of random as this is the only RHEOS function which requires it
+    @eval import Random: seed!, rand
+
+    t = collect(0.0:stepsize:t_total)
+
+    if seed!=nothing
+        # use specified seed
+        @assert seed>=0 "Seed integer must be non-negative"
+        log = ["noisegen: seed: $seed, stepsize: $stepsize"]
+        seed!(seed)
+    else
+        log = ["noisegen: seed: nothing, stepsize: $stepsize"]
+    end
+
+    data = (2*rand(eltype(t), length(t)) .- 1)
+
+    
+
+    RheologyData(data, t, log)
 
 end
 
 """
     repeatdata(self::RheologyData, n::Integer)
 
-Repeat a given RheologyData generated data set n times.
+Repeat a given RheologyData data set `n` times.
 """
 function repeatdata(self::RheologyData, n::Integer; t_trans = 0.0)
 
@@ -158,31 +235,4 @@ function repeatdata(self::RheologyData, n::Integer; t_trans = 0.0)
 
 end
 
-"""
-    addnoise(self::RheologyData; amplitude::Float64 = 0.1, seed::Union{Int, Nothing} = nothing)
-
-Add random noise to artificially generated data.
-"""
-function addnoise(self::RheologyData; amplitude::Float64 = 0.1, seed::Union{Int, Nothing} = nothing)
-
-    @assert self.σ==self.ϵ "addnoise only works when σ==ϵ which is the state of RheologyData after being generated using the built-in RHEOS data generation functions"
-
-    dataraw = self.σ
-
-    if typeof(seed)==Nothing
-        # get random seed
-        Random.seed!()
-    elseif typeof(seed)<:Int
-        # use specified seed
-        @assert seed>=0 "Seed must be non-negative"
-        Random.seed!(seed)
-    end
-
-    data = dataraw .+ amplitude*(2*rand(Float64, length(dataraw)) .- 1)
-
-    log = vcat(self.log, ["added noise of amplitude $amplitude, with seed $seed"])
-
-    RheologyData(data, self.t, log)
-
-end
 

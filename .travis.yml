@@ -6,7 +6,7 @@ os:
   # - osx
 
 julia:
-  - 1.0.1
+  - 1.0.2
 
 notifications:
   email: false
@@ -14,10 +14,18 @@ notifications:
 jobs:
   include:
     - stage: "Documentation"
-      julia: 1.0.1
+      julia: 1.0.2
+      os: linux
+      script:
+        - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
+        - julia --project=docs/ docs/make.jl
+      after_success: skip
+      
+    - stage: "Testing"
+      julia: 1.0.2
       os: linux
       script:
         - julia -e "using Pkg; Pkg.add(\"Test\"); Pkg.test(\"RHEOS\")"
-        - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
-        - julia --project=docs/ docs/make.jl
-after_success: skip
+      after_success: skip
+
+

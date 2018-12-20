@@ -5,7 +5,7 @@
 #############################
 
 """
-    var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float64; mapback::Bool = false)
+    variableresample(self::RheologyData, refvar::Symbol, pcntdownsample::Real; mapback::Bool = false)
 
 Convert a fixed sample rate array to a variable sample rate, with sampling points
 added according to a relative change in chosen variable `refvar`, 1st derivative
@@ -18,19 +18,28 @@ length vs original length after processing has finished. If data is noisy, may
 benefit from sending smoothed signal to this algorithm and either using mapback
 function or interpolating onto unsmoothed data.
 
-See help docstring for `var_resample` for more details on algorithm implementation.
+Algorithm works as follows. 25 initial samples are generated evenly spread. After this, 
+the array is repeatedly sweeped, anywhere Δy, Δdy/dx, Δd2y/dx2 is greater than a threshold, α,
+a new sample is created at the midpoint of the two tested points. This is allowed to
+happen a maximum of 400 times, after which α is decreased and the process starts again.
+This macro process continues until the desired pcntdownsample ratio has been reached.
+
+# Arguments
+
+- `self`: RheologyData instance
+- `refvar`: The data whose derivatives will determine sample densities
+- `pcntdownsample`: Approximate ratio of new samples to old samples
+- `_mapback = false`: (Optional) Determines whether resampled points should 'snap' to closest original points
 """
-function var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float64; _mapback::Bool = false)
+function variableresample(self::RheologyData, refvar::Symbol, pcntdownsample::Real; _mapback::Bool = true)
+
+    @eval import Interpolations: interpolate, Gridded, Linear
 
     # enforce minimum period of original period/10
     _minperiod = (self.t[2] - self.t[1])/10.0
 
     # get time resampled with respect to refvar
     (tᵦ, dummy)  = var_resample(self.t, getfield(self, refvar), pcntdownsample, _minperiod)
-
-    local σ::Array{Float64,1}
-    local ϵ::Array{Float64,1}
-    local t::Array{Float64,1}
 
     if _mapback
         # get mapped indices wrt original
@@ -42,14 +51,13 @@ function var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float6
         
     elseif !_mapback
         # interpolate with respect to t
-        σ_interp = Interpolations.interpolate((self.t,), self.σ, Interpolations.Gridded(Interpolations.Linear()))
-        ϵ_interp = Interpolations.interpolate((self.t,), self.ϵ, Interpolations.Gridded(Interpolations.Linear()))
-        t_interp = Interpolations.interpolate((self.t,), self.t, Interpolations.Gridded(Interpolations.Linear()))
+        σ_interp = Base.invokelatest(interpolate, (self.t,), self.σ, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
+        ϵ_interp = Base.invokelatest(interpolate, (self.t,), self.σ, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
 
         # resample all using new timepoints tᵦ
         σ = σ_interp[tᵦ]
         ϵ = ϵ_interp[tᵦ]
-        t = t_interp[tᵦ]
+        t = tᵦ
     end
 
     # change sampling type to variable
@@ -63,17 +71,20 @@ function var_resample(self::RheologyData, refvar::Symbol, pcntdownsample::Float6
 end
 
 """
-    downsample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1})
+    downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer) 
 
-High-level RheologyData interface to downsample in base.jl. Boundaries are floating point times which are then converted to the closest elements.
+Boundaries are floating point times which are then converted to the closest elements. Works by just
+reducing on indices. For example, time_boundaries could be [0.0, 10.0, 100.0] and elperiods could be
+[2, 4]. So new data would take every 2nd element from 0.0 seconds to 10.0 seconds, then every 4th element
+from 10.0 seconds to 100.0 seconds.
 """
-function downsample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1})
+function downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer) 
 
     # convert boundaries from times to element indicies
     boundaries = closestindices(self.t, time_boundaries)
 
     # get downsampled indices
-    indices = downsample(boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
+    indices = downsample(boundaries, elperiods)
 
     # downsample data
     σ = self.σ[indices]
@@ -96,11 +107,15 @@ function downsample(self::RheologyData, time_boundaries::Array{Float64,1}, elper
 end
 
 """
-    fixed_resample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
+    fixedresample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{K} where K<:Integer, direction::Vector{String})
 
-High-level RheologyData interface to fixed_resample in base.jl
+Resample data with new sample rate(s).
+
+Whereas downsample can only reduce the sample rate by not taking every array element,
+fixedresample can also upsample. Whether to up or down sample for a given section is known
+from the `direction` argument.
 """
-function fixed_resample(self::RheologyData, time_boundaries::Array{Float64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
+function fixedresample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{K} where K<:Integer, direction::Vector{String})
 
     # convert boundaries from times to element indicies
     boundaries = closestindices(self.t, time_boundaries)
@@ -125,31 +140,29 @@ function fixed_resample(self::RheologyData, time_boundaries::Array{Float64,1}, e
 end
 
 """
-    smooth(self::RheologyData, τ::Float64)
+    smooth(self::RheologyData, τ::Real; pad::String="replicate")
 
 Smooth data using a Gaussian Kernel to time scale τ (approximately half power).
 
-Smooths both σ and ϵ.
+Smooths both σ and ϵ. Essentially a low pass filter with frequencies of 1/τ being cut to approximately
+half power. For other pad types available see ImageFiltering documentation.
 """
-function smooth(self::RheologyData, τ::Float64)
+function smooth(self::RheologyData, τ::Real; pad::String="reflect")
 
-    @assert self.sampling=="constant" "Sample rate must be constant for Gaussian smoothing kernel to function properly"
+    @eval import ImageFiltering: imfilter, Kernel
 
-    t = self.t
+    # get sample-rate and Gaussian kernel (std. dev)
+    samplerate = 1.0/getsampleperiod(self.t)
+    Σ = getsigma(τ, samplerate)
 
-    # get constant sample period
-    dt = t[2] - t[1]
-
-    # sample rate
-    samplerate = 1.0/dt;
-
-    σ = smoothgauss(self.σ, τ, samplerate)
-    ϵ = smoothgauss(self.ϵ, τ, samplerate)
+    # smooth signal and return
+    σ = Base.invokelatest(imfilter, self.σ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
+    ϵ = Base.invokelatest(imfilter, self.ϵ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
 
     # add record of operation applied
     log = vcat(self.log, "smooth - τ: $τ")
 
-    self_new = RheologyData(σ, ϵ, t, self.sampling, log)
+    self_new = RheologyData(σ, ϵ, self.t, self.sampling, log)
 
 end
 
@@ -178,33 +191,47 @@ function mapbackdata(self_new::RheologyData, self_original::RheologyData)
 
 end
 
+"""
+    function zerotime(self::RheologyData)
+
+Convenience function to normalize time such that the starting time is 0.0
+"""
+function zerotime(self::RheologyData)
+
+    return RheologyData(self.σ, self.ϵ, self.t .- minimum(self.t), self.sampling, vcat(self.log, ["Normalized time to start at 0.0"]))
+
+end
+
 ##########################
 #~ Processing Functions ~#
 ##########################
 
 """
-    modelfit(data::RheologyData, modulus::Function[, p0::Array{Float64,1}, lo::Array{Float64,1}, hi::Array{Float64,1}; verbose::Bool = false])
+    modelfit(data::RheologyData, model::RheologyModel, modtouse::Symbol; p0::Vector{T} = [-1.0], lo::Vector{T} = [-1.0], hi::Vector{T} = [-1.0], verbose::Bool = false, rel_tol = 1e-4, diff_method="BD") where T<:Real
 
 Fit RheologyData struct to model and return a fitted model as a RheologyModel object.
 
 # Arguments
 
 - `data`: RheologyData struct containing all data
-- `modulus`: E.g. G_SLS, J_springpot etc. See base_models.jl for full list
-- `p0`: Initial parameters to use in fit
+- `model`: RheologyModel containing moduli and default (initial) parameters
+- `modtouse`: :G for relaxation modulus, :J for creep modulus
+- `p0`: Initial parameters to use in fit (uses 'model' parameters if none given)
 - `lo`: Lower bounds for parameters
-- `hi`: Higher bounds for parameters
+- `hi`: Upper bounds for parameters
 - `verbose`: If true, prints parameters on each optimisation iteration
+- `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
+- `diff_method`: Set finite difference formula to use for derivative, currently "BD" or "CD"
 """
 function modelfit(data::RheologyData,
                   model::RheologyModel,
                   modtouse::Symbol;
-                  p0::Array{Float64,1} = [-1.0],
-                  lo::Array{Float64,1} = [-1.0],
-                  hi::Array{Float64,1} = [-1.0],
+                  p0::Vector{T} = [-1.0],
+                  lo::Vector{T} = [-1.0],
+                  hi::Vector{T} = [-1.0],
                   verbose::Bool = false,
                   rel_tol = 1e-4,
-                  diff_method="BD")::RheologyModel
+                  diff_method="BD") where T<:Real
 
     # get modulus function
     modulus = getfield(model, modtouse)
@@ -263,11 +290,15 @@ function modelfit(data::RheologyData,
 end
 
 """
-    modelpredict(data::RheologyData, model::RheologyModel)
+    modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; diff_method="BD")
 
-Given data and model and parameters, predict new dataset based on both.
+Given data and model, return new dataset based on model parameters and using the
+modulus specified by 'modtouse'; either creep modulus (:J, only returned strain is new) or 
+relaxation modulus (:G, only returned stress is new). 'diff_method' sets finite difference for 
+calculating the derivative used in the hereditary integral and can be either backwards difference
+("BD") or central difference ("CD").
 """
-function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; diff_method="BD")::RheologyData
+function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; diff_method="BD")
 
     # get modulus
     modulus = getfield(model, modtouse)
@@ -354,6 +385,25 @@ function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol
 
 end
 
+"""
+    modelstepfit(data::RheologyData, model::RheologyModel, modtouse::Symbol; p0::Vector{T} = [-1.0], lo::Vector{T} = [-1.0], hi::Vector{T} = [-1.0], verbose::Bool = false, rel_tol = 1e-4) where T<:Real
+
+Same as 'modelfit' except assumes a step loading. If this assumption is appropriate for the data
+then fitting can be sped up greatly by use of this function. If modtouse is :G, relaxation modulus,
+then the first element of the strain is assumed to be the amplitude of the step. If modtouse is :j,
+creep modulus, then the first element of the stress is assumed to be the amplitude of the step.
+
+# Arguments
+
+- `data`: RheologyData struct containing all data
+- `model`: RheologyModel containing moduli and default (initial) parameters
+- `modtouse`: :G for relaxation modulus, :J for creep modulus
+- `p0`: Initial parameters to use in fit (uses 'model' parameters if none given)
+- `lo`: Lower bounds for parameters
+- `hi`: Upper bounds for parameters
+- `verbose`: If true, prints parameters on each optimisation iteration
+- `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
+"""
 function modelstepfit(data::RheologyData,
                   model::RheologyModel,
                   modtouse::Symbol;
@@ -403,7 +453,13 @@ function modelstepfit(data::RheologyData,
 
 end
 
-function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; step_on::Real = 0.0)::RheologyData
+"""
+    modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; step_on::Real = 0.0)
+
+Same as modelpredict but assumes a step loading with step starting at 'step_on'. Singularities are bypassed
+by adding 1 to the index of the singular element. 
+"""
+function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; step_on::Real = 0.0)
 
     # get modulus
     modulus = getfield(model, modtouse)
@@ -546,6 +602,28 @@ function obj_dynamic_manual(params::Vector{T},
     cost = weights[1]*costGp + weights[2]*costGpp
 end
 
+"""
+    dynamicmodelfit(data::RheologyDynamic, model::RheologyModel; p0::Vector{T} = [-1.0], lo::Vector{T} = [-1.0], hi::Vector{T} = [-1.0], verbose::Bool = false, rel_tol = 1e-4) where T<:Real
+
+Fits model to the frequency/loss+storage moduli data.
+
+All arguments are as described below. The 'weights' argument some more information.
+As this fitting procedure is fitting two functions simultaneously (the storage
+and loss moduli), if left untransformed the fit would tend to favour the 
+modulus which is larger in magnitude and not fit the other modulus well. To avoid this,
+RHEOS offers a number of data transforms which can be used. 
+
+# Arguments
+
+- `data`: RheologyDynamic struct containing all data
+- `model`: RheologyModel containing moduli and default (initial) parameters
+- `p0`: Initial parameters to use in fit (uses 'model' parameters if none given)
+- `lo`: Lower bounds for parameters
+- `hi`: Upper bounds for parameters
+- `verbose`: If true, prints parameters on each optimisation iteration
+- `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
+- `weights`: Weighting mode for storage and loss modulus (see above)
+"""
 function dynamicmodelfit(data::RheologyDynamic,
                 model::RheologyModel;
                 p0::Vector{T} = [-1.0],
@@ -580,7 +658,9 @@ function dynamicmodelfit(data::RheologyDynamic,
         min_objective!(opt, (params, grad) -> obj_dynamic(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
 
     elseif weights=="linear"
-        min_objective!(opt, (params, grad) -> obj_dynamic_linear(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, mean(data.Gp), mean(data.Gpp); _insight = verbose))
+        meanGp = sum(data.Gp)/length(data.Gp)
+        meanGpp = sum(data.Gp)/length(data.Gp)
+        min_objective!(opt, (params, grad) -> obj_dynamic_linear(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, meanGp, meanGpp; _insight = verbose))
 
     elseif weights=="log"
         min_objective!(opt, (params, grad) -> obj_dynamic_log(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
@@ -608,6 +688,13 @@ function dynamicmodelfit(data::RheologyDynamic,
 
 end
 
+"""
+    dynamicmodelpredict(data::RheologyDynamic, model::RheologyModel)
+
+Given dynamic rheology data and model, return new dataset based on model parameters.
+Returns another RheologyDynamic instance with the predicted Gp and Gpp based on the
+frequencies and model parameters.
+"""
 function dynamicmodelpredict(data::RheologyDynamic, model::RheologyModel)
 
     # get results

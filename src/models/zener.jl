@@ -11,13 +11,13 @@ G_fraczener(t::Vector{T}, params::Vector{T}) where T<:Real = G_fraczener.(t, (pa
 function J_fraczener(t::Vector{T}, params::Vector{T}) where T<:Real
     cₐ, a, cᵦ, β, cᵧ, γ = params
 
-    Jbar(s) = (1/s)*(cₐ*s^a + cᵦ*s^β)/(cₐ*s^a*cᵦ*s^β + cᵧ*s^γ*(cₐ*s^a + cᵦ*s^β))
+    Ĵ(s) = (1/s)*(cₐ*s^a + cᵦ*s^β)/(cₐ*s^a*cᵦ*s^β + cᵧ*s^γ*(cₐ*s^a + cᵦ*s^β))
 
-    # method gives NaN at time 0.0
-    # J = InverseLaplace.ILt(s -> Jbar(s))
+    # # method gives NaN at time 0.0
+    # J = InverseLaplace.ILt(s -> Ĵ(s))
     # return [J(t_val) for t_val in t]
 
-    return InverseLaplace.talbotarr(s -> Jbar(s), t)
+    return InverseLaplace.talbotarr(s -> Ĵ(s), t)
 end
 
 function Gp_fraczener(ω::T, params::Vector{T}) where T<:Real
@@ -42,8 +42,13 @@ function Gpp_fraczener(ω::T, params::Vector{T}) where T<:Real
 end
 Gpp_fraczener(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_fraczener.(ω, (params,))
 
-FractionalZener() = RheologyModel(G_fraczener, J_fraczener, Gp_fraczener, Gpp_fraczener, [1.0, 0.7, 1.0, 0.5, 1.0, 0.2], ["model created with default parameters"])
+"""
+    FractionalZener([params::Vector{T}]) where T<:Real 
+
+2 springpots in series, both in parallel with a springpot.
+"""
 FractionalZener(params::Vector{T}) where T<:Real = RheologyModel(G_fraczener, J_fraczener, Gp_fraczener, Gpp_fraczener, params, ["model created by user with parameters $params"])
+FractionalZener() = RheologyModel(G_fraczener, J_fraczener, Gp_fraczener, Gpp_fraczener, [1.0, 0.7, 1.0, 0.5, 1.0, 0.2], ["model created with default parameters"])
 
 # Fractional Standard Linear Solid in (Fractional) Maxwell Form
 function G_fracsls(t::T, params::Vector{T}) where T<:Real
@@ -56,13 +61,13 @@ G_fracsls(t::Vector{T}, params::Vector{T}) where T<:Real = G_fracsls.(t, (params
 function J_fracsls(t::Vector{T}, params::Vector{T}) where T<:Real
     cₐ, a, kᵦ, kᵧ = params
 
-    Jbar(s) = (1/s)*(cₐ*s^a + kᵦ)/(cₐ*s^a*kᵦ + kᵧ*(cₐ*s^a + kᵦ))
-    
+    Ĵ(s) = (1/s)*(cₐ*s^a + kᵦ)/(cₐ*s^a*kᵦ + kᵧ*(cₐ*s^a + kᵦ))
+
     # method gives NaN at time 0.0
-    # J = InverseLaplace.ILt(s -> Jbar(s))
+    # J = InverseLaplace.ILt(s -> Ĵ(s))
     # return [J(t_val) for t_val in t]
 
-    return InverseLaplace.talbotarr(s -> Jbar(s), t)
+    return InverseLaplace.talbotarr(s -> Ĵ(s), t)
 end
 
 function Gp_fracsls(ω::T, params::Vector{T}) where T<:Real
@@ -83,12 +88,17 @@ function Gpp_fracsls(ω::T, params::Vector{T}) where T<:Real
 
     numerator = kᵦ^2*(cₐ*ω^a)*sin(a*π/2)
 
-    Gpp = numerator/denominator 
+    Gpp = numerator/denominator
 end
 Gpp_fracsls(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_fracsls.(ω, (params,))
 
-FractionalSLS() = RheologyModel(G_fracsls, J_fracsls, Gp_fracsls, Gpp_fracsls, [0.5, 0.5, 1.0, 0.2], ["model created with default parameters"])
+"""
+    FractionalSLS([params::Vector{T}]) where T<:Real
+
+A springpot and spring in series, both in parallel with a spring.
+"""
 FractionalSLS(params::Vector{T}) where T<:Real = RheologyModel(G_fracsls, J_fracsls, Gp_fracsls, Gpp_fracsls, params, ["model created by user with parameters $params"])
+FractionalSLS() = RheologyModel(G_fracsls, J_fracsls, Gp_fracsls, Gpp_fracsls, [0.5, 0.5, 1.0, 0.2], ["model created with default parameters"])
 
 # Standard Linear Solid in Maxwell Form
 function G_sls(t::T, params::Vector{T}) where T<:Real
@@ -133,5 +143,10 @@ function Gpp_sls(ω::T, params::Vector{T}) where T<:Real
 end
 Gpp_sls(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_sls.(ω, (params,))
 
-SLS() = RheologyModel(G_sls, J_sls, Gp_sls, Gpp_sls, [1.0, 0.5, 1.0], ["model created with default parameters"])
+"""
+    SLS(params::Vector{T}) where T<:Real
+
+A spring and dashpot in series, both in parallel with a spring.
+"""
 SLS(params::Vector{T}) where T<:Real = RheologyModel(G_sls, J_sls, Gp_sls, Gpp_sls, params, ["model created by user with parameters $params"])
+SLS() = RheologyModel(G_sls, J_sls, Gp_sls, Gpp_sls, [1.0, 0.5, 1.0], ["model created with default parameters"])

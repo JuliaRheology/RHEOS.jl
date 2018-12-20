@@ -1,16 +1,14 @@
 #!/usr/bin/env julia
-# using RHEOS
-# using PyPlot
+using RHEOS
+using PyPlot
 
-filedir = "../data/rheologyData1_incomplete.csv"
+filedir = "DataIncomplete.csv"
 
-data_partial = fileload(["time", "strain"], filedir)
+data = importdata(["strain", "time"], filedir)
 
-data_resampled = fixed_resample(data_partial, [0.0, 40.0], [8], ["up"])
+model = SLS([500.0, 100.0, 50.0])
 
-model = SLS([843.149, 2024.2, 5.22901])
-
-predicted = modelpredict(data_resampled, model, :G)
+predicted = modelpredict(data, model, :G)
 
 fig, ax = subplots()
 ax[:plot](predicted.t, predicted.σ, label="SLS")

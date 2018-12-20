@@ -36,8 +36,13 @@ function Gpp_fractKV(ω::T, params::Vector{T}) where T<:Real
 end
 Gpp_fractKV(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_fractKV.(ω, (params,))
 
-FractionalKelvinVoigt() = RheologyModel(G_fractKV, J_fractKV, Gp_fractKV, Gpp_fractKV, [2.0, 0.2, 1.0, 0.5], ["model created with default parameters"])
+"""
+    FractionalKelvinVoigt([params::Vector{T}]) where T<:Real
+
+Two springpots in parallel.
+"""
 FractionalKelvinVoigt(params::Vector{T}) where T<:Real = RheologyModel(G_fractKV, J_fractKV, Gp_fractKV, Gpp_fractKV, params, ["model created by user with parameters $params"])
+FractionalKelvinVoigt() = RheologyModel(G_fractKV, J_fractKV, Gp_fractKV, Gpp_fractKV, [2.0, 0.2, 1.0, 0.5], ["model created with default parameters"])
 
 # Fraction Kelvin-Voigt model with lower spring-pot specialized to a spring
 function G_fractKVspring(t::T, params::Vector{T}) where T<:Real
@@ -73,8 +78,13 @@ function Gpp_fractKVspring(ω::T, params::Vector{T}) where T<:Real
 end
 Gpp_fractKVspring(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_fractKVspring.(ω, (params,))
 
-FractionalKVspring() = RheologyModel(G_fractKVspring, J_fractKVspring, Gp_fractKVspring, Gpp_fractKVspring, [2.0, 0.2, 1.0], ["model created with default parameters"])
+"""
+    FractionalKVspring([params::Vector{T}]) where T<:Real
+
+A springpot and spring in parallel.
+"""
 FractionalKVspring(params::Vector{T}) where T<:Real = RheologyModel(G_fractKVspring, J_fractKVspring, Gp_fractKVspring, Gpp_fractKVspring, params, ["model created by user with parameters $params"])
+FractionalKVspring() = RheologyModel(G_fractKVspring, J_fractKVspring, Gp_fractKVspring, Gpp_fractKVspring, [2.0, 0.2, 1.0], ["model created with default parameters"])
 
 # Fraction Kelvin-Voigt model with upper spring-pot specialized to a dash-pot
 function G_fractKVdashpot(t::T, params::Vector{T}) where T<:Real
@@ -115,8 +125,13 @@ function Gpp_fractKVdashpot(ω::T, params::Vector{T}) where T<:Real
 end
 Gpp_fractKVdashpot(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_fractKVdashpot.(ω, (params,))
 
-FractionalKVdashpot() = RheologyModel(G_fractKVdashpot, J_fractKVdashpot, Gp_fractKVdashpot, Gpp_fractKVdashpot, [2.0, 0.2, 1.0], ["model created with default parameters"])
+"""
+    FractionalKVdashpot([params::Vector{T}]) where T<:Real
+
+A springpot and dashpot in parallel.
+"""
 FractionalKVdashpot(params::Vector{T}) where T<:Real = RheologyModel(G_fractKVdashpot, J_fractKVdashpot, Gp_fractKVdashpot, Gpp_fractKVdashpot, params, ["model created by user with parameters $params"])
+FractionalKVdashpot() = RheologyModel(G_fractKVdashpot, J_fractKVdashpot, Gp_fractKVdashpot, Gpp_fractKVdashpot, [2.0, 0.2, 1.0], ["model created with default parameters"])
 
 # Standard Kelvin-Voigt model
 function G_KV(t::T, params::Vector{T}) where T<:Real
@@ -148,5 +163,10 @@ function Gpp_KV(ω::T, params::Vector{T}) where T<:Real
 end
 Gpp_KV(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_KV.(ω, (params,))
 
-KelvinVoigt() = RheologyModel(G_KV, J_KV, Gp_KV, Gpp_KV, [2.0, 1.0], ["model created with default parameters"])
+"""
+    KelvinVoigt([params::Vector{T}]) where T<:Real
+
+A spring and dashpot in parallel.
+"""
 KelvinVoigt(params::Vector{T}) where T<:Real = RheologyModel(G_KV, J_KV, Gp_KV, Gpp_KV, params, ["model created by user with parameters $params"])
+KelvinVoigt() = RheologyModel(G_KV, J_KV, Gp_KV, Gpp_KV, [2.0, 1.0], ["model created with default parameters"])

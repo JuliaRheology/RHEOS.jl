@@ -8,7 +8,7 @@ end
 function J_jeffreys_PT(t::Array{T,1}, params::Array{T,1}) where T<:Real
     η₁, k, η₂ = params
 
-    J = (1 - exp.(-k*t/η₁))/k + t/η₂
+    J = (- exp.(-k*t/η₁) .+ 1 )/k + t/η₂
 end
 
 function Gp_jeffreys_PT(ω::Array{T,1}, params::Array{T,1}) where T<:Real

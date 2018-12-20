@@ -17,12 +17,12 @@ function trapz(y::Vector{T}, x::Vector{T}; init::T=0.0) where T<:Real
     n = length(x)
 
     @assert n==length(y) "X and Y array length must match."
-       
+
     # init*2 to simplify final division by 2
     r = 2.0*init
 
     if n==1; return r; end
-    
+
     # trapezoidal rule
     @inbounds for i in 2:length(x)
         r += (y[i-1] + y[i])*(x[i] - x[i-1])
@@ -53,7 +53,7 @@ function derivCD(y::Vector{T}, x::Vector{T}) where T<:Real
 
     # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
     # this is a physical assumption that material is at rest before first data point.
-    @inbounds ydot[1] = (y[1] - 0.0)/(x[2] - x[1]) 
+    @inbounds ydot[1] = (y[1] - 0.0)/(x[2] - x[1])
 
     # central difference with uneven spacing for general case of constant or variable sample rate
     @inbounds for i in 2:(N-1)
@@ -89,7 +89,7 @@ function derivBD(y::Vector{T}, x::Vector{T}) where T<:Real
 
     # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
     # this is a physical assumption that material is at rest before first data point.
-    @inbounds ydot[1] = (y[1] - 0.0)/(x[2] - x[1]) 
+    @inbounds ydot[1] = (y[1] - 0.0)/(x[2] - x[1])
 
     # backwards difference method for rest of points
     @inbounds for i in 2:N
@@ -114,7 +114,15 @@ function constantcheck(t::Vector{T} where T<:Real)
     diff = round.(t[2:end]-t[1:end-1]; digits=4)
     # check if any element is not equal to 1st element
     check = !any(x -> x != diff[1], diff)
-    
+
+end
+
+function getsampleperiod(t::Vector{T} where T<:Real)
+
+    @assert constantcheck(t) "Sample-rate must be constant"
+
+    rate = t[2]-t[1]
+
 end
 
 function sampleratecompare(t1::Vector{T}, t2::Vector{T}) where T<:Real
@@ -122,10 +130,10 @@ function sampleratecompare(t1::Vector{T}, t2::Vector{T}) where T<:Real
     @assert constantcheck(t1) "Sample-rate of both arguments must be constant, first argument is non-constant"
     @assert constantcheck(t2) "Sample-rate of both arguments must be constant, second argument is non-constant"
 
-    diff1 = round.(t1[2:end]-t1[1:end-1]; digits=4)
-    diff2 = round.(t2[2:end]-t2[1:end-1]; digits=4)
+    diff1 = getsampleperiod(t1)
+    diff2 = getsampleperiod(t2)
 
-    diff1[1] == diff2[1]
+    diff1 == diff2
 
 end
 
@@ -143,32 +151,12 @@ faster will be increasingly cut. Called by smoothgauss function.
 """
 function getsigma(τ::Real, samplerate::Real)
 
-    # smoothing frequency to reduce to half power
+    # get freq, reduce to half power and generate gaussian std. deviation
     smoothfreq = 1.0/τ
 
-    # reduce to half power
     sF_halfpower = smoothfreq/sqrt(2.0*log(2.0))
 
-    # calculate std deviation and return
     σ = samplerate/(2.0*π*sF_halfpower)
-
-end
-
-"""
-    smoothgauss(yArray, τ, samplerate[; pad="replicate"])
-
-Smooth a signal using a Gaussian kernel.
-
-Essentially a low pass filter with frequencies of 1/τ being cut to approximately
-half power. For other pad types available see ImageFiltering documentation.
-"""
-function smoothgauss(yArray::Vector{T} where T<:Real, τ::Real, samplerate::Real; pad::String="replicate")
-
-    # get standard deviation for Gaussian kernel
-    σ = getsigma(τ, samplerate)
-
-    # smooth signal and return
-    smooth = ImageFiltering.imfilter(yArray, ImageFiltering.Kernel.reflect(ImageFiltering.Kernel.gaussian((σ,))), pad)
 
 end
 
@@ -203,6 +191,8 @@ See source code for more implementation details.
 """
 function var_resample(tᵢ::Vector{T}, yᵢ::Vector{T}, pcntdownsample::T, minperiod::T; minsamplenum::Integer = 25) where T<:Real
 
+    @eval using Interpolations
+
     @assert length(tᵢ)==length(yᵢ) "X and Y arrays must have same length."
 
     # length of original arrays
@@ -210,19 +200,19 @@ function var_resample(tᵢ::Vector{T}, yᵢ::Vector{T}, pcntdownsample::T, minpe
 
     # interpolated, callable versions of y and z arrays. No need to interpolate
     # t as it is linear (fixed dt, monotonically increasing)
-    yInterp = Interpolations.interpolate((tᵢ,), yᵢ, Interpolations.Gridded(Interpolations.Linear()))
+    yInterp = Base.invokelatest(interpolate, (tᵢ,), yᵢ, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
 
     # initialise arrays for resampled data
-    xInit = zeros(T, minsamplenum)
-    yInit = zeros(T, minsamplenum)
+    xInit = zeros(T, minsamplenum + 1)
+    yInit = zeros(T, minsamplenum + 1)
 
     # variables for generating correct intervals during initial sweep
-    minsamplenum -= 1 # correction due integer rounding
     modNum = div(originalSize, minsamplenum)
 
     # initial sweep
     initCounter = 1
-    @inbounds for i in 1:originalSize
+    # @inbounds for i in 1:originalSize
+    for i in 1:originalSize
         if mod(i-1, modNum) == 0
             xInit[initCounter] = tᵢ[i]
             yInit[initCounter] = yᵢ[i]
@@ -317,8 +307,8 @@ function closestindex(x::Vector{T} where T<:Real, val::Real)
     dxbest = abs(x[ibest]-val)
 
     # loop through all elements, looking for smallest difference
-    for I in eachindex(x)
-        @inbounds dx = abs(x[I]-val)
+    @inbounds for I in eachindex(x)
+        dx = abs(x[I]-val)
         if dx < dxbest
             dxbest = dx
             ibest = I
@@ -337,71 +327,43 @@ returns array of indices.
 closestindices(x::Vector{T}, vals::Vector{T}) where T<:Real = broadcast(closestindex, (x,), vals)
 
 """
-    mapback(xᵦ::Array{Float64,1}, x::Array{Float64,1})
+    mapback(x₁, x₀)
 
-Match a variable downsampled array xᵦ to its closest possible elements in original
-array x. Returns the array of unique indices corresponding to these matched elements.
+Match a resampled array x₁ to its closest possible elements in original
+array x₀. Returns the array of unique indices corresponding to these matched elements.
 
 Can be used after variable resampling to maintain resampling priorities whilst
 not interfering with data of the fidelity by use of interpolations. Can also be
 useful to ensure no region of the original data has been oversampled as duplicate
 indices are deleted.
 """
-function mapback(xᵦ::Array{Float64,1}, x::Array{Float64,1})
+function mapback(x₁::Vector{T}, x₀::Vector{T}; return_indices=true) where T<:Real
 
-    # array to store indices
-    indices = zeros(Int32, length(xᵦ))
-
-    # loop through all values in resampled array, finding closest index in original array
-    for i in 1:length(xᵦ)
-        @inbounds iClosest = closestindex(x, xᵦ[i])
-        @inbounds indices[i] = iClosest
-    end
+    # get indices
+    indices = closestindices(x₀, x₁)
 
     # remove duplicates
     indices = unique(indices)
 
-    # return indices, can be then used like xᵩ = x[indices]
-    indices
+    if return_indices
+        return indices
+    else
+        return x₀[indices]
+    end
 end
 
-"""
-    downsample(boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
-
-Reduce indices.
-
-Can be applied to the whole array using boundaries
-[1,length(array_to_downsample)] or using different spacers for different parts
-of the data.
-
-# Example
-
-```julia-repl
-julia> x = collect(1.0:1.0:15.0);
-
-julia> newIndices = downsample([1,5,11,length(x)], [2,3,1]);
-
-julia> println(x)
-[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0]
-
-julia> println(x[newIndices])
-[1.0, 3.0, 5.0, 8.0, 11.0, 12.0, 13.0, 14.0, 15.0]
-```
-"""
-function downsample(boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
+function downsample(boundaries::Vector{T}, elperiods::Vector{T}) where T<:Integer
 
     # assert correct function signature
     @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
 
     # initialise indices array
-    indices = zeros(Int64,0)
+    indices = zeros(Integer, 0)
 
     # loop through, skipping elements as required
     for i in 1:length(boundaries)-1
-
         # get indices for this 'section'
         indicesCur = boundaries[i]:elperiods[i]:boundaries[i+1]
-
         # append
         append!(indices, collect(indicesCur))
     end
@@ -433,16 +395,18 @@ julia> println(x1)
 [1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 5.25, 5.5, 5.75, 6.0, 6.25, 6.5, 6.75, 7.0]
 ```
 """
-function fixed_resample(x::Array{Float64,1}, y::Array{Float64,1},
-                        boundaries::Array{Int64,1}, elperiods::Array{Int64,1},
-                        direction::Array{String,1})
+function fixed_resample(x::Vector{T}, y::Vector{T},
+                        boundaries::Vector{U}, elperiods::Vector{U},
+                        direction::Array{String,1}) where T<:Real where U<:Integer
+
+    @eval using Interpolations
 
     # assert correct function signature
     @assert length(x)==length(y) "X and Y arrays must have same length."
     @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
 
     # y as callable interpolations, used for upsampled regions
-    yInterp = Interpolations.interpolate((x,), y, Interpolations.Gridded(Interpolations.Linear()))
+    yInterp = Base.invokelatest(interpolate, (x,), y, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
 
     # initialise resampled arrays as empty
     xᵦ = zeros(Float64,0)
@@ -493,10 +457,10 @@ function singularitytest(modulus::Function, params::Array{T, 1}; t1::T=0.0) wher
 
     startval = modulus([t1], params)[1]
 
-    if startval == NaN || startval == Inf
+    if isnan(startval) || startval == Inf
         return true
     else
-        return false 
+        return false
     end
 
 end
@@ -524,7 +488,7 @@ function boltzintegral_nonsing(modulus::Function, time_series::Array{Float64,1},
     time_mod = vcat([time_previous], time_series)
     # material is assumed at rest at this 'previous' time
     prescribed_dot_mod = vcat([0.0], prescribed_dot)
-    
+
     I = zeros(length(time_mod))
     @inbounds for (i,v) in enumerate(time_mod)
         # generate integral for each time step
@@ -536,11 +500,11 @@ function boltzintegral_nonsing(modulus::Function, time_series::Array{Float64,1},
         I[i] = trapz(intergrand, τ)
     end
 
-    # fix initial point 
+    # fix initial point
     # I[2] = (prescribed_dot[1]*modulus([0.0], params)*(time_series[2] - time_series[1]))[1]
     # to catch weird bug in InverseLaplace
     I[2] = (prescribed_dot[1]*modulus(time_series, params)*(time_series[2] - time_series[1]))[1]
-    
+
     return I[2:end]
 
 end
@@ -587,13 +551,13 @@ function boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, pa
 
     # init time diff, used to cope with singularity
     init_offset = (time_series[2] - time_series[1])/10.0
-    
+
     # need to add an additional 'previous' time point to capture any instantaneous loading
     time_previous = time_series[1] - (time_series[2] - time_series[1])
     time_mod = vcat([time_previous], time_series)
     # material is assumed at rest at this 'previous' time
     prescribed_dot_mod = vcat([0.0], prescribed_dot)
-        
+
     I = zeros(length(time_mod))
     @inbounds for (i,v) in enumerate(time_mod)
         # generate integral for each time step
@@ -606,9 +570,9 @@ function boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, pa
         I[i] = trapz(intergrand, τ)
     end
 
-    # fix initial point 
+    # fix initial point
     I[2] = (prescribed_dot[1]*modulus([init_offset], params)*(time_series[2] - time_series[1]))[1]
-    
+
     return I[2:end]
 
 end
@@ -916,7 +880,7 @@ end
 function leastsquares_stepinit(params_init::Array{Float64,1}, low_bounds::Array{Float64,1},
                            hi_bounds::Array{Float64,1}, modulus::Function,
                            time_series::Array{Float64,1}, prescribed::Float64,
-                           measured::Array{Float64,1}; insight::Bool = false, 
+                           measured::Array{Float64,1}; insight::Bool = false,
                            singularity::Bool = false, _rel_tol = 1e-4)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
