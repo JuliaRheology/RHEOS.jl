@@ -1,5 +1,6 @@
 #!/usr/bin/env julia
 
+export RheoTimeData, RheoTimeDataType, RheoFreqData, RheoFreqDataType
 
 # This defines the data type for all arrays, parameters and processing
 RheoFloat = Float32
@@ -114,7 +115,7 @@ end
 
 
 function RheoFreqData(;Gp::Vector{T1} = empty_rheodata_vector, Gpp::Vector{T2} = empty_rheodata_vector, ω::Vector{T3} = empty_rheodata_vector, info="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
-    s_datatype = string("Data type: ",check_frep_data_consistency(ω,Gp,Gpp))
+    s_datatype = string("Data type: ",check_freq_data_consistency(ω,Gp,Gpp))
     RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω), [info,s_datatype])
 end
 
