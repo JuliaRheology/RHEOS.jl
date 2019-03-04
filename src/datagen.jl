@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 
-export time_line,strainfunction!,stressfunction!
+export time_line,strainfunction,stressfunction
 
 #- timeline(end; start=0; stepsize=(end-start)/250)
 #	→ RheolTimeData with time only defined
@@ -42,7 +42,85 @@ end
 
 
 
+#
+#   These functions provide convenient tools to design steps, ramps and
+#   other input patterns for the stress and strain data
+#
+#   Functions may also return an anonimous function if the parameter t is omitted.
+#   
 
+
+function strainfunction(d::RheoTimeData, f, info="Apply strain function")
+    return RheoTimeData(d.σ,convert(Vector{RheoFloat},map(f,d.t)),d.t, vcat(d.log, [info]))
+end
+
+function stressfunction(d::RheoTimeData, f, info="Apply stress function")
+    return RheoTimeData(convert(Vector{RheoFloat},map(f,d.t)), d.ϵ, d.t, vcat(d.log, [info]))
+end
+
+
+export hstep, ramp, stairs, square, sawtooth, triangle
+
+
+function hstep(t;offset=0.,amp=1.)
+    return (t<offset) ? 0 : amp
+end
+
+function hstep(;offset=0.,amp=1.)
+    return t->(t<offset) ? 0 : amp
+end
+
+
+function ramp(t;offset=0., amp=1.)
+    return (t<offset) ? 0 : (t-offset) * amp
+end
+
+function ramp(;offset=0., amp=1.)
+    return t -> (t<offset) ? 0 : (t-offset) * amp
+end
+
+function stairs(t;offset=0., amp=1., width=1.)
+    return (t<offset) ? 0 : amp * ceil((t-offset)/width)
+end
+
+function stairs(;offset=0., amp=1., width=1.)
+    return t -> (t<offset) ? 0 : amp * ceil((t-offset)/width)
+end
+
+function square(t;offset=0., amp=1., period=1., width=0.5*period)
+    return t<offset ? 0. : ( ((t-offset)%period) <width ? amp : 0.)
+end
+
+function square(;offset=0., amp=1., period=1., width=0.5*period)
+    return t -> t<offset ? 0. : ( ((t-offset)%period) <width ? amp : 0.)
+end
+
+
+function sawtooth(t;offset=0., amp=1., period=1.)
+    return t<offset ? 0. : amp*((t-offset)%period)/period
+end
+
+function sawtooth(;offset=0., amp=1., period=1.)
+    return t -> t<offset ? 0. : amp*((t-offset)%period)/period
+end
+
+
+
+function triangle(t;offset=0., amp=1., period=1., width=0.5*period)
+    if t<offset
+        return 0.
+    end
+    t0=(t-offset)%period
+    if t0 <width
+        return amp*t0/width
+    else
+        return amp*(period-t0)/(period-width)
+    end
+end
+
+function triangle(;offset=0., amp=1., period=1., width=0.5*period)
+    return t -> triangle(t,offset=offset, amp=amp, period=period, width=width)
+end
 
 
 
