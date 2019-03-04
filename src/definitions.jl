@@ -39,16 +39,16 @@ struct RheoTimeData
 end
 
 function RheoTimeData(;ϵ::Vector{T1} = empty_rheodata_vector, σ::Vector{T2} = empty_rheodata_vector, t::Vector{T3} = empty_rheodata_vector, info="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
-    s_datatype = string("Data type: ",check_data_consistency(t,ϵ,σ))
+    s_datatype = string("Data type: ",check_time_data_consistency(t,ϵ,σ))
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), [info, s_datatype])
 end
 
 
 
 
-@enum TimeDataType invalid=-1 timeline=0 strain_only=1 stress_only=2 strain_and_stress=3
+@enum TimeDataType invalid_time_data=-1 timeline=0 strain_only=1 stress_only=2 strain_and_stress=3
 
-function check_data_consistency(t,e,s)
+function check_time_data_consistency(t,e,s)
     @assert (length(t)>0)  "Time data empty"
 
     sdef=(s != empty_rheodata_vector)
@@ -72,12 +72,12 @@ function check_data_consistency(t,e,s)
         return timeline
     end
 
-    return invalid
+    return invalid_time_data
 
 end
 
 function RheoTimeDataType(d::RheoTimeData)
-    return check_data_consistency(d.t,d.ϵ,d.σ)
+    return check_time_data_consistency(d.t,d.ϵ,d.σ)
 end
 
 
@@ -114,11 +114,12 @@ end
 
 
 function RheoFreqData(;Gp::Vector{T1} = empty_rheodata_vector, Gpp::Vector{T2} = empty_rheodata_vector, ω::Vector{T3} = empty_rheodata_vector, info="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
-    RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω), [info])
+    s_datatype = string("Data type: ",check_frep_data_consistency(ω,Gp,Gpp))
+    RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω), [info,s_datatype])
 end
 
 
-@enum FreqDataType invalid=-1 frec_only=0 with_modulus=1
+@enum FreqDataType invalid_freq_data=-1 frec_only=0 with_modulus=1
 
 function check_freq_data_consistency(o,gp,gpp)
     @assert (length(o)>0)  "Freq data empty"
@@ -134,7 +135,7 @@ function check_freq_data_consistency(o,gp,gpp)
         return frec_only
     end
 
-    return invalid
+    return invalid_freq_data
 
 end
 
@@ -151,19 +152,19 @@ end
 
 
 
+struct RheologyData{T<:Real}
 
+    σ::Vector{T}
+    ϵ::Vector{T}
+    t::Vector{T}
 
+    sampling::String
 
+    log::Vector{String}
 
+end
 
-
-
-
-
-
-
-
-
+eltype(::RheologyData{T}) where T = T
 
 
 
