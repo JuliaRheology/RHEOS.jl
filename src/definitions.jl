@@ -153,6 +153,117 @@ end
 
 
 
+
+
+
+
+
+
+function +(self1::RheoTimeData, self2::RheoTimeData)
+
+    type1 = RheoTimeDataType(self1)
+    type2 = RheoTimeDataType(self2)
+    @assert (type1!=invalid_time_data) "Addition error: first parameter invalid"
+    @assert (type2!=invalid_time_data) "Addition error: second parameter invalid"
+    @assert (type1==type2) "Addition error: parameters inconsistent"
+    @assert (type1!=timeline) "Addition error: time only data cannot be added"
+    @assert (self1.t == self2.t) "Addition error: timelines inconsistent"
+
+    # Operation on the logs - not so clear what it should be
+    log = vcat(self1.log, self2.log, ["previous two logs added"])
+
+    if (type1==strain_only) && (type2==strain_only)
+        return RheoTimeData(empty_rheodata_vector, self1.ϵ+self2.ϵ, self1.t, log)
+    end
+
+    if (type1==stress_only) && (type2==stress_only)
+        return RheoTimeData(self1.σ+self2.σ, empty_rheodata_vector, self1.t, log)
+    end
+
+    if (type1==strain_and_stress) && (type2==strain_and_stress)
+        return RheoTimeData(self1.σ+self2.σ, self1.ϵ+self2.ϵ, self1.t, log)
+    end
+
+end
+
+
+function -(self1::RheoTimeData, self2::RheoTimeData)
+
+    type1 = RheoTimeDataType(self1)
+    type2 = RheoTimeDataType(self2)
+    @assert (type1!=invalid_time_data) "Addition error: first parameter invalid"
+    @assert (type2!=invalid_time_data) "Addition error: second parameter invalid"
+    @assert (type1==type2) "Addition error: parameters inconsistent"
+    @assert (type1!=timeline) "Addition error: time only data cannot be added"
+    @assert (self1.t == self2.t) "Addition error: timelines inconsistent"
+
+    # Operation on the logs - not so clear what it should be
+    log = vcat(self1.log, self2.log, ["previous two logs added"])
+
+    if (type1==strain_only) && (type2==strain_only)
+        return RheoTimeData(empty_rheodata_vector, self1.ϵ-self2.ϵ, self1.t, log)
+    end
+
+    if (type1==stress_only) && (type2==stress_only)
+        return RheoTimeData(self1.σ-self2.σ, empty_rheodata_vector, self1.t, log)
+    end
+
+    if (type1==strain_and_stress) && (type2==strain_and_stress)
+        return RheoTimeData(self1.σ-self2.σ, self1.ϵ-self2.ϵ, self1.t, log)
+    end
+
+end
+
+
+function -(self1::RheoTimeData)
+
+    type1 = RheoTimeDataType(self1)
+    @assert (type1!=invalid_time_data) "unary - error: parameter invalid"
+    @assert (type1!=timeline) "unary - error: time only data cannot be manipulated this way"
+
+    # log
+    log = vcat(self1.log, ["multiplied by -1"])
+
+    return RheoTimeData(-self1.σ, -self1.ϵ, self1.t, log)
+
+end
+
+
+
+function *(operand::Real, self1::RheoTimeData)
+
+    type1 = RheoTimeDataType(self1)
+    @assert (type1!=invalid_time_data) "* error: parameter invalid"
+    @assert (type1!=timeline) "* error: time only data cannot be manipulated this way"
+
+    # log
+    log = vcat(self1.log, ["multiplied data by $operand"])
+
+    return RheoTimeData(operand*self1.σ, operand*self1.ϵ, self1.t, log)
+end
+
+function *(self1::RheoTimeData, operand::Real)
+    return operand*self1
+end
+
+
+
+
+#  Time shift operator >>
+#  shift time by a certain amount, trash the end and pad at the start with 0
+
+#  Union operator |
+#  Combine stress_only data and strain_only data into stress_strain
+
+
+
+
+
+
+
+
+
+
 struct RheologyData{T<:Real}
 
     σ::Vector{T}
