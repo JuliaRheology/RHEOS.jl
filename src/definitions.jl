@@ -11,7 +11,7 @@ empty_rheodata_vector=RheoFloat[]
 
 
 """
-    RheoTimeData(σ::Vector{T}, ϵ::Vector{T}, t::Vector{T}, sampling::String, log::Vector{String}) where T<:Real
+    RheoTimeData(;σ::Vector{T1}, ϵ::Vector{T2}, t::Vector{T3}, log::Vector{String}) where {T1<:Real, T2<:Real, T3<:Real}
 
 RheoTimeData struct contains stress, strain and time data.
 
@@ -28,8 +28,6 @@ of the same length as the others.
 - log: a log of struct's events, e.g. preprocessing
 """
 
-# Overload default constructor to do all the checks, including sampling, sizes, etc.
-
 struct RheoTimeData
 
     σ::Vector{RheoFloat}
@@ -41,24 +39,134 @@ struct RheoTimeData
 end
 
 function RheoTimeData(;ϵ::Vector{T1} = empty_rheodata_vector, σ::Vector{T2} = empty_rheodata_vector, t::Vector{T3} = empty_rheodata_vector, info="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
-    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), [info])
+    s_datatype = string("Data type: ",check_data_consistency(t,ϵ,σ))
+    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), [info, s_datatype])
 end
 
 
 
-struct RheologyData{T<:Real}
 
-    σ::Vector{T}
-    ϵ::Vector{T}
-    t::Vector{T}
+@enum TimeDataType invalid=-1 timeline=0 strain_only=1 stress_only=2 strain_and_stress=3
 
-    sampling::String
+function check_data_consistency(t,e,s)
+    @assert (length(t)>0)  "Time data empty"
 
+    sdef=(s != empty_rheodata_vector)
+    edef=(e != empty_rheodata_vector)
+    if (sdef && edef)
+        @assert (length(s)==length(t)) && (length(e)==length(t)) "Time data length inconsistent"
+        return strain_and_stress
+    end
+
+    if (sdef && (!edef))
+        @assert (length(s)==length(t)) "Time data length inconsistent"
+        return stress_only
+    end
+
+    if (edef && (!sdef))
+        @assert (length(e)==length(t)) "Time data length inconsistent"
+        return strain_only
+    end
+
+    if ((!edef) && (!sdef))
+        return timeline
+    end
+
+    return invalid
+
+end
+
+function RheoTimeDataType(d::RheoTimeData)
+    return check_data_consistency(d.t,d.ϵ,d.σ)
+end
+
+
+
+
+
+
+"""
+    RheoFreqData(Gp::Vector{T1}, Gpp::Vector{T2}, ω::Vector{T3}, log::Vector{String}) where {T1<:Real, T2<:Real, T3<:Real}
+
+RheologyDynamic contains storage modulus, loss modulus and frequency data.
+
+If preferred, an instance can be generated manually by just providing the three data
+vectors in the right order.
+
+# Fields
+
+- Gp: storage modulus
+- Gpp: loss modulus
+- ω: frequency
+- log: a log of struct's events, e.g. preprocessing
+"""
+struct RheoFreqData
+
+    # Complex modulus data
+    Gp::Vector{RheoFloat}
+    Gpp::Vector{RheoFloat}
+    ω::Vector{RheoFloat}
+
+    # operations applied, stores history of which functions (including arguments)
     log::Vector{String}
 
 end
 
-eltype(::RheologyData{T}) where T = T
+
+function RheoFreqData(;Gp::Vector{T1} = empty_rheodata_vector, Gpp::Vector{T2} = empty_rheodata_vector, ω::Vector{T3} = empty_rheodata_vector, info="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
+    RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω), [info])
+end
+
+
+@enum FreqDataType invalid=-1 frec_only=0 with_modulus=1
+
+function check_freq_data_consistency(o,gp,gpp)
+    @assert (length(o)>0)  "Freq data empty"
+
+    gpdef=(gp != empty_rheodata_vector)
+    gppdef=(gpp != empty_rheodata_vector)
+    if (gpdef && gppdef)
+        @assert (length(gp)==length(o)) && (length(gpp)==length(o)) "Data length inconsistent"
+        return with_modulus
+    end
+
+    if ((!gpdef) && (!gppdef))
+        return frec_only
+    end
+
+    return invalid
+
+end
+
+function RheoFreqDataType(d::RheoFreqData)
+    return check_freq_data_consistency(d.ω,d.Gp,d.Gpp)
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function RheologyData(colnames::Vector{String}, data1::Vector{T}, data2::Vector{T}, data3::Vector{T}=zeros(length(data2)); filedir::String="none", log::Vector{String}=Array{String}(undef, 0)) where T<:Real
 
