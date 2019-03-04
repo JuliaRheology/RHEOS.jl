@@ -1,5 +1,53 @@
 #!/usr/bin/env julia
 
+
+export time_line,strainfunction!,stressfunction!
+
+#- timeline(end; start=0; stepsize=(end-start)/250)
+#	→ RheolTimeData with time only defined
+
+#- strainfunction!(RheolData, Function)
+#- stressfunction!(RheolData, Function)
+
+#d=timeline(100; stepsize=0.1)
+#strainfunction!(d,t->step(t,ts=10)+rand())
+
+
+"""
+    timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end-t_start)/250.)
+
+Generate RheoTimeData struct with only the time data
+
+# Arguments
+
+- `t_start`: Starting time, typically 0
+- `t_end`: End time
+- `step`: Time between sample
+"""
+function time_line(;t_start::Real=0., t_end::Real=10., step::Real=(t_end-t_start)/250.)
+
+    RheoTimeData(t=collect(t_start:step:t_end), info="timeline created: t_start=$t_start, t_end=$t_end, step=$step")
+end
+
+
+
+
+function strainfunction!(d::RheoTimeData, f)
+    d.ϵ=convert(Vector{RheoFloat},map(f,d.t))
+end
+
+function stressfunction!(d::RheoTimeData, f)
+    d.σ=convert(Vector{RheoFloat},map(f,d.t))
+end
+
+
+
+
+
+
+
+
+
 """
     linegen(t_total::Real; stepsize::Real = 1.0)
 
@@ -23,8 +71,8 @@ end
 """
     stepgen(t_total::Real, t_on::Real; t_trans::Real = 0.0, stepsize::Real = 1.0)
 
-Generate RheologyData struct with a step loading of height 1.0. If `t_trans` is 0.0 then 
-the step is instantaneous, otherwise the step is approximated by a logistic function 
+Generate RheologyData struct with a step loading of height 1.0. If `t_trans` is 0.0 then
+the step is instantaneous, otherwise the step is approximated by a logistic function
 approximately centered at `t_on`.
 
 # Arguments
@@ -34,7 +82,7 @@ approximately centered at `t_on`.
 - `t_trans`: Step transition time
 - `stepsize`: Time sampling period
 """
-function stepgen(t_total::Real, 
+function stepgen(t_total::Real,
                   t_on::Real;
                   t_trans::Real = 0.0,
                   stepsize::Real = 1.0)
@@ -138,7 +186,7 @@ end
 """
     noisegen(t_total::Real; seed::Union{Int, Nothing} = nothing, stepsize::Real = 1.0)
 
-Generate uniform random noise of maximum amplitude +/- 1.0. If reproducibility is required, 
+Generate uniform random noise of maximum amplitude +/- 1.0. If reproducibility is required,
 always use the same number in the `seed` keyword argument with the same non-negative integer.
 
 # Arguments
@@ -166,7 +214,7 @@ function noisegen(t_total::Real; seed::Union{Int, Nothing} = nothing, stepsize::
 
     data = (2*rand(eltype(t), length(t)) .- 1)
 
-    
+
 
     RheologyData(data, t, log)
 
@@ -180,7 +228,7 @@ Repeat a given RheologyData data set `n` times.
 function repeatdata(self::RheologyData, n::Integer; t_trans = 0.0)
 
     @assert self.σ==self.ϵ "Repeat data only works when σ==ϵ which is the state of RheologyData after being generated using the built-in RHEOS data generation functions"
-    
+
     dataraw = self.σ
 
     @assert constantcheck(self.t) "Data sample-rate must be constant"
@@ -209,7 +257,7 @@ function repeatdata(self::RheologyData, n::Integer; t_trans = 0.0)
 
         # fix first repeat
         for (i, v) in enumerate(dataraw)
-            if i<(elbuffer*100) && i<round(Int, length(self.t)/2) 
+            if i<(elbuffer*100) && i<round(Int, length(self.t)/2)
                 data[i] = v
             end
         end
@@ -234,5 +282,3 @@ function repeatdata(self::RheologyData, n::Integer; t_trans = 0.0)
     end
 
 end
-
-
