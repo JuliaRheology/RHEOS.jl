@@ -5,7 +5,8 @@ using RHEOS
 filedir = "DataRelaxation.csv"
 
 # repeated step loading generated with FractionalSLS([2.0, 0.5, 0.5, 0.7])
-data = importdata(["stress","strain", "time"], filedir)
+data = importdata(filedir; t_col =3)
+
 
 # SLS fit
 sls_fit = modelfit(data, SLS(), :G)
