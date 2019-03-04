@@ -1,11 +1,12 @@
 #!/usr/bin/env julia
 using PyPlot
+using Revise
 using RHEOS
 
 filedir = "DataRelaxation.csv"
 
 # repeated step loading generated with FractionalSLS([2.0, 0.5, 0.5, 0.7])
-data = importdata(filedir; t_col =3)
+data = importdata(filedir; t_col =3, ϵ_col = 2)
 
 
 # SLS fit

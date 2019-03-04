@@ -1,65 +1,53 @@
 #!/usr/bin/env julia
 
 """
-    importdata(colnames::Array{String,1}, filedir::String; delimiter=',')
+    importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ_col::Integer=-1, ω_col::Integer= -1, Gp_col::Integer = -1, Gpp_col::Integer = -1, delimiter=',')
 
 Load data from a CSV file (two/three columns, comma seperated by default but
-delimiter can be specified in the `delimiter` keyword argument). Columns must
-be identified by providing an array of strings which tell the function
-which data is contained in each column.
+delimiter can be specified in the `delimiter` keyword argument). Arguments must be
+identified by providing the number of the column in which they are contained.
 
 Can be used to construct either a RheologyData instance or a RheologyDynamic
 instance. Function detects whether "time" or "frequency" has been included
 and proceeds accordingly. For oscillatory data, all three columns (Gp, Gpp, Frequency)
-must be provided. For regular viscoelastic data two or three columns can be provided
-but time must always be provided. I.e. either stress/strain/time, stress/time or
-strain/time.
+must be provided. For regular viscoelastic data only time, or time-stress, or time-strain or
+time-stress-strain data can be provided.
 """
-# function importdata(colnames::Array{String,1}, filedir::String; delimiter=',')
-#
-#     # get length
-#     N = length(colnames)
-#
-#     @assert ("frequency" in colnames)||("time" in colnames) "Data must contain \"time\" or \"frequency\" "
-#
-#     if "time" in colnames
-#         # check colnames length is correct
-#         @assert N==3 || N==2 "Two or three column names required, one of each: \"stress\", \"strain\" and \"time\"."
-#
-#         # read data from file
-#         data = readdlm(filedir, delimiter)
-#
-#         # generate RheologyData struct and output
-#         if N==3
-#             return RheologyData(colnames, data[:, 1], data[:, 2], data[:, 3]; filedir = filedir)
-#         elseif N==2
-#             return RheologyData(colnames, data[:, 1], data[:, 2]; filedir = filedir)
-#         end
-#
-#     elseif "frequency" in colnames
-#         # check colnames length is correct
-#         @assert N==3 "Three column names required, one of each: \"Gp\", \"Gpp\" and \"frequency\"."
-#
-#         # read data from file
-#         data = readdlm(filedir, delimiter)
-#
-#         # generate RheologyDynamic struct and output
-#         return RheologyDynamic(colnames, data[:, 1], data[:, 2], data[:, 3]; filedir=filedir)
-#
-#     end
-#
-# end
-
-
 function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ_col::Integer=-1, ω_col::Integer= -1, Gp_col::Integer = -1, Gpp_col::Integer = -1, delimiter=',')
 
-
-    @assert (t_col==-1)||(ω_col==-1) "Data must contaSin \"time\" or \"frequency\" "
+    @assert (t_col==-1)||(ω_col==-1) "Data must contain \"time\" or \"frequency\" "
 
     if t_col!=-1
 
         # read data from file
         data = readdlm(filedir, delimiter)
+
+        # test for NaNs at the beginning and end of the data
+
+        newstartingval = 1
+        for i in 1:length(data[:,t_col])
+            if !isnan(sum(data[i,:]))
+                newstartingval = i
+                break
+            end
+        end
+
+        # TO DO LATER: We need to add the check of nans within the data not just at the beginning and end
+        # el_del = []
+        # for i in newstartingval:length(data[:,t_col])
+        #     if !isnan(sum(data[i,:]))
+        #         el_del = i
+        #     end
+        # end
+
+        newendingval = 1
+        for i=length(data[:,t_col]):-1:1
+            if !isnan(sum(data[i,:]))
+                newendingval = i
+                break
+            end
+        end
+        data = data[newstartingval:newendingval,:]
 
         # generate RheologyData struct and output
         if (ϵ_col!=-1) & (σ_col!=-1)
