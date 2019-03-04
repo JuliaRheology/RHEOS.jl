@@ -1,9 +1,19 @@
 #!/usr/bin/env julia
 
-"""
-    RheologyData(σ::Vector{T}, ϵ::Vector{T}, t::Vector{T}, sampling::String, log::Vector{String}) where T<:Real
 
-RheologyData struct contains stress, strain and time data.
+# This defines the data type for all arrays, parameters and processing
+RheoFloat = Float32
+
+
+
+# Empty vector mostly used as default parameters to indicate missing/unspecified data.
+empty_rheodata_vector=RheoFloat[]
+
+
+"""
+    RheoTimeData(σ::Vector{T}, ϵ::Vector{T}, t::Vector{T}, sampling::String, log::Vector{String}) where T<:Real
+
+RheoTimeData struct contains stress, strain and time data.
 
 If preferred, an instance can be generated manually by just providing the three data
 vectors in the right order, sampling type will be checked automatically. If loading
@@ -15,9 +25,27 @@ of the same length as the others.
 - σ: stress
 - ϵ: strain
 - t: time
-- sampling: sampling type, either "constant" or "variable"
 - log: a log of struct's events, e.g. preprocessing
 """
+
+# Overload default constructor to do all the checks, including sampling, sizes, etc.
+
+struct RheoTimeData
+
+    σ::Vector{RheoFloat}
+    ϵ::Vector{RheoFloat}
+    t::Vector{RheoFloat}
+
+    log::Vector{String}
+
+end
+
+function RheoTimeData(;ϵ::Vector{T1} = empty_rheodata_vector, σ::Vector{T2} = empty_rheodata_vector, t::Vector{T3} = empty_rheodata_vector, info="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
+    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), [info])
+end
+
+
+
 struct RheologyData{T<:Real}
 
     σ::Vector{T}
@@ -224,7 +252,7 @@ function *(self1::RheologyData, self2::RheologyData)
 end
 
 function -(self::RheologyData)
-    
+
     ϵ = -self.ϵ
     σ = -self.σ
 
