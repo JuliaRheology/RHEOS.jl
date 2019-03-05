@@ -18,7 +18,7 @@ length vs original length after processing has finished. If data is noisy, may
 benefit from sending smoothed signal to this algorithm and either using mapback
 function or interpolating onto unsmoothed data.
 
-Algorithm works as follows. 25 initial samples are generated evenly spread. After this, 
+Algorithm works as follows. 25 initial samples are generated evenly spread. After this,
 the array is repeatedly sweeped, anywhere Δy, Δdy/dx, Δd2y/dx2 is greater than a threshold, α,
 a new sample is created at the midpoint of the two tested points. This is allowed to
 happen a maximum of 400 times, after which α is decreased and the process starts again.
@@ -48,7 +48,7 @@ function variableresample(self::RheologyData, refvar::Symbol, pcntdownsample::Re
         σ = self.σ[mapback_indices]
         ϵ = self.ϵ[mapback_indices]
         t = self.t[mapback_indices]
-        
+
     elseif !_mapback
         # interpolate with respect to t
         σ_interp = Base.invokelatest(interpolate, (self.t,), self.σ, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
@@ -62,23 +62,23 @@ function variableresample(self::RheologyData, refvar::Symbol, pcntdownsample::Re
 
     # change sampling type to variable
     sampling = "variable"
-    
+
     # add record of operation applied
     log = vcat(self.log, "var_resample - refvar: $refvar, pcntdownsample: $pcntdownsample, mapback: $_mapback")
 
-    self_new = RheologyData(σ, ϵ, t, sampling, log)
+    self_new = RheoTimeData(σ=σ, ϵ=ϵ, t=t, log)
 
 end
 
 """
-    downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer) 
+    downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer)
 
 Boundaries are floating point times which are then converted to the closest elements. Works by just
 reducing on indices. For example, time_boundaries could be [0.0, 10.0, 100.0] and elperiods could be
 [2, 4]. So new data would take every 2nd element from 0.0 seconds to 10.0 seconds, then every 4th element
 from 10.0 seconds to 100.0 seconds.
 """
-function downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer) 
+function downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer)
 
     # convert boundaries from times to element indicies
     boundaries = closestindices(self.t, time_boundaries)
@@ -102,7 +102,7 @@ function downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real
     # add record of operation applied
     log = vcat(self.log, "downsample - boundaries: $boundaries, elperiods: $elperiods")
 
-    self_new = RheologyData(σ, ϵ, t, sampling, log)
+    self_new = RheoTimeData(σ=σ, ϵ=ϵ, t=t, log)
 
 end
 
@@ -135,7 +135,7 @@ function fixedresample(self::RheologyData, time_boundaries::Vector{T} where T<:R
     # add record of operation applied
     log = vcat(self.log, "fixed_resample - boundaries: $boundaries, elperiods: $elperiods, direction: $direction")
 
-    self_new = RheologyData(σ, ϵ, t, sampling, log)
+    self_new = RheoTimeData(σ=σ, ϵ=ϵ, t=t, log)
 
 end
 
@@ -162,7 +162,7 @@ function smooth(self::RheologyData, τ::Real; pad::String="reflect")
     # add record of operation applied
     log = vcat(self.log, "smooth - τ: $τ")
 
-    self_new = RheologyData(σ, ϵ, self.t, self.sampling, log)
+    self_new = RheoTimeData(σ=σ, ϵ=ϵ, t=self.t, log)
 
 end
 
@@ -187,7 +187,7 @@ function mapbackdata(self_new::RheologyData, self_original::RheologyData)
 
     # to add, check if sample rate is now variable or constant (unlikely but could fall back to constant?)
 
-    self_new = RheologyData(σ, ϵ, t, self_new.sampling, log)
+    self_new = RheoTimeData(σ=σ, ϵ=ϵ,t = t, log)
 
 end
 
@@ -223,28 +223,33 @@ Fit RheologyData struct to model and return a fitted model as a RheologyModel ob
 - `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
 - `diff_method`: Set finite difference formula to use for derivative, currently "BD" or "CD"
 """
-function modelfit(data::RheologyData,
+function modelfit(data::RheoTimeData,
                   model::RheologyModel,
                   modtouse::Symbol;
-                  p0::Vector{T} = [-1.0],
-                  lo::Vector{T} = [-1.0],
-                  hi::Vector{T} = [-1.0],
+                  p0::Array{T1,1} = [-1.0],
+                  lo::Array{T2,1} = [-1.0],
+                  hi::Array{T3,1} = [-1.0],
                   verbose::Bool = false,
                   rel_tol = 1e-4,
-                  diff_method="BD") where T<:Real
+                  diff_method="BD") where {T1<:Real, T2<:Real, T3<:Real}
+
+    p0 = convert(Array{RheoFloat,1},p0)
+    lo = convert(Array{RheoFloat,1},lo)
+    hi = convert(Array{RheoFloat,1},hi)
+    rel_tol = convert(RheoFloat,rel_tol)
 
     # get modulus function
     modulus = getfield(model, modtouse)
 
     # use default p0 if not provided
     if quasinull(p0)
-        p0 = model.parameters
-    end 
+        p0 = convert(Array{RheoFloat,1},model.parameters)
+    end
 
     # get singularity presence
     sing = singularitytest(modulus, p0)
 
-    # get time step (only needed for convolution, which requires constant so t[2]-t[1] is sufficient)
+    # get time step (only needed for convolution, which requires constant dt so t[2]-t[1] is sufficient)
     dt = data.t[2] - data.t[1]
 
     # TEMP - CHECK WITH ALE AND ALEXANDRE BUT IS DEFINITELY NECESSARY
@@ -268,16 +273,18 @@ function modelfit(data::RheologyData,
     end
 
     # fit
+    sampling_check = constantcheck(data.t)
+
     (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed leastsquares_init(p0,
-                                                                                    lo, 
+                                                                                    lo,
                                                                                     hi,
-                                                                                    modulus, 
-                                                                                    t_zeroed, 
-                                                                                    dt, 
+                                                                                    modulus,
+                                                                                    t_zeroed,
+                                                                                    dt,
                                                                                     dcontrolled,
-                                                                                    measured; 
+                                                                                    measured;
                                                                                     insight = verbose,
-                                                                                    sampling = data.sampling, 
+                                                                                    sampling = sampling_check,
                                                                                     singularity = sing,
                                                                                     _rel_tol = rel_tol)
 
@@ -293,8 +300,8 @@ end
     modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; diff_method="BD")
 
 Given data and model, return new dataset based on model parameters and using the
-modulus specified by 'modtouse'; either creep modulus (:J, only returned strain is new) or 
-relaxation modulus (:G, only returned stress is new). 'diff_method' sets finite difference for 
+modulus specified by 'modtouse'; either creep modulus (:J, only returned strain is new) or
+relaxation modulus (:G, only returned stress is new). 'diff_method' sets finite difference for
 calculating the derivative used in the hereditary integral and can be either backwards difference
 ("BD") or central difference ("CD").
 """
@@ -326,20 +333,22 @@ function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol
     # time must start at 0 for convolution to work properly!
     t_zeroed = data.t .- minimum(data.t)
 
+
+
     # get convolution
-    if !sing && data.sampling == "constant"
+    if !sing && constantcheck(data.t)
         convolved = boltzconvolve_nonsing(modulus, t_zeroed, dt, model.parameters, dcontrolled)
 
-    elseif sing && data.sampling == "constant"
+    elseif sing && constantcheck(data.t)
         # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, model.parameters, dcontrolled)
         t_zeroed[1] = 0.0 + (t_zeroed[2] - t_zeroed[1])/10.0
         # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, model.parameters, dcontrolled)
         convolved = boltzconvolve(modulus, t_zeroed, dt, model.parameters, dcontrolled)
 
-    elseif !sing && data.sampling == "variable"
+    elseif !sing && !constantcheck(data.t)
         convolved = boltzintegral_nonsing(modulus, t_zeroed, model.parameters, dcontrolled)
 
-    elseif sing && data.sampling == "variable"
+    elseif sing && !constantcheck(data.t)
         convolved = boltzintegral_sing(modulus, t_zeroed, model.parameters, dcontrolled)
 
     end
@@ -353,7 +362,7 @@ function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol
     #     elseif modtouse == :G
     #         σ = convolved
     #         ϵ = data.ϵ[2:end]
-    #     end   
+    #     end
     #     t = data.t[2:end]
 
     if sing
@@ -363,7 +372,7 @@ function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol
         elseif modtouse == :G
             σ = convolved
             ϵ = data.ϵ
-        end 
+        end
         t = data.t
 
     elseif !sing
@@ -373,15 +382,15 @@ function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol
         elseif modtouse == :G
             σ = convolved
             ϵ = data.ϵ
-        end 
+        end
         t = data.t
 
     end
-        
+
     # store operation
     log = vcat(data.log, "Predicted data from model:", model.log)
 
-    RheologyData(σ, ϵ, t, data.sampling, log)
+    RheoTimeData(σ=σ, ϵ=ϵ, t=t, log)
 
 end
 
@@ -407,23 +416,27 @@ creep modulus, then the first element of the stress is assumed to be the amplitu
 function modelstepfit(data::RheologyData,
                   model::RheologyModel,
                   modtouse::Symbol;
-                  p0::Array{Float64,1} = [-1.0],
-                  lo::Array{Float64,1} = [-1.0],
-                  hi::Array{Float64,1} = [-1.0],
+                  p0::Array{T1,1} = [-1.0],
+                  lo::Array{T2,1} = [-1.0],
+                  hi::Array{T3,1} = [-1.0],
                   verbose::Bool = false,
-                  rel_tol = 1e-4)::RheologyModel
+                  rel_tol = 1e-4)::RheologyModel  where {T1<:Real, T2<:Real, T3<:Real}
 
+    p0 = convert(Vector{RheoFloat},p0)
+    lo = convert(Vector{RheoFloat},lo)
+    hi = convert(Vector{RheoFloat},hi)
+    rel_tol = convert(Vector{RheoFloat},rel_tol)
     # get modulus function
     modulus = getfield(model, modtouse)
 
     # use default p0 if not provided
     if quasinull(p0)
-        p0 = model.parameters
-    end 
+        p0 = convert(Array{RheoFloat,1},model.parameters)
+    end
 
     # get singularity presence
     sing = singularitytest(modulus, p0; t1 = data.t[1])
-    
+
     # get controlled variable (just take first element as it's a step) and measured variable
     if modtouse == :J
         controlled = data.σ[1]
@@ -435,12 +448,12 @@ function modelstepfit(data::RheologyData,
 
     # start fit
     (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed leastsquares_stepinit(p0,
-                                                                                        lo, 
+                                                                                        lo,
                                                                                         hi,
-                                                                                        modulus, 
-                                                                                        data.t, 
+                                                                                        modulus,
+                                                                                        data.t,
                                                                                         controlled,
-                                                                                        measured; 
+                                                                                        measured;
                                                                                         insight = verbose,
                                                                                         singularity = sing,
                                                                                         _rel_tol = rel_tol)
@@ -457,7 +470,7 @@ end
     modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; step_on::Real = 0.0)
 
 Same as modelpredict but assumes a step loading with step starting at 'step_on'. Singularities are bypassed
-by adding 1 to the index of the singular element. 
+by adding 1 to the index of the singular element.
 """
 function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; step_on::Real = 0.0)
 
@@ -491,23 +504,23 @@ function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Sy
     elseif modtouse == :G
         σ = predicted
         ϵ = data.ϵ
-    end 
-        
+    end
+
     # store operation
     log = vcat(data.log, "Predicted data from model:", model.log)
 
-    RheologyData(σ, ϵ, data.t, data.sampling, log)
+    RheoTimeData(σ=σ, ϵ=ϵ, t=t, log)
 
 end
 
-function obj_dynamic(params::Vector{T},
-                     grad::Vector{T},
-                     ω::Vector{T},
-                     dataGp::Vector{T},
-                     dataGpp::Vector{T},
+function obj_dynamic(params::Vector{RheoFloat},
+                     grad::Vector{RheoFloat},
+                     ω::Vector{RheoFloat},
+                     dataGp::Vector{RheoFloat},
+                     dataGpp::Vector{RheoFloat},
                      modelGp::Function,
                      modelGpp::Function;
-                     _insight::Bool = false) where T<:Real
+                     _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -520,16 +533,16 @@ function obj_dynamic(params::Vector{T},
 
 end
 
-function obj_dynamic_linear(params::Vector{T},
-                            grad::Vector{T},
-                            ω::Vector{T},
-                            dataGp::Vector{T},
-                            dataGpp::Vector{T},
+function obj_dynamic_linear(params::Vector{RheoFloat},
+                            grad::Vector{RheoFloat},
+                            ω::Vector{RheoFloat},
+                            dataGp::Vector{RheoFloat},
+                            dataGpp::Vector{RheoFloat},
                             modelGp::Function,
                             modelGpp::Function,
-                            meanGp::T,
-                            meanGpp::T;
-                            _insight::Bool = false) where T<:Real
+                            meanGp::RheoFloat,
+                            meanGpp::RheoFloat;
+                            _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -542,14 +555,14 @@ function obj_dynamic_linear(params::Vector{T},
 
 end
 
-function obj_dynamic_log(params::Vector{T},
-                     grad::Vector{T},
-                     ω::Vector{T},
-                     dataGp::Vector{T},
-                     dataGpp::Vector{T},
+function obj_dynamic_log(params::Vector{RheoFloat},
+                     grad::Vector{RheoFloat},
+                     ω::Vector{RheoFloat},
+                     dataGp::Vector{RheoFloat},
+                     dataGpp::Vector{RheoFloat},
                      modelGp::Function,
                      modelGpp::Function;
-                     _insight::Bool = false) where T<:Real
+                     _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -562,14 +575,14 @@ function obj_dynamic_log(params::Vector{T},
 
 end
 
-function obj_dynamic_global(params::Vector{T},
-                     grad::Vector{T},
-                     ω::Vector{T},
-                     dataGp::Vector{T},
-                     dataGpp::Vector{T},
+function obj_dynamic_global(params::Vector{RheoFloat},
+                     grad::Vector{RheoFloat},
+                     ω::Vector{RheoFloat},
+                     dataGp::Vector{RheoFloat},
+                     dataGpp::Vector{RheoFloat},
                      modelGp::Function,
                      modelGpp::Function;
-                     _insight::Bool = false) where T<:Real
+                     _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -582,15 +595,15 @@ function obj_dynamic_global(params::Vector{T},
 
 end
 
-function obj_dynamic_manual(params::Vector{T},
-                            grad::Vector{T},
-                            ω::Vector{T},
-                            dataGp::Vector{T},
-                            dataGpp::Vector{T},
+function obj_dynamic_manual(params::Vector{RheoFloat},
+                            grad::Vector{RheoFloat},
+                            ω::Vector{RheoFloat},
+                            dataGp::Vector{RheoFloat},
+                            dataGpp::Vector{RheoFloat},
                             modelGp::Function,
                             modelGpp::Function,
-                            weights::Vector{T};
-                            _insight::Bool = false) where T<:Real
+                            weights::Vector{RheoFloat};
+                            _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -609,9 +622,9 @@ Fits model to the frequency/loss+storage moduli data.
 
 All arguments are as described below. The 'weights' argument some more information.
 As this fitting procedure is fitting two functions simultaneously (the storage
-and loss moduli), if left untransformed the fit would tend to favour the 
+and loss moduli), if left untransformed the fit would tend to favour the
 modulus which is larger in magnitude and not fit the other modulus well. To avoid this,
-RHEOS offers a number of data transforms which can be used. 
+RHEOS offers a number of data transforms which can be used.
 
 # Arguments
 
@@ -636,7 +649,7 @@ function dynamicmodelfit(data::RheologyDynamic,
     # get initial paramaters
     if quasinull(p0)
         p0 = model.parameters
-    end 
+    end
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(:LN_SBPLX, length(p0))

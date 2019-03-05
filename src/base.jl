@@ -12,7 +12,7 @@ Array based trapezoidal integration of y with respect to x.
 Limits of integration defined by the start and end points of the arrays. 'init'
 keyword argument is used for setting an initial condition.
 """
-function trapz(y::Vector{T}, x::Vector{T}; init::T=0.0) where T<:Real
+function trapz(y::Vector{RheoFloat}, x::Vector{RheoFloat}; init::RheoFloat=0.0)
 
     n = length(x)
 
@@ -40,7 +40,7 @@ end
 Given two arrays of data, x and y, calculate dy/dx using central difference
 method and forward and backward difference for array boundaries.
 """
-function derivCD(y::Vector{T}, x::Vector{T}) where T<:Real
+function derivCD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 
     # get length
     N = length(x)
@@ -65,7 +65,7 @@ function derivCD(y::Vector{T}, x::Vector{T}) where T<:Real
     # 1st order backwards difference for last element
     ydot[N] = (y[N] - y[N-1])/(x[N] - x[N-1])
 
-    ydot
+    return convert(Vector{RheoFloat},ydot)
 
 end
 
@@ -76,7 +76,7 @@ Given two arrays of data, x and y, calculate dy/dx using 1st order
 backward difference. Assumes y==0 at a previous point, i.e.
 y is 'at rest'. Captures instantaneous loading where derivCD will not.
 """
-function derivBD(y::Vector{T}, x::Vector{T}) where T<:Real
+function derivBD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 
     # get length
     N = length(x)
@@ -96,12 +96,12 @@ function derivBD(y::Vector{T}, x::Vector{T}) where T<:Real
         ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
     end
 
-    ydot
+    return convert(Vector{RheoFloat},ydot)
 end
 
-function quasinull(x::Array{Float64,1})
+function quasinull(x::Array{RheoFloat,1})
 
-    if x == [-1.0]
+    if x == convert(Array{RheoFloat,1},[-1.0])
         return true
     else
         return false
@@ -109,7 +109,7 @@ function quasinull(x::Array{Float64,1})
 
 end
 
-function constantcheck(t::Vector{T} where T<:Real)
+function constantcheck(t::Vector{RheoFloat} )
 
     diff = round.(t[2:end]-t[1:end-1]; digits=4)
     # check if any element is not equal to 1st element
@@ -117,7 +117,7 @@ function constantcheck(t::Vector{T} where T<:Real)
 
 end
 
-function getsampleperiod(t::Vector{T} where T<:Real)
+function getsampleperiod(t::Vector{RheoFloat})
 
     @assert constantcheck(t) "Sample-rate must be constant"
 
@@ -125,7 +125,7 @@ function getsampleperiod(t::Vector{T} where T<:Real)
 
 end
 
-function sampleratecompare(t1::Vector{T}, t2::Vector{T}) where T<:Real
+function sampleratecompare(t1::Vector{RheoFloat}, t2::Vector{RheoFloat})
 
     @assert constantcheck(t1) "Sample-rate of both arguments must be constant, first argument is non-constant"
     @assert constantcheck(t2) "Sample-rate of both arguments must be constant, second argument is non-constant"
@@ -373,7 +373,7 @@ function downsample(boundaries::Vector{T}, elperiods::Vector{T}) where T<:Intege
 end
 
 """
-    fixed_resample(x::Array{Float64,1}, y::Array{Float64,1}, boundaries::Array{Int64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
+    fixed_resample(x::Array{RheoFloat,1}, y::Array{RheoFloat,1}, boundaries::Array{Int64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
 
 Resample two arrays with new sample rate(s).
 
@@ -409,8 +409,8 @@ function fixed_resample(x::Vector{T}, y::Vector{T},
     yInterp = Base.invokelatest(interpolate, (x,), y, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
 
     # initialise resampled arrays as empty
-    xᵦ = zeros(Float64,0)
-    yᵦ = zeros(Float64,0)
+    xᵦ = zeros(RheoFloat,0)
+    yᵦ = zeros(RheoFloat,0)
 
     # loop through boundaries
     for i in 1:length(boundaries)-1
@@ -453,7 +453,7 @@ end
 #~ Processing Functions ~#
 ##########################
 
-function singularitytest(modulus::Function, params::Array{T, 1}; t1::T=0.0) where T<:Real
+function singularitytest(modulus::Function, params::Array{RheoFloat, 1}; t1::RheoFloat=convert(RheoFloat,0.0))
 
     startval = modulus([t1], params)[1]
 
@@ -466,7 +466,7 @@ function singularitytest(modulus::Function, params::Array{T, 1}; t1::T=0.0) wher
 end
 
 """
-    boltzintegral_nonsing(modulus::Function, time_series::Array{Float64,1}, params::Array{Float64,1}, prescribed_dot::Array{Float64,1})
+    boltzintegral_nonsing(modulus::Function, time_series::Array{RheoFloat,1}, params::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1})
 
 Calculate Boltzmann Superposition integral using direct integration method.
 
@@ -480,8 +480,8 @@ than the convolution method. However, it works for variable sample rate.
 - `params`: Parameters passed to viscoelastic modulus
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
-function boltzintegral_nonsing(modulus::Function, time_series::Array{Float64,1}, params::Array{Float64,1},
-                    prescribed_dot::Array{Float64,1})::Array{Float64,1}
+function boltzintegral_nonsing(modulus::Function, time_series::Array{RheoFloat,1}, params::Array{RheoFloat,1},
+                    prescribed_dot::Array{RheoFloat,1})::Array{RheoFloat,1}
 
     # need to add an additional 'previous' time point to capture any instantaneous loading
     time_previous = time_series[1] - (time_series[2] - time_series[1])
@@ -505,12 +505,12 @@ function boltzintegral_nonsing(modulus::Function, time_series::Array{Float64,1},
     # to catch weird bug in InverseLaplace
     I[2] = (prescribed_dot[1]*modulus(time_series, params)*(time_series[2] - time_series[1]))[1]
 
-    return I[2:end]
+    return convert(Vector{RheoFloat},I[2:end])
 
 end
 
 # """
-#     boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, params::Array{Float64,1}, prescribed_dot::Array{Float64,1})
+#     boltzintegral_sing(modulus::Function, time_series::Array{RheoFloat,1}, params::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1})
 
 # Calculate Boltzmann Superposition integral using direct integration method.
 
@@ -527,8 +527,8 @@ end
 # - `params`: Parameters passed to viscoelastic modulus
 # - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 # """
-# function boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, params::Array{Float64,1},
-#                     prescribed_dot::Array{Float64,1})::Array{Float64,1}
+# function boltzintegral_sing(modulus::Function, time_series::Array{RheoFloat,1}, params::Array{RheoFloat,1},
+#                     prescribed_dot::Array{RheoFloat,1})::Array{RheoFloat,1}
 
 #     I = zeros(length(time_series)-1)
 #     # only traverse after time t=0, first element
@@ -546,8 +546,8 @@ end
 
 # end
 
-function boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, params::Array{Float64,1},
-                    prescribed_dot::Array{Float64,1})::Array{Float64,1}
+function boltzintegral_sing(modulus::Function, time_series::Array{RheoFloat,1}, params::Array{RheoFloat,1},
+                    prescribed_dot::Array{RheoFloat,1})::Array{RheoFloat,1}
 
     # init time diff, used to cope with singularity
     init_offset = (time_series[2] - time_series[1])/10.0
@@ -573,38 +573,14 @@ function boltzintegral_sing(modulus::Function, time_series::Array{Float64,1}, pa
     # fix initial point
     I[2] = (prescribed_dot[1]*modulus([init_offset], params)*(time_series[2] - time_series[1]))[1]
 
-    return I[2:end]
+    return convert(Vector{RheoFloat},I[2:end])
 
 end
 
-"""
-    boltzconvolve_nonsing(modulus::Function, time_series::Array{Float64,1}, dt::Float64, params::Array{Float64,1}, prescribed_dot::Array{Float64,1})
 
-Calculate Boltzmann Superposition integral using convolution method.
-
-This is much faster and slightly more accurate (depending on sample resolution)
-than the integral method. However, it works for constant sample rate.
-
-# Arguments
-
-- `modulus`: Viscoelastic modulus function
-- `time_series`: The array of times
-- `dt`: Constant time step (sample period)
-- `params`: Parameters passed to viscoelastic modulus
-- `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
-"""
-function boltzconvolve_nonsing(modulus::Function, time_series::Array{Float64,1}, dt::Float64,
-                        params::Array{Float64,1}, prescribed_dot::Array{Float64,1})::Array{Float64,1}
-
-    Modulus = modulus(time_series, params)
-    β = convn(Modulus, prescribed_dot)
-    # pick out relevant elements (1st half) and multiply by dt
-    β = β[1:length(time_series)]*dt
-
-end
 
 # """
-#     boltzconvolve_sing(modulus::Function, time_series::Array{Float64,1}, dt::Float64, params::Array{Float64,1}, prescribed_dot::Array{Float64,1})
+#     boltzconvolve_sing(modulus::Function, time_series::Array{RheoFloat,1}, dt::RheoFloat, params::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1})
 
 # Calculate Boltzmann Superposition integral using convolution method.
 
@@ -622,8 +598,8 @@ end
 # - `params`: Parameters passed to viscoelastic modulus
 # - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 # """
-# function boltzconvolve_sing(modulus::Function, time_series::Array{Float64,1}, dt::Float64,
-#                         params::Array{Float64,1}, prescribed_dot::Array{Float64,1})::Array{Float64,1}
+# function boltzconvolve_sing(modulus::Function, time_series::Array{RheoFloat,1}, dt::RheoFloat,
+#                         params::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1})::Array{RheoFloat,1}
 
 #     # convolved length will be original_length-1
 #     len = length(time_series)-1
@@ -635,11 +611,43 @@ end
 
 # end
 
-function boltzconvolve(modulus::Function, time_series::Array{Float64,1}, dt::Float64,
-                        params::Array{Float64,1}, prescribed_dot::Array{Float64,1})::Array{Float64,1}
+function boltzconvolve(modulus, time_series, dt,
+                        params, prescribed_dot)
+
+    time_series = convert(Vector{RheoFloat,1},time_series)
+    params = convert(Vector{RheoFloat,1},param)
 
     Modulus = modulus(time_series, params)
     # fast convolution
+    β = convn(Modulus, prescribed_dot)
+    # pick out relevant elements (1st half) and multiply by dt
+    β = β[1:length(time_series)]*dt
+    return convert(Vector{RheoFloat},β)
+
+end
+
+"""
+    boltzconvolve_nonsing(modulus::Function, time_series::Array{RheoFloat,1}, dt::RheoFloat, params::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1})
+
+Calculate Boltzmann Superposition integral using convolution method.
+
+This is much faster and slightly more accurate (depending on sample resolution)
+than the integral method. However, it works for constant sample rate.
+
+# Arguments
+
+- `modulus`: Viscoelastic modulus function
+- `time_series`: The array of times
+- `dt`: Constant time step (sample period)
+- `params`: Parameters passed to viscoelastic modulus
+- `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
+"""
+function boltzconvolve_nonsing(modulus, time_series, dt,params, prescribed_dot)
+
+
+    Modulus = modulus(time_series, params)
+
+
     β = convn(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
     β = β[1:length(time_series)]*dt
@@ -647,7 +655,7 @@ function boltzconvolve(modulus::Function, time_series::Array{Float64,1}, dt::Flo
 end
 
 """
-    obj_const_nonsing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, dt::Float64, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _insight::Bool = false)
+    obj_const_nonsing(params::Array{RheoFloat,1}, grad::Array{RheoFloat,1}, modulus::Function, time_series::Array{RheoFloat,1}, dt::RheoFloat, prescribed_dot::Array{RheoFloat,1}, measured::Array{RheoFloat,1}; _insight::Bool = false)
 
 Generate the sum-of-squares of the difference between `measured` and the Boltzmann
 convolution integral of the selected `modulus` and `prescribed_dot`. Used when
@@ -664,23 +672,23 @@ sample rate is constant and model does not feature singularity.
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
-function obj_const_nonsing(params::Array{Float64,1}, grad::Array{Float64,1},
-                            modulus::Function, time_series::Array{Float64,1},
-                            dt::Float64, prescribed_dot::Array{Float64,1},
-                            measured::Array{Float64,1}; _insight::Bool = false)::Float64
+function obj_const_nonsing(params, grad,
+                            modulus, time_series,
+                            dt, prescribed_dot,
+                            measured; _insight::Bool = false)
 
     if _insight
-        println("Current Parameters: ", params)
+        println("AAoCurrent Parameters: ", params)
     end
-
     convolved = boltzconvolve_nonsing(modulus, time_series, dt, params, prescribed_dot)
 
     cost = sum(0.5*(measured - convolved).^2)
+    return convert(RheoFloat,cost)
 
 end
 
 """
-    obj_const_sing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, dt::Float64, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _insight::Bool = false)
+    obj_const_sing(params::Array{RheoFloat,1}, grad::Array{RheoFloat,1}, modulus::Function, time_series::Array{RheoFloat,1}, dt::RheoFloat, prescribed_dot::Array{RheoFloat,1}, measured::Array{RheoFloat,1}; _insight::Bool = false)
 
 Generate the sum-of-squares of the difference between `measured` and the Boltzmann
 convolution integral of the selected `modulus` and `prescribed_dot`. Used when
@@ -697,10 +705,10 @@ sample rate is constant and model does feature singularity.
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
-function obj_const_sing(params::Array{Float64,1}, grad::Array{Float64,1},
-                            modulus::Function, time_series::Array{Float64,1},
-                            dt::Float64, prescribed_dot::Array{Float64,1},
-                            measured::Array{Float64,1}; _insight::Bool = false)::Float64
+function obj_const_sing(params, grad,
+                            modulus, time_series,
+                            dt, prescribed_dot,
+                            measured; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -718,7 +726,7 @@ function obj_const_sing(params::Array{Float64,1}, grad::Array{Float64,1},
 end
 
 """
-    obj_var_nonsing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _insight::Bool = false)
+    obj_var_nonsing(params::Array{RheoFloat,1}, grad::Array{RheoFloat,1}, modulus::Function, time_series::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1}, measured::Array{RheoFloat,1}; _insight::Bool = false)
 
 Generate the sum-of-squares of the difference between `measured` and the Boltzmann
 convolution integral of the selected `modulus` and `prescribed_dot`. Used when
@@ -734,10 +742,10 @@ sample rate is variable and no singularity in model.
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
-function obj_var_nonsing(params::Array{Float64,1}, grad::Array{Float64,1},
-                            modulus::Function, time_series::Array{Float64,1},
-                            prescribed_dot::Array{Float64,1}, measured::Array{Float64,1};
-                            _insight::Bool = false)::Float64
+function obj_var_nonsing(params::Array{RheoFloat,1}, grad::Array{RheoFloat,1},
+                            modulus::Function, time_series::Array{RheoFloat,1},
+                            prescribed_dot::Array{RheoFloat,1}, measured::Array{RheoFloat,1};
+                            _insight::Bool = false)::RheoFloat
 
     if _insight
         println("Current Parameters: ", params)
@@ -750,7 +758,7 @@ function obj_var_nonsing(params::Array{Float64,1}, grad::Array{Float64,1},
 end
 
 """
-    obj_var_sing(params::Array{Float64,1}, grad::Array{Float64,1}, modulus::Function, time_series::Array{Float64,1}, prescribed_dot::Array{Float64,1}, measured::Array{Float64,1}; _insight::Bool = false)
+    obj_var_sing(params::Array{RheoFloat,1}, grad::Array{RheoFloat,1}, modulus::Function, time_series::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1}, measured::Array{RheoFloat,1}; _insight::Bool = false)
 
 Generate the sum-of-squares of the difference between `measured` and the Boltzmann
 convolution integral of the selected `modulus` and `prescribed_dot`. Used when
@@ -766,10 +774,10 @@ sample rate is variable and there IS singularity in model.
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
-function obj_var_sing(params::Array{Float64,1}, grad::Array{Float64,1},
-                            modulus::Function, time_series::Array{Float64,1},
-                            prescribed_dot::Array{Float64,1}, measured::Array{Float64,1};
-                            _insight::Bool = false)::Float64
+function obj_var_sing(params::Array{RheoFloat,1}, grad::Array{RheoFloat,1},
+                            modulus::Function, time_series::Array{RheoFloat,1},
+                            prescribed_dot::Array{RheoFloat,1}, measured::Array{RheoFloat,1};
+                            _insight::Bool = false)::RheoFloat
 
     if _insight
         println("Current Parameters: ", params)
@@ -804,11 +812,11 @@ Initialise then begin a least squares fitting of the supplied data.
 - `insight`: Declare whether insight info should be shown when this function is called, true or false
 - `singularity`: Presence of singularity in model
 """
-function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Float64,1},
-                           hi_bounds::Array{Float64,1}, modulus::Function,
-                           time_series::Array{Float64,1}, dt::Float64,
-                           prescribed_dot::Array{Float64,1}, measured::Array{Float64,1};
-                           insight::Bool = false, sampling::String = "constant",
+function leastsquares_init(params_init, low_bounds,
+                           hi_bounds, modulus,
+                           time_series, dt,
+                           prescribed_dot, measured;
+                           insight::Bool = false, sampling::Bool=true,
                            singularity::Bool = false, _rel_tol = 1e-4)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
@@ -828,13 +836,22 @@ function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Floa
 
     # set Opt object as a minimisation objective. Use a closure for additional
     # arguments sent to object objectivefunc
-    if !singularity && sampling == "constant"
+
+    params_init = convert(Vector{Float64},params_init)
+    low_bounds = convert(Vector{Float64},low_bounds)
+    hi_bounds = convert(Vector{Float64}, hi_bounds)
+    time_series = convert(Vector{Float64},time_series)
+    prescribed_dot = convert(Vector{Float64},prescribed_dot)
+    measured = convert(Vector{Float64},measured)
+
+
+    if !singularity && sampling
         min_objective!(opt, (params, grad) -> obj_const_nonsing(params, grad, modulus,
                                                             time_series, dt,
                                                             prescribed_dot, measured;
                                                             _insight = insight))
 
-    elseif singularity && sampling == "constant"
+    elseif singularity && sampling
         # remove singularity, just go close to it, 1/10th over first sample period
         time_series[1] = 0.0 + (time_series[2] - time_series[1])/10.0
 
@@ -843,12 +860,12 @@ function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Floa
                                                         prescribed_dot, measured;
                                                         _insight = insight))
 
-    elseif !singularity && sampling == "variable"
+    elseif !singularity && !sampling
         min_objective!(opt, (params, grad) -> obj_var_nonsing(params, grad, modulus,
                                                         time_series, prescribed_dot,
                                                         measured; _insight = insight))
 
-    elseif singularity && sampling == "variable"
+    elseif singularity && !sampling
         min_objective!(opt, (params, grad) -> obj_var_sing(params, grad, modulus,
                                                         time_series, prescribed_dot,
                                                         measured; _insight = insight))
@@ -859,11 +876,12 @@ function leastsquares_init(params_init::Array{Float64,1}, low_bounds::Array{Floa
     (minf, minx, ret) = NLopt.optimize(opt, params_init)
 
     # return all
+    #return (convert(RheoFloat,minf), convert(Array{RheoFloat,1},minx), ret)
     return (minf, minx, ret)
 
 end
 
-function obj_step_nonsing(params::Vector{T}, grad::Vector{T}, modulus::Function, t::Vector{T}, prescribed::T, measured::Vector{T}; _insight=false) where T<:Number
+function obj_step_nonsing(params::Vector{RheoFloat}, grad::Vector{RheoFloat}, modulus::Function, t::Vector{RheoFloat}, prescribed::RheoFloat, measured::Vector{RheoFloat}; _insight=false)
     if _insight
         println("Current Parameters: ", params)
     end
@@ -873,7 +891,7 @@ function obj_step_nonsing(params::Vector{T}, grad::Vector{T}, modulus::Function,
     cost = sum(0.5*(measured - estimated).^2)
 end
 
-function obj_step_sing(params::Vector{T}, grad::Vector{T}, modulus::Function, t::Vector{T}, prescribed::T, measured::Vector{T}; _insight=false) where T<:Number
+function obj_step_sing(params::Vector{RheoFloat}, grad::Vector{RheoFloat}, modulus::Function, t::Vector{RheoFloat}, prescribed::RheoFloat, measured::Vector{RheoFloat}; _insight=false)
     if _insight
         println("Current Parameters: ", params)
     end
@@ -883,10 +901,10 @@ function obj_step_sing(params::Vector{T}, grad::Vector{T}, modulus::Function, t:
     cost = sum(0.5*(measured[2:end] - estimated).^2)
 end
 
-function leastsquares_stepinit(params_init::Array{Float64,1}, low_bounds::Array{Float64,1},
-                           hi_bounds::Array{Float64,1}, modulus::Function,
-                           time_series::Array{Float64,1}, prescribed::Float64,
-                           measured::Array{Float64,1}; insight::Bool = false,
+function leastsquares_stepinit(params_init::Array{RheoFloat,1}, low_bounds::Array{RheoFloat,1},
+                           hi_bounds::Array{RheoFloat,1}, modulus::Function,
+                           time_series::Array{RheoFloat,1}, prescribed::RheoFloat,
+                           measured::Array{RheoFloat,1}; insight::Bool = false,
                            singularity::Bool = false, _rel_tol = 1e-4)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
@@ -922,6 +940,6 @@ function leastsquares_stepinit(params_init::Array{Float64,1}, low_bounds::Array{
     (minf, minx, ret) = NLopt.optimize(opt, params_init)
 
     # return all
-    return (minf, minx, ret)
+    return (convert(RheoFloat,minf), convert(Array{RheoFloat,1},minx), ret)
 
 end

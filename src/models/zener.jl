@@ -43,7 +43,7 @@ end
 Gpp_fraczener(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_fraczener.(ω, (params,))
 
 """
-    FractionalZener([params::Vector{T}]) where T<:Real 
+    FractionalZener([params::Vector{T}]) where T<:Real
 
 2 springpots in series, both in parallel with a springpot.
 """
@@ -101,12 +101,12 @@ FractionalSLS(params::Vector{T}) where T<:Real = RheologyModel(G_fracsls, J_frac
 FractionalSLS() = RheologyModel(G_fracsls, J_fracsls, Gp_fracsls, Gpp_fracsls, [0.5, 0.5, 1.0, 0.2], ["model created with default parameters"])
 
 # Standard Linear Solid in Maxwell Form
-function G_sls(t::T, params::Vector{T}) where T<:Real
+function G_sls(t, params)
     η, kᵦ, kᵧ = params
 
     G = kᵧ + kᵦ*exp(-t*kᵦ/η)
 end
-G_sls(t::Vector{T}, params::Vector{T}) where T<:Real = G_sls.(t, (params,))
+G_sls(t::Vector{T}, params::Vector{T}) where {T<:Real} = G_sls.(t, (params,))
 
 function J_sls(t::T, params::Vector{T}) where T<:Real
     η, kᵦ, kᵧ = params

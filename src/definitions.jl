@@ -3,7 +3,7 @@
 export RheoTimeData, RheoTimeDataType, RheoFreqData, RheoFreqDataType
 
 # This defines the data type for all arrays, parameters and processing
-RheoFloat = Float32
+#RheoFloat = Float32
 
 
 

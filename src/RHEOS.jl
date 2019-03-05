@@ -3,6 +3,7 @@ __precompile__(true)
 
 module RHEOS
 
+RheoFloat = Float32
 # installed from Julia package repository
 using InverseLaplace
 using NLopt
@@ -14,6 +15,7 @@ import Base.eltype
 import SpecialFunctions.gamma
 import Base: +, -, *
 import DelimitedFiles: readdlm, writedlm
+export constantcheck
 
 ######################################################
 # definitions.jl
@@ -35,6 +37,7 @@ export linegen, stepgen, rampgen, singen, noisegen, repeatdata
 export variableresample, downsample, fixedresample, smooth, zerotime
 export modelfit, modelpredict, modelstepfit, modelsteppredict
 export dynamicmodelfit, dynamicmodelpredict
+
 
 ######################################################
 # bundled dependencies from rheos-cambridge forked repos
