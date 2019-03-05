@@ -876,8 +876,8 @@ function leastsquares_init(params_init, low_bounds,
     (minf, minx, ret) = NLopt.optimize(opt, params_init)
 
     # return all
-    #return (convert(RheoFloat,minf), convert(Array{RheoFloat,1},minx), ret)
-    return (minf, minx, ret)
+    return (convert(RheoFloat,minf), convert(Array{RheoFloat,1},minx), ret)
+
 
 end
 
