@@ -47,7 +47,7 @@ end
 
 
 
-@enum TimeDataType invalid_time_data=-1 timeline=0 strain_only=1 stress_only=2 strain_and_stress=3
+@enum TimeDataType invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
 
 function check_time_data_consistency(t,e,s)
     @assert (length(t)>0)  "Time data empty"
@@ -70,7 +70,7 @@ function check_time_data_consistency(t,e,s)
     end
 
     if ((!edef) && (!sdef))
-        return timeline
+        return time_only
     end
 
     return invalid_time_data
@@ -166,7 +166,7 @@ function +(self1::RheoTimeData, self2::RheoTimeData)
     @assert (type1!=invalid_time_data) "Addition error: first parameter invalid"
     @assert (type2!=invalid_time_data) "Addition error: second parameter invalid"
     @assert (type1==type2) "Addition error: parameters inconsistent"
-    @assert (type1!=timeline) "Addition error: time only data cannot be added"
+    @assert (type1!=time_only) "Addition error: time only data cannot be added"
     @assert (self1.t == self2.t) "Addition error: timelines inconsistent"
 
     # Operation on the logs - not so clear what it should be
@@ -194,7 +194,7 @@ function -(self1::RheoTimeData, self2::RheoTimeData)
     @assert (type1!=invalid_time_data) "Addition error: first parameter invalid"
     @assert (type2!=invalid_time_data) "Addition error: second parameter invalid"
     @assert (type1==type2) "Addition error: parameters inconsistent"
-    @assert (type1!=timeline) "Addition error: time only data cannot be added"
+    @assert (type1!=time_only) "Addition error: time only data cannot be added"
     @assert (self1.t == self2.t) "Addition error: timelines inconsistent"
 
     # Operation on the logs - not so clear what it should be
@@ -219,7 +219,7 @@ function -(self1::RheoTimeData)
 
     type1 = RheoTimeDataType(self1)
     @assert (type1!=invalid_time_data) "unary - error: parameter invalid"
-    @assert (type1!=timeline) "unary - error: time only data cannot be manipulated this way"
+    @assert (type1!=time_only) "unary - error: time only data cannot be manipulated this way"
 
     # log
     log = vcat(self1.log, ["multiplied by -1"])
@@ -234,7 +234,7 @@ function *(operand::Real, self1::RheoTimeData)
 
     type1 = RheoTimeDataType(self1)
     @assert (type1!=invalid_time_data) "* error: parameter invalid"
-    @assert (type1!=timeline) "* error: time only data cannot be manipulated this way"
+    @assert (type1!=time_only) "* error: time only data cannot be manipulated this way"
 
     # log
     log = vcat(self1.log, ["multiplied data by $operand"])
@@ -245,6 +245,7 @@ end
 function *(self1::RheoTimeData, operand::Real)
     return operand*self1
 end
+
 
 
 
