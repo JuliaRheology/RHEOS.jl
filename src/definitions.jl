@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
 
-export RheoTimeData, RheoTimeDataType, RheoFreqData, RheoFreqDataType
+export RheoTimeData, RheoTimeDataType, RheoFreqData, RheoFreqDataType, check_time_data_consistency
 
 # This defines the data type for all arrays, parameters and processing
 #RheoFloat = Float32

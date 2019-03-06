@@ -224,11 +224,11 @@ Fit RheologyData struct to model and return a fitted model as a RheologyModel ob
 - `diff_method`: Set finite difference formula to use for derivative, currently "BD" or "CD"
 """
 function modelfit(data::RheoTimeData,
-                  model::RheologyModel,
-                  modtouse::Symbol;
+                  model::RheologyModel;
                   p0::Array{T1,1} = [-1.0],
                   lo::Array{T2,1} = [-1.0],
                   hi::Array{T3,1} = [-1.0],
+                  modtouse::Symbol = :Nothing,
                   verbose::Bool = false,
                   rel_tol = 1e-4,
                   diff_method="BD") where {T1<:Real, T2<:Real, T3<:Real}
@@ -238,7 +238,40 @@ function modelfit(data::RheoTimeData,
     hi = convert(Array{RheoFloat,1},hi)
     rel_tol = convert(RheoFloat,rel_tol)
 
-    # get modulus function
+    check = check_time_data_consistency(data.t,data.ϵ,data.σ)
+    @assert (Int(check) == 3) "Both stress and strain are required"
+
+    # use correct method for derivative
+    if diff_method=="BD"
+        deriv = derivBD
+    elseif diff_method=="CD"
+        deriv = derivCD
+    end
+
+    # get modulus function and derivative
+    if modtouse == :Nothing
+        dσ = deriv(data.σ, data.t)
+        dϵ = deriv(data.ϵ, data.t)
+        max_dσ = maximum(dσ[2:end])
+        max_dϵ = maximum(dϵ[2:end])
+        if (max_dσ<=max_dϵ)
+            modtouse = :J;
+            dcontrolled = dσ;
+            measured = data.ϵ
+        elseif (max_dσ>max_dϵ)
+            modtouse = :G;
+            dcontrolled = dϵ;
+            measured = data.σ
+        end
+        print(modtouse)
+    elseif modtouse == :J
+        dcontrolled = deriv(data.σ, data.t)
+        measured = data.ϵ
+    elseif modtouse == :G
+        dcontrolled = deriv(data.ϵ, data.t)
+        measured = data.σ
+    end
+
     modulus = getfield(model, modtouse)
 
     # use default p0 if not provided
@@ -256,21 +289,6 @@ function modelfit(data::RheoTimeData,
     # time must start at 0 for convolution to work properly!
     t_zeroed = data.t .- minimum(data.t)
 
-    # use correct method for derivative
-    if diff_method=="BD"
-        deriv = derivBD
-    elseif diff_method=="CD"
-        deriv = derivCD
-    end
-
-    # get derivative of controlled variable and measured variable
-    if modtouse == :J
-        dcontrolled = deriv(data.σ, data.t)
-        measured = data.ϵ
-    elseif modtouse == :G
-        dcontrolled = deriv(data.ϵ, data.t)
-        measured = data.σ
-    end
 
     # fit
     sampling_check = constantcheck(data.t)
@@ -290,7 +308,7 @@ function modelfit(data::RheoTimeData,
 
     modulusname = string(modulus)
 
-    log = vcat(data.log, "Fitted $modulusname, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
+    log = vcat(data.log, "Fitted $modulusname, Modulus used: $modtouse, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
 
     RheologyModel(model.G, model.J, model.Gp, model.Gpp, minx, log)
 
@@ -305,7 +323,7 @@ relaxation modulus (:G, only returned stress is new). 'diff_method' sets finite 
 calculating the derivative used in the hereditary integral and can be either backwards difference
 ("BD") or central difference ("CD").
 """
-function modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; diff_method="BD")
+function modelpredict(data::RheoTimeData, model::RheologyModel, modtouse::Symbol; diff_method="BD")
 
     # get modulus
     modulus = getfield(model, modtouse)
