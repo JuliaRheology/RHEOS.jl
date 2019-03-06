@@ -265,6 +265,70 @@ end
 
 
 
+
+
+
+"""
+    RheologyModel(G::T, J::T, Gp::T, Gpp::T, parameters::Vector{S<:Real} log::Vector{String}) where T<:Function
+
+RheologyModel contains a model's various moduli, parameters, and log of activity.
+
+For incomplete models, an alternative constructor is available where all arguments
+are keyword arguments and moduli not provided default to a null modulus which
+always returns [-1.0].
+
+# Fields
+
+- G: Relaxation modulus
+- J: Creep modulus
+- Gp: Storage modulus
+- Gpp: Loss modulus
+- parameters: Used for predicting and as default starting parameters in fitting
+- log: a log of struct's events, e.g. what file it was fitted to
+"""
+struct RheologyModel
+
+    G::Function
+
+    J::Function
+
+    Gp::Function
+
+    Gpp::Function
+
+    parameters::Vector{RheoFloat}
+
+    log::Vector{String}
+
+end
+
+function null_modulus(t::Vector{RheoFloat}, params::Vector{T}) where T<:Real
+    return [-1.0]
+end
+
+RheologyModel(;G::Function = null_modulus,
+               J::Function = null_modulus,
+               Gp::Function = null_modulus,
+               Gpp::Function = null_modulus,
+               params::Vector{T} where T<:Real = [-1.0],
+               log::Vector{String} = ["model created by user with parameters $params"]) = RheologyModel(G, J, Gp, Gpp, convert(Vector{RheoFloat},params), log)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 struct RheologyData{T<:Real}
 
     σ::Vector{T}
@@ -504,50 +568,7 @@ function *(operand::Real, self::RheologyData)
 
 end
 
-"""
-    RheologyModel(G::T, J::T, Gp::T, Gpp::T, parameters::Vector{S<:Real} log::Vector{String}) where T<:Function
 
-RheologyModel contains a model's various moduli, parameters, and log of activity.
-
-For incomplete models, an alternative constructor is available where all arguments
-are keyword arguments and moduli not provided default to a null modulus which
-always returns [-1.0].
-
-# Fields
-
-- G: Relaxation modulus
-- J: Creep modulus
-- Gp: Storage modulus
-- Gpp: Loss modulus
-- parameters: Used for predicting and as default starting parameters in fitting
-- log: a log of struct's events, e.g. what file it was fitted to
-"""
-struct RheologyModel
-
-    G::Function
-
-    J::Function
-
-    Gp::Function
-
-    Gpp::Function
-
-    parameters::Vector{T} where T<:Real
-
-    log::Vector{String}
-
-end
-
-function null_modulus(t::Vector{T}, params::Vector{T}) where T<:Real
-    return [-1.0]
-end
-
-RheologyModel(;G::Function = null_modulus,
-               J::Function = null_modulus,
-               Gp::Function = null_modulus,
-               Gpp::Function = null_modulus,
-               params::Vector{T} where T<:Real = [-1.0],
-               log::Vector{String} = ["model created by user with parameters $params"]) = RheologyModel(G, J, Gp, Gpp, params, log)
 
 """
     RheologyDynamic(Gp::Vector{T}, Gpp::Vector{T}, ω::Vector{T}, log::Vector{String}) where T<:Real

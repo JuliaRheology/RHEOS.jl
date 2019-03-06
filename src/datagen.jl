@@ -47,14 +47,14 @@ end
 #   other input patterns for the stress and strain data
 #
 #   Functions may also return an anonimous function if the parameter t is omitted.
-#   
+#
 
 
-function strainfunction(d::RheoTimeData, f, info="Apply strain function")
+function strainfunction(d::RheoTimeData, f::T, info="Apply strain function") where T<:Function
     return RheoTimeData(d.σ,convert(Vector{RheoFloat},map(f,d.t)),d.t, vcat(d.log, [info]))
 end
 
-function stressfunction(d::RheoTimeData, f, info="Apply stress function")
+function stressfunction(d::RheoTimeData, f::T, info="Apply stress function") where T<:Function
     return RheoTimeData(convert(Vector{RheoFloat},map(f,d.t)), d.ϵ, d.t, vcat(d.log, [info]))
 end
 
