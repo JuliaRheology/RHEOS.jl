@@ -644,9 +644,7 @@ than the integral method. However, it works for constant sample rate.
 """
 function boltzconvolve_nonsing(modulus, time_series, dt,params, prescribed_dot)
 
-
     Modulus = modulus(time_series, params)
-
 
     β = convn(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
