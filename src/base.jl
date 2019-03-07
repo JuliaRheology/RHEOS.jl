@@ -399,7 +399,7 @@ julia> println(x1)
 function fixed_resample(x::Vector{T}, y::Vector{T},
                         boundaries::Vector{U}, elperiods::Union{Vector{U},U}) where T<:RheoFloat where U<:Integer
 
-    @eval using Interpolations
+    #@eval using Interpolations
 
     # assert correct function signature
     @assert length(x)==length(y) "X and Y arrays must have same length."
