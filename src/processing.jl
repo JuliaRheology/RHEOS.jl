@@ -5,72 +5,6 @@
 #############################
 
 """
-    variableresample(self::RheologyData, refvar::Symbol, pcntdownsample::Real; mapback::Bool = false)
-
-Convert a fixed sample rate array to a variable sample rate, with sampling points
-added according to a relative change in chosen variable `refvar`, 1st derivative
-of `refvar` and 2nd derivative of `refvar` (WRT time). Usually chosen as the
-measured variable, so :σ for a stress relaxation test and :ϵ for a creep test.
-
-Currently only variable downsampling supported. pcntdown sample is approximate,
-works well in some cases and very poorly in others. If required, compare resampled
-length vs original length after processing has finished. If data is noisy, may
-benefit from sending smoothed signal to this algorithm and either using mapback
-function or interpolating onto unsmoothed data.
-
-Algorithm works as follows. 25 initial samples are generated evenly spread. After this,
-the array is repeatedly sweeped, anywhere Δy, Δdy/dx, Δd2y/dx2 is greater than a threshold, α,
-a new sample is created at the midpoint of the two tested points. This is allowed to
-happen a maximum of 400 times, after which α is decreased and the process starts again.
-This macro process continues until the desired pcntdownsample ratio has been reached.
-
-# Arguments
-
-- `self`: RheologyData instance
-- `refvar`: The data whose derivatives will determine sample densities
-- `pcntdownsample`: Approximate ratio of new samples to old samples
-- `_mapback = false`: (Optional) Determines whether resampled points should 'snap' to closest original points
-"""
-function variableresample(self::RheologyData, refvar::Symbol, pcntdownsample::Real; _mapback::Bool = true)
-
-    @eval import Interpolations: interpolate, Gridded, Linear
-
-    # enforce minimum period of original period/10
-    _minperiod = (self.t[2] - self.t[1])/10.0
-
-    # get time resampled with respect to refvar
-    (tᵦ, dummy)  = var_resample(self.t, getfield(self, refvar), pcntdownsample, _minperiod)
-
-    if _mapback
-        # get mapped indices wrt original
-        mapback_indices = mapback(tᵦ, self.t)
-
-        σ = self.σ[mapback_indices]
-        ϵ = self.ϵ[mapback_indices]
-        t = self.t[mapback_indices]
-
-    elseif !_mapback
-        # interpolate with respect to t
-        σ_interp = Base.invokelatest(interpolate, (self.t,), self.σ, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
-        ϵ_interp = Base.invokelatest(interpolate, (self.t,), self.σ, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
-
-        # resample all using new timepoints tᵦ
-        σ = σ_interp[tᵦ]
-        ϵ = ϵ_interp[tᵦ]
-        t = tᵦ
-    end
-
-    # change sampling type to variable
-    sampling = "variable"
-
-    # add record of operation applied
-    log = vcat(self.log, "var_resample - refvar: $refvar, pcntdownsample: $pcntdownsample, mapback: $_mapback")
-
-    self_new = RheoTimeData(σ=σ, ϵ=ϵ, t=t, log)
-
-end
-
-"""
     fixedresample(self::RheoTimeData, elperiods::Union{Vector{K},K}; time_boundaries::Vector{T}= [-1])
 
 Resample data with new sample rate(s).
@@ -114,7 +48,7 @@ Smooth data using a Gaussian Kernel to time scale τ (approximately half power).
 Smooths both σ and ϵ. Essentially a low pass filter with frequencies of 1/τ being cut to approximately
 half power. For other pad types available see ImageFiltering documentation.
 """
-function smooth(self::RheologyData, τ::Real; pad::String="reflect")
+function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
 
     @eval import ImageFiltering: imfilter, Kernel
 
@@ -123,13 +57,89 @@ function smooth(self::RheologyData, τ::Real; pad::String="reflect")
     Σ = getsigma(τ, samplerate)
 
     # smooth signal and return
-    σ = Base.invokelatest(imfilter, self.σ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
-    ϵ = Base.invokelatest(imfilter, self.ϵ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
+    check = RheoTimeDataType(self)
+    if (Int(check) == 1)
+        epsilon = Base.invokelatest(imfilter, self.ϵ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
+        sigma = [];
+    elseif (Int(check) == 2)
+        sigma = Base.invokelatest(imfilter, self.σ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
+        epsilon = [];
+    elseif (Int(check) == 3)
+        sigma = Base.invokelatest(imfilter, self.σ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
+        epsilon = Base.invokelatest(imfilter, self.ϵ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
+    end
 
     # add record of operation applied
     log = vcat(self.log, "smooth - τ: $τ")
 
-    self_new = RheoTimeData(σ=σ, ϵ=ϵ, t=self.t, log)
+    self_new = RheoTimeData(sigma, epsilon, self.t, log)
+
+end
+
+
+"""
+    variableresample(self::RheologyData, refvar::Symbol, pcntdownsample::Real; mapback::Bool = false)
+
+Convert a fixed sample rate array to a variable sample rate, with sampling points
+added according to a relative change in chosen variable `refvar`, 1st derivative
+of `refvar` and 2nd derivative of `refvar` (WRT time). Usually chosen as the
+measured variable, so :σ for a stress relaxation test and :ϵ for a creep test.
+
+Currently only variable downsampling supported. pcntdown sample is approximate,
+works well in some cases and very poorly in others. If required, compare resampled
+length vs original length after processing has finished. If data is noisy, may
+benefit from sending smoothed signal to this algorithm and either using mapback
+function or interpolating onto unsmoothed data.
+
+Algorithm works as follows. 25 initial samples are generated evenly spread. After this,
+the array is repeatedly sweeped, anywhere Δy, Δdy/dx, Δd2y/dx2 is greater than a threshold, α,
+a new sample is created at the midpoint of the two tested points. This is allowed to
+happen a maximum of 400 times, after which α is decreased and the process starts again.
+This macro process continues until the desired pcntdownsample ratio has been reached.
+
+# Arguments
+
+- `self`: RheologyData instance
+- `refvar`: The data whose derivatives will determine sample densities
+- `pcntdownsample`: Approximate ratio of new samples to old samples
+- `_mapback = false`: (Optional) Determines whether resampled points should 'snap' to closest original points
+"""
+function variableresample(self::RheoTimeData, refvar::Symbol, pcntdownsample::Real; _mapback::Bool = true)
+
+    @eval import Interpolations: interpolate, Gridded, Linear
+
+    # enforce minimum period of original period/10
+    _minperiod = (self.t[2] - self.t[1])/10.0
+
+    # get time resampled with respect to refvar
+    (tᵦ, dummy)  = var_resample(self.t, getfield(self, refvar), pcntdownsample, _minperiod)
+
+    if _mapback
+        # get mapped indices wrt original
+        mapback_indices = mapback(tᵦ, self.t)
+
+        σ = self.σ[mapback_indices]
+        ϵ = self.ϵ[mapback_indices]
+        t = self.t[mapback_indices]
+
+    elseif !_mapback
+        # interpolate with respect to t
+        σ_interp = Base.invokelatest(interpolate, (self.t,), self.σ, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
+        ϵ_interp = Base.invokelatest(interpolate, (self.t,), self.σ, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
+
+        # resample all using new timepoints tᵦ
+        σ = σ_interp[tᵦ]
+        ϵ = ϵ_interp[tᵦ]
+        t = tᵦ
+    end
+
+    # change sampling type to variable
+    sampling = "variable"
+
+    # add record of operation applied
+    log = vcat(self.log, "var_resample - refvar: $refvar, pcntdownsample: $pcntdownsample, mapback: $_mapback")
+
+    self_new = RheoTimeData(σ=σ, ϵ=ϵ, t=t, log)
 
 end
 
@@ -377,6 +387,14 @@ function modelpredict(data::RheoTimeData,model::RheologyModel; modtouse::Symbol=
     # TEMP - CHECK WITH ALE AND ALEXANDRE BUT IS DEFINITELY NECESSARY
     # time must start at 0 for convolution to work properly!
     t_zeroed = data.t .- minimum(data.t)
+
+    # params_init = convert(Vector{Float64},params_init)
+    # low_bounds = convert(Vector{Float64},low_bounds)
+    # hi_bounds = convert(Vector{Float64}, hi_bounds)
+    # time_series = convert(Vector{Float64},time_series)
+    # prescribed_dot = convert(Vector{Float64},prescribed_dot)
+    # measured = convert(Vector{Float64},measured)
+
 
     # get convolution
     if !sing && constantcheck(data.t)

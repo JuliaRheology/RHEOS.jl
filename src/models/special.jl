@@ -5,6 +5,7 @@ function G_fractspecial(t::T, params::Vector{T}) where T<:Real
     η, cᵦ, β, k = params
 
     G = k + cᵦ*t^(-β)*mittleff(1 - β, 1 - β, -cᵦ*(t^(1 - β))/η)
+    convert(typeof(params[1]),G)
 end
 G_fractspecial(t::Vector{T}, params::Vector{T}) where T<:Real = G_fractspecial.(t, (params,))
 
