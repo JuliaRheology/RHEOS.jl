@@ -298,7 +298,7 @@ end
 
 Find the index of the array element closest to val.
 """
-function closestindex(x::Vector{T} where T<:Real, val::Real)
+function closestindex(x::Vector{T1}, val::T2) where {T1<:Real,T2<:Real}
 
     # intialise closest match variable, assuming best match is index 1
     ibest = 1
@@ -324,7 +324,7 @@ end
 Uses `closestindex` iteratively to find closest index for each value in `vals` array,
 returns array of indices.
 """
-closestindices(x::Vector{T}, vals::Vector{T}) where T<:Real = broadcast(closestindex, (x,), vals)
+closestindices(x::Vector{T1}, vals::Vector{T2}) where {T1<:Real, T2<:Real} = broadcast(closestindex, (x,), vals)
 
 """
     mapback(x₁, x₀)
@@ -396,8 +396,7 @@ julia> println(x1)
 ```
 """
 function fixed_resample(x::Vector{T}, y::Vector{T},
-                        boundaries::Vector{U}, elperiods::Vector{U},
-                        direction::Array{String,1}) where T<:Real where U<:Integer
+                        boundaries::Vector{U}, elperiods::Union{Vector{U},U}) where T<:RheoFloat where U<:Integer
 
     @eval using Interpolations
 
@@ -416,7 +415,7 @@ function fixed_resample(x::Vector{T}, y::Vector{T},
     for i in 1:length(boundaries)-1
 
         # upsampling, starts at each element then intepolates up N times
-        if direction[i]=="up"
+        if !signbit(elperiods[i])
             for k in boundaries[i]:(boundaries[i+1]-1)
                 # starting element
                 append!(xᵦ, x[k])
@@ -432,9 +431,9 @@ function fixed_resample(x::Vector{T}, y::Vector{T},
             end
 
         # downsampling, simply takes every N element as in downsample function
-        elseif direction[i]=="down" #under/sampling
-            append!(xᵦ,x[boundaries[i]:elperiods[i]:(boundaries[i+1]-1)])
-            append!(yᵦ,y[boundaries[i]:elperiods[i]:(boundaries[i+1]-1)])
+        elseif signbit(elperiods[i]) #under/sampling
+            append!(xᵦ,x[boundaries[i]:abs(elperiods[i]):(boundaries[i+1]-1)])
+            append!(yᵦ,y[boundaries[i]:abs(elperiods[i]):(boundaries[i+1]-1)])
         end
     end
 
@@ -480,8 +479,7 @@ than the convolution method. However, it works for variable sample rate.
 - `params`: Parameters passed to viscoelastic modulus
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
-function boltzintegral_nonsing(modulus::Function, time_series::Array{RheoFloat,1}, params::Array{RheoFloat,1},
-                    prescribed_dot::Array{RheoFloat,1})::Array{RheoFloat,1}
+function boltzintegral_nonsing(modulus, time_series, params,prescribed_dot)
 
     # need to add an additional 'previous' time point to capture any instantaneous loading
     time_previous = time_series[1] - (time_series[2] - time_series[1])
@@ -546,8 +544,7 @@ end
 
 # end
 
-function boltzintegral_sing(modulus::Function, time_series::Array{RheoFloat,1}, params::Array{RheoFloat,1},
-                    prescribed_dot::Array{RheoFloat,1})::Array{RheoFloat,1}
+function boltzintegral_sing(modulus, time_series, params,prescribed_dot)
 
     # init time diff, used to cope with singularity
     init_offset = (time_series[2] - time_series[1])/10.0
@@ -611,8 +608,7 @@ end
 
 # end
 
-function boltzconvolve(modulus, time_series, dt,
-                        params, prescribed_dot)
+function boltzconvolve(modulus, time_series, dt,params, prescribed_dot)
 
     Modulus = modulus(time_series, params)
     # fast convolution
@@ -667,10 +663,7 @@ sample rate is constant and model does not feature singularity.
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
-function obj_const_nonsing(params, grad,
-                            modulus, time_series,
-                            dt, prescribed_dot,
-                            measured; _insight::Bool = false)
+function obj_const_nonsing(params, grad,modulus, time_series,dt, prescribed_dot,measured; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -795,10 +788,10 @@ Initialise then begin a least squares fitting of the supplied data.
 - `insight`: Declare whether insight info should be shown when this function is called, true or false
 - `singularity`: Presence of singularity in model
 """
-function leastsquares_init(params_init, low_bounds,
-                           hi_bounds, modulus,
-                           time_series, dt,
-                           prescribed_dot, measured;
+function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::Vector{RheoFloat},
+                           hi_bounds::Vector{RheoFloat}, modulus::Function,
+                           time_series::Vector{RheoFloat}, dt::RheoFloat,
+                           prescribed_dot::Vector{RheoFloat}, measured::Vector{RheoFloat};
                            insight::Bool = false, sampling::Bool=true,
                            singularity::Bool = false, _rel_tol = 1e-4)
 

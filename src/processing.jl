@@ -71,71 +71,38 @@ function variableresample(self::RheologyData, refvar::Symbol, pcntdownsample::Re
 end
 
 """
-    downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer)
-
-Boundaries are floating point times which are then converted to the closest elements. Works by just
-reducing on indices. For example, time_boundaries could be [0.0, 10.0, 100.0] and elperiods could be
-[2, 4]. So new data would take every 2nd element from 0.0 seconds to 10.0 seconds, then every 4th element
-from 10.0 seconds to 100.0 seconds.
-"""
-function downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer)
-
-    # convert boundaries from times to element indicies
-    boundaries = closestindices(self.t, time_boundaries)
-
-    # get downsampled indices
-    indices = downsample(boundaries, elperiods)
-
-    # downsample data
-    σ = self.σ[indices]
-    ϵ = self.ϵ[indices]
-    t = self.t[indices]
-
-    # change to variable sampling rate if more than one section, if not then as original
-    local sampling::String
-    if length(elperiods) > 1
-        sampling = "variable"
-    else
-        sampling = self.sampling
-    end
-
-    # add record of operation applied
-    log = vcat(self.log, "downsample - boundaries: $boundaries, elperiods: $elperiods")
-
-    self_new = RheoTimeData(σ=σ, ϵ=ϵ, t=t, log)
-
-end
-
-"""
-    fixedresample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{K} where K<:Integer, direction::Vector{String})
+    fixedresample(self::RheoTimeData, elperiods::Union{Vector{K},K}; time_boundaries::Vector{T}= [-1])
 
 Resample data with new sample rate(s).
 
-Whereas downsample can only reduce the sample rate by not taking every array element,
-fixedresample can also upsample. Whether to up or down sample for a given section is known
-from the `direction` argument.
+Fixedresample can downsample or upsample data. If the number of elperiods is negative it is going to reduce the number of samples,
+viceversa if it is positive. If time boundaries are not specified, resampling is applied to the whole set of data.
 """
-function fixedresample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{K} where K<:Integer, direction::Vector{String})
+function fixedresample(self::RheoTimeData, elperiods::Union{Vector{K},K}; time_boundaries::Vector{T}= [-1]) where {K<:Integer,T<:Real}
 
     # convert boundaries from times to element indicies
-    boundaries = closestindices(self.t, time_boundaries)
-
-    # resample all data
-    (t, σ) = fixed_resample(self.t, self.σ, boundaries, elperiods, direction)
-    (t, ϵ) = fixed_resample(self.t, self.ϵ, boundaries, elperiods, direction)
-
-    # change to variable sampling rate if more than one section
-    local sampling::String
-    if length(elperiods) > 1
-        sampling = "variable"
+    if time_boundaries ==[-1]
+        boundaries = [1,length(self.t)];
     else
-        sampling = self.sampling
+        boundaries = closestindices(self.t, time_boundaries)
+    end
+
+    check = RheoTimeDataType(self)
+    if (Int(check) == 1)
+        (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods)
+        sigma = [];
+    elseif (Int(check) == 2)
+        (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods)
+        epsilon = [];
+    elseif (Int(check) == 3)
+        (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods)
+        (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods)
     end
 
     # add record of operation applied
-    log = vcat(self.log, "fixed_resample - boundaries: $boundaries, elperiods: $elperiods, direction: $direction")
+    log = vcat(self.log, "fixed_resample - boundaries: $boundaries, elperiods: $elperiods")
 
-    self_new = RheoTimeData(σ=σ, ϵ=ϵ, t=t, log)
+    self_new = RheoTimeData(sigma, epsilon, time, log)
 
 end
 
@@ -201,6 +168,43 @@ function zerotime(self::RheologyData)
     return RheologyData(self.σ, self.ϵ, self.t .- minimum(self.t), self.sampling, vcat(self.log, ["Normalized time to start at 0.0"]))
 
 end
+
+
+# """
+#     downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer)
+#
+# Boundaries are floating point times which are then converted to the closest elements. Works by just
+# reducing on indices. For example, time_boundaries could be [0.0, 10.0, 100.0] and elperiods could be
+# [2, 4]. So new data would take every 2nd element from 0.0 seconds to 10.0 seconds, then every 4th element
+# from 10.0 seconds to 100.0 seconds.
+# """
+# function downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer)
+#
+#     # convert boundaries from times to element indicies
+#     boundaries = closestindices(self.t, time_boundaries)
+#
+#     # get downsampled indices
+#     indices = downsample(boundaries, elperiods)
+#
+#     # downsample data
+#     σ = self.σ[indices]
+#     ϵ = self.ϵ[indices]
+#     t = self.t[indices]
+#
+#     # change to variable sampling rate if more than one section, if not then as original
+#     local sampling::String
+#     if length(elperiods) > 1
+#         sampling = "variable"
+#     else
+#         sampling = self.sampling
+#     end
+#
+#     # add record of operation applied
+#     log = vcat(self.log, "downsample - boundaries: $boundaries, elperiods: $elperiods")
+#
+#     self_new = RheoTimeData(σ=σ, ϵ=ϵ, t=t, log)
+#
+# end
 
 ##########################
 #~ Processing Functions ~#
@@ -437,9 +441,9 @@ function modelpredict(data::RheoTimeData,model::RheologyModel; modtouse::Symbol=
         pred_mod = model.G
     end
     time = data.t
-
+    modparam = model.parameters
     # store operation
-    log = vcat( model.log, "Predicted data using: $pred_mod")
+    log = vcat( data.log, "Predicted data using: $pred_mod, Parameters: $modparam")
 
 
     return RheoTimeData(sigma,epsilon,time, log)
