@@ -5,14 +5,14 @@
 #######################
 
 """
-    trapz(y, x[; init = 0.0])
+    trapz(y, x; init=0.0)
 
 Array based trapezoidal integration of y with respect to x.
 
 Limits of integration defined by the start and end points of the arrays. 'init'
 keyword argument is used for setting an initial condition.
 """
-function trapz(y::Vector{RheoFloat}, x::Vector{RheoFloat}; init::RheoFloat=0.0)
+function trapz(y, x; init=0.0)
 
     n = length(x)
 
@@ -30,6 +30,7 @@ function trapz(y::Vector{RheoFloat}, x::Vector{RheoFloat}; init::RheoFloat=0.0)
 
     # return summation
     r/2.0
+
 
 end
 
@@ -495,15 +496,16 @@ function boltzintegral_nonsing(modulus, time_series, params,prescribed_dot)
         Modulusᵢ = modulus(Modulus_arg, params)
         df_dtᵢ = prescribed_dot_mod[1:i]
         intergrand = Modulusᵢ.*df_dtᵢ
+
         I[i] = trapz(intergrand, τ)
     end
-
     # fix initial point
     # I[2] = (prescribed_dot[1]*modulus([0.0], params)*(time_series[2] - time_series[1]))[1]
     # to catch weird bug in InverseLaplace
     I[2] = (prescribed_dot[1]*modulus(time_series, params)*(time_series[2] - time_series[1]))[1]
 
-    return convert(Vector{RheoFloat},I[2:end])
+    I[2:end]
+
 
 end
 
@@ -546,6 +548,7 @@ end
 
 function boltzintegral_sing(modulus, time_series, params,prescribed_dot)
 
+
     # init time diff, used to cope with singularity
     init_offset = (time_series[2] - time_series[1])/10.0
 
@@ -563,14 +566,17 @@ function boltzintegral_sing(modulus, time_series, params,prescribed_dot)
         Modulus_arg[end] = init_offset
         Modulusᵢ = modulus(Modulus_arg, params)
         df_dtᵢ = prescribed_dot_mod[1:i]
+
         intergrand = Modulusᵢ.*df_dtᵢ
+
         I[i] = trapz(intergrand, τ)
+
     end
 
     # fix initial point
     I[2] = (prescribed_dot[1]*modulus([init_offset], params)*(time_series[2] - time_series[1]))[1]
 
-    return convert(Vector{RheoFloat},I[2:end])
+    I[2:end]
 
 end
 
@@ -730,8 +736,10 @@ function obj_var_nonsing(params, grad,modulus, time_series, prescribed_dot, meas
     if _insight
         println("Current Parameters: ", params)
     end
-
+    #print("entrato1")
     convolved = boltzintegral_nonsing(modulus, time_series, params, prescribed_dot)
+    #print("entrato2")
+    #print(typeof(convolved))
 
     cost = sum(0.5*(measured - convolved).^2)
 

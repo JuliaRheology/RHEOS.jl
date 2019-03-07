@@ -277,7 +277,6 @@ function modelfit(data::RheoTimeData,
             dcontrolled = dϵ;
             measured = data.σ
         end
-        print(modtouse)
     elseif modtouse == :J
         dcontrolled = deriv(data.σ, data.t)
         measured = data.ϵ
@@ -387,14 +386,6 @@ function modelpredict(data::RheoTimeData,model::RheologyModel; modtouse::Symbol=
     # TEMP - CHECK WITH ALE AND ALEXANDRE BUT IS DEFINITELY NECESSARY
     # time must start at 0 for convolution to work properly!
     t_zeroed = data.t .- minimum(data.t)
-
-    # params_init = convert(Vector{Float64},params_init)
-    # low_bounds = convert(Vector{Float64},low_bounds)
-    # hi_bounds = convert(Vector{Float64}, hi_bounds)
-    # time_series = convert(Vector{Float64},time_series)
-    # prescribed_dot = convert(Vector{Float64},prescribed_dot)
-    # measured = convert(Vector{Float64},measured)
-
 
     # get convolution
     if !sing && constantcheck(data.t)
