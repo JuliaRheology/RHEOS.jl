@@ -238,7 +238,7 @@ function modelfit(data::RheoTimeData,
     hi = convert(Array{RheoFloat,1},hi)
     rel_tol = convert(RheoFloat,rel_tol)
 
-    check = check_time_data_consistency(data.t,data.ϵ,data.σ)
+    check = RheoTimeDataType(data)
     @assert (Int(check) == 3) "Both stress and strain are required"
 
     # use correct method for derivative
@@ -323,13 +323,7 @@ relaxation modulus (:G, only returned stress is new). 'diff_method' sets finite 
 calculating the derivative used in the hereditary integral and can be either backwards difference
 ("BD") or central difference ("CD").
 """
-function modelpredict(data::RheoTimeData, model::RheologyModel, modtouse::Symbol; diff_method="BD")
-
-    # get modulus
-    modulus = getfield(model, modtouse)
-
-    # get singularity presence
-    sing = singularitytest(modulus, model.parameters)
+function modelpredict(data::RheoTimeData,model::RheologyModel; modtouse::Symbol=:Nothing, diff_method="BD")
 
     # use correct method for derivative
     if diff_method=="BD"
@@ -338,20 +332,47 @@ function modelpredict(data::RheoTimeData, model::RheologyModel, modtouse::Symbol
         deriv = derivCD
     end
 
-    if modtouse == :J
+    if modtouse == :Nothing
+        check = RheoTimeDataType(data)
+        if (Int(check) == 1)
+            modtouse = :G;
+            dcontrolled = deriv(data.ϵ, data.t)
+        elseif (Int(check) == 2)
+            modtouse = :J;
+            dcontrolled = deriv(data.σ, data.t)
+        elseif (Int(check) == 3)
+            dσ = deriv(data.σ, data.t)
+            dϵ = deriv(data.ϵ, data.t)
+            max_dσ = maximum(dσ[2:end])
+            max_dϵ = maximum(dϵ[2:end])
+            if (max_dσ<=max_dϵ)
+                modtouse = :J;
+                dcontrolled = dσ;
+            elseif (max_dσ>max_dϵ)
+                modtouse = :G;
+                dcontrolled = dϵ;
+            end
+        end
+    elseif modtouse == :J
         dcontrolled = deriv(data.σ, data.t)
     elseif modtouse == :G
         dcontrolled = deriv(data.ϵ, data.t)
     end
 
+
+    # get modulus
+    modulus = getfield(model, modtouse)
+
+    # get singularity presence
+    sing = singularitytest(modulus, model.parameters)
+
     # get time step (only needed for convolution, which requires constant so t[2]-t[1] is sufficient)
     dt = data.t[2] - data.t[1]
+
 
     # TEMP - CHECK WITH ALE AND ALEXANDRE BUT IS DEFINITELY NECESSARY
     # time must start at 0 for convolution to work properly!
     t_zeroed = data.t .- minimum(data.t)
-
-
 
     # get convolution
     if !sing && constantcheck(data.t)
@@ -383,32 +404,45 @@ function modelpredict(data::RheoTimeData, model::RheologyModel, modtouse::Symbol
     #     end
     #     t = data.t[2:end]
 
-    if sing
-        if modtouse == :J
-            σ = data.σ
-            ϵ = convolved
-        elseif modtouse == :G
-            σ = convolved
-            ϵ = data.ϵ
-        end
-        t = data.t
+    # ASK LOUIS!
+    # if sing
+    #     if modtouse == :J
+    #         sigma = data.σ
+    #         epsilon = convolved
+    #     elseif modtouse == :G
+    #         sigma = convolved
+    #         epsilon = data.ϵ
+    #     end
+    #     time = data.t
+    #
+    # elseif !sing
+    #     if modtouse == :J
+    #         sigma = data.σ
+    #         epsilon = convolved
+    #     elseif modtouse == :G
+    #         sigma = convolved
+    #         epsilon = data.ϵ
+    #     end
+    #     time = data.t
+    #
+    # end
 
-    elseif !sing
-        if modtouse == :J
-            σ = data.σ
-            ϵ = convolved
-        elseif modtouse == :G
-            σ = convolved
-            ϵ = data.ϵ
-        end
-        t = data.t
-
+    if modtouse == :J
+        sigma = data.σ
+        epsilon = convolved
+        pred_mod = model.J
+    elseif modtouse == :G
+        sigma = convolved
+        epsilon = data.ϵ
+        pred_mod = model.G
     end
+    time = data.t
 
     # store operation
-    log = vcat(data.log, "Predicted data from model:", model.log)
+    log = vcat( model.log, "Predicted data using: $pred_mod")
 
-    RheoTimeData(σ=σ, ϵ=ϵ, t=t, log)
+
+    return RheoTimeData(sigma,epsilon,time, log)
 
 end
 

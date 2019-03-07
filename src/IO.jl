@@ -48,7 +48,7 @@ function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ
             end
         end
         data = data[newstartingval:newendingval,:]
-
+        
         # generate RheologyData struct and output
         if (ϵ_col!=-1) & (σ_col!=-1)
             return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], σ = data[:,σ_col], info = "Imported data: file $filedir, stress and strain")

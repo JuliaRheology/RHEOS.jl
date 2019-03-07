@@ -18,7 +18,8 @@ ub = [Inf, 0.99, Inf, Inf]
 fractsls_fit = modelfit(data, FractionalSLS(); modtouse=:G, lo=lb, hi=ub, verbose=true)
 
 # # get curves based on models fitted
-sls_predicted = modelpredict(data, sls_fit, :G)
+sls_predicted = modelpredict(data, sls_fit; modtouse = :G)
+sls_predicted = modelpredict(data, sls_fit2)
 fractsls_predicted = modelpredict(data, fractsls_fit, :G)
 
 # plot all data

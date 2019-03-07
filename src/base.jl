@@ -614,9 +614,6 @@ end
 function boltzconvolve(modulus, time_series, dt,
                         params, prescribed_dot)
 
-    time_series = convert(Vector{RheoFloat,1},time_series)
-    params = convert(Vector{RheoFloat,1},param)
-
     Modulus = modulus(time_series, params)
     # fast convolution
     β = convn(Modulus, prescribed_dot)
@@ -676,7 +673,7 @@ function obj_const_nonsing(params, grad,
                             measured; _insight::Bool = false)
 
     if _insight
-        println("AAoCurrent Parameters: ", params)
+        println("Current Parameters: ", params)
     end
     convolved = boltzconvolve_nonsing(modulus, time_series, dt, params, prescribed_dot)
 
@@ -703,10 +700,7 @@ sample rate is constant and model does feature singularity.
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
-function obj_const_sing(params, grad,
-                            modulus, time_series,
-                            dt, prescribed_dot,
-                            measured; _insight::Bool = false)
+function obj_const_sing(params, grad,modulus, time_series,dt, prescribed_dot,measured; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -714,9 +708,6 @@ function obj_const_sing(params, grad,
 
     # convolved = boltzconvolve_sing(modulus, time_series, dt, params, prescribed_dot)
     convolved = boltzconvolve(modulus, time_series, dt, params, prescribed_dot)
-
-    # don't use first element as singularity exists in model - Edit: INCORRECT COMMENT!
-    # cost = sum(0.5*(measured[1:(length(measured)-1)] - convolved).^2)
 
     # do as this has been taken care of in convolution!
     cost = sum(0.5*(measured - convolved).^2)
@@ -740,10 +731,7 @@ sample rate is variable and no singularity in model.
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
-function obj_var_nonsing(params::Array{RheoFloat,1}, grad::Array{RheoFloat,1},
-                            modulus::Function, time_series::Array{RheoFloat,1},
-                            prescribed_dot::Array{RheoFloat,1}, measured::Array{RheoFloat,1};
-                            _insight::Bool = false)::RheoFloat
+function obj_var_nonsing(params, grad,modulus, time_series, prescribed_dot, measured;_insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -772,10 +760,7 @@ sample rate is variable and there IS singularity in model.
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
-function obj_var_sing(params::Array{RheoFloat,1}, grad::Array{RheoFloat,1},
-                            modulus::Function, time_series::Array{RheoFloat,1},
-                            prescribed_dot::Array{RheoFloat,1}, measured::Array{RheoFloat,1};
-                            _insight::Bool = false)::RheoFloat
+function obj_var_sing(params, grad,modulus, time_series,prescribed_dot, measured;_insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -879,7 +864,7 @@ function leastsquares_init(params_init, low_bounds,
 
 end
 
-function obj_step_nonsing(params::Vector{RheoFloat}, grad::Vector{RheoFloat}, modulus::Function, t::Vector{RheoFloat}, prescribed::RheoFloat, measured::Vector{RheoFloat}; _insight=false)
+function obj_step_nonsing(params, grad, modulus, t, prescribed, measured; _insight=false)
     if _insight
         println("Current Parameters: ", params)
     end
@@ -922,6 +907,14 @@ function leastsquares_stepinit(params_init::Array{RheoFloat,1}, low_bounds::Arra
 
     # set Opt object as a minimisation objective. Use a closure for additional
     # arguments sent to object objectivefunc
+
+    params_init = convert(Vector{Float64},params_init)
+    low_bounds = convert(Vector{Float64},low_bounds)
+    hi_bounds = convert(Vector{Float64}, hi_bounds)
+    time_series = convert(Vector{Float64},time_series)
+    prescribed_dot = convert(Vector{Float64},prescribed_dot)
+    measured = convert(Vector{Float64},measured)
+
     if !singularity
         min_objective!(opt, (params, grad) -> obj_step_nonsing(params, grad, modulus,
                                                             time_series, prescribed, measured;
