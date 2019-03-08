@@ -1,3 +1,149 @@
+# Processing
+
+"""
+    variableresample(self::RheologyData, refvar::Symbol, pcntdownsample::Real; mapback::Bool = false)
+
+Convert a fixed sample rate array to a variable sample rate, with sampling points
+added according to a relative change in chosen variable `refvar`, 1st derivative
+of `refvar` and 2nd derivative of `refvar` (WRT time). Usually chosen as the
+measured variable, so :σ for a stress relaxation test and :ϵ for a creep test.
+
+Currently only variable downsampling supported. pcntdown sample is approximate,
+works well in some cases and very poorly in others. If required, compare resampled
+length vs original length after processing has finished. If data is noisy, may
+benefit from sending smoothed signal to this algorithm and either using mapback
+function or interpolating onto unsmoothed data.
+
+Algorithm works as follows. 25 initial samples are generated evenly spread. After this,
+the array is repeatedly sweeped, anywhere Δy, Δdy/dx, Δd2y/dx2 is greater than a threshold, α,
+a new sample is created at the midpoint of the two tested points. This is allowed to
+happen a maximum of 400 times, after which α is decreased and the process starts again.
+This macro process continues until the desired pcntdownsample ratio has been reached.
+
+# Arguments
+
+- `self`: RheologyData instance
+- `refvar`: The data whose derivatives will determine sample densities
+- `pcntdownsample`: Approximate ratio of new samples to old samples
+- `_mapback = false`: (Optional) Determines whether resampled points should 'snap' to closest original points
+"""
+function variableresample(self::RheoTimeData, refvar::Symbol, pcntdownsample::Real; _mapback::Bool = true)
+
+    @eval import Interpolations: interpolate, Gridded, Linear
+
+    # enforce minimum period of original period/10
+    _minperiod = (self.t[2] - self.t[1])/10.0
+
+    # get time resampled with respect to refvar
+    (tᵦ, dummy)  = var_resample(self.t, getfield(self, refvar), pcntdownsample, _minperiod)
+
+    if _mapback
+        # get mapped indices wrt original
+        mapback_indices = mapback(tᵦ, self.t)
+
+        σ = self.σ[mapback_indices]
+        ϵ = self.ϵ[mapback_indices]
+        t = self.t[mapback_indices]
+
+    elseif !_mapback
+        # interpolate with respect to t
+        σ_interp = Base.invokelatest(interpolate, (self.t,), self.σ, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
+        ϵ_interp = Base.invokelatest(interpolate, (self.t,), self.σ, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
+
+        # resample all using new timepoints tᵦ
+        σ = σ_interp[tᵦ]
+        ϵ = ϵ_interp[tᵦ]
+        t = tᵦ
+    end
+
+    # change sampling type to variable
+    sampling = "variable"
+
+    # add record of operation applied
+    log = vcat(self.log, "var_resample - refvar: $refvar, pcntdownsample: $pcntdownsample, mapback: $_mapback")
+
+    self_new = RheoTimeData(σ=σ, ϵ=ϵ, t=t, log)
+
+end
+
+"""
+    function mapbackdata(self_new::RheologyData, self_original::RheologyData)
+
+Map back elements (WRT closest time elements) of all data from self_new to
+self_original. See mapback help docstring for more info on how algorithm works.
+"""
+function mapbackdata(self_new::RheologyData, self_original::RheologyData)
+
+    # get mapped back indices
+    indices = mapback(self_new.t, self_original.t)
+
+    #  set variables
+    σ = self_original.σ[indices]
+    ϵ = self_original.ϵ[indices]
+    t = self_original.t[indices]
+
+    # add record of operation applied
+    log = vcat(self_new.log, "mapped back") # mapped back to what? Include self_origina.log as well? Need to change Array type if so.
+
+    # to add, check if sample rate is now variable or constant (unlikely but could fall back to constant?)
+
+    self_new = RheoTimeData(σ=σ, ϵ=ϵ,t = t, log)
+
+end
+
+"""
+    function zerotime(self::RheologyData)
+
+Convenience function to normalize time such that the starting time is 0.0
+"""
+function zerotime(self::RheologyData)
+
+    return RheologyData(self.σ, self.ϵ, self.t .- minimum(self.t), self.sampling, vcat(self.log, ["Normalized time to start at 0.0"]))
+
+end
+
+
+# """
+#     downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer)
+#
+# Boundaries are floating point times which are then converted to the closest elements. Works by just
+# reducing on indices. For example, time_boundaries could be [0.0, 10.0, 100.0] and elperiods could be
+# [2, 4]. So new data would take every 2nd element from 0.0 seconds to 10.0 seconds, then every 4th element
+# from 10.0 seconds to 100.0 seconds.
+# """
+# function downsample(self::RheologyData, time_boundaries::Vector{T} where T<:Real, elperiods::Vector{S} where S<:Integer)
+#
+#     # convert boundaries from times to element indicies
+#     boundaries = closestindices(self.t, time_boundaries)
+#
+#     # get downsampled indices
+#     indices = downsample(boundaries, elperiods)
+#
+#     # downsample data
+#     σ = self.σ[indices]
+#     ϵ = self.ϵ[indices]
+#     t = self.t[indices]
+#
+#     # change to variable sampling rate if more than one section, if not then as original
+#     local sampling::String
+#     if length(elperiods) > 1
+#         sampling = "variable"
+#     else
+#         sampling = self.sampling
+#     end
+#
+#     # add record of operation applied
+#     log = vcat(self.log, "downsample - boundaries: $boundaries, elperiods: $elperiods")
+#
+#     self_new = RheoTimeData(σ=σ, ϵ=ϵ, t=t, log)
+#
+# end
+
+###############################################################################
+#           BASE
+###############################################################################
+
+
 function sampleratecompare(t1::Vector{RheoFloat}, t2::Vector{RheoFloat})
 
     @assert constantcheck(t1) "Sample-rate of both arguments must be constant, first argument is non-constant"

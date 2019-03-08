@@ -7,7 +7,7 @@ filedir = "Epi_relax.csv"
 
 # repeated step loading generated with FractionalSLS([2.0, 0.5, 0.5, 0.7])
 data = importdata(filedir; t_col =1, ϵ_col = 3, σ_col = 2)
-data_resampled = fixedresample(data,[1,-2],time_boundaries=[1,15,150])
+data_resampled = fixedresample(data,[1],time_boundaries=[-0.6,80])
 
 # SLS fit
 sls_fit = modelfit(data, SLS(); modtouse = :G, verbose=true)
@@ -19,6 +19,8 @@ lb = [0.1, 0.1, 0.1, 0.1]
 ub = [Inf, Inf, 0.99, Inf]
 fractspecial_fit = modelfit(data_resampled, FractionalSpecial(); p0 = p0, lo=lb, hi=ub, verbose=true)
 fracspecial_predicted = modelpredict(data, fractspecial_fit)
+
+fractspecial_fit = modelstepfit(data, FractionalSpecial(); p0 = p0, lo=lb, hi=ub, verbose=true)
 
 
 # # get curves based on models fitted

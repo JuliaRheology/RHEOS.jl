@@ -31,7 +31,6 @@ function trapz(y, x; init=0.0)
     # return summation
     r/2.0
 
-
 end
 
 
@@ -263,6 +262,7 @@ end
 ##########################
 
 function singularitytest(modulus::Function, params::Array{RheoFloat, 1}; t1::RheoFloat=convert(RheoFloat,0.0))
+
 
     startval = modulus([t1], params)[1]
 
@@ -723,7 +723,7 @@ function leastsquares_stepinit(params_init::Array{RheoFloat,1}, low_bounds::Arra
     low_bounds = convert(Vector{Float64},low_bounds)
     hi_bounds = convert(Vector{Float64}, hi_bounds)
     time_series = convert(Vector{Float64},time_series)
-    prescribed_dot = convert(Vector{Float64},prescribed_dot)
+    prescribed = convert(Float64,prescribed)
     measured = convert(Vector{Float64},measured)
 
     if !singularity
