@@ -389,7 +389,6 @@ function modelstepfit(data::RheoTimeData,
         p0 = convert(Array{RheoFloat,1},model.parameters)
     end
 
-
     # TEMP - CHECK WITH ALE AND ALEXANDRE BUT IS DEFINITELY NECESSARY
     # time must start at 0 for convolution to work properly!
     t_zeroed = data.t .- minimum(data.t)
