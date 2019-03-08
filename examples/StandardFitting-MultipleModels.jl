@@ -6,11 +6,11 @@ using RHEOS
 filedir = "Epi_relax.csv"
 
 # repeated step loading generated with FractionalSLS([2.0, 0.5, 0.5, 0.7])
-data = importdata(filedir; t_col =1, σ_col = 2)
-data_resampled = fixedresample(data,[1],time_boundaries=[0.0,80])
+data = importdata(filedir; t_col =1, σ_col = 2, ϵ_col = 3)
+data_resampled = fixedresample(data,[1],time_boundaries=[-0.45,80])
 
 # SLS fit
-sls_fit = modelfit(data, SLS(); modtouse = :G, verbose=true)~
+sls_fit = modelfit(data, SLS(); modtouse = :G, verbose=true)
 sls_fit2 = modelfit(data_resampled, SLS());
 
 # Spring-pot fit: cₐ, a, kᵦ, kᵧ
@@ -22,8 +22,8 @@ fracspecial_predicted = modelpredict(data, fractspecial_fit)
 
 fractspecial_fit = modelstepfit(data_resampled, FractionalSpecial(); p0 = p0, lo=lb, hi=ub, verbose=true)
 fractspecial_fit = modelstepfit(data_resampled, FractionalSpecial(); p0 = p0, lo=lb, hi=ub, step_ϵ = 0.3)
-fractspecial_fit = modelstepfit(data_resampled, FractionalSpecial(); p0 = p0, lo=lb, hi=ub, modtouse = :G)
-fracspecial_predicted = modelpredict(data, fractspecial_fit)
+fractspecial_fit = modelstepfit(data_resampled, FractionalSpecial(); p0 = p0, lo=lb, hi=ub, modtouse = :G, step_ϵ = 0.3)
+fracspecial_predicted = modelsteppredict(data_resampled, fractspecial_fit; modtouse=:G)
 
 # # get curves based on models fitted
 sls_predicted = modelpredict(data, sls_fit; modtouse = :G)

@@ -264,41 +264,6 @@ function modelpredict(data::RheoTimeData,model::RheologyModel; modtouse::Symbol=
 
     end
 
-    # code commented out has off by one error
-    # need to find a better way to handle singularities
-    # if sing
-    #     if modtouse == :J
-    #         σ = data.σ[2:end]
-    #         ϵ = convolved
-    #     elseif modtouse == :G
-    #         σ = convolved
-    #         ϵ = data.ϵ[2:end]
-    #     end
-    #     t = data.t[2:end]
-
-    # ASK LOUIS!
-    # if sing
-    #     if modtouse == :J
-    #         sigma = data.σ
-    #         epsilon = convolved
-    #     elseif modtouse == :G
-    #         sigma = convolved
-    #         epsilon = data.ϵ
-    #     end
-    #     time = data.t
-    #
-    # elseif !sing
-    #     if modtouse == :J
-    #         sigma = data.σ
-    #         epsilon = convolved
-    #     elseif modtouse == :G
-    #         sigma = convolved
-    #         epsilon = data.ϵ
-    #     end
-    #     time = data.t
-    #
-    # end
-
     if modtouse == :J
         sigma = data.σ
         epsilon = convolved
@@ -309,6 +274,7 @@ function modelpredict(data::RheoTimeData,model::RheologyModel; modtouse::Symbol=
         pred_mod = model.G
     end
     time = data.t
+
     modparam = model.parameters
     # store operation
     log = vcat( data.log, "Predicted data using: $pred_mod, Parameters: $modparam")
@@ -430,9 +396,9 @@ function modelstepfit(data::RheoTimeData,
                                                                                         _rel_tol = rel_tol)
 
     modulusname = string(modulus)
-print(controlled)
 
-    log = vcat(data.log, "Fitted $modulusname, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
+
+    log = vcat(data.log, "Fitted $modulusname, Step value = $controlled, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
 
     RheologyModel(model.G, model.J, model.Gp, model.Gpp, minx, log)
 
@@ -444,20 +410,52 @@ end
 Same as modelpredict but assumes a step loading with step starting at 'step_on'. Singularities are bypassed
 by adding 1 to the index of the singular element.
 """
-function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; step_on::Real = 0.0)
+function modelsteppredict(data, model; modtouse::Symbol=:Nothing, step_on::Real = 0.0, diff_method = "BD")
+
+    step_on = convert(RheoFloat,step_on)
+
+    if diff_method=="BD"
+        deriv = derivBD
+    elseif diff_method=="CD"
+        deriv = derivCD
+    end
+
+    check = RheoTimeDataType(data)
+    if (modtouse == :Nothing)
+        if (Int(check) == 1)
+            modtouse = :G;
+            controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
+        elseif (Int(check) == 2)
+            modtouse = :J;
+            controlled = data.σ[convert(Integer,round(length(data.σ)\2))]
+        elseif (Int(check) == 3)
+            dσ = deriv(data.σ, data.t)
+            dϵ = deriv(data.ϵ, data.t)
+            num_dσ = count(iszero,dσ)
+            num_dϵ = count(iszero,dϵ)
+            if (num_dσ<=num_dϵ)
+                modtouse = :G;
+                controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
+            elseif (num_dσ>num_dϵ)
+                modtouse = :J;
+                controlled = data.σ[convert(Integer,round(length(data.σ)\2))]
+            end
+        end
+    elseif modtouse == :J
+        @assert (Int(check) == 2)|| (Int(check) == 3) "Stress required"
+        controlled = data.σ[convert(Integer,round(length(data.σ)\2))]
+    elseif modtouse == :G
+        @assert (Int(check) == 1)|| (Int(check) == 3) "Strain required"
+        controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
+    end
 
     # get modulus
     modulus = getfield(model, modtouse)
 
     # check singularity presence at time closest to step
     stepon_el = closestindex(data.t, step_on)
-    sing = singularitytest(modulus, model.parameters; t1 = (data.t[stepon_el] - step_on))
 
-    if modtouse == :J
-        controlled = data.σ[1]
-    elseif modtouse == :G
-        controlled = data.ϵ[1]
-    end
+    sing = singularitytest(modulus, model.parameters; t1 = convert(RheoFloat,(data.t[stepon_el] - step_on)))
 
     # get predicted
     if !sing
@@ -481,7 +479,7 @@ function modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Sy
     # store operation
     log = vcat(data.log, "Predicted data from model:", model.log)
 
-    RheoTimeData(σ=σ, ϵ=ϵ, t=t, log)
+    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), data.t, log)
 
 end
 
