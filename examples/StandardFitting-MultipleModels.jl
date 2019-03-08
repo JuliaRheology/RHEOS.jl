@@ -11,7 +11,7 @@ data_resampled = fixedresample(data,[1,-2],time_boundaries=[1,15,150])
 
 # SLS fit
 sls_fit = modelfit(data, SLS(); modtouse = :G, verbose=true)
-sls_fit2 = modelfit(data, SLS());
+sls_fit2 = modelfit(data_resampled, SLS());
 
 # Spring-pot fit: cₐ, a, kᵦ, kᵧ
 p0 = [1e4, 1e3, 0.3, 4e2]
@@ -29,7 +29,7 @@ fractsls_predicted = modelpredict(data, fractsls_fit, :G)
 # plot all data
 fig, ax = subplots()
 ax[:loglog](data.t, data.σ, label="Data", color="black")
-#ax[:loglog](sls_predicted.t, sls_predicted.σ, label="SLS")
+ax[:loglog](sls_predicted.t, sls_predicted.σ, label="SLS")
 ax[:plot](fracspecial_predicted.t, fracspecial_predicted.σ, "--", label="Fractional SLS")
 ax[:legend](loc="best")
 show()
