@@ -99,11 +99,11 @@ Fit RheologyData struct to model and return a fitted model as a RheologyModel ob
 - `diff_method`: Set finite difference formula to use for derivative, currently "BD" or "CD"
 """
 function modelfit(data::RheoTimeData,
-                  model::RheologyModel;
+                  model::RheologyModel,
+                  modloading::Union{LoadingType,Integer};
                   p0::Array{T1,1} = [-1.0],
                   lo::Array{T2,1} = [-1.0],
                   hi::Array{T3,1} = [-1.0],
-                  modtouse::Symbol = :Nothing,
                   verbose::Bool = false,
                   rel_tol = 1e-4,
                   diff_method="BD") where {T1<:Real, T2<:Real, T3<:Real}
@@ -124,29 +124,14 @@ function modelfit(data::RheoTimeData,
     end
 
     # get modulus function and derivative
-    if modtouse == :Nothing
-        dσ = deriv(data.σ, data.t)
-        dϵ = deriv(data.ϵ, data.t)
-        max_dσ = unique(dσ[1:end])
-        max_dϵ = unique(dϵ[1:end])
-        print(length(max_dσ), "\n")
-        print(length(max_dϵ))
-        error()
-        if (max_dσ<=max_dϵ)
-            modtouse = :J;
-            dcontrolled = dσ;
-            measured = data.ϵ
-        elseif (max_dσ>max_dϵ)
-            modtouse = :G;
-            dcontrolled = dϵ;
-            measured = data.σ
-        end
-    elseif modtouse == :J
+    if Int(modloading) == 2
         dcontrolled = deriv(data.σ, data.t)
         measured = data.ϵ
-    elseif modtouse == :G
+        modtouse = :J
+    elseif Int(modloading) == 1
         dcontrolled = deriv(data.ϵ, data.t)
         measured = data.σ
+        modtouse = :G
     end
 
     modulus = getfield(model, modtouse)
@@ -200,7 +185,7 @@ relaxation modulus (:G, only returned stress is new). 'diff_method' sets finite 
 calculating the derivative used in the hereditary integral and can be either backwards difference
 ("BD") or central difference ("CD").
 """
-function modelpredict(data::RheoTimeData,model::RheologyModel; modtouse::Symbol=:Nothing, diff_method="BD")
+function modelpredict(data::RheoTimeData,model::RheologyModel; diff_method="BD")
 
     # use correct method for derivative
     if diff_method=="BD"
@@ -212,21 +197,14 @@ function modelpredict(data::RheoTimeData,model::RheologyModel; modtouse::Symbol=
     check = RheoTimeDataType(data)
     @assert (Int(check) == 3) "Both stress and strain are already defined"
 
-    if modtouse == :Nothing
-        check = RheoTimeDataType(data)
-        if (Int(check) == 1)
-            modtouse = :G;
-            dcontrolled = deriv(data.ϵ, data.t)
-        elseif (Int(check) == 2)
-            modtouse = :J;
-            dcontrolled = deriv(data.σ, data.t)
-        end
-    elseif modtouse == :J
-        dcontrolled = deriv(data.σ, data.t)
-    elseif modtouse == :G
+    check = RheoTimeDataType(data)
+    if (Int(check) == 1)
+        modtouse = :G;
         dcontrolled = deriv(data.ϵ, data.t)
+    elseif (Int(check) == 2)
+        modtouse = :J;
+        dcontrolled = deriv(data.σ, data.t)
     end
-
 
     # get modulus
     modulus = getfield(model, modtouse)
@@ -324,19 +302,7 @@ function modelstepfit(data::RheoTimeData,
     if (step_σ == nothing)  && (step_ϵ == nothing)
         check = RheoTimeDataType(data)
         @assert (Int(check) == 3) "Both stress and strain are required"
-        if (modtouse == :Nothing)
-            dσ = deriv(data.σ, data.t)
-            dϵ = deriv(data.ϵ, data.t)
-            num_dσ = count(iszero,dσ)
-            num_dϵ = count(iszero,dϵ)
-            if (num_dσ<=num_dϵ)
-                modtouse = :G;
-                controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
-            elseif (num_dσ>num_dϵ)
-                modtouse = :J;
-                controlled = data.σ[convert(Integer,round(length(data.σ)\2))]
-            end
-        elseif modtouse == :J
+        if modtouse == :J
             controlled = data.σ[convert(Integer,round(length(data.σ)\2))]
         elseif modtouse == :G
             controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]

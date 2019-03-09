@@ -7,17 +7,17 @@ filedir = "Epi_relax.csv"
 
 # repeated step loading generated with FractionalSLS([2.0, 0.5, 0.5, 0.7])
 data = importdata(filedir; t_col =1, σ_col = 2, ϵ_col = 3)
-data_resampled = fixedresample(data,[1],time_boundaries=[-0.45,80])
+data_resampled = fixedresample(data,-2)
 
 # SLS fit
-sls_fit = modelfit(data, SLS(); modtouse = :G, verbose=true)
-sls_fit2 = modelfit(data_resampled, SLS());
+sls_fit = modelfit(data, SLS(), strain_imposed, verbose=true)
+sls_fit2 = modelfit(data, SLS(), 1);
 
 # Spring-pot fit: cₐ, a, kᵦ, kᵧ
 p0 = [1e4, 1e3, 0.3, 4e2]
 lb = [0.1, 0.1, 0.1, 0.1]
 ub = [Inf, Inf, 0.99, Inf]
-fractspecial_fit = modelfit(data_resampled, FractionalSpecial(); p0 = p0, lo=lb, hi=ub, verbose=true)
+fractspecial_fit = modelfit(data_resampled, FractionalSpecial(), strain_imposed; p0 = p0, lo=lb, hi=ub, verbose=true)
 fracspecial_predicted = modelpredict(data, fractspecial_fit)
 
 fractspecial_fit = modelstepfit(data_resampled, FractionalSpecial(); p0 = p0, lo=lb, hi=ub, verbose=true)
@@ -37,3 +37,6 @@ ax[:loglog](data.t, data.σ, label="Data", color="black")
 ax[:plot](fracspecial_predicted.t, fracspecial_predicted.σ, "--", label="Fractional SLS")
 ax[:legend](loc="best")
 show()
+
+
+prova(strain_imposed)

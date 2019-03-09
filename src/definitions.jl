@@ -1,6 +1,7 @@
 #!/usr/bin/env julia
 
 export RheoTimeData, RheoTimeDataType, RheoFreqData, RheoFreqDataType, check_time_data_consistency
+export LoadingType, strain_imposed, stress_imposed
 
 # This defines the data type for all arrays, parameters and processing
 #RheoFloat = Float32
@@ -46,7 +47,6 @@ end
 
 
 
-
 @enum TimeDataType invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
 
 function check_time_data_consistency(t,e,s)
@@ -81,7 +81,7 @@ function RheoTimeDataType(d::RheoTimeData)
     return check_time_data_consistency(d.t,d.ϵ,d.σ)
 end
 
-
+@enum LoadingType strain_imposed=1 stress_imposed=2
 
 
 

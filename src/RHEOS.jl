@@ -4,6 +4,7 @@ __precompile__(true)
 module RHEOS
 
 RheoFloat = Float32
+
 # installed from Julia package repository
 using InverseLaplace
 using NLopt
