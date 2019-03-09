@@ -14,6 +14,7 @@ viceversa if it is positive. If time boundaries are not specified, resampling is
 """
 function fixedresample(self::RheoTimeData, elperiods::Union{Vector{K},K}; time_boundaries::Vector{T}= [-1]) where {K<:Integer,T<:Real}
 
+    @assert (count(iszero,elperiods)==0) "Number of elements cannot be zero"
     # convert boundaries from times to element indicies
     if time_boundaries ==[-1]
         boundaries = [1,length(self.t)];
@@ -126,8 +127,11 @@ function modelfit(data::RheoTimeData,
     if modtouse == :Nothing
         dσ = deriv(data.σ, data.t)
         dϵ = deriv(data.ϵ, data.t)
-        max_dσ = maximum(dσ[2:end])
-        max_dϵ = maximum(dϵ[2:end])
+        max_dσ = unique(dσ[1:end])
+        max_dϵ = unique(dϵ[1:end])
+        print(length(max_dσ), "\n")
+        print(length(max_dϵ))
+        error()
         if (max_dσ<=max_dϵ)
             modtouse = :J;
             dcontrolled = dσ;
@@ -205,6 +209,9 @@ function modelpredict(data::RheoTimeData,model::RheologyModel; modtouse::Symbol=
         deriv = derivCD
     end
 
+    check = RheoTimeDataType(data)
+    @assert (Int(check) == 3) "Both stress and strain are already defined"
+
     if modtouse == :Nothing
         check = RheoTimeDataType(data)
         if (Int(check) == 1)
@@ -213,18 +220,6 @@ function modelpredict(data::RheoTimeData,model::RheologyModel; modtouse::Symbol=
         elseif (Int(check) == 2)
             modtouse = :J;
             dcontrolled = deriv(data.σ, data.t)
-        elseif (Int(check) == 3)
-            dσ = deriv(data.σ, data.t)
-            dϵ = deriv(data.ϵ, data.t)
-            max_dσ = maximum(dσ[2:end])
-            max_dϵ = maximum(dϵ[2:end])
-            if (max_dσ<=max_dϵ)
-                modtouse = :J;
-                dcontrolled = dσ;
-            elseif (max_dσ>max_dϵ)
-                modtouse = :G;
-                dcontrolled = dϵ;
-            end
         end
     elseif modtouse == :J
         dcontrolled = deriv(data.σ, data.t)
@@ -421,6 +416,8 @@ function modelsteppredict(data, model; modtouse::Symbol=:Nothing, step_on::Real 
     end
 
     check = RheoTimeDataType(data)
+    @assert (Int(check) == 3) "Both stress and strain are already defined"
+
     if (modtouse == :Nothing)
         if (Int(check) == 1)
             modtouse = :G;
@@ -428,18 +425,6 @@ function modelsteppredict(data, model; modtouse::Symbol=:Nothing, step_on::Real 
         elseif (Int(check) == 2)
             modtouse = :J;
             controlled = data.σ[convert(Integer,round(length(data.σ)\2))]
-        elseif (Int(check) == 3)
-            dσ = deriv(data.σ, data.t)
-            dϵ = deriv(data.ϵ, data.t)
-            num_dσ = count(iszero,dσ)
-            num_dϵ = count(iszero,dϵ)
-            if (num_dσ<=num_dϵ)
-                modtouse = :G;
-                controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
-            elseif (num_dσ>num_dϵ)
-                modtouse = :J;
-                controlled = data.σ[convert(Integer,round(length(data.σ)\2))]
-            end
         end
     elseif modtouse == :J
         @assert (Int(check) == 2)|| (Int(check) == 3) "Stress required"
