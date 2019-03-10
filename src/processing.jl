@@ -4,7 +4,7 @@
 #~ Preprocessing Functions ~#
 #############################
 
-export cutting
+export cutting, extract
 
 """
     fixedresample(self::RheoTimeData, elperiods::Union{Vector{K},K}; time_boundaries::Vector{T}= [-1])
@@ -46,7 +46,7 @@ end
 function cutting(self::RheoTimeData, time_on::T1,time_off::T2) where {T1<:Number, T2<:Number}
 
     @assert isreal(time_on) && isreal(time_off) "Boundaries cannot be complex numbers"
-    
+
     boundary_on = closestindex(self.t, time_on);
     boundary_off = closestindex(self.t, time_off);
     time = self.t[boundary_on:boundary_off]
@@ -101,6 +101,31 @@ function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
     log = vcat(self.log, "smooth - τ: $τ")
 
     self_new = RheoTimeData(sigma, epsilon, self.t, log)
+
+end
+
+
+function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
+
+    check = RheoTimeDataType(self)
+
+    if Int(type)==0
+        @assert Int(check)!=-1 "Time not available"
+        log = vcat(self.log,"Time extracted")
+        return RheoTimeData([], [],self.t,log)
+    elseif Int(type) == 1
+        @assert Int(check)==3 || Int(check)==1 "Strain not available"
+        log = vcat(self.log,"Time and strain extracted")
+        return RheoTimeData([], self.ϵ,self.t,log)
+    elseif Int(type) == 2
+        @assert Int(check)==3 || Int(check)==2 "Stress not available"
+        log = vcat(self.log,"Time and stress extracted")
+        return RheoTimeData(self.σ, [], self.t,log)
+    elseif Int(type)==3
+        @assert Int(check)==3 "Both stress and strain not available"
+        log = vcat(self.log,"Time, stress and strain extracted")
+        return RheoTimeData(self.σ, self.ϵ, self.t,log)
+    end
 
 end
 

@@ -12,7 +12,8 @@ data_resampled_var = fixedresample(data,[1,-12],time_boundaries=[0.0, 8.0,80.0])
 data_cut = cutting(data,0,50.0)
 
 # variable for prediction
-data_predict = importdata(filedir; t_col =1, ϵ_col = 3)
+data_predict = extract(data,strain_only)
+data_predict3 = extract(data,0)
 data_predict_fix = fixedresample(data_predict,-2,time_boundaries=[-0.6, 80.0])
 data_predict_var = fixedresample(data_predict,[1,-12],time_boundaries=[0.0, 8.0,80.0])
 
