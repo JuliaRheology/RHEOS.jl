@@ -50,6 +50,3 @@ ax[:plot](fracspecial_predicted_var.t, fracspecial_predicted_var.σ, "--", label
 ax[:plot](fracspecial_predicted_step.t, fracspecial_predicted_step.σ, "--", label="Fractional special step")
 ax[:legend](loc="best")
 show()
-
-
-prova(strain_imposed)
