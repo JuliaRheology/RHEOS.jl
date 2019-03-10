@@ -107,6 +107,7 @@ end
 
 function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
 
+    @assert (Int(type)!=3) && (Int(type)!=-1) "Cannot extract both stress and strain"
     check = RheoTimeDataType(self)
 
     if Int(type)==0
@@ -121,10 +122,6 @@ function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
         @assert Int(check)==3 || Int(check)==2 "Stress not available"
         log = vcat(self.log,"Time and stress extracted")
         return RheoTimeData(self.σ, [], self.t,log)
-    elseif Int(type)==3
-        @assert Int(check)==3 "Both stress and strain not available"
-        log = vcat(self.log,"Time, stress and strain extracted")
-        return RheoTimeData(self.σ, self.ϵ, self.t,log)
     end
 
 end
