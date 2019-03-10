@@ -4,6 +4,8 @@
 #~ Preprocessing Functions ~#
 #############################
 
+export cutting
+
 """
     fixedresample(self::RheoTimeData, elperiods::Union{Vector{K},K}; time_boundaries::Vector{T}= [-1])
 
@@ -38,6 +40,31 @@ function fixedresample(self::RheoTimeData, elperiods::Union{Vector{K},K}; time_b
     log = vcat(self.log, "fixed_resample - boundaries: $boundaries, elperiods: $elperiods")
 
     self_new = RheoTimeData(sigma, epsilon, time, log)
+
+end
+
+function cutting(self::RheoTimeData, time_on::T1,time_off::T2) where {T1<:Number, T2<:Number}
+
+    @assert isreal(time_on) && isreal(time_off) "Boundaries cannot be complex numbers"
+    
+    boundary_on = closestindex(self.t, time_on);
+    boundary_off = closestindex(self.t, time_off);
+    time = self.t[boundary_on:boundary_off]
+
+    check = RheoTimeDataType(self)
+    if (Int(check) == 1)
+        epsilon = self.ϵ[boundary_on:boundary_off]
+        sigma = [];
+    elseif (Int(check) == 2)
+        sigma = self.σ[boundary_on:boundary_off]
+        epsilon = [];
+    elseif (Int(check) == 3)
+        epsilon = self.ϵ[boundary_on:boundary_off]
+        sigma = self.σ[boundary_on:boundary_off]
+    end
+    log = vcat(self.log, "Data from $time_on to $time_off extracted.")
+
+    return RheoTimeData(sigma,epsilon,time,log)
 
 end
 

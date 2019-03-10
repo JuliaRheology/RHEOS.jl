@@ -9,6 +9,7 @@ filedir = "Epi_relax.csv"
 data = importdata(filedir; t_col =1, σ_col = 2, ϵ_col = 3)
 data_resampled_fix = fixedresample(data,-2,time_boundaries=[-0.6, 80.0])
 data_resampled_var = fixedresample(data,[1,-12],time_boundaries=[0.0, 8.0,80.0])
+data_cut = cutting(data,0,50.0)
 
 # variable for prediction
 data_predict = importdata(filedir; t_col =1, ϵ_col = 3)
