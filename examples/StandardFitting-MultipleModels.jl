@@ -13,9 +13,8 @@ data_cut = cutting(data,0,50.0)
 
 # variable for prediction
 data_predict = extract(data,strain_only)
-data_predict3 = extract(data,0)
-data_predict_fix = fixedresample(data_predict,-2,time_boundaries=[-0.6, 80.0])
-data_predict_var = fixedresample(data_predict,[1,-12],time_boundaries=[0.0, 8.0,80.0])
+data_predict_fix = extract(data_resampled_fix,strain_only)
+data_predict_var = extract(data_resampled_var,strain_only)
 
 # SLS fit - No singularity - constant sampling
 sls_fit_fix = modelfit(data_resampled_fix, SLS(), strain_imposed, verbose=true)
