@@ -263,7 +263,6 @@ end
 
 function singularitytest(modulus::Function, params::Array{RheoFloat, 1}; t1::RheoFloat=convert(RheoFloat,0.0))
 
-
     startval = modulus([t1], params)[1]
 
     if isnan(startval) || startval == Inf
@@ -359,7 +358,7 @@ function boltzintegral_sing(modulus, time_series, params,prescribed_dot)
 
 
     # init time diff, used to cope with singularity
-    init_offset = (time_series[2] - time_series[1])/10.0
+    init_offset = (time_series[2] - time_series[1])/10.0;
 
     # need to add an additional 'previous' time point to capture any instantaneous loading
     time_previous = time_series[1] - (time_series[2] - time_series[1])
@@ -383,7 +382,7 @@ function boltzintegral_sing(modulus, time_series, params,prescribed_dot)
     end
 
     # fix initial point
-    I[2] = (prescribed_dot[1]*modulus([init_offset], params)*(time_series[2] - time_series[1]))[1]
+    I[2] = (prescribed_dot[1]*modulus([init_offset], convert(Vector{Float64},params))*(time_series[2] - time_series[1]))[1]
 
     I[2:end]
 

@@ -195,9 +195,8 @@ function modelpredict(data::RheoTimeData,model::RheologyModel; diff_method="BD")
     end
 
     check = RheoTimeDataType(data)
-    @assert (Int(check) == 3) "Both stress and strain are already defined"
+    @assert (Int(check) ==1)||(Int(check) ==2) "Both stress and strain are already defined"
 
-    check = RheoTimeDataType(data)
     if (Int(check) == 1)
         modtouse = :G;
         dcontrolled = deriv(data.ϵ, data.t)
@@ -277,9 +276,9 @@ creep modulus, then the first element of the stress is assumed to be the amplitu
 - `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
 """
 function modelstepfit(data::RheoTimeData,
-                  model::RheologyModel;
-                  modtouse::Symbol=:Nothing,
-                  step_σ = nothing, step_ϵ = nothing,
+                  model::RheologyModel,
+                  modloading::Union{LoadingType,Integer};
+                  step = nothing,
                   p0::Array{T1,1} = [-1.0],
                   lo::Array{T2,1} = [-1.0],
                   hi::Array{T3,1} = [-1.0],
@@ -298,36 +297,43 @@ function modelstepfit(data::RheoTimeData,
         deriv = derivCD
     end
 
+    if Int(modloading) == 2
+        dcontrolled = deriv(data.σ, data.t)
+        measured = data.ϵ
+        modtouse = :J
+    elseif Int(modloading) == 1
+        dcontrolled = deriv(data.ϵ, data.t)
+        measured = data.σ
+        modtouse = :G
+    end
     # get modulus function and derivative
-    if (step_σ == nothing)  && (step_ϵ == nothing)
+    if (step == nothing)
         check = RheoTimeDataType(data)
         @assert (Int(check) == 3) "Both stress and strain are required"
-        if modtouse == :J
+        if Int(modloading) == 2
             controlled = data.σ[convert(Integer,round(length(data.σ)\2))]
-        elseif modtouse == :G
+            measured = data.ϵ
+            modtouse = :J
+        elseif Int(modloading) == 1
             controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
+            measured = data.σ
+            modtouse = :G
         end
-    elseif (step_σ != nothing) && (step_ϵ == nothing)
+    elseif (step != nothing)
         check = RheoTimeDataType(data)
-        @assert (Int(check) == 3) || (Int(check) == 1) "Strain required"
-        @assert (modtouse == :Nothing)|| (modtouse == :J) "Model to use required is J"
-        modtouse = :J;
-        controlled = convert(RheoFloat,step_σ);
-    elseif (step_σ == nothing) && (step_ϵ != nothing)
-        check = RheoTimeDataType(data)
-        @assert (Int(check) == 3) || (Int(check) == 2) "Stress required"
-        @assert (modtouse == :Nothing)|| (modtouse == :G) "Model to use required is G"
-        modtouse = :G;
-        controlled =convert(RheoFloat, step_ϵ);
-    else
-        error("Both step stress and strain defined")
+        if Int(modloading) == 2
+            @assert (Int(check) == 3) || (Int(check) == 1) "Strain required"
+            modtouse = :J;
+            controlled = convert(RheoFloat,step);
+            measured = data.ϵ
+        elseif Int(modloading) == 1
+            @assert (Int(check) == 3) || (Int(check) == 2) "Stress required"
+            measured = data.σ
+            modtouse = :G;
+            controlled =convert(RheoFloat, step);
+        end
     end
 
-    if modtouse == :J
-        measured = data.ϵ
-    elseif modtouse == :G
-        measured = data.σ
-    end
 
     print(controlled)
     modulus = getfield(model, modtouse)
@@ -382,7 +388,7 @@ function modelsteppredict(data, model; modtouse::Symbol=:Nothing, step_on::Real 
     end
 
     check = RheoTimeDataType(data)
-    @assert (Int(check) == 3) "Both stress and strain are already defined"
+    @assert (Int(check) == 1) || (Int(check) == 2) "Both stress and strain are already defined"
 
     if (modtouse == :Nothing)
         if (Int(check) == 1)
