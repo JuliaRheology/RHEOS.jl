@@ -1,3 +1,16 @@
+# useful function to make available to all models
+
+rheoconv(t::Real) = RheoFloat(t)
+rheoconv(t::Array{T,1}) where T<:Real = convert(Vector{RheoFloat},t)
+
+invLaplace(f::Function, t::Array{RheoFloat}) = InverseLaplace.talbotarr(f, t)
+invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
+
+
+
+
+
+
 # 2 time scale Generalized Maxwell-Wiechert type models
 
 params_SLS2 = [:G₀, :G₁, :η₁, :G₂, :η₂]
@@ -16,7 +29,7 @@ function info_SLS2()
        ")
 end
 
-function G_SLS2(t::Union{Array{T,1},T}, params::Array{T,1}) where T<:Real
+function G_SLS2(t::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1})
 
    G₀, G₁, η₁, G₂, η₂ = params
 
@@ -24,7 +37,13 @@ function G_SLS2(t::Union{Array{T,1},T}, params::Array{T,1}) where T<:Real
 
 end
 
-function J_SLS2(t::Union{Array{T,1},T}, params::Array{T,1}) where T<:Real
+
+function G_SLS2(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real}
+    G_SLS2(rheoconv(t),rheoconv(params))
+end
+
+
+function J_SLS2(t::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1})
     G₀, G₁, η₁, G₂, η₂ = params
 
     tau1 = G₁/η₁
@@ -32,7 +51,11 @@ function J_SLS2(t::Union{Array{T,1},T}, params::Array{T,1}) where T<:Real
 
     Jbar(s) = (1/s^2)*(G₀/s+G₁*1/(s+tau1)+G₂*1/(s+tau2))
 
-    return InverseLaplace.talbotarr(s -> Jbar(s), t)
+    return invLaplace(s -> Jbar(s), t)
+end
+
+function J_SLS2(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real}
+    J_SLS2(rheoconv(t),rheoconv(params))
 end
 
 
