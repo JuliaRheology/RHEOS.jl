@@ -262,6 +262,76 @@ end
 
 
 
+struct RheoModelClass
+
+    G::Function
+    J::Function
+    Gp::Function
+    Gpp::Function
+
+    parameters::Vector{Symbol}
+    info::Function
+
+end
+
+
+function Base.show(io::IO, m::RheoModelClass)
+    m.info()
+end
+
+#export show
+
+
+struct RheoModel
+
+    G::Function
+    J::Function
+    Gp::Function
+    Gpp::Function
+
+    parameters
+    info::Function
+    log::Vector{String}
+
+end
+
+
+function info(m::RheoModelClass, nt)
+    print(m)
+    print(nt)
+end
+
+function RheoModel(m::RheoModelClass, nt)
+    # check that every parameter in m exists in the named tupple nt
+    @assert all( i-> i in keys(nt), m.parameters) "Missing parameter(s) in model definition."
+    p=map(i->nt[i], m.parameters)
+    p_str_names=map(i->"$(i)=1",p)
+    # build string s = "( p1 = v1, p2 = v2, ...)"
+    nt = eval(Meta.parse(s))
+
+    f()=info(m,nt)
+    return RheoModel(t->m.G(t,p), t->m.J(t,p), ω->m.Gp(ω,p), ω->m.Gpp(ω,p), nt, f, ["Log!!!"])
+end
+
+
+function Base.show(io::IO, m::RheoModel)
+    m.info()
+end
+
+
+
+
+
+
+export RheoModelClass, RheoModel
+
+function null_modulus(t::Vector{RheoFloat}, params::Vector{T}) where T<:Real
+    return [-1.0]
+end
+
+
+
+
 
 
 
