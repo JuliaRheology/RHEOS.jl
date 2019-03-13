@@ -15,8 +15,7 @@ invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
 
 params_SLS2 = [:G₀, :G₁, :η₁, :G₂, :η₂]
 
-function info_SLS2(io::IO)
-    Base.print(io,"Model SLS2
+info_SLS2 = ("Model SLS2
                                ___
          ___╱╲  ╱╲  ╱╲  ________| |_____
          |    ╲╱  ╲╱  ╲╱       _|_|     |
@@ -31,7 +30,6 @@ function info_SLS2(io::IO)
                         G₀
 
        ")
-end
 
 function G_SLS2(t::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1})
 

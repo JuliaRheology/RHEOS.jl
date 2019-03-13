@@ -270,13 +270,14 @@ struct RheoModelClass
     Gpp::Function
 
     params::Vector{Symbol}
-    info::Function
+    info::String
 
 end
 
 
 function Base.show(io::IO, m::RheoModelClass)
-    m.info(io)
+    print(io, m.info)
+    return
 end
 
 #export show
@@ -290,35 +291,33 @@ struct RheoModel
     Gpp::Function
 
     params::NamedTuple
-    info::Function
+    info::String
     log::Vector{String}
 
 end
 
 
-function info(io::IO,m::RheoModelClass, nt)
-    print(io,m)
-    print(io,nt)
+function info(m::RheoModelClass, nt)
+    conc = string(m, "\n",nt)
+    return conc
 end
 
 function RheoModel(m::RheoModelClass, nt::NamedTuple)
     # check that every parameter in m exists in the named tupple nt
     @assert all( i-> i in keys(nt), m.params) "Missing parameter(s) in model definition."
+    # check that no extra parameters have been provided
     @assert length(m.params) == length(nt) "Missmatch number of model parameters and parameters provided"
+
     p=map(i->RheoFloat(nt[i]), m.params)
     nt=NamedTuple{Tuple(m.params)}(p)
-    f(io::IO)=info(io::IO,m,nt)
-
+    f=info(m,nt)
     return RheoModel(t->m.G(t,p), t->m.J(t,p), ω->m.Gp(ω,p), ω->m.Gpp(ω,p), nt, f, ["Log!!!"])
 end
 
 
 function Base.show(io::IO, m::RheoModel)
-    m.info(io)
+    print(io,m.info)
 end
-
-
-
 
 
 
@@ -329,6 +328,10 @@ export RheoModelClass, RheoModel
 function null_modulus(t::Vector{RheoFloat}, params::Vector{T}) where T<:Real
     return [-1.0]
 end
+
+
+
+
 
 
 
