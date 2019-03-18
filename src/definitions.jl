@@ -2,7 +2,7 @@
 
 export RheoTimeData, RheoTimeDataType, RheoFreqData, RheoFreqDataType, check_time_data_consistency
 export LoadingType, strain_imposed, stress_imposed
-export TimeDataType, time_only, strain_only, stress_only
+export TimeDataType, time_only, strain_only, stress_only, strain_and_stress
 
 # This defines the data type for all arrays, parameters and processing
 #RheoFloat = Float32
