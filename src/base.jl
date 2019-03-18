@@ -261,7 +261,7 @@ end
 #~ Processing Functions ~#
 ##########################
 
-function singularitytest(modulus::Function, params::Array{RheoFloat, 1}; t1::RheoFloat=convert(RheoFloat,0.0))
+function singularitytest(modulus::Function, params::NamedTuple; t1::RheoFloat=convert(RheoFloat,0.0))
 
     startval = modulus([t1], params)[1]
 

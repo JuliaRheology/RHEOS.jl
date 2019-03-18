@@ -17,7 +17,7 @@ data_predict_fix = extract(data_resampled_fix,strain_only)
 data_predict_var = extract(data_resampled_var,strain_only)
 
 # SLS fit - No singularity - constant sampling
-sls_fit_fix = modelfit(data_resampled_fix, SLS(), strain_imposed, verbose=true)
+sls_fit_fix = modelfit(data_resampled_fix, SLS2(), strain_imposed, verbose=true)
 # OR sls_fit_fix2 = modelfit(data_resampled_fix, SLS(), 1);
 sls_predicted_fix = modelpredict(data_predict, sls_fit_fix)
 

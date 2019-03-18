@@ -1,6 +1,35 @@
 #!/usr/bin/env julia
 
-# Spring-Pot Model
+
+# SpringPot = fun_gen(
+#         # Model name
+#         name="springpot",
+#         # Model parameters,
+#         p = [:cᵦ, :β],
+#         # Relaxation modulus
+#         G = quote
+#               return cᵦ*t^(-β)/gamma(1 - β)
+#             end,
+#         # Creep modulus
+#         J = quote
+#               return (t^β)/(cᵦ*gamma(1 + β))
+#             end,
+#         # Storage modulus
+#         Gp = quote
+#                return cᵦ*(ω^β)*cos(π*β/2)
+#              end,
+#         # Loss modulus
+#         Gpp = quote
+#                 return cᵦ*(ω^β)*sin(π*β/2)
+#               end,
+#         # Network
+#         info= "
+#                 ____ ╱╲ ____
+#                      ╲╱  cᵦ, β
+#                 "
+#         )
+
+
 function G_springpot(t::T, params::Vector{T}) where T<:Real
     cᵦ, β = params
 

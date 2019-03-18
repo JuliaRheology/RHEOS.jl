@@ -148,7 +148,7 @@ Fit RheologyData struct to model and return a fitted model as a RheologyModel ob
 - `diff_method`: Set finite difference formula to use for derivative, currently "BD" or "CD"
 """
 function modelfit(data::RheoTimeData,
-                  model::RheologyModel,
+                  model::RheoModel,
                   modloading::Union{LoadingType,Integer};
                   p0::Array{T1,1} = [-1.0],
                   lo::Array{T2,1} = [-1.0],
@@ -234,7 +234,7 @@ relaxation modulus (:G, only returned stress is new). 'diff_method' sets finite 
 calculating the derivative used in the hereditary integral and can be either backwards difference
 ("BD") or central difference ("CD").
 """
-function modelpredict(data::RheoTimeData,model::RheologyModel; diff_method="BD")
+function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
 
     # use correct method for derivative
     if diff_method=="BD"
@@ -258,7 +258,7 @@ function modelpredict(data::RheoTimeData,model::RheologyModel; diff_method="BD")
     modulus = getfield(model, modtouse)
 
     # get singularity presence
-    sing = singularitytest(modulus, model.parameters)
+    sing = singularitytest(modulus, model.params)
 
     # get time step (only needed for convolution, which requires constant so t[2]-t[1] is sufficient)
     dt = data.t[2] - data.t[1]
@@ -269,19 +269,19 @@ function modelpredict(data::RheoTimeData,model::RheologyModel; diff_method="BD")
 
     # get convolution
     if !sing && constantcheck(data.t)
-        convolved = boltzconvolve_nonsing(modulus, t_zeroed, dt, model.parameters, dcontrolled)
+        convolved = boltzconvolve_nonsing(modulus, t_zeroed, dt, model.params, dcontrolled)
 
     elseif sing && constantcheck(data.t)
-        # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, model.parameters, dcontrolled)
+        # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, model.params, dcontrolled)
         t_zeroed[1] = 0.0 + (t_zeroed[2] - t_zeroed[1])/10.0
-        # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, model.parameters, dcontrolled)
-        convolved = boltzconvolve(modulus, t_zeroed, dt, model.parameters, dcontrolled)
+        # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, model.params, dcontrolled)
+        convolved = boltzconvolve(modulus, t_zeroed, dt, model.params, dcontrolled)
 
     elseif !sing && !constantcheck(data.t)
-        convolved = boltzintegral_nonsing(modulus, t_zeroed, model.parameters, dcontrolled)
+        convolved = boltzintegral_nonsing(modulus, t_zeroed, model.params, dcontrolled)
 
     elseif sing && !constantcheck(data.t)
-        convolved = boltzintegral_sing(modulus, t_zeroed, model.parameters, dcontrolled)
+        convolved = boltzintegral_sing(modulus, t_zeroed, model.params, dcontrolled)
 
     end
 
@@ -296,7 +296,7 @@ function modelpredict(data::RheoTimeData,model::RheologyModel; diff_method="BD")
     end
     time = data.t
 
-    modparam = model.parameters
+    modparam = model.params
     # store operation
     log = vcat( data.log, "Predicted data using: $pred_mod, Parameters: $modparam")
 

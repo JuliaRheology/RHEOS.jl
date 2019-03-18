@@ -306,9 +306,10 @@ function RheoModel(m::RheoModelClass, nt::NamedTuple)
     # check that every parameter in m exists in the named tupple nt
     @assert all( i-> i in keys(nt), m.params) "Missing parameter(s) in model definition."
     # check that no extra parameters have been provided
-    @assert length(m.params) == length(nt) "Missmatch number of model parameters and parameters provided"
+    @assert length(m.params) == length(nt) "Mismatch number of model parameters and parameters provided"
 
     p=map(i->RheoFloat(nt[i]), m.params)
+    p = convert(Array{RheoFloat,1},p)
     nt=NamedTuple{Tuple(m.params)}(p)
     f=info(m,nt)
     return RheoModel(t->m.G(t,p), t->m.J(t,p), ω->m.Gp(ω,p), ω->m.Gpp(ω,p), nt, f, ["Log!!!"])
@@ -377,9 +378,6 @@ struct RheologyModel
 
 end
 
-function null_modulus(t::Vector{RheoFloat}, params::Vector{T}) where T<:Real
-    return [-1.0]
-end
 
 RheologyModel(;G::Function = null_modulus,
                J::Function = null_modulus,
