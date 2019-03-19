@@ -17,7 +17,7 @@ function fun_gen(;name,p,G,J,Gp,Gpp,info)
     gps=Symbol("Gp_"*name)
     gpps=Symbol("Gpp_"*name)
     mod_G = @eval $gs(t::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = ($parameters,$G);
-    mod_J = @eval $js(t::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = ($parameters,$G);
+    mod_J = @eval $js(t::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = ($parameters,$J);
     mod_Gp = @eval $gps(ω::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = ($parameters,$Gp);
     mod_Gpp = @eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = ($parameters,$Gpp);
     param = p
