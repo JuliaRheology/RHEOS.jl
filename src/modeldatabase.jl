@@ -9,6 +9,25 @@ invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
 
 
 function fun_gen(;name,p,G,J,Gp,Gpp,info)
+    unpack_expr = Meta.parse(string(join(string.(p), ","), "=params"))
+
+    gs=Symbol("G_"*name)
+    js=Symbol("J_"*name)
+    gps=Symbol("Gp_"*name)
+    gpps=Symbol("Gpp_"*name)
+
+    @eval $gs(t::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $G; end
+    @eval $js(t::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $J; end
+    @eval $gps(ω::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gp; end
+    @eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gpp; end
+    param = p
+    info_model = string("Model $name \n",info)
+    @eval $gs(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gs(rheoconv(t),rheoconv(params))
+    @eval $js(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $js(rheoconv(t),rheoconv(params))
+    return RheoModelClass(eval(gs),eval(js),eval(gps),eval(gpps),param,info_model)
+end
+
+function fun_gen_old(;name,p,G,J,Gp,Gpp,info)
     parameters = begin
             string(join(string.(p), ","), "=params")
             end

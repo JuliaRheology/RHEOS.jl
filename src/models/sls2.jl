@@ -11,6 +11,8 @@ SLS2 = fun_gen(
             end,
         # Creep modulus
         J = quote
+              tau1 = G₁/η₁
+              tau2 = G₂/η₂
               Jbar(s) = (1/s^2)*(G₀/s+G₁*1/(s+tau1)+G₂*1/(s+tau2))
               return invLaplace(s -> Jbar(s), t)
             end,
