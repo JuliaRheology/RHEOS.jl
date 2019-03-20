@@ -272,6 +272,8 @@ struct RheoModelClass
     params::Vector{Symbol}
     info::String
 
+    expressions::NamedTuple
+
 end
 
 

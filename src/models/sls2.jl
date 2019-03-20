@@ -1,6 +1,6 @@
 # 2 time scale Generalized Maxwell-Wiechert type models
 
-SLS2 = fun_gen(
+SLS2 = RheoModelClass(
         # Model name
         name="SLS2",
         # Model parameters,
