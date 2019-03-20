@@ -244,7 +244,7 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
     end
 
     check = RheoTimeDataType(data)
-    @assert (Int(check) ==1)||(Int(check) ==2) "Both stress and strain are already defined"
+    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
 
     if (Int(check) == 1)
         modtouse = :G;
@@ -256,7 +256,6 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
 
     # get modulus
     modulus = getfield(model, modtouse)
-    print(modulus)
 
     # get singularity presence
     sing = singularitytest(modulus)
@@ -438,21 +437,21 @@ function modelsteppredict(data, model; modtouse::Symbol=:Nothing, step_on::Real 
     end
 
     check = RheoTimeDataType(data)
-    @assert (Int(check) == 1) || (Int(check) == 2) "Both stress and strain are already defined"
+    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
 
     if (modtouse == :Nothing)
-        if (Int(check) == 1)
+        if (check == strain_only)
             modtouse = :G;
             controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
-        elseif (Int(check) == 2)
+        elseif (check == stress_only)
             modtouse = :J;
             controlled = data.σ[convert(Integer,round(length(data.σ)\2))]
         end
     elseif modtouse == :J
-        @assert (Int(check) == 2)|| (Int(check) == 3) "Stress required"
+        @assert (check == stress_only) "Stress required"
         controlled = data.σ[convert(Integer,round(length(data.σ)\2))]
     elseif modtouse == :G
-        @assert (Int(check) == 1)|| (Int(check) == 3) "Strain required"
+        @assert (check == strain_only) "Strain required"
         controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
     end
 
