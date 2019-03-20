@@ -369,11 +369,6 @@ end
 
 #expr_replace(e,(k_0=0.5,k_1=1.123,k_2=3.14))
 
-
-
-
-
-
 # not clean use nt in function when already passed as parameters
 
 function RheoModel(m::RheoModelClass, nt::NamedTuple)
@@ -394,16 +389,20 @@ function RheoModel(m::RheoModelClass, nt::NamedTuple)
     gpps=Symbol("Gpp_"*m.name)
 
 
-    expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}(
-            (   expr_replace(m.expressions.G, nt),
-                expr_replace(m.expressions.J, nt),
-                expr_replace(m.expressions.Gp, nt),
-                expr_replace(m.expressions.Gpp, nt) )   )
+    # expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}(
+    #         (  expr_replace(m.expressions.G, nt),
+    #            expr_replace(m.expressions.J, nt),
+    #            expr_replace(m.expressions.Gp, nt),
+    #            expr_replace(m.expressions.Gpp, nt) )   )
+    G = expr_replace(m.expressions.G, nt)
+    J = expr_replace(m.expressions.J, nt)
+    Gp = expr_replace(m.expressions.Gp, nt)
+    Gpp = expr_replace(m.expressions.Gpp, nt)
 
-    @eval $gs(t::Union{Array{RheoFloat,1},RheoFloat}) = begin $expressions.G; end
-    @eval $js(t::Union{Array{RheoFloat,1},RheoFloat}) = begin $expressions.J; end
-    @eval $gps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $expressions.Gp; end
-    @eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $expressions.Gpp; end
+    @eval $gs(t::Union{Array{RheoFloat,1},RheoFloat}) = begin $G; end
+    @eval $js(t::Union{Array{RheoFloat,1},RheoFloat}) = begin $J; end
+    @eval $gps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $Gp; end
+    @eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $Gpp; end
     @eval $gs(t::Union{Array{T1,1},T1}) where T1<:Real = $gs(rheoconv(t))
     @eval $js(t::Union{Array{T1,1},T1}) where T1<:Real = $js(rheoconv(t))
 
