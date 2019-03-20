@@ -51,3 +51,10 @@ ax[:plot](fracspecial_predicted_var.t, fracspecial_predicted_var.σ, "--", label
 ax[:plot](fracspecial_predicted_step.t, fracspecial_predicted_step.σ, "--", label="Fractional special step")
 ax[:legend](loc="best")
 show()
+
+SLS2mod = RheoModel(SLS2,(G₀=1, G₁=1, η₁=1, G₂=1, η₂=2))
+SLS2_predict = modelpredict(data_predict,SLS2mod)
+SLS2_steppredict = modelsteppredict(data_predict, SLS2mod)
+fig, ax = subplots()
+ax[:loglog](SLS2_predict.t, SLS2_predict.σ, label="Data", color="black")
+ax[:loglog](SLS2_steppredict.t, SLS2_steppredict.σ, label="Data", color="blue")

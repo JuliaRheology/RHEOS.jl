@@ -256,9 +256,10 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
 
     # get modulus
     modulus = getfield(model, modtouse)
+    print(modulus)
 
     # get singularity presence
-    sing = singularitytest(modulus, model.params)
+    sing = singularitytest(modulus)
 
     # get time step (only needed for convolution, which requires constant so t[2]-t[1] is sufficient)
     dt = data.t[2] - data.t[1]
@@ -269,19 +270,19 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
 
     # get convolution
     if !sing && constantcheck(data.t)
-        convolved = boltzconvolve_nonsing(modulus, t_zeroed, dt, model.params, dcontrolled)
+        convolved = boltzconvolve_nonsing(modulus, t_zeroed, dt, dcontrolled)
 
     elseif sing && constantcheck(data.t)
-        # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, model.params, dcontrolled)
+        # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, dcontrolled)
         t_zeroed[1] = 0.0 + (t_zeroed[2] - t_zeroed[1])/10.0
-        # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, model.params, dcontrolled)
-        convolved = boltzconvolve(modulus, t_zeroed, dt, model.params, dcontrolled)
+        # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, dcontrolled)
+        convolved = boltzconvolve(modulus, t_zeroed, dt, dcontrolled)
 
     elseif !sing && !constantcheck(data.t)
-        convolved = boltzintegral_nonsing(modulus, t_zeroed, model.params, dcontrolled)
+        convolved = boltzintegral_nonsing(modulus, t_zeroed, dcontrolled)
 
     elseif sing && !constantcheck(data.t)
-        convolved = boltzintegral_sing(modulus, t_zeroed, model.params, dcontrolled)
+        convolved = boltzintegral_sing(modulus, t_zeroed, dcontrolled)
 
     end
 
@@ -461,16 +462,16 @@ function modelsteppredict(data, model; modtouse::Symbol=:Nothing, step_on::Real 
     # check singularity presence at time closest to step
     stepon_el = closestindex(data.t, step_on)
 
-    sing = singularitytest(modulus, model.parameters; t1 = convert(RheoFloat,(data.t[stepon_el] - step_on)))
+    sing = singularitytest(modulus; t1 = convert(RheoFloat,(data.t[stepon_el] - step_on)))
 
     # get predicted
     if !sing
         predicted = zeros(length(data.t))
-        predicted[stepon_el:end] = controlled*modulus(data.t[stepon_el:end] .- step_on, model.parameters)
+        predicted[stepon_el:end] = controlled*modulus(data.t[stepon_el:end] .- step_on)
 
     elseif sing
         predicted = zeros(length(data.t))
-        predicted[(stepon_el + 1):end] = controlled*modulus(data.t[(stepon_el + 1):end] .- step_on, model.parameters)
+        predicted[(stepon_el + 1):end] = controlled*modulus(data.t[(stepon_el + 1):end] .- step_on)
 
     end
 

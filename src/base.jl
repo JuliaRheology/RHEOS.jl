@@ -261,9 +261,9 @@ end
 #~ Processing Functions ~#
 ##########################
 
-function singularitytest(modulus::Function, params::NamedTuple; t1::RheoFloat=convert(RheoFloat,0.0))
+function singularitytest(modulus; t1::RheoFloat=convert(RheoFloat,0.0))
 
-    startval = modulus([t1], params)[1]
+    startval = modulus([t1])[1]
 
     if isnan(startval) || startval == Inf
         return true
@@ -288,7 +288,7 @@ than the convolution method. However, it works for variable sample rate.
 - `params`: Parameters passed to viscoelastic modulus
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
-function boltzintegral_nonsing(modulus, time_series, params,prescribed_dot)
+function boltzintegral_nonsing(modulus, time_series, prescribed_dot)
 
     # need to add an additional 'previous' time point to capture any instantaneous loading
     time_previous = time_series[1] - (time_series[2] - time_series[1])
@@ -301,7 +301,7 @@ function boltzintegral_nonsing(modulus, time_series, params,prescribed_dot)
         # generate integral for each time step
         τ = time_mod[1:i]
         Modulus_arg = v .- τ
-        Modulusᵢ = modulus(Modulus_arg, params)
+        Modulusᵢ = modulus(Modulus_arg)
         df_dtᵢ = prescribed_dot_mod[1:i]
         intergrand = Modulusᵢ.*df_dtᵢ
 
@@ -310,7 +310,7 @@ function boltzintegral_nonsing(modulus, time_series, params,prescribed_dot)
     # fix initial point
     # I[2] = (prescribed_dot[1]*modulus([0.0], params)*(time_series[2] - time_series[1]))[1]
     # to catch weird bug in InverseLaplace
-    I[2] = (prescribed_dot[1]*modulus(time_series, params)*(time_series[2] - time_series[1]))[1]
+    I[2] = (prescribed_dot[1]*modulus(time_series)*(time_series[2] - time_series[1]))[1]
 
     I[2:end]
 
@@ -354,7 +354,7 @@ end
 
 # end
 
-function boltzintegral_sing(modulus, time_series, params,prescribed_dot)
+function boltzintegral_sing(modulus, time_series, prescribed_dot)
 
 
     # init time diff, used to cope with singularity
@@ -372,7 +372,7 @@ function boltzintegral_sing(modulus, time_series, params,prescribed_dot)
         τ = time_mod[1:i]
         Modulus_arg = v .- τ
         Modulus_arg[end] = init_offset
-        Modulusᵢ = modulus(Modulus_arg, params)
+        Modulusᵢ = modulus(Modulus_arg)
         df_dtᵢ = prescribed_dot_mod[1:i]
 
         intergrand = Modulusᵢ.*df_dtᵢ
@@ -382,7 +382,7 @@ function boltzintegral_sing(modulus, time_series, params,prescribed_dot)
     end
 
     # fix initial point
-    I[2] = (prescribed_dot[1]*modulus([init_offset], convert(Vector{Float64},params))*(time_series[2] - time_series[1]))[1]
+    I[2] = (prescribed_dot[1]*modulus([init_offset])*(time_series[2] - time_series[1]))[1]
 
     I[2:end]
 
@@ -422,10 +422,10 @@ end
 
 # end
 
-function boltzconvolve(modulus, time_series, dt,params, prescribed_dot)
+function boltzconvolve(modulus, time_series, dt,prescribed_dot)
 
 
-    Modulus = modulus(time_series, params)
+    Modulus = modulus(time_series)
     # fast convolution
     β = convn(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
@@ -450,9 +450,9 @@ than the integral method. However, it works for constant sample rate.
 - `params`: Parameters passed to viscoelastic modulus
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
-function boltzconvolve_nonsing(modulus, time_series, dt,params, prescribed_dot)
+function boltzconvolve_nonsing(modulus, time_series, dt,prescribed_dot)
 
-    Modulus = modulus(time_series, params)
+    Modulus = modulus(time_series)
 
     β = convn(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
@@ -483,6 +483,7 @@ function obj_const_nonsing(params, grad,modulus, time_series,dt, prescribed_dot,
     if _insight
         println("Current Parameters: ", params)
     end
+    
     convolved = boltzconvolve_nonsing(modulus, time_series, dt, params, prescribed_dot)
 
     cost = sum(0.5*(measured - convolved).^2)
