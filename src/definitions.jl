@@ -264,6 +264,7 @@ end
 
 struct RheoModelClass
 
+    name::String
     G::Function
     J::Function
     Gp::Function
@@ -281,6 +282,40 @@ function Base.show(io::IO, m::RheoModelClass)
     print(io, m.info)
     return
 end
+
+
+export rheoconv,invLaplace
+
+rheoconv(t::Real) = RheoFloat(t)
+rheoconv(t::Array{T,1}) where T<:Real = convert(Vector{RheoFloat},t)
+
+invLaplace(f::Function, t::Array{RheoFloat}) = InverseLaplace.talbotarr(f, t)
+invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
+
+# Define Null Expression, and make it default parameter
+# Model name and parameters should be required --> assert
+# info should have generic default value, such as "Model with $n params named $s..."
+
+function RheoModelClass(;name,p,G,J,Gp,Gpp,info)
+    info_model = string("Model $name \n",info)
+
+    # Expression to unpack parameter array into suitably names variables in the moduli expressions
+    unpack_expr = Meta.parse(string(join(string.(p), ","), "=params"))
+
+    gs=Symbol("G_"*name)
+    js=Symbol("J_"*name)
+    gps=Symbol("Gp_"*name)
+    gpps=Symbol("Gpp_"*name)
+
+    @eval $gs(t::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $G; end
+    @eval $js(t::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $J; end
+    @eval $gps(ω::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gp; end
+    @eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gpp; end
+    @eval $gs(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gs(rheoconv(t),rheoconv(params))
+    @eval $js(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $js(rheoconv(t),rheoconv(params))
+    return RheoModelClass(name,eval(gs),eval(js),eval(gps),eval(gpps),p,info_model,(G=G,J=J,Gp=Gp,Gpp=Gpp))
+end
+
 
 #export show
 
@@ -304,6 +339,43 @@ function info(m::RheoModelClass, nt)
     return conc
 end
 
+
+# Cool replacement function inspired from
+# https://stackoverflow.com/questions/29778698/julia-lang-metaprogramming-turn-expression-into-function-with-expression-depend
+# This probably could go in its own module as this is very useful.
+#
+
+expr_replace!(ex, s, v) = ex
+expr_replace!(ex::Symbol, s, v) = s == ex ? v : ex
+
+function expr_replace!(ex::Expr, s, v)
+    for i=1:length(ex.args)
+        ex.args[i] = expr_replace!(ex.args[i], s, v)
+    end
+    return ex
+end
+
+expr_replace(ex, s, v) = expr_replace!(copy(ex), s, v)
+
+function expr_replace(ex, nt)
+    e = copy(ex)
+    k=keys(nt)
+    v=values(nt)
+    for i in 1:length(nt)
+        expr_replace!(e, k[i], v[i])
+    end
+    return e
+end
+
+#expr_replace(e,(k_0=0.5,k_1=1.123,k_2=3.14))
+
+
+
+
+
+
+# not clean use nt in function when already passed as parameters
+
 function RheoModel(m::RheoModelClass, nt::NamedTuple)
     # check that every parameter in m exists in the named tupple nt
     @assert all( i-> i in keys(nt), m.params) "Missing parameter(s) in model definition."
@@ -314,7 +386,29 @@ function RheoModel(m::RheoModelClass, nt::NamedTuple)
     p = convert(Array{RheoFloat,1},p)
     nt=NamedTuple{Tuple(m.params)}(p)
     f=info(m,nt)
-    return RheoModel(t->m.G(t,p), t->m.J(t,p), ω->m.Gp(ω,p), ω->m.Gpp(ω,p), nt, f, ["Log!!!"])
+
+
+    gs=Symbol("G_"*m.name)
+    js=Symbol("J_"*m.name)
+    gps=Symbol("Gp_"*m.name)
+    gpps=Symbol("Gpp_"*m.name)
+
+
+    expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}(
+            (   expr_replace(m.expressions.G, nt),
+                expr_replace(m.expressions.J, nt),
+                expr_replace(m.expressions.Gp, nt),
+                expr_replace(m.expressions.Gpp, nt) )   )
+
+    @eval $gs(t::Union{Array{RheoFloat,1},RheoFloat}) = begin $expressions.G; end
+    @eval $js(t::Union{Array{RheoFloat,1},RheoFloat}) = begin $expressions.J; end
+    @eval $gps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $expressions.Gp; end
+    @eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $expressions.Gpp; end
+    @eval $gs(t::Union{Array{T1,1},T1}) where T1<:Real = $gs(rheoconv(t))
+    @eval $js(t::Union{Array{T1,1},T1}) where T1<:Real = $js(rheoconv(t))
+
+
+    return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), nt, f, ["Log!!!"])
 end
 
 
