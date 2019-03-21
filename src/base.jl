@@ -426,6 +426,7 @@ function boltzconvolve(modulus, time_series, dt,prescribed_dot)
 
 
     Modulus = modulus(time_series)
+    Modulus = convert(Array{Float32,1},Modulus)
     # fast convolution
     β = convn(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
@@ -519,8 +520,9 @@ function obj_const_sing(params, grad,modulus, time_series,dt, prescribed_dot,mea
         println("Current Parameters: ", params)
     end
 
+    mod(t) = modulus(t,params)
     # convolved = boltzconvolve_sing(modulus, time_series, dt, params, prescribed_dot)
-    convolved = boltzconvolve(modulus, time_series, dt, params, prescribed_dot)
+    convolved = boltzconvolve(mod, time_series, dt, prescribed_dot)
 
     # do as this has been taken care of in convolution!
     cost = sum(0.5*(measured - convolved).^2)
@@ -549,8 +551,9 @@ function obj_var_nonsing(params, grad,modulus, time_series, prescribed_dot, meas
     if _insight
         println("Current Parameters: ", params)
     end
-    #print("entrato1")
-    convolved = boltzintegral_nonsing(modulus, time_series, params, prescribed_dot)
+
+    mod(t) = modulus(t,params)
+    convolved = boltzintegral_nonsing(mod, time_series, prescribed_dot)
 
     cost = sum(0.5*(measured - convolved).^2)
 
@@ -578,8 +581,8 @@ function obj_var_sing(params, grad,modulus, time_series,prescribed_dot, measured
     if _insight
         println("Current Parameters: ", params)
     end
-
-    convolved = boltzintegral_sing(modulus, time_series, params, prescribed_dot)
+    mod(t) = modulus(t,params)
+    convolved = boltzintegral_sing(modulus, time_series, prescribed_dot)
 
     # don't use first element as singularity exists in model - Edit: INCORRECT COMMENT!
     # cost = sum(0.5*(measured[2:end] - convolved).^2)
@@ -682,7 +685,9 @@ function obj_step_nonsing(params, grad, modulus, t, prescribed, measured; _insig
         println("Current Parameters: ", params)
     end
 
-    estimated = prescribed*modulus(t, params)
+    mod(t) = modulus(t,params)
+
+    estimated = prescribed*mod(t)
 
     cost = sum(0.5*(measured - estimated).^2)
 end
@@ -692,7 +697,9 @@ function obj_step_sing(params, grad, modulus, t, prescribed, measured; _insight=
         println("Current Parameters: ", params)
     end
 
-    estimated = prescribed*modulus(t, params)[2:end]
+    mod(t) = modulus(t,params)
+
+    estimated = prescribed*mod(t)[2:end]
 
     cost = sum(0.5*(measured[2:end] - estimated).^2)
 end

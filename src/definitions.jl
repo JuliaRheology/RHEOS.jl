@@ -297,7 +297,7 @@ invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
 # info should have generic default value, such as "Model with $n params named $s..."
 
 function RheoModelClass(;name::String,
-                         p::Array{Symbol},
+                         p::Array{Symbol}=[],
                          G::Expr = quote return NaN end,
                          J::Expr = quote return NaN end,
                          Gp::Expr = quote return NaN end,

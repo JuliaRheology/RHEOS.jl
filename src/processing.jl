@@ -203,7 +203,7 @@ function modelfit(data::RheoTimeData,
     modulus = eval(getfield(model, modtouse))
     mod(t) = modulus(t,p0)
 
-    @assert ~isnan(mod(5.0)) "Module to use not defined"
+    @assert ~isnan(mod(5.0)) "Modulus to use not defined"
     # get singularity presence
     sing = singularitytest(mod)
     # get time step (only needed for convolution, which requires constant dt so t[2]-t[1] is sufficient)
@@ -232,9 +232,8 @@ function modelfit(data::RheoTimeData,
     modulusname = string(modulus)
     log = vcat(data.log, "Fitted $modulusname, Modulus used: $modtouse, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
     nt = NamedTuple{Tuple(model.params)}(minx)
-    model_fitted = RheoModel(model,nt; log_add = log);
 
-    return model_fitted
+    return RheoModel(model,nt; log_add = log);
 
 end
 
@@ -259,10 +258,10 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
     check = RheoTimeDataType(data)
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
 
-    if (check == strain_imposed)
+    if (check == strain_only)
         modtouse = :G;
         dcontrolled = deriv(data.ϵ, data.t)
-    elseif (check == stress_imposed)
+    elseif (check == stress_only)
         modtouse = :J;
         dcontrolled = deriv(data.σ, data.t)
     end
@@ -338,20 +337,36 @@ creep modulus, then the first element of the stress is assumed to be the amplitu
 - `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
 """
 function modelstepfit(data::RheoTimeData,
-                  model::RheologyModel,
+                  model::RheoModelClass,
                   modloading::Union{LoadingType,Integer};
                   step = nothing,
-                  p0::Array{T1,1} = [-1.0],
-                  lo::Array{T2,1} = [-1.0],
-                  hi::Array{T3,1} = [-1.0],
+                  p0::Union{NamedTuple,Tuple} = (),
+                  lo::Union{NamedTuple,Tuple} = (),
+                  hi::Union{NamedTuple,Tuple} = (),
                   verbose::Bool = false,
                   rel_tol = 1e-4,
                   diff_method="BD") where {T1<:Real, T2<:Real, T3<:Real}
 
-    p0 = convert(Vector{RheoFloat},p0)
-    lo = convert(Vector{RheoFloat},lo)
-    hi = convert(Vector{RheoFloat},hi)
-    # get modulus function
+    if isempty(p0)
+     p0 = convert(Array{RheoFloat,1}, fill(0.5,length(model.params)))
+          @warn "Initial values for model parameters is set to 0.5 by default"
+    else
+     p0 = model_parameters(p0,model.params,"initial guess")
+    end
+
+    if isempty(lo)
+     lo = convert(Array{RheoFloat,1}, [-1])
+    else
+     lo = model_parameters(lo,model.params,"low bounds")
+    end
+
+    if isempty(hi)
+     hi = convert(Array{RheoFloat,1}, [-1])
+    else
+     hi = model_parameters(hi,model.params,"high bounds")
+    end
+
+    rel_tol = convert(RheoFloat,rel_tol)
 
     if diff_method=="BD"
         deriv = derivBD
@@ -359,11 +374,11 @@ function modelstepfit(data::RheoTimeData,
         deriv = derivCD
     end
 
-    if Int(modloading) == 2
+    if  modloading == stress_imposed
         dcontrolled = deriv(data.σ, data.t)
         measured = data.ϵ
         modtouse = :J
-    elseif Int(modloading) == 1
+    elseif modloading == strain_imposed
         dcontrolled = deriv(data.ϵ, data.t)
         measured = data.σ
         modtouse = :G
@@ -371,46 +386,42 @@ function modelstepfit(data::RheoTimeData,
     # get modulus function and derivative
     if (step == nothing)
         check = RheoTimeDataType(data)
-        @assert (Int(check) == 3) "Both stress and strain are required"
-        if Int(modloading) == 2
-            controlled = data.σ[convert(Integer,round(length(data.σ)\2))]
+        @assert (check == strain_and_stress) "Both stress and strain are required"
+        if (modloading == stress_imposed)
+            controlled = data.σ[convert(Integer,round(length(data.σ)/2))]
             measured = data.ϵ
             modtouse = :J
-        elseif Int(modloading) == 1
+        elseif (modloading == strain_imposed)
             controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
             measured = data.σ
             modtouse = :G
         end
     elseif (step != nothing)
         check = RheoTimeDataType(data)
-        if Int(modloading) == 2
-            @assert (Int(check) == 3) || (Int(check) == 1) "Strain required"
+        if (modloading == stress_imposed)
+            @assert (check == strain_only)||(check == strain_and_stress) "Strain required"
             modtouse = :J;
             controlled = convert(RheoFloat,step);
             measured = data.ϵ
-        elseif Int(modloading) == 1
-            @assert (Int(check) == 3) || (Int(check) == 2) "Stress required"
+        elseif (modloading == strain_imposed)
+            @assert (check == stress_only)||(check == strain_and_stress) "Stress required"
             measured = data.σ
             modtouse = :G;
             controlled =convert(RheoFloat, step);
         end
     end
 
+    modulus = eval(getfield(model, modtouse))
+    mod(t) = modulus(t,p0)
 
-    print(controlled)
-    modulus = getfield(model, modtouse)
-
-    # use default p0 if not provided
-    if quasinull(p0)
-        p0 = convert(Array{RheoFloat,1},model.parameters)
-    end
+    @assert ~isnan(mod(5.0)) "Modulus to use not defined"
+    # get singularity presence
+    sing = singularitytest(mod)
 
     # TEMP - CHECK WITH ALE AND ALEXANDRE BUT IS DEFINITELY NECESSARY
     # time must start at 0 for convolution to work properly!
     t_zeroed = data.t .- minimum(data.t)
 
-    # get singularity presence
-    sing = singularitytest(modulus, p0; t1 = t_zeroed[1])
 
     # start fit
     (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed leastsquares_stepinit(p0,
@@ -425,11 +436,10 @@ function modelstepfit(data::RheoTimeData,
                                                                                         _rel_tol = rel_tol)
 
     modulusname = string(modulus)
+    log = vcat(data.log, "Fitted $modulusname, Modulus used: $modtouse, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
+    nt = NamedTuple{Tuple(model.params)}(minx)
 
-
-    log = vcat(data.log, "Fitted $modulusname, Step value = $controlled, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
-
-    RheologyModel(model.G, model.J, model.Gp, model.Gpp, minx, log)
+    return RheoModel(model,nt; log_add = log);
 
 end
 
@@ -458,11 +468,12 @@ function modelsteppredict(data, model; modtouse::Symbol=:Nothing, step_on::Real 
             controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
         elseif (check == stress_only)
             modtouse = :J;
-            controlled = data.σ[convert(Integer,round(length(data.σ)\2))]
+            print(round(length(data.σ)))
+            controlled = data.σ[convert(Integer,round(length(data.σ)/2))]
         end
     elseif modtouse == :J
         @assert (check == stress_only) "Stress required"
-        controlled = data.σ[convert(Integer,round(length(data.σ)\2))]
+        controlled = data.σ[convert(Integer,round(length(data.σ)/2))]
     elseif modtouse == :G
         @assert (check == strain_only) "Strain required"
         controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
