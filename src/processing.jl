@@ -148,22 +148,39 @@ Fit RheologyData struct to model and return a fitted model as a RheologyModel ob
 - `diff_method`: Set finite difference formula to use for derivative, currently "BD" or "CD"
 """
 function modelfit(data::RheoTimeData,
-                  model::RheoModel,
+                  model::RheoModelClass,
                   modloading::Union{LoadingType,Integer};
-                  p0::Array{T1,1} = [-1.0],
-                  lo::Array{T2,1} = [-1.0],
-                  hi::Array{T3,1} = [-1.0],
+                  p0::Union{NamedTuple,Tuple} = (),
+                  lo::Union{NamedTuple,Tuple} = (),
+                  hi::Union{NamedTuple,Tuple} = (),
                   verbose::Bool = false,
                   rel_tol = 1e-4,
                   diff_method="BD") where {T1<:Real, T2<:Real, T3<:Real}
 
-    p0 = convert(Array{RheoFloat,1},p0)
-    lo = convert(Array{RheoFloat,1},lo)
-    hi = convert(Array{RheoFloat,1},hi)
+    if isempty(p0)
+        p0 = convert(Array{RheoFloat,1}, fill(0.5,length(model.params)))
+        @warn "Initial values for model parameters is set to 0.5 by default"
+    else
+        p0 = model_parameters(p0,model.params,"initial guess")
+    end
+
+    if isempty(lo)
+        lo = convert(Array{RheoFloat,1}, [-1])
+    else
+        lo = model_parameters(lo,model.params,"low bounds")
+    end
+
+    if isempty(hi)
+        hi = convert(Array{RheoFloat,1}, [-1])
+    else
+        hi = model_parameters(hi,model.params,"high bounds")
+    end
+
     rel_tol = convert(RheoFloat,rel_tol)
 
     check = RheoTimeDataType(data)
-    @assert (Int(check) == 3) "Both stress and strain are required"
+    @assert (check == strain_and_stress) "Both stress and strain are required"
+
 
     # use correct method for derivative
     if diff_method=="BD"
@@ -173,33 +190,28 @@ function modelfit(data::RheoTimeData,
     end
 
     # get modulus function and derivative
-    if Int(modloading) == 2
+    if modloading == stress_imposed
         dcontrolled = deriv(data.σ, data.t)
         measured = data.ϵ
         modtouse = :J
-    elseif Int(modloading) == 1
+    elseif modloading == strain_imposed
         dcontrolled = deriv(data.ϵ, data.t)
         measured = data.σ
         modtouse = :G
     end
 
-    modulus = getfield(model, modtouse)
+    modulus = eval(getfield(model, modtouse))
+    mod(t) = modulus(t,p0)
 
-    # use default p0 if not provided
-    if quasinull(p0)
-        p0 = convert(Array{RheoFloat,1},model.parameters)
-    end
-
+    @assert ~isnan(mod(5.0)) "Module to use not defined"
     # get singularity presence
-    sing = singularitytest(modulus, p0)
-
+    sing = singularitytest(mod)
     # get time step (only needed for convolution, which requires constant dt so t[2]-t[1] is sufficient)
     dt = data.t[2] - data.t[1]
 
     # TEMP - CHECK WITH ALE AND ALEXANDRE BUT IS DEFINITELY NECESSARY
     # time must start at 0 for convolution to work properly!
     t_zeroed = data.t .- minimum(data.t)
-
 
     # fit
     sampling_check = constantcheck(data.t)
@@ -218,10 +230,11 @@ function modelfit(data::RheoTimeData,
                                                                                     _rel_tol = rel_tol)
 
     modulusname = string(modulus)
-
     log = vcat(data.log, "Fitted $modulusname, Modulus used: $modtouse, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
+    nt = NamedTuple{Tuple(model.params)}(minx)
+    model_fitted = RheoModel(model,nt; log_add = log);
 
-    RheologyModel(model.G, model.J, model.Gp, model.Gpp, minx, log)
+    return model_fitted
 
 end
 
@@ -246,10 +259,10 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
     check = RheoTimeDataType(data)
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
 
-    if (Int(check) == 1)
+    if (check == strain_imposed)
         modtouse = :G;
         dcontrolled = deriv(data.ϵ, data.t)
-    elseif (Int(check) == 2)
+    elseif (check == stress_imposed)
         modtouse = :J;
         dcontrolled = deriv(data.σ, data.t)
     end

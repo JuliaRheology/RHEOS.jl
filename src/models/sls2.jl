@@ -16,14 +16,6 @@ SLS2 = RheoModelClass(
               Jbar(s) = (1/s^2)*(G₀/s+G₁*1/(s+tau1)+G₂*1/(s+tau2))
               return invLaplace(s -> Jbar(s), t)
             end,
-        # Storage modulus
-        Gp = quote
-               return [-1]
-             end,
-        # Loss modulus
-        Gpp = quote
-                return [-1]
-              end,
         # Network
         info= "
                                        ___
@@ -42,6 +34,8 @@ SLS2 = RheoModelClass(
         )
 
 #
+
+
 # """
 # SLS2(params::Vector{T}) where T<:Real
 #

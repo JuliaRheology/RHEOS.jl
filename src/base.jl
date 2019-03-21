@@ -453,6 +453,7 @@ than the integral method. However, it works for constant sample rate.
 function boltzconvolve_nonsing(modulus, time_series, dt,prescribed_dot)
 
     Modulus = modulus(time_series)
+    Modulus = convert(Array{Float64,1},Modulus)
 
     β = convn(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
@@ -478,13 +479,16 @@ sample rate is constant and model does not feature singularity.
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
-function obj_const_nonsing(params, grad,modulus, time_series,dt, prescribed_dot,measured; _insight::Bool = false)
+function obj_const_nonsing(params, grad, modulus, time_series,dt, prescribed_dot,measured; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
     end
-    
-    convolved = boltzconvolve_nonsing(modulus, time_series, dt, params, prescribed_dot)
+
+    mod(t) = modulus(t,params)
+
+    convolved = boltzconvolve_nonsing(mod, time_series, dt, prescribed_dot)
+
 
     cost = sum(0.5*(measured - convolved).^2)
     return convert(RheoFloat,cost)
@@ -547,8 +551,6 @@ function obj_var_nonsing(params, grad,modulus, time_series, prescribed_dot, meas
     end
     #print("entrato1")
     convolved = boltzintegral_nonsing(modulus, time_series, params, prescribed_dot)
-    #print("entrato2")
-    #print(typeof(convolved))
 
     cost = sum(0.5*(measured - convolved).^2)
 

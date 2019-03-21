@@ -296,7 +296,13 @@ invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
 # Model name and parameters should be required --> assert
 # info should have generic default value, such as "Model with $n params named $s..."
 
-function RheoModelClass(;name,p,G,J,Gp,Gpp,info)
+function RheoModelClass(;name::String,
+                         p::Array{Symbol},
+                         G::Expr = quote return NaN end,
+                         J::Expr = quote return NaN end,
+                         Gp::Expr = quote return NaN end,
+                         Gpp::Expr = quote return NaN end,
+                         info)
     info_model = string("Model $name \n",info)
 
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
@@ -375,16 +381,22 @@ end
 
 #expr_replace(e,(k_0=0.5,k_1=1.123,k_2=3.14))
 
+
+function model_parameters(nt::NamedTuple, params::Vector{Symbol}, err_string::String)
+    # check that every parameter in m exists in the named tupple nt
+    @assert all( i-> i in keys(nt),params) "Missing parameter(s) in " * err_string
+    # check that no extra parameters have been provided
+    @assert length(params) == length(nt) "Mismatch number of model parameters and parameters provided in " * err_string
+
+    p=map(i->RheoFloat(nt[i]),params)
+    p = convert(Array{RheoFloat,1},p)
+end
+
 # not clean use nt in function when already passed as parameters
 
-function RheoModel(m::RheoModelClass, nt::NamedTuple)
-    # check that every parameter in m exists in the named tupple nt
-    @assert all( i-> i in keys(nt), m.params) "Missing parameter(s) in model definition."
-    # check that no extra parameters have been provided
-    @assert length(m.params) == length(nt) "Mismatch number of model parameters and parameters provided"
+function RheoModel(m::RheoModelClass, nt::NamedTuple; log_add::Array{String} = [" "])
 
-    p=map(i->RheoFloat(nt[i]), m.params)
-    p = convert(Array{RheoFloat,1},p)
+    p = model_parameters(nt, m.params,"model definition")
     nt=NamedTuple{Tuple(m.params)}(p)
     f=info(m,nt)
 
@@ -417,7 +429,7 @@ function RheoModel(m::RheoModelClass, nt::NamedTuple)
     @eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $Gpp; end
 
 
-    return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), nt, f, ["Log!!!"])
+    return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), nt, f, log_add)
 end
 
 
@@ -427,7 +439,7 @@ end
 
 
 
-export RheoModelClass, RheoModel
+export RheoModelClass, RheoModel, model_parameters
 
 
 
