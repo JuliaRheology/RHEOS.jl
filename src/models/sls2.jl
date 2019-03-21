@@ -7,7 +7,7 @@ SLS2 = RheoModelClass(
         p = [:G₀, :G₁, :η₁, :G₂, :η₂],
         # Relaxation modulus
         G = quote
-              return G₀ .+ G₁*exp.(-t*G₁/η₁) .+ G₂*exp.(-t*G₂/η₂)
+              return G₀ + G₁*exp(-t*G₁/η₁) + G₂*exp(-t*G₂/η₂)
             end,
         # Creep modulus
         J = quote

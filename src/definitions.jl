@@ -307,12 +307,18 @@ function RheoModelClass(;name,p,G,J,Gp,Gpp,info)
     gps=Symbol("Gp_"*name)
     gpps=Symbol("Gpp_"*name)
 
-    @eval $gs(t::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $G; end
-    @eval $js(t::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $J; end
+    @eval $gs(t::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $G; end
+    # This seems to be very slow
+    #@eval $gs(ta::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin $unpack_expr; [$G for t in ta]; end
+    @eval $gs(ta::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gs(t,params) for t in ta]; end
+    @eval $gs(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gs(rheoconv(t),rheoconv(params))
+
+    @eval $js(t::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $J; end
+    @eval $js(t::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$js(t,params) for t in ta]; end
+    @eval $js(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $js(rheoconv(t),rheoconv(params))
+
     @eval $gps(ω::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gp; end
     @eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gpp; end
-    @eval $gs(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gs(rheoconv(t),rheoconv(params))
-    @eval $js(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $js(rheoconv(t),rheoconv(params))
     return RheoModelClass(name,eval(gs),eval(js),eval(gps),eval(gpps),p,info_model,(G=G,J=J,Gp=Gp,Gpp=Gpp))
 end
 
@@ -399,12 +405,16 @@ function RheoModel(m::RheoModelClass, nt::NamedTuple)
     Gp = expr_replace(m.expressions.Gp, nt)
     Gpp = expr_replace(m.expressions.Gpp, nt)
 
-    @eval $gs(t::Union{Array{RheoFloat,1},RheoFloat}) = begin $G; end
-    @eval $js(t::Union{Array{RheoFloat,1},RheoFloat}) = begin $J; end
+    @eval $gs(t::RheoFloat) = begin $G; end
+    @eval $gs(ta::Array{RheoFloat,1}) = broadcast($gs, ta)
+    @eval $gs(t::Union{Array{T1,1},T1}) where T1<:Real = $gs(rheoconv(t))
+
+    @eval $js(t::RheoFloat) = begin $J; end
+    @eval $js(ta::Array{RheoFloat,1}) = broadcast($js, ta)
+    @eval $js(t::Union{Array{T1,1},T1}) where T1<:Real = $js(rheoconv(t))
+
     @eval $gps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $Gp; end
     @eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $Gpp; end
-    @eval $gs(t::Union{Array{T1,1},T1}) where T1<:Real = $gs(rheoconv(t))
-    @eval $js(t::Union{Array{T1,1},T1}) where T1<:Real = $js(rheoconv(t))
 
 
     return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), nt, f, ["Log!!!"])
