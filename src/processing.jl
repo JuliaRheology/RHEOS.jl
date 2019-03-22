@@ -25,13 +25,13 @@ function fixedresample(self::RheoTimeData, elperiods::Union{Vector{K},K}; time_b
     end
 
     check = RheoTimeDataType(self)
-    if (Int(check) == 1)
+    if (check == strain_only)
         (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods)
         sigma = [];
-    elseif (Int(check) == 2)
+    elseif (check == stress_only)
         (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods)
         epsilon = [];
-    elseif (Int(check) == 3)
+    elseif (check == strain_and_stress)
         (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods)
         (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods)
     end
@@ -52,13 +52,13 @@ function cutting(self::RheoTimeData, time_on::T1,time_off::T2) where {T1<:Number
     time = self.t[boundary_on:boundary_off]
 
     check = RheoTimeDataType(self)
-    if (Int(check) == 1)
+    if (check == strain_only)
         epsilon = self.ϵ[boundary_on:boundary_off]
         sigma = [];
-    elseif (Int(check) == 2)
+    elseif (check == stress_only)
         sigma = self.σ[boundary_on:boundary_off]
         epsilon = [];
-    elseif (Int(check) == 3)
+    elseif (check == strain_and_stress)
         epsilon = self.ϵ[boundary_on:boundary_off]
         sigma = self.σ[boundary_on:boundary_off]
     end
@@ -86,13 +86,13 @@ function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
 
     # smooth signal and return
     check = RheoTimeDataType(self)
-    if (Int(check) == 1)
+    if (check == strain_only)
         epsilon = Base.invokelatest(imfilter, self.ϵ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
         sigma = [];
-    elseif (Int(check) == 2)
+    elseif (check == stress_only)
         sigma = Base.invokelatest(imfilter, self.σ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
         epsilon = [];
-    elseif (Int(check) == 3)
+    elseif (check == strain_and_stress)
         sigma = Base.invokelatest(imfilter, self.σ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
         epsilon = Base.invokelatest(imfilter, self.ϵ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
     end
@@ -107,19 +107,19 @@ end
 
 function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
 
-    @assert (Int(type)!=3) && (Int(type)!=-1) "Cannot extract both stress and strain"
+    @assert (type!= strain_and_stress) && (type!= invalid_time_data) "Cannot extract both stress and strain"
     check = RheoTimeDataType(self)
 
-    if Int(type)==0
-        @assert Int(check)!=-1 "Time not available"
+    if type == time_only
+        @assert check!= invalid_time_data "Time not available"
         log = vcat(self.log,"Time extracted")
         return RheoTimeData([], [],self.t,log)
-    elseif Int(type) == 1
-        @assert Int(check)==3 || Int(check)==1 "Strain not available"
+    elseif type == strain_only
+        @assert (check == strain_and_stress) || (check == strain_only) "Strain not available"
         log = vcat(self.log,"Time and strain extracted")
         return RheoTimeData([], self.ϵ,self.t,log)
-    elseif Int(type) == 2
-        @assert Int(check)==3 || Int(check)==2 "Stress not available"
+    elseif type == stress_only
+        @assert (check == strain_and_stress) || (check == stress_only) "Stress not available"
         log = vcat(self.log,"Time and stress extracted")
         return RheoTimeData(self.σ, [], self.t,log)
     end
@@ -449,7 +449,7 @@ end
 Same as modelpredict but assumes a step loading with step starting at 'step_on'. Singularities are bypassed
 by adding 1 to the index of the singular element.
 """
-function modelsteppredict(data, model; modtouse::Symbol=:Nothing, step_on::Real = 0.0, diff_method = "BD")
+function modelsteppredict(data, model; step_on::Real = 0.0, diff_method = "BD")
 
     step_on = convert(RheoFloat,step_on)
 
@@ -462,21 +462,13 @@ function modelsteppredict(data, model; modtouse::Symbol=:Nothing, step_on::Real 
     check = RheoTimeDataType(data)
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
 
-    if (modtouse == :Nothing)
-        if (check == strain_only)
-            modtouse = :G;
-            controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
-        elseif (check == stress_only)
-            modtouse = :J;
-            print(round(length(data.σ)))
-            controlled = data.σ[convert(Integer,round(length(data.σ)/2))]
-        end
-    elseif modtouse == :J
-        @assert (check == stress_only) "Stress required"
-        controlled = data.σ[convert(Integer,round(length(data.σ)/2))]
-    elseif modtouse == :G
-        @assert (check == strain_only) "Strain required"
+    if (check == strain_only)
+        modtouse = :G;
         controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
+    elseif (check == stress_only)
+        modtouse = :J;
+        print(round(length(data.σ)))
+        controlled = data.σ[convert(Integer,round(length(data.σ)/2))]
     end
 
     # get modulus
