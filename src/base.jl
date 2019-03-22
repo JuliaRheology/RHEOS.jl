@@ -426,12 +426,11 @@ function boltzconvolve(modulus, time_series, dt,prescribed_dot)
 
 
     Modulus = modulus(time_series)
-    Modulus = convert(Array{Float32,1},Modulus)
+    Modulus = convert(typeof(prescribed_dot),Modulus)
     # fast convolution
     β = convn(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
     β = β[1:length(time_series)]*dt
-    return convert(Vector{RheoFloat},β)
 
 end
 
@@ -454,7 +453,7 @@ than the integral method. However, it works for constant sample rate.
 function boltzconvolve_nonsing(modulus, time_series, dt,prescribed_dot)
 
     Modulus = modulus(time_series)
-    Modulus = convert(Array{Float64,1},Modulus)
+    Modulus = convert(typeof(prescribed_dot),Modulus)
 
     β = convn(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
@@ -487,9 +486,7 @@ function obj_const_nonsing(params, grad, modulus, time_series,dt, prescribed_dot
     end
 
     mod(t) = modulus(t,params)
-
     convolved = boltzconvolve_nonsing(mod, time_series, dt, prescribed_dot)
-
 
     cost = sum(0.5*(measured - convolved).^2)
     return convert(RheoFloat,cost)
@@ -686,7 +683,6 @@ function obj_step_nonsing(params, grad, modulus, t, prescribed, measured; _insig
     end
 
     mod(t) = modulus(t,params)
-
     estimated = prescribed*mod(t)
 
     cost = sum(0.5*(measured - estimated).^2)
@@ -698,7 +694,6 @@ function obj_step_sing(params, grad, modulus, t, prescribed, measured; _insight=
     end
 
     mod(t) = modulus(t,params)
-
     estimated = prescribed*mod(t)[2:end]
 
     cost = sum(0.5*(measured[2:end] - estimated).^2)

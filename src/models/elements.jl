@@ -57,7 +57,7 @@ Spring =  RheoModelClass(
                 "
         )
 
-Dashpot =  RheoModelClass(
+DashPot =  RheoModelClass(
         # Model name
         name="dashpot",
         # Model parameters,
@@ -75,10 +75,11 @@ Dashpot =  RheoModelClass(
                 return η*ω
               end,
         # Network
-        info= "        ___
-                   _____| |_____
-                       _|_|
-                             η
+        info= "
+                 ___
+             _____| |_____
+                 _|_|
+                     η
                 "
         )
 

@@ -1,6 +1,5 @@
 #!/usr/bin/env julia
 
-
 FractionalSpecial = RheoModelClass(
         # Model name
         name="fractspecial",
@@ -8,8 +7,7 @@ FractionalSpecial = RheoModelClass(
         p = [:η, :cᵦ, :β, :k],
         # Relaxation modulus
         G = quote
-              G= k + cᵦ*t^(-β)*mittleff(1 - β, 1 - β, -cᵦ*(t^(1 - β))/η)
-              return convert(Float64,G)
+              return k + cᵦ*t^(-β)*mittleff(1 - β, 1 - β, -cᵦ*(t^(1 - β))/η)
             end,
         # Creep modulus
         J = quote
