@@ -13,6 +13,7 @@ data_cut = cutting(data,0,50.0)
 
 # ----------------- EXTRACTING data for prediction -----------------------------
 data_predict = extract(data,strain_only)
+data_predict = extract(data,1)
 data_predict_fix = extract(data_resampled_fix,strain_only)
 data_predict_var = extract(data_resampled_var,strain_only)
 

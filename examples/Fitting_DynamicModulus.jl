@@ -7,7 +7,9 @@ filedir = "FrequencyData.csv"
 
 # ------------------ IMPORT DATA example -------------------------------
 
-#data = importdata(filedir; ω_col =3, Gp_col = 1, Gpp_col = 2)
+data = importdata(filedir; ω_col =3, Gp_col = 1, Gpp_col = 2)
+data_ext = extract(data,0)
+data_ext = extract(data,frec_only)
 
 #------------------------------GENERATE DATA AND FIT----------------------------
 

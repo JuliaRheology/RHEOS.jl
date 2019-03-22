@@ -105,26 +105,47 @@ function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
 end
 
 
-function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
+function extract(self::Union{RheoTimeData,RheoFreqData}, type::Union{TimeDataType,FreqDataType,Integer})
 
-    @assert (type!= strain_and_stress) && (type!= invalid_time_data) "Cannot extract both stress and strain"
-    check = RheoTimeDataType(self)
 
-    if type == time_only
-        @assert check!= invalid_time_data "Time not available"
-        log = vcat(self.log,"Time extracted")
-        return RheoTimeData([], [],self.t,log)
-    elseif type == strain_only
-        @assert (check == strain_and_stress) || (check == strain_only) "Strain not available"
-        log = vcat(self.log,"Time and strain extracted")
-        return RheoTimeData([], self.ϵ,self.t,log)
-    elseif type == stress_only
-        @assert (check == strain_and_stress) || (check == stress_only) "Stress not available"
-        log = vcat(self.log,"Time and stress extracted")
-        return RheoTimeData(self.σ, [], self.t,log)
+    if (typeof(self)==RheoTimeData)
+
+        type = typeof(type)==Int ? TimeDataType(type) : type
+        @assert (typeof(type)==TimeDataType) || (typeof(type)==Int) "Cannot extract frequency data from RheoTimeData"
+        @assert (type!= strain_and_stress) && (type!= invalid_time_data) "Cannot extract both stress and strain"
+        @assert (type!= invalid_time_data) "Cannot extract information from invalid time data"
+        check = RheoTimeDataType(self)
+
+        if type == time_only
+            @assert check!= invalid_time_data "Time not available"
+            log = vcat(self.log,"Time extracted")
+            return RheoTimeData([], [],self.t,log)
+        elseif type == strain_only
+            @assert (check == strain_and_stress) || (check == strain_only) "Strain not available"
+            log = vcat(self.log,"Time and strain extracted")
+            return RheoTimeData([], self.ϵ,self.t,log)
+        elseif type == stress_only
+            @assert (check == strain_and_stress) || (check == stress_only) "Stress not available"
+            log = vcat(self.log,"Time and stress extracted")
+            return RheoTimeData(self.σ, [], self.t,log)
+        end
+
+    elseif (typeof(self)==RheoFreqData)
+        
+        type = typeof(type)==Int ? FreqDataType(type) : type
+        @assert (typeof(type)==FreqDataType) || (typeof(type)==Int) "Cannot extract time data from RheoFreqData"
+        @assert (type!= with_modulus) "Cannot extract frequency with moduli"
+        @assert (type!= invalid_freq_data) "Cannot extract information from invalid frequency data"
+        check = RheoFreqDataType(self)
+        @assert (check == with_modulus) "Frequency and modulii required"
+        log = vcat(self.log,"Frequency extracted")
+        return RheoFreqData([], [],self.ω,log)
     end
 
 end
+
+
+
 
 ##########################
 #~ Processing Functions ~#
