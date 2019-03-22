@@ -425,8 +425,16 @@ function RheoModel(m::RheoModelClass, nt::NamedTuple; log_add::Array{String} = [
     @eval $js(ta::Array{RheoFloat,1}) = broadcast($js, ta)
     @eval $js(t::Union{Array{T1,1},T1}) where T1<:Real = $js(rheoconv(t))
 
-    @eval $gps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $Gp; end
-    @eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $Gpp; end
+    @eval $gps(ω::RheoFloat) = begin $Gp; end
+    @eval $gps(ωa::Array{RheoFloat,1}) = broadcast($gps, ωa)
+    @eval $gps(ω::Union{Array{T1,1},T1}) where T1<:Real = $gps(rheoconv(ω))
+
+    @eval $gpps(ω::RheoFloat) = begin $Gpp; end
+    @eval $gpps(ωa::Array{RheoFloat,1}) = broadcast($gpps, ωa)
+    @eval $gpps(ω::Union{Array{T1,1},T1}) where T1<:Real = $gpps(rheoconv(ω))
+
+    #@eval $gps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $Gp; end
+    #@eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $Gpp; end
 
 
     return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), nt, f, log_add)

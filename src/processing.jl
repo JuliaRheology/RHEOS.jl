@@ -449,7 +449,7 @@ end
 Same as modelpredict but assumes a step loading with step starting at 'step_on'. Singularities are bypassed
 by adding 1 to the index of the singular element.
 """
-function modelsteppredict(data, model; step_on::Real = 0.0, diff_method = "BD")
+function modelsteppredict(data::RheoTimeData,model::RheoModel; step_on::Real = 0.0, diff_method = "BD")
 
     step_on = convert(RheoFloat,step_on)
 
@@ -704,15 +704,14 @@ Given dynamic rheology data and model, return new dataset based on model paramet
 Returns another RheologyDynamic instance with the predicted Gp and Gpp based on the
 frequencies and model parameters.
 """
-function dynamicmodelpredict(data::RheologyDynamic, model::RheologyModel)
+function dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
 
     # get results
-    predGp = model.Gp(data.ω, model.parameters)
-    predGpp = model.Gpp(data.ω, model.parameters)
+    predGp = model.Gp(data.ω)
+    predGpp = model.Gpp(data.ω)
 
     # store operation
     log = vcat(data.log, "Predicted data from model:", model.log)
-
-    RheologyDynamic(predGp, predGpp, data.ω, log)
+    RheoFreqData(predGp, predGpp,data.ω, log)
 
 end

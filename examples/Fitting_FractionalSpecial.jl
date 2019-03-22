@@ -5,17 +5,19 @@ using RHEOS
 
 filedir = "Epi_relax.csv"
 
+# ------------------ IMPORT DATA AND RESAMPLING -------------------------------
 # repeated step loading generated with FractionalSLS([2.0, 0.5, 0.5, 0.7])
 data = importdata(filedir; t_col =1, σ_col = 2, ϵ_col = 3)
 data_resampled_fix = fixedresample(data,-2,time_boundaries=[-0.6, 80.0])
 data_resampled_var = fixedresample(data,[1,-12],time_boundaries=[0.0, 8.0,80.0])
 data_cut = cutting(data,0,50.0)
 
-# variable for prediction
+# ----------------- EXTRACTING data for prediction -----------------------------
 data_predict = extract(data,strain_only)
 data_predict_fix = extract(data_resampled_fix,strain_only)
 data_predict_var = extract(data_resampled_var,strain_only)
 
+# -------------- FITTING ------------------------------------------------------
 # Fractional model: η, cβ, β, k - Singularity - constant sampling
 p0 = (η = 1e4, cᵦ=1e3, β=0.30, k=4e2)
 lb = (η = 0.0, cᵦ=0.0, β=0.01, k=0.0)
@@ -40,6 +42,7 @@ ax[:plot](fracspecial_predicted_step.t, fracspecial_predicted_step.σ, "--", lab
 ax[:legend](loc="best")
 show()
 
+# ------------------ CREEP PREDICTION -----------------------------------------
 # Generate step in stress
 time = time_line(t_end = 200.0)
 step_creep = stressfunction(time,hstep(amp=0.3))
@@ -49,3 +52,11 @@ fracspecial_creep = modelsteppredict(step_creep, fractspecial_fit_step)
 
 fig, ax = subplots()
 ax[:loglog](fracspecial_creep.t, fracspecial_creep.ϵ, "--", label="Fractional special fix")
+
+# ------------------ FREQUENCY RESPONSE PREDICTION------------------------------
+frequency = frequency_spec(ω_start = 1.e-3)
+fracspecial_spect = dynamicmodelpredict(frequency,fractspecial_fit_step)
+
+fig, ax = subplots()
+ax[:loglog](fracspecial_spect.ω, fracspecial_spect.Gp, "--", color = "blue", label="Fractional special fix")
+ax[:loglog](fracspecial_spect.ω, fracspecial_spect.Gpp, "--", color = "red", label="Fractional special fix")

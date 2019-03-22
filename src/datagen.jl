@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 
-export time_line,strainfunction,stressfunction
+export time_line,strainfunction,stressfunction, frequency_spec
 
 #- timeline(end; start=0; stepsize=(end-start)/250)
 #	→ RheolTimeData with time only defined
@@ -121,6 +121,14 @@ end
 function triangle(;offset=0., amp=1., period=1., width=0.5*period)
     return t -> triangle(t,offset=offset, amp=amp, period=period, width=width)
 end
+
+
+
+function frequency_spec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(ω_end-ω_start)/1.0e5)
+
+    RheoFreqData(ω=collect(ω_start:step:ω_end), info="frequency spectrum created: ω_start=$ω_start, ω_end=$ω_end, step=$step")
+end
+
 
 
 
