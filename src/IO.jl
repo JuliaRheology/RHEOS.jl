@@ -15,15 +15,15 @@ time-stress-strain data can be provided.
 """
 function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ_col::Integer=-1, ω_col::Integer= -1, Gp_col::Integer = -1, Gpp_col::Integer = -1, delimiter=',')
 
-    @assert (t_col==-1)||(ω_col==-1) "Data must contain \"time\" or \"frequency\" "
+    @assert ((t_col!=-1)&(ω_col==-1)) || ((t_col==-1)&(ω_col!=-1)) "Data must contain either \"time\" or \"frequency\" "
 
     if t_col!=-1
 
+        @assert (Gp_col==-1) & (Gpp_col ==-1) "Loss and storage modulus not allowed for time data"
         # read data from file
         data = readdlm(filedir, delimiter)
 
         # test for NaNs at the beginning and end of the data
-
         newstartingval = 1
         for i in 1:length(data[:,t_col])
             if !isnan(sum(data[i,:]))
@@ -48,7 +48,7 @@ function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ
             end
         end
         data = data[newstartingval:newendingval,:]
-        
+
         # generate RheologyData struct and output
         if (ϵ_col!=-1) & (σ_col!=-1)
             return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], σ = data[:,σ_col], info = "Imported data: file $filedir, stress and strain")
@@ -62,7 +62,8 @@ function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ
 
     elseif ω_col!=-1
         # check colnames length is correct
-        @assert Gp_col==-1 & Gpp_col==-1 "\"Gp\" and \"Gpp\" are required."
+        @assert (σ_col==-1) & (ϵ_col ==-1) "Stress and strain not allowed for frequency data"
+        @assert Gp_col!=-1 & Gpp_col!=-1 "\"Gp\" and \"Gpp\" are required."
 
         # read data from file
         data = readdlm(filedir, delimiter)

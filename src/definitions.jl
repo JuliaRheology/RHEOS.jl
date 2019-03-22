@@ -320,11 +320,19 @@ function RheoModelClass(;name::String,
     @eval $gs(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gs(rheoconv(t),rheoconv(params))
 
     @eval $js(t::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $J; end
-    @eval $js(t::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$js(t,params) for t in ta]; end
+    @eval $js(ta::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$js(t,params) for t in ta]; end
     @eval $js(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $js(rheoconv(t),rheoconv(params))
 
-    @eval $gps(ω::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gp; end
-    @eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gpp; end
+    @eval $gps(ω::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gp; end
+    @eval $gps(ωa::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gps(ω,params) for ω in ωa]; end
+    @eval $gps(ω::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gps(rheoconv(ω),rheoconv(params))
+
+    @eval $gpps(ω::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gpp; end
+    @eval $gpps(ωa::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gpps(ω,params) for ω in ωa]; end
+    @eval $gpps(ω::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gpps(rheoconv(ω),rheoconv(params))
+
+    #@eval $gps(ω::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gp; end
+    #@eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gpp; end
     return RheoModelClass(name,eval(gs),eval(js),eval(gps),eval(gpps),p,info_model,(G=G,J=J,Gp=Gp,Gpp=Gpp))
 end
 

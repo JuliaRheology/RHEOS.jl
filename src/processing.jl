@@ -522,8 +522,10 @@ function obj_dynamic(params::Vector{RheoFloat},
         println("Current Parameters: ", params)
     end
 
-    costGp = sum(0.5*(dataGp - modelGp(ω, params)).^2)
-    costGpp = sum(0.5*(dataGpp - modelGpp(ω, params)).^2)
+    modGp(ω) = modelGp(ω,params)
+    modGpp(ω) = modelGpp(ω,params)
+    costGp = sum(0.5*(dataGp - modGp(ω)).^2)
+    costGpp = sum(0.5*(dataGpp - modGpp(ω)).^2)
 
     cost = costGp + costGpp
 
@@ -544,28 +546,31 @@ function obj_dynamic_linear(params::Vector{RheoFloat},
         println("Current Parameters: ", params)
     end
 
-    costGp = sum(0.5*(dataGp/meanGp - modelGp(ω, params)/meanGp).^2)
-    costGpp = sum(0.5*(dataGpp/meanGpp - modelGpp(ω, params)/meanGpp).^2)
+    modGp(ω) = modelGp(ω,params)
+    modGpp(ω) = modelGpp(ω,params)
+    costGp = sum(0.5*(dataGp/meanGp - modGp(ω)/meanGp).^2)
+    costGpp = sum(0.5*(dataGpp/meanGpp - modGpp(ω)/meanGpp).^2)
 
     cost = costGp + costGpp
 
 end
 
-function obj_dynamic_log(params::Vector{RheoFloat},
-                     grad::Vector{RheoFloat},
-                     ω::Vector{RheoFloat},
-                     dataGp::Vector{RheoFloat},
-                     dataGpp::Vector{RheoFloat},
-                     modelGp::Function,
-                     modelGpp::Function;
+function obj_dynamic_log(params,
+                     grad,
+                     ω,
+                     dataGp,
+                     dataGpp,
+                     modelGp,
+                     modelGpp;
                      _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
     end
-
-    costGp = sum(0.5*(log.(dataGp) - log.(modelGp(ω, params))).^2)
-    costGpp = sum(0.5*(log.(dataGpp) - log.(modelGpp(ω, params))).^2)
+    modGp(ωa) = modelGp(ωa,params)
+    modGpp(ωa) = modelGpp(ωa,params)
+    costGp = sum(0.5*(log.(dataGp) - log.(modGp(ω))).^2)
+    costGpp = sum(0.5*(log.(dataGpp) - log.(modGpp(ω))).^2)
 
     cost = costGp + costGpp
 
@@ -583,7 +588,8 @@ function obj_dynamic_global(params::Vector{RheoFloat},
     if _insight
         println("Current Parameters: ", params)
     end
-
+    modGp(ωa) = modelGp(ωa,params)
+    modGpp(ωa) = modelGpp(ωa,params)
     costGp = sum(0.5*(((dataGp - modelGp(ω, params))./dataGp).^2))
     costGpp = sum(0.5*(((dataGpp - modelGpp(ω, params))./dataGpp).^2))
 
@@ -604,7 +610,8 @@ function obj_dynamic_manual(params::Vector{RheoFloat},
     if _insight
         println("Current Parameters: ", params)
     end
-
+    modGp(ωa) = modelGp(ωa,params)
+    modGpp(ωa) = modelGpp(ωa,params)
     costGp = sum(0.5*(dataGp - modelGp(ω, params)).^2)
     costGpp = sum(0.5*(dataGpp - modelGpp(ω, params)).^2)
 
@@ -633,19 +640,36 @@ RHEOS offers a number of data transforms which can be used.
 - `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
 - `weights`: Weighting mode for storage and loss modulus (see above)
 """
-function dynamicmodelfit(data::RheologyDynamic,
-                model::RheologyModel;
-                p0::Vector{T} = [-1.0],
-                lo::Vector{T} = [-1.0],
-                hi::Vector{T} = [-1.0],
+function dynamicmodelfit(data::RheoFreqData,
+                model::RheoModelClass;
+                p0::Union{NamedTuple,Tuple} = (),
+                lo::Union{NamedTuple,Tuple} = (),
+                hi::Union{NamedTuple,Tuple} = (),
                 verbose::Bool = false,
                 rel_tol::T = 1e-4,
                 weights::Union{String, Vector{T}}="log") where T<:Real
 
-    # get initial paramaters
-    if quasinull(p0)
-        p0 = model.parameters
+
+    if isempty(p0)
+       p0 = convert(Array{RheoFloat,1}, fill(0.5,length(model.params)))
+       @warn "Initial values for model parameters is set to 0.5 by default"
+    else
+       p0 = model_parameters(p0,model.params,"initial guess")
     end
+
+    if isempty(lo)
+       lo = convert(Array{RheoFloat,1}, [-1])
+    else
+       lo = model_parameters(lo,model.params,"low bounds")
+    end
+
+    if isempty(hi)
+       hi = convert(Array{RheoFloat,1}, [-1])
+    else
+       hi = model_parameters(hi,model.params,"high bounds")
+    end
+
+    rel_tol = convert(RheoFloat,rel_tol)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(:LN_SBPLX, length(p0))
@@ -689,11 +713,12 @@ function dynamicmodelfit(data::RheologyDynamic,
 
     println(ret)
 
-    # log fit details
+
     modelname = string(model)
     log = vcat(data.log, "Fitted Gp, Gpp of $modelname, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
+    nt = NamedTuple{Tuple(model.params)}(minx)
 
-    RheologyModel(model.G, model.J, model.Gp, model.Gpp, minx, log)
+    return RheoModel(model,nt; log_add = log);
 
 end
 

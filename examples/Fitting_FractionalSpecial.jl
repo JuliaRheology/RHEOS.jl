@@ -6,7 +6,6 @@ using RHEOS
 filedir = "Epi_relax.csv"
 
 # ------------------ IMPORT DATA AND RESAMPLING -------------------------------
-# repeated step loading generated with FractionalSLS([2.0, 0.5, 0.5, 0.7])
 data = importdata(filedir; t_col =1, σ_col = 2, ϵ_col = 3)
 data_resampled_fix = fixedresample(data,-2,time_boundaries=[-0.6, 80.0])
 data_resampled_var = fixedresample(data,[1,-12],time_boundaries=[0.0, 8.0,80.0])
@@ -17,7 +16,7 @@ data_predict = extract(data,strain_only)
 data_predict_fix = extract(data_resampled_fix,strain_only)
 data_predict_var = extract(data_resampled_var,strain_only)
 
-# -------------- FITTING ------------------------------------------------------
+# -------------------------- FITTING -------------------------------------------
 # Fractional model: η, cβ, β, k - Singularity - constant sampling
 p0 = (η = 1e4, cᵦ=1e3, β=0.30, k=4e2)
 lb = (η = 0.0, cᵦ=0.0, β=0.01, k=0.0)

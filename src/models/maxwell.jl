@@ -1,49 +1,85 @@
 #!/usr/bin/env julia
 
-# Fractional Maxwell Model
-function G_fractmaxwell(t::T, params::Vector{T}) where T<:Real
-    cₐ, a, cᵦ, β = params
+FractionalMaxwell = RheoModelClass(
+          # Model name
+          name="fractmaxwell",
+          # Model parameters,
+          p = [:cₐ, :a, :cᵦ, :β],
+          # Relaxation modulus
+          G = quote
+                return cᵦ*t^(-β)*mittleff(a - β, 1 - β, -cᵦ*t^(a - β)/cₐ)
+              end,
+          # Creep modulus
+          J = quote
+                return t^(a)/(cₐ*gamma(1 + a)) + t^(β)/(cᵦ*gamma(1 + β))
+              end,
+          # Storage modulus
+          Gp = quote
+                 denominator = (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2)
+                 numerator = ((cᵦ*ω^β)^2)*(cₐ*ω^a)*cos(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*cos(β*π/2)
+                 return numerator/denominator
+               end,
+         # Loss modulus
+          Gpp = quote
+                  denominator = (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2)
+                  numerator = ((cᵦ*ω^β)^2)*(cₐ*ω^a)*sin(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*sin(β*π/2)
+                  return numerator/denominator
+                end,
+          # Network
+          info= "
+             ___╱╲__________╱╲____
+                ╲╱          ╲╱
+                  cₐ,a         cᵦ, β
+                 "
+          )
 
-    G = cᵦ*t^(-β)*mittleff(a - β, 1 - β, -cᵦ*t^(a - β)/cₐ)
-end
-G_fractmaxwell(t::Vector{T}, params::Vector{T}) where T<:Real = G_fractmaxwell.(t, (params,))
 
-function J_fractmaxwell(t::T, params::Vector{T}) where T<:Real
-    cₐ, a, cᵦ, β = params
 
-    J = t^(a)/(cₐ*gamma(1 + a)) + t^(β)/(cᵦ*gamma(1 + β))
-end
-J_fractmaxwell(t::Vector{T}, params::Vector{T}) where T<:Real = J_fractmaxwell.(t, (params,))
 
-function Gp_fractmaxwell(ω::T, params::Vector{T}) where T<:Real
-    cₐ, a, cᵦ, β = params
-
-    denominator = (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2)
-
-    numerator = ((cᵦ*ω^β)^2)*(cₐ*ω^a)*cos(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*cos(β*π/2)
-
-    Gp = numerator/denominator
-end
-Gp_fractmaxwell(ω::Vector{T}, params::Vector{T}) where T<:Real = Gp_fractmaxwell.(ω, (params,))
-
-function Gpp_fractmaxwell(ω::T, params::Vector{T}) where T<:Real
-    cₐ, a, cᵦ, β = params
-
-    denominator = (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2)
-
-    numerator = ((cᵦ*ω^β)^2)*(cₐ*ω^a)*sin(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*sin(β*π/2)
-
-    Gpp = numerator/denominator
-end
-Gpp_fractmaxwell(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_fractmaxwell.(ω, (params,))
-
-"""
-    FractionalMaxwell([params::Vector{T}]) where T<:Real
-
-Two springpots in series.
-"""
-FractionalMaxwell(params::Vector{T}) where T<:Real = RheologyModel(G_fractmaxwell, J_fractmaxwell, Gp_fractmaxwell, Gpp_fractmaxwell, params, ["model created by user with parameters $params"])
-FractionalMaxwell() = RheologyModel(G_fractmaxwell, J_fractmaxwell, Gp_fractmaxwell, Gpp_fractmaxwell, [2.0, 0.2, 1.0, 0.5], ["model created with default parameters"])
+# # Fractional Maxwell Model
+# function G_fractmaxwell(t::T, params::Vector{T}) where T<:Real
+#     cₐ, a, cᵦ, β = params
+#
+#     G = cᵦ*t^(-β)*mittleff(a - β, 1 - β, -cᵦ*t^(a - β)/cₐ)
+# end
+# G_fractmaxwell(t::Vector{T}, params::Vector{T}) where T<:Real = G_fractmaxwell.(t, (params,))
+#
+# function J_fractmaxwell(t::T, params::Vector{T}) where T<:Real
+#     cₐ, a, cᵦ, β = params
+#
+#     J = t^(a)/(cₐ*gamma(1 + a)) + t^(β)/(cᵦ*gamma(1 + β))
+# end
+# J_fractmaxwell(t::Vector{T}, params::Vector{T}) where T<:Real = J_fractmaxwell.(t, (params,))
+#
+# function Gp_fractmaxwell(ω::T, params::Vector{T}) where T<:Real
+#     cₐ, a, cᵦ, β = params
+#
+#     denominator = (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2)
+#
+#     numerator = ((cᵦ*ω^β)^2)*(cₐ*ω^a)*cos(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*cos(β*π/2)
+#
+#     Gp = numerator/denominator
+# end
+# Gp_fractmaxwell(ω::Vector{T}, params::Vector{T}) where T<:Real = Gp_fractmaxwell.(ω, (params,))
+#
+# function Gpp_fractmaxwell(ω::T, params::Vector{T}) where T<:Real
+#     cₐ, a, cᵦ, β = params
+#
+#     denominator = (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2)
+#
+#     numerator = ((cᵦ*ω^β)^2)*(cₐ*ω^a)*sin(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*sin(β*π/2)
+#
+#     Gpp = numerator/denominator
+# end
+# Gpp_fractmaxwell(ω::Vector{T}, params::Vector{T}) where T<:Real = Gpp_fractmaxwell.(ω, (params,))
+#
+# """
+#     FractionalMaxwell([params::Vector{T}]) where T<:Real
+#
+# Two springpots in series.
+# """
+# FractionalMaxwell(params::Vector{T}) where T<:Real = RheologyModel(G_fractmaxwell, J_fractmaxwell, Gp_fractmaxwell, Gpp_fractmaxwell, params, ["model created by user with parameters $params"])
+# FractionalMaxwell() = RheologyModel(G_fractmaxwell, J_fractmaxwell, Gp_fractmaxwell, Gpp_fractmaxwell, [2.0, 0.2, 1.0, 0.5], ["model created with default parameters"])
 
 # Fractional Maxwell Model (β=0, second spring-pot specialized to spring)
 function G_fractmaxwell_spring(t::T, params::Vector{T}) where T<:Real
@@ -98,7 +134,7 @@ FractionalMaxwellSpring() = RheologyModel(G_fractmaxwell_spring, J_fractmaxwell_
 # Fractional Maxwell Model (α=0, first spring-pot specialized to dash-pot)
 function G_fractmaxwell_dashpot(t::T, params::Vector{T}) where T<:Real
     η, cᵦ, β = params
-    
+
     G = cᵦ*t^(-β)*mittleff(1 - β, 1 - β, -cᵦ*t^(1 - β)/η)
 end
 G_fractmaxwell_dashpot(t::Vector{T}, params::Vector{T}) where T<:Real = G_fractmaxwell_dashpot.(t, (params,))
