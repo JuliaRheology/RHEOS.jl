@@ -107,7 +107,6 @@ end
 
 function extract(self::Union{RheoTimeData,RheoFreqData}, type::Union{TimeDataType,FreqDataType,Integer})
 
-
     if (typeof(self)==RheoTimeData)
 
         type = typeof(type)==Int ? TimeDataType(type) : type
@@ -131,7 +130,7 @@ function extract(self::Union{RheoTimeData,RheoFreqData}, type::Union{TimeDataTyp
         end
 
     elseif (typeof(self)==RheoFreqData)
-        
+
         type = typeof(type)==Int ? FreqDataType(type) : type
         @assert (typeof(type)==FreqDataType) || (typeof(type)==Int) "Cannot extract time data from RheoFreqData"
         @assert (type!= with_modulus) "Cannot extract frequency with moduli"
