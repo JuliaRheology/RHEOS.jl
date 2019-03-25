@@ -315,8 +315,6 @@ function RheoModelClass(;name::String,
     gpps=Symbol("Gpp_"*name)
 
     @eval $gs(t::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $G; end
-    # This seems to be very slow
-    #@eval $gs(ta::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin $unpack_expr; [$G for t in ta]; end
     @eval $gs(ta::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gs(t,params) for t in ta]; end
     @eval $gs(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gs(rheoconv(t),rheoconv(params))
 
@@ -332,13 +330,12 @@ function RheoModelClass(;name::String,
     @eval $gpps(ωa::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gpps(ω,params) for ω in ωa]; end
     @eval $gpps(ω::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gpps(rheoconv(ω),rheoconv(params))
 
-    #@eval $gps(ω::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gp; end
-    #@eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gpp; end
+
     return RheoModelClass(name,eval(gs),eval(js),eval(gps),eval(gpps),p,info_model,(G=G,J=J,Gp=Gp,Gpp=Gpp))
 end
 
 
-#export show
+
 
 
 struct RheoModel
@@ -347,6 +344,8 @@ struct RheoModel
     J::Function
     Gp::Function
     Gpp::Function
+    expressions::NamedTuple
+
 
     params::NamedTuple
     info::String
@@ -388,11 +387,10 @@ function expr_replace(ex, nt)
     return e
 end
 
-#expr_replace(e,(k_0=0.5,k_1=1.123,k_2=3.14))
 
 
 function model_parameters(nt::NamedTuple, params::Vector{Symbol}, err_string::String)
-    # check that every parameter in m exists in the named tupple nt
+    # check that every parameter in m exists in the named tuple nt
     @assert all( i-> i in keys(nt),params) "Missing parameter(s) in " * err_string
     # check that no extra parameters have been provided
     @assert length(params) == length(nt) "Mismatch number of model parameters and parameters provided in " * err_string
@@ -401,30 +399,29 @@ function model_parameters(nt::NamedTuple, params::Vector{Symbol}, err_string::St
     p = convert(Array{RheoFloat,1},p)
 end
 
-# not clean use nt in function when already passed as parameters
 
-function RheoModel(m::RheoModelClass, nt::NamedTuple; log_add::Array{String} = [" "])
 
-    p = model_parameters(nt, m.params,"model definition")
+function RheoModel(m::RheoModelClass, nt0::NamedTuple; log_add::Array{String} = [" "])
+
+    # check all parameters are provided and create a well ordered named tuple
+    p = model_parameters(nt0, m.params,"model definition")
     nt=NamedTuple{Tuple(m.params)}(p)
+    # function called when model is printed
     f=info(m,nt)
 
-
+    # This section creates moduli functions with material parameters
+    # replaced by specific values.
     gs=Symbol("G_"*m.name)
     js=Symbol("J_"*m.name)
     gps=Symbol("Gp_"*m.name)
     gpps=Symbol("Gpp_"*m.name)
 
-
-    # expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}(
-    #         (  expr_replace(m.expressions.G, nt),
-    #            expr_replace(m.expressions.J, nt),
-    #            expr_replace(m.expressions.Gp, nt),
-    #            expr_replace(m.expressions.Gpp, nt) )   )
     G = expr_replace(m.expressions.G, nt)
     J = expr_replace(m.expressions.J, nt)
     Gp = expr_replace(m.expressions.Gp, nt)
     Gpp = expr_replace(m.expressions.Gpp, nt)
+
+    expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}( ( G, J, Gp, Gpp ) )
 
     @eval $gs(t::RheoFloat) = begin $G; end
     @eval $gs(ta::Array{RheoFloat,1}) = broadcast($gs, ta)
@@ -442,11 +439,8 @@ function RheoModel(m::RheoModelClass, nt::NamedTuple; log_add::Array{String} = [
     @eval $gpps(ωa::Array{RheoFloat,1}) = broadcast($gpps, ωa)
     @eval $gpps(ω::Union{Array{T1,1},T1}) where T1<:Real = $gpps(rheoconv(ω))
 
-    #@eval $gps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $Gp; end
-    #@eval $gpps(ω::Union{Array{RheoFloat,1},RheoFloat}) = begin $Gpp; end
 
-
-    return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), nt, f, log_add)
+    return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), expressions, nt, f, log_add)
 end
 
 
@@ -459,7 +453,9 @@ end
 export RheoModelClass, RheoModel, model_parameters
 
 
-
+#
+#  Do we still need this function?
+#
 function null_modulus(t::Vector{RheoFloat}, params::Vector{T}) where T<:Real
     return [-1.0]
 end
