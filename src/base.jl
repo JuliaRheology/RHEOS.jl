@@ -182,30 +182,17 @@ returns array of indices.
 closestindices(x::Vector{T1}, vals::Vector{T2}) where {T1<:Real, T2<:Real} = broadcast(closestindex, (x,), vals)
 
 """
-    fixed_resample(x::Array{RheoFloat,1}, y::Array{RheoFloat,1}, boundaries::Array{Int64,1}, elperiods::Array{Int64,1}, direction::Array{String,1})
+    fixed_resample(x::Array{RheoFloat,1}, y::Array{RheoFloat,1}, boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
 
 Resample two arrays with new sample rate(s).
+It can either reduce the sample rate by not taking every array element or it can increase the sample
+rate by inserting new elements. If the number of elements per period (elperiods) is a positive number, then it uppersamples; if
+it is negative it downsamples.
 
-Whereas downsample can only reduce the sample rate by not taking every array element,
-fixed_resample can also upsample. This is why it does not work on and return indices
-but rather the new resampled arrays themselves.
+The function returns the resampled x and y arrays.
 
-# Example
-
-```julia-repl
-julia> x = collect(1.0:1.0:7.0);
-
-julia> (x1,y1,z1) = fixed_resample(x, x, x, [1,3,5,length(x)], [2,1,4], ["up","down","up"]);
-
-julia> println(x)
-[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
-
-julia> println(x1)
-[1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 5.25, 5.5, 5.75, 6.0, 6.25, 6.5, 6.75, 7.0]
-```
 """
-function fixed_resample(x::Vector{T}, y::Vector{T},
-                        boundaries::Vector{U}, elperiods::Union{Vector{U},U}) where T<:RheoFloat where U<:Integer
+function fixed_resample(x::Vector{T}, y::Vector{T},boundaries::Vector{U}, elperiods::Union{Vector{U},U}) where T<:RheoFloat where U<:Integer
 
     #@eval using Interpolations
 
@@ -274,7 +261,7 @@ function singularitytest(modulus; t1::RheoFloat=convert(RheoFloat,0.0))
 end
 
 """
-    boltzintegral_nonsing(modulus::Function, time_series::Array{RheoFloat,1}, params::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1})
+    boltzintegral_nonsing(modulus, time_series, prescribed_dot)
 
 Calculate Boltzmann Superposition integral using direct integration method.
 
@@ -283,9 +270,8 @@ than the convolution method. However, it works for variable sample rate.
 
 # Arguments
 
-- `modulus`: Viscoelastic modulus function
+- `modulus`: Viscoelastic modulus function in which the parameters have been substituted
 - `time_series`: The array of times
-- `params`: Parameters passed to viscoelastic modulus
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
 function boltzintegral_nonsing(modulus, time_series, prescribed_dot)
@@ -435,7 +421,7 @@ function boltzconvolve(modulus, time_series, dt,prescribed_dot)
 end
 
 """
-    boltzconvolve_nonsing(modulus::Function, time_series::Array{RheoFloat,1}, dt::RheoFloat, params::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1})
+    boltzconvolve_nonsing(modulus, time_series, dt::RheoFloat,prescribed_dot)
 
 Calculate Boltzmann Superposition integral using convolution method.
 
@@ -444,10 +430,9 @@ than the integral method. However, it works for constant sample rate.
 
 # Arguments
 
-- `modulus`: Viscoelastic modulus function
+- `modulus`: Viscoelastic modulus function in which the parameters have been substituted
 - `time_series`: The array of times
 - `dt`: Constant time step (sample period)
-- `params`: Parameters passed to viscoelastic modulus
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
 function boltzconvolve_nonsing(modulus, time_series, dt,prescribed_dot)
@@ -462,7 +447,7 @@ function boltzconvolve_nonsing(modulus, time_series, dt,prescribed_dot)
 end
 
 """
-    obj_const_nonsing(params::Array{RheoFloat,1}, grad::Array{RheoFloat,1}, modulus::Function, time_series::Array{RheoFloat,1}, dt::RheoFloat, prescribed_dot::Array{RheoFloat,1}, measured::Array{RheoFloat,1}; _insight::Bool = false)
+    obj_const_nonsing(params, grad, modulus, time_series, dt, prescribed_dot, measured; _insight::Bool = false)
 
 Generate the sum-of-squares of the difference between `measured` and the Boltzmann
 convolution integral of the selected `modulus` and `prescribed_dot`. Used when
@@ -479,12 +464,12 @@ sample rate is constant and model does not feature singularity.
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
-function obj_const_nonsing(params, grad, modulus, time_series,dt, prescribed_dot,measured; _insight::Bool = false)
+function obj_const_nonsing(params, grad, modulus, time_series, dt, prescribed_dot, measured; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
     end
-
+    # Replace parameters inside the viscoelastic modulus
     mod(t) = modulus(t,params)
     convolved = boltzconvolve_nonsing(mod, time_series, dt, prescribed_dot)
 
@@ -494,7 +479,7 @@ function obj_const_nonsing(params, grad, modulus, time_series,dt, prescribed_dot
 end
 
 """
-    obj_const_sing(params::Array{RheoFloat,1}, grad::Array{RheoFloat,1}, modulus::Function, time_series::Array{RheoFloat,1}, dt::RheoFloat, prescribed_dot::Array{RheoFloat,1}, measured::Array{RheoFloat,1}; _insight::Bool = false)
+    obj_const_sing(params, grad, modulus, time_series, dt, prescribed_dot, measured; _insight::Bool = false)
 
 Generate the sum-of-squares of the difference between `measured` and the Boltzmann
 convolution integral of the selected `modulus` and `prescribed_dot`. Used when
@@ -527,7 +512,7 @@ function obj_const_sing(params, grad,modulus, time_series,dt, prescribed_dot,mea
 end
 
 """
-    obj_var_nonsing(params::Array{RheoFloat,1}, grad::Array{RheoFloat,1}, modulus::Function, time_series::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1}, measured::Array{RheoFloat,1}; _insight::Bool = false)
+    obj_var_nonsing(params, grad, modulus, time_series, prescribed_dot, measured; _insight::Bool = false)
 
 Generate the sum-of-squares of the difference between `measured` and the Boltzmann
 convolution integral of the selected `modulus` and `prescribed_dot`. Used when
@@ -543,7 +528,7 @@ sample rate is variable and no singularity in model.
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
-function obj_var_nonsing(params, grad,modulus, time_series, prescribed_dot, measured;_insight::Bool = false)
+function obj_var_nonsing(params, grad, modulus, time_series, prescribed_dot, measured; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -557,7 +542,7 @@ function obj_var_nonsing(params, grad,modulus, time_series, prescribed_dot, meas
 end
 
 """
-    obj_var_sing(params::Array{RheoFloat,1}, grad::Array{RheoFloat,1}, modulus::Function, time_series::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1}, measured::Array{RheoFloat,1}; _insight::Bool = false)
+    obj_var_sing(params, grad, modulus, time_series, prescribed_dot, measured; _insight::Bool = false)
 
 Generate the sum-of-squares of the difference between `measured` and the Boltzmann
 convolution integral of the selected `modulus` and `prescribed_dot`. Used when
@@ -573,7 +558,7 @@ sample rate is variable and there IS singularity in model.
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
-function obj_var_sing(params, grad,modulus, time_series,prescribed_dot, measured;_insight::Bool = false)
+function obj_var_sing(params, grad, modulus, time_series, prescribed_dot, measured; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
