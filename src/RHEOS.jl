@@ -3,7 +3,10 @@ __precompile__(true)
 
 module RHEOS
 
+
+# This defines the data type for all arrays, parameters and processing
 RheoFloat = Float32
+
 
 # installed from Julia package repository
 using InverseLaplace
