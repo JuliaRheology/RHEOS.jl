@@ -200,6 +200,10 @@ function modelfit(data::RheoTimeData,
     if isempty(p0)
         p0 = convert(Array{RheoFloat,1}, fill(0.5,length(model.params)))
         @warn "Initial values for model parameters is set to 0.5 by default"
+        # if length(findall(x->(x==:β)||(x==:a),model.params))==2
+        #     index = findall(x->x==:a,model.params)
+        #     p0[index[1]] = 0.8;
+        # end
     else
         p0 = model_parameters(p0,model.params,"initial guess")
     end
@@ -553,14 +557,7 @@ end
 
 
 
-function obj_dynamic(params::Vector{RheoFloat},
-                     grad::Vector{RheoFloat},
-                     ω::Vector{RheoFloat},
-                     dataGp::Vector{RheoFloat},
-                     dataGpp::Vector{RheoFloat},
-                     modelGp::Function,
-                     modelGpp::Function;
-                     _insight::Bool = false)
+function obj_dynamic(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -575,16 +572,7 @@ function obj_dynamic(params::Vector{RheoFloat},
 
 end
 
-function obj_dynamic_linear(params::Vector{RheoFloat},
-                            grad::Vector{RheoFloat},
-                            ω::Vector{RheoFloat},
-                            dataGp::Vector{RheoFloat},
-                            dataGpp::Vector{RheoFloat},
-                            modelGp::Function,
-                            modelGpp::Function,
-                            meanGp::RheoFloat,
-                            meanGpp::RheoFloat;
-                            _insight::Bool = false)
+function obj_dynamic_linear(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp, meanGp, meanGpp; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -599,14 +587,7 @@ function obj_dynamic_linear(params::Vector{RheoFloat},
 
 end
 
-function obj_dynamic_log(params,
-                     grad,
-                     ω,
-                     dataGp,
-                     dataGpp,
-                     modelGp,
-                     modelGpp;
-                     _insight::Bool = false)
+function obj_dynamic_log(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -620,44 +601,29 @@ function obj_dynamic_log(params,
 
 end
 
-function obj_dynamic_global(params::Vector{RheoFloat},
-                     grad::Vector{RheoFloat},
-                     ω::Vector{RheoFloat},
-                     dataGp::Vector{RheoFloat},
-                     dataGpp::Vector{RheoFloat},
-                     modelGp::Function,
-                     modelGpp::Function;
-                     _insight::Bool = false)
+function obj_dynamic_global(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
     end
     modGp(ωa) = modelGp(ωa,params)
     modGpp(ωa) = modelGpp(ωa,params)
-    costGp = sum(0.5*(((dataGp - modelGp(ω, params))./dataGp).^2))
-    costGpp = sum(0.5*(((dataGpp - modelGpp(ω, params))./dataGpp).^2))
+    costGp = sum(0.5*(((dataGp - modGp(ω))./dataGp).^2))
+    costGpp = sum(0.5*(((dataGpp - modGpp(ω))./dataGpp).^2))
 
     cost = costGp + costGpp
 
 end
 
-function obj_dynamic_manual(params::Vector{RheoFloat},
-                            grad::Vector{RheoFloat},
-                            ω::Vector{RheoFloat},
-                            dataGp::Vector{RheoFloat},
-                            dataGpp::Vector{RheoFloat},
-                            modelGp::Function,
-                            modelGpp::Function,
-                            weights::Vector{RheoFloat};
-                            _insight::Bool = false)
+function obj_dynamic_manual(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp, weights; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
     end
     modGp(ωa) = modelGp(ωa,params)
     modGpp(ωa) = modelGpp(ωa,params)
-    costGp = sum(0.5*(dataGp - modelGp(ω, params)).^2)
-    costGpp = sum(0.5*(dataGpp - modelGpp(ω, params)).^2)
+    costGp = sum(0.5*(dataGp - modGp(ω)).^2)
+    costGpp = sum(0.5*(dataGpp - modGpp(ω)).^2)
 
     cost = weights[1]*costGp + weights[2]*costGpp
 end

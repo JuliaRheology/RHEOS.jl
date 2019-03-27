@@ -60,3 +60,6 @@ fracspecial_spect = dynamicmodelpredict(frequency,fractspecial_fit_step)
 fig, ax = subplots()
 ax[:loglog](fracspecial_spect.ω, fracspecial_spect.Gp, "--", color = "blue", label="Fractional special fix")
 ax[:loglog](fracspecial_spect.ω, fracspecial_spect.Gpp, "--", color = "red", label="Fractional special fix")
+
+
+fractspecial_fit_fix = modelfit(data_resampled_fix, FractionalMaxwell, strain_imposed; verbose=true)
