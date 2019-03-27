@@ -13,6 +13,8 @@ Resample data with new sample rate(s).
 
 Fixedresample can downsample or upsample data. If the number of elperiods is negative it is going to reduce the number of samples,
 viceversa if it is positive. If time boundaries are not specified, resampling is applied to the whole set of data.
+If number of elements per period (elperiods) is 1 or -1 it returns the original RheoTimeData, whilst 0 is not accepted as valid
+number for elperiods.
 """
 function fixedresample(self::RheoTimeData, elperiods::Union{Vector{K},K}; time_boundaries::Vector{T}= [-1]) where {K<:Integer,T<:Real}
 
@@ -43,6 +45,14 @@ function fixedresample(self::RheoTimeData, elperiods::Union{Vector{K},K}; time_b
 
 end
 
+"""
+    function cutting(self::RheoTimeData, time_on::T1,time_off::T2) where {T1<:Number, T2<:Number}
+
+Remove the data outside a specified time interval.
+
+By specifing a time interval (time_on, time_off), a new RheoTimeData is returned without the data
+laying outside time interval.
+"""
 function cutting(self::RheoTimeData, time_on::T1,time_off::T2) where {T1<:Number, T2<:Number}
 
     @assert isreal(time_on) && isreal(time_off) "Boundaries cannot be complex numbers"
@@ -69,7 +79,7 @@ function cutting(self::RheoTimeData, time_on::T1,time_off::T2) where {T1<:Number
 end
 
 """
-    smooth(self::RheologyData, τ::Real; pad::String="replicate")
+function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
 
 Smooth data using a Gaussian Kernel to time scale τ (approximately half power).
 
@@ -104,9 +114,18 @@ function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
 
 end
 
+"""
+    function extract(self::Union{RheoTimeData,RheoFreqData}, type::Union{TimeDataType,FreqDataType,Integer})
 
+Extract specific fields form RheoTimeData or RheoFreqData.
+
+Extract can copy one or more fields from a given RheoXData variable into a new RheoXData one. The fields that
+are copied are identified by the specified type of data.
+If self is a RheoTimeData, the type that can be extracted is time_only (or 0), stress_only (or 1), strain_only (or 2).
+Note that strain_and_stress (or 3) is not allowed.
+If self is a RheoFreqData, the type that can be extracted is frec_only (or 0).
+"""
 function extract(self::Union{RheoTimeData,RheoFreqData}, type::Union{TimeDataType,FreqDataType,Integer})
-
 
     if (typeof(self)==RheoTimeData)
 
@@ -131,7 +150,7 @@ function extract(self::Union{RheoTimeData,RheoFreqData}, type::Union{TimeDataTyp
         end
 
     elseif (typeof(self)==RheoFreqData)
-        
+
         type = typeof(type)==Int ? FreqDataType(type) : type
         @assert (typeof(type)==FreqDataType) || (typeof(type)==Int) "Cannot extract time data from RheoFreqData"
         @assert (type!= with_modulus) "Cannot extract frequency with moduli"
@@ -152,16 +171,16 @@ end
 ##########################
 
 """
-    modelfit(data::RheologyData, model::RheologyModel, modtouse::Symbol; p0::Vector{T} = [-1.0], lo::Vector{T} = [-1.0], hi::Vector{T} = [-1.0], verbose::Bool = false, rel_tol = 1e-4, diff_method="BD") where T<:Real
+    modelfit(data::RheoTimeData, model::RheoModelClass, modloading::Symbol; p0::Union{NamedTuple,Tuple} = (), lo::Union{NamedTuple,Tuple} = (), hi::Union{NamedTuple,Tuple} = (), verbose::Bool = false, rel_tol = 1e-4, diff_method="BD")
 
 Fit RheologyData struct to model and return a fitted model as a RheologyModel object.
 
 # Arguments
 
-- `data`: RheologyData struct containing all data
-- `model`: RheologyModel containing moduli and default (initial) parameters
-- `modtouse`: :G for relaxation modulus, :J for creep modulus
-- `p0`: Initial parameters to use in fit (uses 'model' parameters if none given)
+- `data`: RheoTimeData struct containing all data
+- `model`: RheoModelClass containing moduli functions and named tuple parameters
+- `modloading`: strain_imposed or 1, stress_imposed or 2
+- `p0`: Initial parameters to use in fit (uses 0.5 for all parameters if not defined)
 - `lo`: Lower bounds for parameters
 - `hi`: Upper bounds for parameters
 - `verbose`: If true, prints parameters on each optimisation iteration
@@ -176,11 +195,15 @@ function modelfit(data::RheoTimeData,
                   hi::Union{NamedTuple,Tuple} = (),
                   verbose::Bool = false,
                   rel_tol = 1e-4,
-                  diff_method="BD") where {T1<:Real, T2<:Real, T3<:Real}
+                  diff_method="BD")
 
     if isempty(p0)
         p0 = convert(Array{RheoFloat,1}, fill(0.5,length(model.params)))
         @warn "Initial values for model parameters is set to 0.5 by default"
+        # if length(findall(x->(x==:β)||(x==:a),model.params))==2
+        #     index = findall(x->x==:a,model.params)
+        #     p0[index[1]] = 0.8;
+        # end
     else
         p0 = model_parameters(p0,model.params,"initial guess")
     end
@@ -210,6 +233,7 @@ function modelfit(data::RheoTimeData,
         deriv = derivCD
     end
 
+    modloading = typeof(modloading)==Int ? LoadingType(modloading) : modloading
     # get modulus function and derivative
     if modloading == stress_imposed
         dcontrolled = deriv(data.σ, data.t)
@@ -259,13 +283,14 @@ function modelfit(data::RheoTimeData,
 end
 
 """
-    modelpredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; diff_method="BD")
+    modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
 
-Given data and model, return new dataset based on model parameters and using the
-modulus specified by 'modtouse'; either creep modulus (:J, only returned strain is new) or
-relaxation modulus (:G, only returned stress is new). 'diff_method' sets finite difference for
-calculating the derivative used in the hereditary integral and can be either backwards difference
-("BD") or central difference ("CD").
+Given an incomplete data set (only either stress or strain missing) and model with values substituted into
+parameters (RheoModel),return a new dataset based on the model.
+If data is type of stress_only, then creep modulus (:J) is used; if data type is strain_only relaxation modulus (:G).
+A complete RheoTimeDatadata of type "strain_and_stress" is returned.
+'diff_method' sets finite difference for calculating the derivative used in the hereditary integral and
+can be either backwards difference ("BD") or central difference ("CD").
 """
 function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
 
@@ -339,23 +364,25 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
 end
 
 """
-    modelstepfit(data::RheologyData, model::RheologyModel, modtouse::Symbol; p0::Vector{T} = [-1.0], lo::Vector{T} = [-1.0], hi::Vector{T} = [-1.0], verbose::Bool = false, rel_tol = 1e-4) where T<:Real
+    modelstepfit(data::RheoTimeData, model::RheoModelClass, modloading::Union{LoadingType,Integer}; step=nothing, p0::Union{NamedTuple,Tuple} = (), lo::Union{NamedTuple,Tuple} = (), hi::Union{NamedTuple,Tuple} = (), verbose::Bool = false, rel_tol = 1e-4) where T<:Real
 
 Same as 'modelfit' except assumes a step loading. If this assumption is appropriate for the data
-then fitting can be sped up greatly by use of this function. If modtouse is :G, relaxation modulus,
-then the first element of the strain is assumed to be the amplitude of the step. If modtouse is :j,
-creep modulus, then the first element of the stress is assumed to be the amplitude of the step.
+then fitting can be sped up greatly by use of this function. If modloading is strain_imposed, relaxation modulus is used,
+then the element in the middle of the strain is assumed to be the amplitude of the step. If modloading is stress_imposed,
+the creep modulus is used, then the middle element of the stress is assumed to be the amplitude of the step.
+Alternatively, it is possible to define the value of the step by defining the optional "step" parameter.
 
 # Arguments
 
-- `data`: RheologyData struct containing all data
-- `model`: RheologyModel containing moduli and default (initial) parameters
-- `modtouse`: :G for relaxation modulus, :J for creep modulus
-- `p0`: Initial parameters to use in fit (uses 'model' parameters if none given)
-- `lo`: Lower bounds for parameters
-- `hi`: Upper bounds for parameters
+- `data`: RheoTimeData struct containing all data
+- `model`: RheoModelClass containing moduli and parameters tuples
+- `modloading`: strain_imposed for relaxation modulus, stress_imposed for creep modulus
+- `p0`: Named tuple of initial parameters to use in fit (uses 0.5 for all parameters if none given)
+- `lo`: Named tuple of lower bounds for parameters
+- `hi`: Named tuple of upper bounds for parameters
 - `verbose`: If true, prints parameters on each optimisation iteration
 - `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
+- `diff_method`: Set finite difference formula to use for derivative, currently "BD" or "CD"
 """
 function modelstepfit(data::RheoTimeData,
                   model::RheoModelClass,
@@ -465,12 +492,12 @@ function modelstepfit(data::RheoTimeData,
 end
 
 """
-    modelsteppredict(data::RheologyData, model::RheologyModel, modtouse::Symbol; step_on::Real = 0.0)
+    modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 0.0, diff_method = "BD")
 
 Same as modelpredict but assumes a step loading with step starting at 'step_on'. Singularities are bypassed
 by adding 1 to the index of the singular element.
 """
-function modelsteppredict(data::RheoTimeData,model::RheoModel; step_on::Real = 0.0, diff_method = "BD")
+function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 0.0, diff_method = "BD")
 
     step_on = convert(RheoFloat,step_on)
 
@@ -530,14 +557,7 @@ end
 
 
 
-function obj_dynamic(params::Vector{RheoFloat},
-                     grad::Vector{RheoFloat},
-                     ω::Vector{RheoFloat},
-                     dataGp::Vector{RheoFloat},
-                     dataGpp::Vector{RheoFloat},
-                     modelGp::Function,
-                     modelGpp::Function;
-                     _insight::Bool = false)
+function obj_dynamic(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -552,16 +572,7 @@ function obj_dynamic(params::Vector{RheoFloat},
 
 end
 
-function obj_dynamic_linear(params::Vector{RheoFloat},
-                            grad::Vector{RheoFloat},
-                            ω::Vector{RheoFloat},
-                            dataGp::Vector{RheoFloat},
-                            dataGpp::Vector{RheoFloat},
-                            modelGp::Function,
-                            modelGpp::Function,
-                            meanGp::RheoFloat,
-                            meanGpp::RheoFloat;
-                            _insight::Bool = false)
+function obj_dynamic_linear(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp, meanGp, meanGpp; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -576,14 +587,7 @@ function obj_dynamic_linear(params::Vector{RheoFloat},
 
 end
 
-function obj_dynamic_log(params,
-                     grad,
-                     ω,
-                     dataGp,
-                     dataGpp,
-                     modelGp,
-                     modelGpp;
-                     _insight::Bool = false)
+function obj_dynamic_log(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -597,69 +601,54 @@ function obj_dynamic_log(params,
 
 end
 
-function obj_dynamic_global(params::Vector{RheoFloat},
-                     grad::Vector{RheoFloat},
-                     ω::Vector{RheoFloat},
-                     dataGp::Vector{RheoFloat},
-                     dataGpp::Vector{RheoFloat},
-                     modelGp::Function,
-                     modelGpp::Function;
-                     _insight::Bool = false)
+function obj_dynamic_global(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
     end
     modGp(ωa) = modelGp(ωa,params)
     modGpp(ωa) = modelGpp(ωa,params)
-    costGp = sum(0.5*(((dataGp - modelGp(ω, params))./dataGp).^2))
-    costGpp = sum(0.5*(((dataGpp - modelGpp(ω, params))./dataGpp).^2))
+    costGp = sum(0.5*(((dataGp - modGp(ω))./dataGp).^2))
+    costGpp = sum(0.5*(((dataGpp - modGpp(ω))./dataGpp).^2))
 
     cost = costGp + costGpp
 
 end
 
-function obj_dynamic_manual(params::Vector{RheoFloat},
-                            grad::Vector{RheoFloat},
-                            ω::Vector{RheoFloat},
-                            dataGp::Vector{RheoFloat},
-                            dataGpp::Vector{RheoFloat},
-                            modelGp::Function,
-                            modelGpp::Function,
-                            weights::Vector{RheoFloat};
-                            _insight::Bool = false)
+function obj_dynamic_manual(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp, weights; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
     end
     modGp(ωa) = modelGp(ωa,params)
     modGpp(ωa) = modelGpp(ωa,params)
-    costGp = sum(0.5*(dataGp - modelGp(ω, params)).^2)
-    costGpp = sum(0.5*(dataGpp - modelGpp(ω, params)).^2)
+    costGp = sum(0.5*(dataGp - modGp(ω)).^2)
+    costGpp = sum(0.5*(dataGpp - modGpp(ω)).^2)
 
     cost = weights[1]*costGp + weights[2]*costGpp
 end
 
 """
-    dynamicmodelfit(data::RheologyDynamic, model::RheologyModel; p0::Vector{T} = [-1.0], lo::Vector{T} = [-1.0], hi::Vector{T} = [-1.0], verbose::Bool = false, rel_tol = 1e-4) where T<:Real
+    dynamicmodelfit(data::RheoFreqData, model::RheoModelClass; p0::Union{NamedTuple,Tuple} = (), lo::Union{NamedTuple,Tuple} = (), hi::Union{NamedTuple,Tuple} = (), verbose::Bool = false, rel_tol = 1e-4) where T<:Real
 
 Fits model to the frequency/loss+storage moduli data.
 
-All arguments are as described below. The 'weights' argument some more information.
+All arguments are as described below.
 As this fitting procedure is fitting two functions simultaneously (the storage
 and loss moduli), if left untransformed the fit would tend to favour the
 modulus which is larger in magnitude and not fit the other modulus well. To avoid this,
-RHEOS offers a number of data transforms which can be used.
+RHEOS offers a number of data transforms which can be used by changing "weights" argument.
 
 # Arguments
 
-- `data`: RheologyDynamic struct containing all data
-- `model`: RheologyModel containing moduli and default (initial) parameters
-- `p0`: Initial parameters to use in fit (uses 'model' parameters if none given)
+- `data`: RheoFreqData struct containing all data
+- `model`: RheoModelClass containing moduli and symbols of parameters
+- `p0`: Initial parameters to use in fit (uses 0.5 for all parameters if none given)
 - `lo`: Lower bounds for parameters
 - `hi`: Upper bounds for parameters
 - `verbose`: If true, prints parameters on each optimisation iteration
 - `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
-- `weights`: Weighting mode for storage and loss modulus (see above)
+- `weights`: Weighting mode for storage and loss modulus (linear, log, global)
 """
 function dynamicmodelfit(data::RheoFreqData,
                 model::RheoModelClass;
@@ -744,11 +733,11 @@ function dynamicmodelfit(data::RheoFreqData,
 end
 
 """
-    dynamicmodelpredict(data::RheologyDynamic, model::RheologyModel)
+    dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
 
-Given dynamic rheology data and model, return new dataset based on model parameters.
-Returns another RheologyDynamic instance with the predicted Gp and Gpp based on the
-frequencies and model parameters.
+Given dynamic rheology data with only frequency and model where parameters have been substituted.
+Returns another RheoFreqData instance with the predicted Gp and Gpp based on the
+frequencies and model given as arguments.
 """
 function dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
 
