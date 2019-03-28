@@ -34,7 +34,6 @@ of the same length as the others.
 - t: time
 - log: a log of struct's events, e.g. preprocessing
 """
-
 struct RheoTimeData
 
     σ::Vector{RheoFloat}
@@ -284,6 +283,9 @@ end
 
 
 function Base.show(io::IO, m::RheoModelClass)
+    print(io, "\nModel name: $(m.name)")
+    ps=join([string(s) for s in m.params], ", ", " and ")
+    print(io, "\n\nFree parameters: $ps\n")
     print(io, m.info)
     return
 end
@@ -308,7 +310,6 @@ function RheoModelClass(;name::String,
                          Gp::Expr = quote return NaN end,
                          Gpp::Expr = quote return NaN end,
                          info)
-    info_model = string("Model $name \n",info)
 
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
     unpack_expr = Meta.parse(string(join(string.(p), ","), "=params"))
@@ -335,7 +336,7 @@ function RheoModelClass(;name::String,
     @eval $gpps(ω::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gpps(rheoconv(ω),rheoconv(params))
 
 
-    return RheoModelClass(name,eval(gs),eval(js),eval(gps),eval(gpps),p,info_model,(G=G,J=J,Gp=Gp,Gpp=Gpp))
+    return RheoModelClass(name,eval(gs),eval(js),eval(gps),eval(gpps),p,info,(G=G,J=J,Gp=Gp,Gpp=Gpp))
 end
 
 
@@ -358,9 +359,13 @@ struct RheoModel
 end
 
 
-function info(m::RheoModelClass, nt)
-    conc = string(m, "\n",nt)
-    return conc
+
+function Base.show(io::IO, m::RheoModelClass)
+    print(io, "\nModel name: $(m.name)")
+    ps=join([string(s) for s in m.params], ", ", " and ")
+    print(io, "\n\nFree parameters: $ps\n")
+    print(io, m.info)
+    return
 end
 
 
@@ -410,8 +415,9 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple; log_add::Array{String} = 
     # check all parameters are provided and create a well ordered named tuple
     p = model_parameters(nt0, m.params,"model definition")
     nt=NamedTuple{Tuple(m.params)}(p)
-    # function called when model is printed
-    f=info(m,nt)
+    # string printed
+    info = string("\nModel: $(m.name)\n\nParameter values: $nt \n",m.info)
+
 
     # This section creates moduli functions with material parameters
     # replaced by specific values.
@@ -444,7 +450,7 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple; log_add::Array{String} = 
     @eval $gpps(ω::Union{Array{T1,1},T1}) where T1<:Real = $gpps(rheoconv(ω))
 
 
-    return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), expressions, nt, f, log_add)
+    return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), expressions, nt, info, log_add)
 end
 
 
@@ -473,7 +479,7 @@ julia> SLS2_mod.G(1,[1,2,3])
 3.8796492f0
 
 """
-function freeze_params(m::RheoModelClass, name::String, nt0::NamedTuple)
+function freeze_params(m::RheoModelClass, nt0::NamedTuple)
 
     # check that every parameter in m exists in the named tuple nt
     @assert all( i-> i in m.params,keys(nt0)) "A parameter to freeze is not in the model"
@@ -483,8 +489,8 @@ function freeze_params(m::RheoModelClass, name::String, nt0::NamedTuple)
     # create array of remaining variables
     p = filter(s -> !(s in keys(nt)),m.params)
 
-
-    f=info(m,string("Model ", name, "\nSet parameters: ",nt))
+    name="$(m.name) with set parameters: $nt"
+    info = m.info
 
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
     unpack_expr = Meta.parse(string(join(string.(p), ","), "=params"))
@@ -521,7 +527,7 @@ function freeze_params(m::RheoModelClass, name::String, nt0::NamedTuple)
     @eval $gpps(ω::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gpps(rheoconv(ω),rheoconv(params))
 
 
-    return RheoModelClass(name, eval(gs),eval(js),eval(gps),eval(gpps), p, f, expressions)
+    return RheoModelClass(name, eval(gs),eval(js),eval(gps),eval(gpps), p, info, expressions)
 end
 
 
