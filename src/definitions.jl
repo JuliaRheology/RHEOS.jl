@@ -42,12 +42,13 @@ struct RheoTimeData
     t::Vector{RheoFloat}
 
     log::Vector{String}
+    #log::Dict{Any,Any}
 
 end
 
-function RheoTimeData(;ϵ::Vector{T1} = empty_rheodata_vector, σ::Vector{T2} = empty_rheodata_vector, t::Vector{T3} = empty_rheodata_vector, info="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoTimeData(;ϵ::Vector{T1} = empty_rheodata_vector, σ::Vector{T2} = empty_rheodata_vector, t::Vector{T3} = empty_rheodata_vector, source="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
     s_datatype = string("Data type: ",check_time_data_consistency(t,ϵ,σ))
-    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), [info, s_datatype])
+    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), [info,s_datatype])   #Dict{Any,Any}("source"=> source, "datatype"=>check_time_data_consistency(t,ϵ,σ))
 end
 
 
@@ -445,6 +446,85 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple; log_add::Array{String} = 
 
     return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), expressions, nt, f, log_add)
 end
+
+
+export freeze_params
+
+"""
+    freeze_params(m::RheoModelClass, name::String, nt0::NamedTuple)
+
+Return a new RheoModelClass with some of the parameters frozen to specific values
+
+# Fields
+
+- m: original RheoModelClass
+- name: name of the modified model
+- nt0: named tuple with values for each parameter to freeze
+
+# Example
+
+julia> SLS2_mod = freeze_params( SLS2, "SLS2_mod", (G₀=2,η₂=3.5))
+[...]
+
+julia> SLS2.G(1,[2,1,2,3,3.5])
+3.8796492f0
+
+julia> SLS2_mod.G(1,[1,2,3])
+3.8796492f0
+
+"""
+function freeze_params(m::RheoModelClass, name::String, nt0::NamedTuple)
+
+    # check that every parameter in m exists in the named tuple nt
+    @assert all( i-> i in m.params,keys(nt0)) "A parameter to freeze is not in the model"
+    # convert values format for consistency
+    nt=NamedTuple{keys(nt0)}([RheoFloat(i) for i in nt0])
+
+    # create array of remaining variables
+    p = filter(s -> !(s in keys(nt)),m.params)
+
+
+    f=info(m,string("Model ", name, "\nSet parameters: ",nt))
+
+    # Expression to unpack parameter array into suitably names variables in the moduli expressions
+    unpack_expr = Meta.parse(string(join(string.(p), ","), "=params"))
+
+    # This section creates moduli functions with material parameters
+    # replaced by specific values.
+    gs=Symbol("G_"*name)
+    js=Symbol("J_"*name)
+    gps=Symbol("Gp_"*name)
+    gpps=Symbol("Gpp_"*name)
+
+    G = expr_replace(m.expressions.G, nt)
+    J = expr_replace(m.expressions.J, nt)
+    Gp = expr_replace(m.expressions.Gp, nt)
+    Gpp = expr_replace(m.expressions.Gpp, nt)
+
+    expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}( ( G, J, Gp, Gpp ) )
+
+
+    @eval $gs(t::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $G; end
+    @eval $gs(ta::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gs(t,params) for t in ta]; end
+    @eval $gs(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gs(rheoconv(t),rheoconv(params))
+
+    @eval $js(t::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $J; end
+    @eval $js(ta::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$js(t,params) for t in ta]; end
+    @eval $js(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $js(rheoconv(t),rheoconv(params))
+
+    @eval $gps(ω::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gp; end
+    @eval $gps(ωa::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gps(ω,params) for ω in ωa]; end
+    @eval $gps(ω::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gps(rheoconv(ω),rheoconv(params))
+
+    @eval $gpps(ω::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gpp; end
+    @eval $gpps(ωa::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gpps(ω,params) for ω in ωa]; end
+    @eval $gpps(ω::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gpps(rheoconv(ω),rheoconv(params))
+
+
+    return RheoModelClass(name, eval(gs),eval(js),eval(gps),eval(gpps), p, f, expressions)
+end
+
+
 
 
 function Base.show(io::IO, m::RheoModel)
