@@ -28,6 +28,12 @@ FractionalKelvinVoigt =  RheoModelClass(
         Gpp = quote
                 return cₐ*ω^a*sin(a*π/2) + cᵦ*ω^β*sin(β*π/2)
               end,
+        # Constraints
+        Ineq = quote
+                 return [(a<1) & (a>0)
+                         (β<1) & (β>0)
+                          -a+β < 0]
+                end,
         # Network
         info= "
                 ________ ╱╲ ________
@@ -65,6 +71,10 @@ FractionalKVspring =  RheoModelClass(
         Gpp = quote
                 return cₐ*ω^a*sin(a*π/2)
               end,
+        # Constraints
+        Ineq = quote
+                 return (a<1) & (a>0)
+                end,
         # Network
         info= "
                 ________ ╱╲ ________
@@ -103,6 +113,10 @@ FractionalKVdashpot =  RheoModelClass(
         Gpp = quote
                 return η*ω + cᵦ*ω^β*sin(β*π/2)
               end,
+        # Constraints
+        Ineq = quote
+                 return (β<1) & (β>0)
+                end,
         # Network
         info= "
                         ___

@@ -7,7 +7,7 @@ FractionalMaxwell = RheoModelClass(
           p = [:cₐ, :a, :cᵦ, :β],
           # Relaxation modulus
           G = quote
-                return cᵦ*t^(-β)*mittleff(a - β, 1 - β, -cᵦ*t^(a - β)/cₐ)
+                 return cᵦ*t^(-β)*mittleff(a - β, 1 - β, -cᵦ*t^(a - β)/cₐ)
               end,
           # Creep modulus
           J = quote
@@ -25,6 +25,12 @@ FractionalMaxwell = RheoModelClass(
                   numerator = ((cᵦ*ω^β)^2)*(cₐ*ω^a)*sin(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*sin(β*π/2)
                   return numerator/denominator
                 end,
+          # Constraints
+          Ineq = quote
+                   return [(a<1) & (a>0)
+                           (β<1) & (β>0)
+                            -a+β < 0]
+                  end,
           # Network
           info= "
              ___╱╲__________╱╲____
@@ -61,6 +67,10 @@ FractionalMaxwellSpring = RheoModelClass(
                 numerator = k^2*(cₐ*ω^a)*sin(a*π/2)
                 return numerator/denominator
               end,
+        # Constraints
+        Ineq = quote
+                 return (a<1) & (a>0)
+                end,
         # Network
         info= "
            ___╱╲_________╱╲  ╱╲  ╱╲  ________
@@ -95,6 +105,10 @@ FractionalMaxwellDashpot = RheoModelClass(
                   numerator = ((cᵦ*ω^β)^2)*(η*ω) + ((η*ω)^2)*(cᵦ*ω^β)*sin(β*π/2)
                   return numerator/denominator
                 end,
+          # Constraints
+          Ineq = quote
+                   return (β<1) & (β>0)
+                  end,
           # Network
           info= "
                   ___

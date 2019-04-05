@@ -22,6 +22,10 @@ SpringPot =  RheoModelClass(
         Gpp = quote
                 return cᵦ*(ω^β)*sin(π*β/2)
               end,
+        # Constraints
+        Ineq = quote
+                 return (β<1) & (β>0)
+                end,
         # Network
         info= "
                 ____ ╱╲ ____

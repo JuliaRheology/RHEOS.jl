@@ -199,14 +199,17 @@ function modelfit(data::RheoTimeData,
 
     if isempty(p0)
         p0 = convert(Array{RheoFloat,1}, fill(0.5,length(model.params)))
-        @warn "Initial values for model parameters is set to 0.5 by default"
-        # if length(findall(x->(x==:β)||(x==:a),model.params))==2
-        #     index = findall(x->x==:a,model.params)
-        #     p0[index[1]] = 0.8;
-        # end
+        if length(findall(x->(x==:β)||(x==:a),model.params))==2
+            index = findall(x->x==:a,model.params)
+            p0[index[1]] = 0.8;
+        end
+        @warn "Initial values for model parameters is set to $p0 by default"
     else
         p0 = model_parameters(p0,model.params,"initial guess")
     end
+
+    check_ineq = model.ineq(p0)
+    @assert (all(check_ineq)==true)  "Initial guess not feasible"
 
     if isempty(lo)
         lo = convert(Array{RheoFloat,1}, [-1])

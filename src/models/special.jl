@@ -28,6 +28,10 @@ FractionalSpecial = RheoModelClass(
                 numerator = ((cᵦ*ω^β)^2)*(η*ω) + ((η*ω)^2)*(cᵦ*ω^β)*sin(β*π/2)
                 return numerator/denominator
               end,
+        # Constraints
+        Ineq = quote
+                 return (β<1) & (β>0)
+                end,
         # Network
         info= "
                       ___

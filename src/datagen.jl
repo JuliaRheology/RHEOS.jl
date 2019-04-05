@@ -26,7 +26,7 @@ Generate RheoTimeData struct with only the time data
 """
 function time_line(;t_start::Real=0., t_end::Real=10., step::Real=(t_end-t_start)/250.)
 
-    RheoTimeData(t=collect(t_start:step:t_end), info="timeline created: t_start=$t_start, t_end=$t_end, step=$step")
+    RheoTimeData(t=collect(t_start:step:t_end), source="timeline created: t_start=$t_start, t_end=$t_end, step=$step")
 end
 
 

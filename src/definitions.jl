@@ -47,7 +47,7 @@ end
 
 function RheoTimeData(;ϵ::Vector{T1} = empty_rheodata_vector, σ::Vector{T2} = empty_rheodata_vector, t::Vector{T3} = empty_rheodata_vector, source="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
     s_datatype = string("Data type: ",check_time_data_consistency(t,ϵ,σ))
-    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), [info,s_datatype])   #Dict{Any,Any}("source"=> source, "datatype"=>check_time_data_consistency(t,ϵ,σ))
+    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), [source,s_datatype])   #Dict{Any,Any}("source"=> source, "datatype"=>check_time_data_consistency(t,ϵ,σ))
 end
 
 
@@ -274,7 +274,9 @@ struct RheoModelClass
     Gp::Function
     Gpp::Function
 
+
     params::Vector{Symbol}
+    ineq::Function
     info::String
 
     expressions::NamedTuple
@@ -309,6 +311,7 @@ function RheoModelClass(;name::String,
                          J::Expr = quote return NaN end,
                          Gp::Expr = quote return NaN end,
                          Gpp::Expr = quote return NaN end,
+                         Ineq::Expr = quote return true end,
                          info)
 
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
@@ -318,6 +321,7 @@ function RheoModelClass(;name::String,
     js=Symbol("J_"*name)
     gps=Symbol("Gp_"*name)
     gpps=Symbol("Gpp_"*name)
+    ineq=Symbol("ineq_"*name)
 
     @eval $gs(t::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $G; end
     @eval $gs(ta::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gs(t,params) for t in ta]; end
@@ -335,8 +339,10 @@ function RheoModelClass(;name::String,
     @eval $gpps(ωa::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gpps(ω,params) for ω in ωa]; end
     @eval $gpps(ω::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gpps(rheoconv(ω),rheoconv(params))
 
+    @eval $ineq(params::Array{RheoFloat,1}) = begin $unpack_expr; $Ineq; end
+    @eval $ineq(params::Array{T1,1}) where {T1<:Real} = $ineq(rheoconv(params))
 
-    return RheoModelClass(name,eval(gs),eval(js),eval(gps),eval(gpps),p,info,(G=G,J=J,Gp=Gp,Gpp=Gpp))
+    return RheoModelClass(name,eval(gs),eval(js),eval(gps),eval(gpps),p,eval(ineq),info,(G=G,J=J,Gp=Gp,Gpp=Gpp,ineq=Ineq))
 end
 
 
@@ -353,6 +359,7 @@ struct RheoModel
 
 
     params::NamedTuple
+    ineq::Function
     info::String
     log::Vector{String}
 
@@ -360,13 +367,13 @@ end
 
 
 
-function Base.show(io::IO, m::RheoModelClass)
-    print(io, "\nModel name: $(m.name)")
-    ps=join([string(s) for s in m.params], ", ", " and ")
-    print(io, "\n\nFree parameters: $ps\n")
-    print(io, m.info)
-    return
-end
+# function Base.show(io::IO, m::RheoModelClass)
+#     print(io, "\nModel name: $(m.name)")
+#     ps=join([string(s) for s in m.params], ", ", " and ")
+#     print(io, "\n\nFree parameters: $ps\n")
+#     print(io, m.info)
+#     return
+# end
 
 
 # Cool replacement function inspired from
@@ -425,11 +432,13 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple; log_add::Array{String} = 
     js=Symbol("J_"*m.name)
     gps=Symbol("Gp_"*m.name)
     gpps=Symbol("Gpp_"*m.name)
+    ineq=Symbol("ineq_"*m.name)
 
     G = expr_replace(m.expressions.G, nt)
     J = expr_replace(m.expressions.J, nt)
     Gp = expr_replace(m.expressions.Gp, nt)
     Gpp = expr_replace(m.expressions.Gpp, nt)
+    Ineq = expr_replace(m.expressions.ineq, nt)
 
     expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}( ( G, J, Gp, Gpp ) )
 
@@ -449,8 +458,9 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple; log_add::Array{String} = 
     @eval $gpps(ωa::Array{RheoFloat,1}) = broadcast($gpps, ωa)
     @eval $gpps(ω::Union{Array{T1,1},T1}) where T1<:Real = $gpps(rheoconv(ω))
 
+    @eval $ineq() = begin $Ineq; end
 
-    return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), expressions, nt, info, log_add)
+    return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), expressions, nt, eval(ineq), info, log_add)
 end
 
 
