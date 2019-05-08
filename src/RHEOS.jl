@@ -32,7 +32,7 @@ export null_modulus
 export SpringPot, Spring, DashPot
 export FractionalMaxwell, FractionalMaxwellSpring, FractionalMaxwellDashpot, Maxwell
 export FractionalKelvinVoigt, FractionalKVspring, FractionalKVdashpot, KelvinVoigt
-export FractionalZener, FractionalSLS, SLS
+export FractionalZener, FractionalSLS, SLS, FractionalJeffreys, Jeffreys
 export FractionalSpecial
 export JeffreysPT
 export SLS2, PowerLawPlateau

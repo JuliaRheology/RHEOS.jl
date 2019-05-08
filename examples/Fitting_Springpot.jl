@@ -27,21 +27,23 @@ lb = (η=0.0, cᵦ=0.0, β=0.1, k=0.0)
 ub = (η=Inf, cᵦ=Inf, β=0.9, k=Inf)
 fit_fs = modelfit(fs_pred,FractionalSpecial,strain_imposed; p0 =p0, lo = lb, hi = ub, verbose = true)
 predict_fs = modelpredict(step_strain,fit_fs)
+
+
 #--------------------------------------------------
 
-fm = RheoModel(FractionalMaxwell, (cₐ=10, a=0.55, cᵦ=5, β=0.5))
+fm = RheoModel(FractionalMaxwell, (cₐ=10, a=1., cᵦ=5, β=0.5))
 time = time_line(t_end = 200.0)
-step_strain = strainfunction(time,hstep())
+step_strain = strainfunction(time,hstep(amp = 0.3))
 fm_pred = modelpredict(step_strain,fm)
 
-p0 = (cₐ=5, a=0.6, cᵦ=2, β=0.2)
+p0 = (cₐ=5, a=0.52, cᵦ=2, β=0.50)
 lb = (cₐ=0.0, a=0.01, cᵦ=0.0, β=0.01)
 ub = (cₐ=1e3, a=0.99, cᵦ=1e3, β=0.99)
 fit_fs = modelfit(fm_pred,FractionalMaxwell,strain_imposed; p0 = p0, lo = lb, hi = ub,verbose = true)
 predict_fs = modelpredict(step_strain,fit_fs)
 
 
-
+plot(strain_tot.t, strain_tot.ϵ)
 using NLopt, Test
 
 count = 0 # keep track of # function evaluations

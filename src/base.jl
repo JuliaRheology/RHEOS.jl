@@ -3,6 +3,7 @@
 #######################
 #~ Utility Functions ~#
 #######################
+export derivCD, derivBD, trapz
 
 """
     trapz(y, x; init=0.0)

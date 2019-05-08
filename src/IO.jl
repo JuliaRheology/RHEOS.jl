@@ -51,13 +51,13 @@ function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ
 
         # generate RheologyData struct and output
         if (ϵ_col!=-1) & (σ_col!=-1)
-            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], σ = data[:,σ_col], info = "Imported data: file $filedir, stress and strain")
+            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], σ = data[:,σ_col], source = "Imported data: file $filedir, stress and strain")
         elseif (ϵ_col!=-1) & (σ_col==-1)
-            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], info = "Imported data: file $filedir, only strain")
+            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], source = "Imported data: file $filedir, only strain")
         elseif (σ_col!=-1) & (ϵ_col==-1)
-            return RheoTimeData(t = data[:,t_col], σ = data[:,σ_col], info = "Imported data: file $filedir, only stress")
+            return RheoTimeData(t = data[:,t_col], σ = data[:,σ_col], source = "Imported data: file $filedir, only stress")
         elseif (t_col!=-1) & (σ_col==-1) &  (ϵ_col==-1)
-            return RheoTimeData(t = data[:,t_col], info = "Imported data: file $filedir, only time")
+            return RheoTimeData(t = data[:,t_col], source = "Imported data: file $filedir, only time")
         end
 
     elseif ω_col!=-1
