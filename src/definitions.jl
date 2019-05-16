@@ -359,7 +359,7 @@ struct RheoModel
 
 
     params::NamedTuple
-    ineq::Function
+    #ineq::Function
     info::String
     log::Vector{String}
 
@@ -408,12 +408,13 @@ end
 function model_parameters(nt::NamedTuple, params::Vector{Symbol}, err_string::String)
     # check that every parameter in m exists in the named tuple nt
     @assert all( i-> i in keys(nt),params) "Missing parameter(s) in " * err_string
-    # check that no extra parameters have been provided
+    # check that variableno extra parameters have been provided
     @assert length(params) == length(nt) "Mismatch number of model parameters and parameters provided in " * err_string
 
     p=map(i->RheoFloat(nt[i]),params)
     p = convert(Array{RheoFloat,1},p)
 end
+
 
 
 
@@ -425,43 +426,76 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple; log_add::Array{String} = 
     # string printed
     info = string("\nModel: $(m.name)\n\nParameter values: $nt \n",m.info)
 
-
-    # This section creates moduli functions with material parameters
-    # replaced by specific values.
-    gs=Symbol("G_"*m.name)
-    js=Symbol("J_"*m.name)
-    gps=Symbol("Gp_"*m.name)
-    gpps=Symbol("Gpp_"*m.name)
-    ineq=Symbol("ineq_"*m.name)
-
+    # This attaches expressions to the models with parameters substituted by values.
+    # Future development: this could be disabled with a key word if processing time is an issue
     G = expr_replace(m.expressions.G, nt)
     J = expr_replace(m.expressions.J, nt)
     Gp = expr_replace(m.expressions.Gp, nt)
     Gpp = expr_replace(m.expressions.Gpp, nt)
-    Ineq = expr_replace(m.expressions.ineq, nt)
 
     expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}( ( G, J, Gp, Gpp ) )
 
-    @eval $gs(t::RheoFloat) = begin $G; end
-    @eval $gs(ta::Array{RheoFloat,1}) = broadcast($gs, ta)
-    @eval $gs(t::Union{Array{T1,1},T1}) where T1<:Real = $gs(rheoconv(t))
-
-    @eval $js(t::RheoFloat) = begin $J; end
-    @eval $js(ta::Array{RheoFloat,1}) = broadcast($js, ta)
-    @eval $js(t::Union{Array{T1,1},T1}) where T1<:Real = $js(rheoconv(t))
-
-    @eval $gps(ω::RheoFloat) = begin $Gp; end
-    @eval $gps(ωa::Array{RheoFloat,1}) = broadcast($gps, ωa)
-    @eval $gps(ω::Union{Array{T1,1},T1}) where T1<:Real = $gps(rheoconv(ω))
-
-    @eval $gpps(ω::RheoFloat) = begin $Gpp; end
-    @eval $gpps(ωa::Array{RheoFloat,1}) = broadcast($gpps, ωa)
-    @eval $gpps(ω::Union{Array{T1,1},T1}) where T1<:Real = $gpps(rheoconv(ω))
-
-    @eval $ineq() = begin $Ineq; end
-
-    return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), expressions, nt, eval(ineq), info, log_add)
+    p_vals = [i for i in nt]  # vector with model parameters
+    return RheoModel(t->m.G(t,p_vals), t->m.J(t,p_vals), t->m.Gp(t,p_vals), t->m.Gpp(t,p_vals), expressions, nt, info, log_add)
 end
+
+
+#
+#   This form of the constructor does not work within function, due to world age restrictions
+#   Could be reintegrated later as an option for people who know what they are doing.
+#   https://discourse.julialang.org/t/how-to-bypass-the-world-age-problem/7012/10
+#
+# function RheoModel(m::RheoModelClass, nt0::NamedTuple; log_add::Array{String} = [" "])
+#
+#     # check all parameters are provided and create a well ordered named tuple
+#     p = model_parameters(nt0, m.params,"model definition")
+#     nt=NamedTuple{Tuple(m.params)}(p)
+#     # string printed
+#     info = string("\nModel: $(m.name)\n\nParameter values: $nt \n",m.info)
+#
+#
+#     # This section creates moduli functions with material parameters
+#     # replaced by specific values.
+#       #
+#       #  Need to add unique string to function name to make sure
+#       #   different instances of the same model do not overwrite the functions.
+#       #
+#     gs=Symbol("G_"*m.name)
+#     js=Symbol("J_"*m.name)
+#     gps=Symbol("Gp_"*m.name)
+#     gpps=Symbol("Gpp_"*m.name)
+#     ineq=Symbol("ineq_"*m.name)
+#
+#     G = expr_replace(m.expressions.G, nt)
+#     J = expr_replace(m.expressions.J, nt)
+#     Gp = expr_replace(m.expressions.Gp, nt)
+#     Gpp = expr_replace(m.expressions.Gpp, nt)
+#     Ineq = expr_replace(m.expressions.ineq, nt)
+#
+#     expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}( ( G, J, Gp, Gpp ) )
+#
+#     @eval $gs(t::RheoFloat) = begin $G; end
+#     @eval $gs(ta::Array{RheoFloat,1}) = broadcast($gs, ta)
+#     @eval $gs(t::Union{Array{T1,1},T1}) where T1<:Real = $gs(rheoconv(t))
+#
+#     @eval $js(t::RheoFloat) = begin $J; end
+#     @eval $js(ta::Array{RheoFloat,1}) = broadcast($js, ta)
+#     @eval $js(t::Union{Array{T1,1},T1}) where T1<:Real = $js(rheoconv(t))
+#
+#     @eval $gps(ω::RheoFloat) = begin $Gp; end
+#     @eval $gps(ωa::Array{RheoFloat,1}) = broadcast($gps, ωa)
+#     @eval $gps(ω::Union{Array{T1,1},T1}) where T1<:Real = $gps(rheoconv(ω))
+#
+#     @eval $gpps(ω::RheoFloat) = begin $Gpp; end
+#     @eval $gpps(ωa::Array{RheoFloat,1}) = broadcast($gpps, ωa)
+#     @eval $gpps(ω::Union{Array{T1,1},T1}) where T1<:Real = $gpps(rheoconv(ω))
+#
+#     @eval $ineq() = begin $Ineq; end
+#
+#     @eval tmpmod = RheoModel($gs,$js,$gps,$gpps, $expressions, $nt, $ineq, $info, $log_add)
+#     return tmpmod
+#     #return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), expressions, nt, eval(ineq), info, log_add)
+# end
 
 
 export freeze_params
