@@ -372,7 +372,6 @@ function boltzintegral_sing(modulus, time_series, prescribed_dot)
     I[2] = (prescribed_dot[1]*modulus([init_offset])*(time_series[2] - time_series[1]))[1]
 
     I[2:end]
-
 end
 
 
@@ -565,13 +564,13 @@ function obj_var_sing(params, grad, modulus, time_series, prescribed_dot, measur
         println("Current Parameters: ", params)
     end
     mod(t) = modulus(t,params)
-    convolved = boltzintegral_sing(modulus, time_series, prescribed_dot)
-
+    convolved = boltzintegral_sing(mod, time_series, prescribed_dot)
     # don't use first element as singularity exists in model - Edit: INCORRECT COMMENT!
     # cost = sum(0.5*(measured[2:end] - convolved).^2)
 
     # do as this has been taken care of in convolution!
     cost = sum(0.5*(measured - convolved).^2)
+
 
 end
 
@@ -628,6 +627,7 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::Vector{Rh
 
 
     if !singularity && sampling
+
         min_objective!(opt, (params, grad) -> obj_const_nonsing(params, grad, modulus,
                                                             time_series, dt,
                                                             prescribed_dot, measured;
@@ -636,18 +636,19 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::Vector{Rh
     elseif singularity && sampling
         # remove singularity, just go close to it, 1/10th over first sample period
         time_series[1] = 0.0 + (time_series[2] - time_series[1])/10.0
-
         min_objective!(opt, (params, grad) -> obj_const_sing(params, grad, modulus,
                                                         time_series, dt,
                                                         prescribed_dot, measured;
                                                         _insight = insight))
 
     elseif !singularity && !sampling
+
         min_objective!(opt, (params, grad) -> obj_var_nonsing(params, grad, modulus,
                                                         time_series, prescribed_dot,
                                                         measured; _insight = insight))
 
     elseif singularity && !sampling
+
         min_objective!(opt, (params, grad) -> obj_var_sing(params, grad, modulus,
                                                         time_series, prescribed_dot,
                                                         measured; _insight = insight))
