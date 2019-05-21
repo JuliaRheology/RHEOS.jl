@@ -7,14 +7,14 @@ SLS2 = RheoModelClass(
         p = [:G₀, :G₁, :η₁, :G₂, :η₂],
         # Relaxation modulus
         G = quote
-              return G₀ + G₁*exp(-t*G₁/η₁) + G₂*exp(-t*G₂/η₂)
+              G₀ + G₁*exp(-t*G₁/η₁) + G₂*exp(-t*G₂/η₂)
             end,
         # Creep modulus
         J = quote
               tau1 = G₁/η₁
               tau2 = G₂/η₂
               Jbar(s) = (1/s^2)*(G₀/s+G₁*1/(s+tau1)+G₂*1/(s+tau2))
-              return invLaplace(s -> Jbar(s), t)
+              invLaplace(s -> Jbar(s), t)
             end,
         # Network
         info= "

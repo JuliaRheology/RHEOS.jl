@@ -8,23 +8,23 @@ SpringPot =  RheoModelClass(
         p = [:cᵦ, :β],
         # Relaxation modulus
         G = quote
-              return cᵦ*t^(-β)/gamma(1 - β)
+              cᵦ*t^(-β)/gamma(1 - β)
             end,
         # Creep modulus
         J = quote
-              return (t^β)/(cᵦ*gamma(1 + β))
+              (t^β)/(cᵦ*gamma(1 + β))
             end,
         # Storage modulus
         Gp = quote
-               return cᵦ*(ω^β)*cos(π*β/2)
+                cᵦ*(ω^β)*cos(π*β/2)
              end,
         # Loss modulus
         Gpp = quote
-                return cᵦ*(ω^β)*sin(π*β/2)
+                cᵦ*(ω^β)*sin(π*β/2)
               end,
         # Constraints
-        Ineq = quote
-                 return (β<1) & (β>0)
+        constraint = quote
+                (β<1) & (β>0)
                 end,
         # Network
         info= "
@@ -40,19 +40,19 @@ Spring =  RheoModelClass(
         p = [:k],
         # Relaxation modulus
         G = quote
-              return k
+              k
             end,
         # Creep modulus
         J = quote
-              return 1/k
+              1/k
             end,
         # Storage modulus
         Gp = quote
-               return k
+                k
              end,
         # Loss modulus
         Gpp = quote
-                return 0.0
+                0.0
               end,
         # Network
         info= "
@@ -68,15 +68,15 @@ DashPot =  RheoModelClass(
         p = [:η],
         # Creep modulus
         J = quote
-              return t/η
+              t/η
             end,
         # Storage modulus
         Gp = quote
-               return 0.0
+                0.0
              end,
         # Loss modulus
         Gpp = quote
-                return η*ω
+                η*ω
               end,
         # Network
         info= "

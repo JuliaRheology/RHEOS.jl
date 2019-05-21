@@ -8,7 +8,7 @@ JeffreysPT = RheoModelClass(
           p = [:η₁, :k, :η₂],
           # Creep modulus
           J = quote
-                return (- exp(-k*t/η₁) + 1 )/k + t/η₂
+                (- exp(-k*t/η₁) + 1 )/k + t/η₂
               end,
           # Network
           info= "

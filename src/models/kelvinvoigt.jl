@@ -7,32 +7,32 @@ FractionalKelvinVoigt =  RheoModelClass(
         p = [:cₐ, :a, :cᵦ, :β],
         # Relaxation modulus
         G = quote
-              return cₐ*t^(-a)/gamma(1 - a) + cᵦ*t^(-β)/gamma(1 - β)
+              cₐ*t^(-a)/gamma(1 - a) + cᵦ*t^(-β)/gamma(1 - β)
             end,
         # Creep modulus
         J = quote
-              return (t^(a)/cₐ)*mittleff(a - β, 1 + a, -cᵦ*t^(a - β)/cₐ)
+              (t^(a)/cₐ)*mittleff(a - β, 1 + a, -cᵦ*t^(a - β)/cₐ)
             end,
         # Storage modulus
         Gp = quote
                 # cosine floating point error work-around
                 if a!=1.0 && β!=1.0
-                    return cₐ*ω^a*cos(a*π/2) + cᵦ*ω^β*cos(β*π/2)
+                    cₐ*ω^a*cos(a*π/2) + cᵦ*ω^β*cos(β*π/2)
                 elseif a==1.0 && β!=1.0
-                    return cᵦ*ω^β*cos(β*π/2)
+                    cᵦ*ω^β*cos(β*π/2)
                 elseif a==1.0 && β==1.0
-                    return 0.0
+                    0.0
                 end
              end,
         # Loss modulus
         Gpp = quote
-                return cₐ*ω^a*sin(a*π/2) + cᵦ*ω^β*sin(β*π/2)
+                cₐ*ω^a*sin(a*π/2) + cᵦ*ω^β*sin(β*π/2)
               end,
         # Constraints
-        Ineq = quote
-                 return [(a<1) & (a>0)
+        constraint = quote
+                 all([  (a<1) & (a>0)
                          (β<1) & (β>0)
-                          -a+β < 0]
+                          -a+β < 0])
                 end,
         # Network
         info= "
@@ -41,7 +41,7 @@ FractionalKelvinVoigt =  RheoModelClass(
            ____|                    |____
                |                    |
                |________ ╱╲ ________|
-                         ╲╱  cᵦ, β
+                return         ╲╱  cᵦ, β
                 "
         )
 
@@ -53,27 +53,27 @@ FractionalKVspring =  RheoModelClass(
         p = [:cₐ, :a, :k],
         # Relaxation modulus
         G = quote
-              return cₐ*t^(-a)/gamma(1 - a) + k
+              cₐ*t^(-a)/gamma(1 - a) + k
             end,
         # Creep modulus
         J = quote
-              return (t^(a)/cₐ)*mittleff(a, 1 + a, -k*t^a/cₐ)
+              (t^(a)/cₐ)*mittleff(a, 1 + a, -k*t^a/cₐ)
             end,
         # Storage modulus
         Gp = quote
                 if a!=1.0
-                    return cₐ*ω^a*cos(a*π/2) + k
+                    cₐ*ω^a*cos(a*π/2) + k
                 else
-                    return k
+                    k
                 end
              end,
         # Loss modulus
         Gpp = quote
-                return cₐ*ω^a*sin(a*π/2)
+                cₐ*ω^a*sin(a*π/2)
               end,
         # Constraints
-        Ineq = quote
-                 return (a<1) & (a>0)
+        constraint = quote
+                 (a<1) & (a>0)
                 end,
         # Network
         info= "
@@ -94,28 +94,28 @@ FractionalKVdashpot =  RheoModelClass(
         p = [:η, :cᵦ, :β],
         # Relaxation modulus
         G = quote
-              return t!=0.0 ? cᵦ*t^(-β)/gamma(1 - β) : Inf
+              t!=0.0 ? cᵦ*t^(-β)/gamma(1 - β) : Inf
             end,
         # Creep modulus
         J = quote
-              return (t/η)*mittleff(1 - β, 1 + 1, -cᵦ*t^(1.0 - β)/η)
+              (t/η)*mittleff(1 - β, 1 + 1, -cᵦ*t^(1.0 - β)/η)
             end,
         # Storage modulus
         Gp = quote
                 # cosine floating point error work-around
                 if β==1.0
-                    return 0.0
+                    0.0
                 else
-                    return cᵦ*ω^β*cos(β*π/2)
+                    cᵦ*ω^β*cos(β*π/2)
                 end
              end,
         # Loss modulus
         Gpp = quote
-                return η*ω + cᵦ*ω^β*sin(β*π/2)
+                η*ω + cᵦ*ω^β*sin(β*π/2)
               end,
         # Constraints
-        Ineq = quote
-                 return (β<1) & (β>0)
+        constraint = quote
+                 (β<1) & (β>0)
                 end,
         # Network
         info= "
@@ -136,19 +136,19 @@ KelvinVoigt =  RheoModelClass(
         p = [:η, :k],
         # Relaxation modulus
         G = quote
-              return t!=0.0 ? k : Inf
+              t!=0.0 ? k : Inf
             end,
         # Creep modulus
         J = quote
-              return (1 - exp(-k*t/η))/k
+              (1 - exp(-k*t/η))/k
             end,
         # Storage modulus
         Gp = quote
-                return k
+                k
              end,
         # Loss modulus
         Gpp = quote
-                return η*ω
+                η*ω
               end,
         # Network
         info= "

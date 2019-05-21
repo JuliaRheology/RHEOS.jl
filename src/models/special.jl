@@ -7,30 +7,30 @@ FractionalSpecial = RheoModelClass(
         p = [:η, :cᵦ, :β, :k],
         # Relaxation modulus
         G = quote
-              return k + cᵦ*t^(-β)*mittleff(1 - β, 1 - β, -cᵦ*(t^(1 - β))/η)
+              k + cᵦ*t^(-β)*mittleff(1 - β, 1 - β, -cᵦ*(t^(1 - β))/η)
             end,
         # Creep modulus
         J = quote
               a = η/cᵦ
               b = k*η/cᵦ
               Ĵ(s) = (1/s^2)*(1+a*s^(1-β))/(η+k/s+b*s^(-β))
-              return invLaplace(s -> Ĵ(s), t)
+              invLaplace(s -> Ĵ(s), t)
             end,
         # Storage modulus
         Gp = quote
                denominator = (η*ω)^2 + (cᵦ*ω^β)^2
                numerator = ((η*ω)^2)*(cᵦ*ω^β)*cos(β*π/2)
-               return numerator/denominator + k
+               numerator/denominator + k
              end,
        # Loss modulus
         Gpp = quote
                 denominator = (η*ω)^2 + (cᵦ*ω^β)^2
                 numerator = ((cᵦ*ω^β)^2)*(η*ω) + ((η*ω)^2)*(cᵦ*ω^β)*sin(β*π/2)
-                return numerator/denominator
+                numerator/denominator
               end,
         # Constraints
-        Ineq = quote
-                 return (β<1) & (β>0)
+        constraint = quote
+                 (β<1) & (β>0)
                 end,
         # Network
         info= "

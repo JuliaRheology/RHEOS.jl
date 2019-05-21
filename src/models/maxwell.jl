@@ -7,29 +7,29 @@ FractionalMaxwell = RheoModelClass(
           p = [:cₐ, :a, :cᵦ, :β],
           # Relaxation modulus
           G = quote
-                 return cᵦ*t^(-β)*mittleff(a - β, 1 - β, -cᵦ*t^(a - β)/cₐ)
+                 cᵦ*t^(-β)*mittleff(a - β, 1 - β, -cᵦ*t^(a - β)/cₐ)
               end,
           # Creep modulus
           J = quote
-                return t^(a)/(cₐ*gamma(1 + a)) + t^(β)/(cᵦ*gamma(1 + β))
+                t^(a)/(cₐ*gamma(1 + a)) + t^(β)/(cᵦ*gamma(1 + β))
               end,
           # Storage modulus
           Gp = quote
                  denominator = (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2)
                  numerator = ((cᵦ*ω^β)^2)*(cₐ*ω^a)*cos(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*cos(β*π/2)
-                 return numerator/denominator
+                 numerator/denominator
                end,
          # Loss modulus
           Gpp = quote
                   denominator = (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2)
                   numerator = ((cᵦ*ω^β)^2)*(cₐ*ω^a)*sin(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*sin(β*π/2)
-                  return numerator/denominator
+                  numerator/denominator
                 end,
           # Constraints
-          Ineq = quote
-                   return [(a<1) & (a>0)
-                           (β<1) & (β>0)
-                            -a+β < 0]
+          constraint = quote
+                   all([ (a<1) & (a>0)
+                         (β<1) & (β>0)
+                         -a+β < 0     ])
                   end,
           # Network
           info= "
@@ -47,29 +47,27 @@ FractionalMaxwellSpring = RheoModelClass(
         # Relaxation modulus
         G = quote
                 # special case when α==0.0, 2 springs in series
-                a==0.0 && return 1.0/(1.0/cₐ + 1.0/k)
-                # normal case
-                return k*mittleff(a, -k*t^a/cₐ)
+                a==0.0 ? 1.0/(1.0/cₐ + 1.0/k) : k*mittleff(a, -k*t^a/cₐ) # normal case otherwise
             end,
         # Creep modulus
         J = quote
-              return t^(a)/(cₐ*gamma(1 + a)) + 1/k
+              t^(a)/(cₐ*gamma(1 + a)) + 1/k
             end,
         # Storage modulus
         Gp = quote
                 denominator = (cₐ*ω^a)^2 + k^2 + 2*(cₐ*ω^a)*k*cos(a*π/2)
                 numerator = k^2*(cₐ*ω^a)*cos(a*π/2) + (cₐ*ω^a)^2*k
-                return numerator/denominator
+                numerator/denominator
              end,
        # Loss modulus
         Gpp = quote
                 denominator = (cₐ*ω^a)^2 + k^2 + 2*(cₐ*ω^a)*k*cos(a*π/2)
                 numerator = k^2*(cₐ*ω^a)*sin(a*π/2)
-                return numerator/denominator
+                numerator/denominator
               end,
         # Constraints
-        Ineq = quote
-                 return (a<1) & (a>0)
+        constraint = quote
+                 (a<1) & (a>0)
                 end,
         # Network
         info= "
@@ -87,27 +85,27 @@ FractionalMaxwellDashpot = RheoModelClass(
           p = [:η, :cᵦ, :β],
           # Relaxation modulus
           G = quote
-                return cᵦ*t^(-β)*mittleff(1 - β, 1 - β, -cᵦ*t^(1 - β)/η)
+                cᵦ*t^(-β)*mittleff(1 - β, 1 - β, -cᵦ*t^(1 - β)/η)
               end,
           # Creep modulus
           J = quote
-                return t/η + t^β/(cᵦ*gamma(1 + β))
+                t/η + t^β/(cᵦ*gamma(1 + β))
               end,
           # Storage modulus
           Gp = quote
                   denominator = (η*ω)^2 + (cᵦ*ω^β)^2 + 2*(η*ω)*(cᵦ*ω^β)*cos((1-β)*π/2)
                   numerator = ((η*ω)^2)*(cᵦ*ω^β)*cos(β*π/2)
-                  return numerator/denominator
+                  numerator/denominator
                end,
          # Loss modulus
           Gpp = quote
                   denominator = (η*ω)^2 + (cᵦ*ω^β)^2 + 2*(η*ω)*(cᵦ*ω^β)*cos((1-β)*π/2)
                   numerator = ((cᵦ*ω^β)^2)*(η*ω) + ((η*ω)^2)*(cᵦ*ω^β)*sin(β*π/2)
-                  return numerator/denominator
+                  numerator/denominator
                 end,
           # Constraints
-          Ineq = quote
-                   return (β<1) & (β>0)
+          constraint = quote
+                   (β<1) & (β>0)
                   end,
           # Network
           info= "
@@ -126,23 +124,23 @@ Maxwell = RheoModelClass(
         p = [:η, :k],
         # Relaxation modulus
         G = quote
-              return k*exp(-k*t/η)
+              k*exp(-k*t/η)
             end,
         # Creep modulus
         J = quote
-              return t/η + 1/k
+              t/η + 1/k
             end,
         # Storage modulus
         Gp = quote
                 denominator = 1 + η^2*ω^2/k^2
                 numerator = η^2*ω^2/k
-                return numerator/denominator
+                numerator/denominator
              end,
        # Loss modulus
         Gpp = quote
                 denominator = 1 + η^2*ω^2/k^2
                 numerator = η*ω
-                return numerator/denominator
+                numerator/denominator
               end,
         # Network
         info= "

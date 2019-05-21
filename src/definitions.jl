@@ -266,19 +266,31 @@ end
 
 
 
+
+
+
+
+using FunctionWrappers: FunctionWrapper
+
+
+
 struct RheoModelClass
 
     name::String
-    G::Function
-    J::Function
-    Gp::Function
-    Gpp::Function
-
-
     params::Vector{Symbol}
-    ineq::Function
-    info::String
 
+    G::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}}
+    Ga::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}}
+    J::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}}
+    Ja::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}}
+    Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}}
+    Gpa::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}}
+    Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}}
+    Gppa::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}}
+
+    constraint::FunctionWrapper{Bool,Tuple{Array{RheoFloat,1}}}
+
+    info::String
     expressions::NamedTuple
 
 end
@@ -307,43 +319,30 @@ invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
 
 function RheoModelClass(;name::String,
                          p::Array{Symbol}=[],
-                         G::Expr = quote return NaN end,
-                         J::Expr = quote return NaN end,
-                         Gp::Expr = quote return NaN end,
-                         Gpp::Expr = quote return NaN end,
-                         Ineq::Expr = quote return true end,
+                         G::Expr = quote NaN end,
+                         J::Expr = quote NaN end,
+                         Gp::Expr = quote NaN end,
+                         Gpp::Expr = quote NaN end,
+                         constraint::Expr = quote true end,
                          info)
 
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
     unpack_expr = Meta.parse(string(join(string.(p), ","), "=params"))
+    expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint)
 
-    gs=Symbol("G_"*name)
-    js=Symbol("J_"*name)
-    gps=Symbol("Gp_"*name)
-    gpps=Symbol("Gpp_"*name)
-    ineq=Symbol("ineq_"*name)
-
-    @eval $gs(t::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $G; end
-    @eval $gs(ta::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gs(t,params) for t in ta]; end
-    @eval $gs(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gs(rheoconv(t),rheoconv(params))
-
-    @eval $js(t::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $J; end
-    @eval $js(ta::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$js(t,params) for t in ta]; end
-    @eval $js(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $js(rheoconv(t),rheoconv(params))
-
-    @eval $gps(ω::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gp; end
-    @eval $gps(ωa::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gps(ω,params) for ω in ωa]; end
-    @eval $gps(ω::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gps(rheoconv(ω),rheoconv(params))
-
-    @eval $gpps(ω::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gpp; end
-    @eval $gpps(ωa::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gpps(ω,params) for ω in ωa]; end
-    @eval $gpps(ω::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gpps(rheoconv(ω),rheoconv(params))
-
-    @eval $ineq(params::Array{RheoFloat,1}) = begin $unpack_expr; $Ineq; end
-    @eval $ineq(params::Array{T1,1}) where {T1<:Real} = $ineq(rheoconv(params))
-
-    return RheoModelClass(name,eval(gs),eval(js),eval(gps),eval(gpps),p,eval(ineq),info,(G=G,J=J,Gp=Gp,Gpp=Gpp,ineq=Ineq))
+    @eval return(RheoModelClass($name, $p,
+        ((t,params) -> begin $unpack_expr; $G; end)                 |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
+        ((ta,params) -> begin $unpack_expr; [$G for t in ta]; end)  |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
+        ((t,params) -> begin $unpack_expr; $J; end)                 |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
+        ((ta,params) -> begin $unpack_expr; [$J for t in ta]; end)  |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
+        ((t,params) -> begin $unpack_expr; $Gp; end)                |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
+        ((ta,params) -> begin $unpack_expr; [$Gp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
+        ((t,params) -> begin $unpack_expr; $Gpp; end)               |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
+        ((ta,params) -> begin $unpack_expr; [$Gpp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
+        (params -> begin $unpack_expr; $constraint; end)            |> FunctionWrapper{Bool,Tuple{Array{RheoFloat,1}}},
+        $info, $expressions) )
 end
+
 
 
 
@@ -351,15 +350,18 @@ end
 
 struct RheoModel
 
-    G::Function
-    J::Function
-    Gp::Function
-    Gpp::Function
+    G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    Ga::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}
+    J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    Ja::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}
+    Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    Gpa::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}
+    Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    Gppa::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}
     expressions::NamedTuple
 
 
     params::NamedTuple
-    #ineq::Function
     info::String
     log::Vector{String}
 
@@ -435,8 +437,16 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple; log_add::Array{String} = 
 
     expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}( ( G, J, Gp, Gpp ) )
 
-    p_vals = [i for i in nt]  # vector with model parameters
-    return RheoModel(t->m.G(t,p_vals), t->m.J(t,p_vals), t->m.Gp(t,p_vals), t->m.Gpp(t,p_vals), expressions, nt, info, log_add)
+    @eval return( RheoModel(
+    (t -> begin $G; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
+    (ta -> begin [$G for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
+    (t -> begin $J; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
+    (ta -> begin [$J for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
+    (t -> begin $Gp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
+    (ta -> begin [$Gp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
+    (t -> begin $Gpp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
+    (ta -> begin [$Gpp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
+    $expressions, $nt, $info, $log_add) )
 end
 
 
@@ -539,12 +549,8 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
     unpack_expr = Meta.parse(string(join(string.(p), ","), "=params"))
 
-    # This section creates moduli functions with material parameters
+    # This section creates moduli expressions with material parameters
     # replaced by specific values.
-    gs=Symbol("G_"*name)
-    js=Symbol("J_"*name)
-    gps=Symbol("Gp_"*name)
-    gpps=Symbol("Gpp_"*name)
 
     G = expr_replace(m.expressions.G, nt)
     J = expr_replace(m.expressions.J, nt)
@@ -554,24 +560,17 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
     expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}( ( G, J, Gp, Gpp ) )
 
 
-    @eval $gs(t::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $G; end
-    @eval $gs(ta::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gs(t,params) for t in ta]; end
-    @eval $gs(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gs(rheoconv(t),rheoconv(params))
-
-    @eval $js(t::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $J; end
-    @eval $js(ta::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$js(t,params) for t in ta]; end
-    @eval $js(t::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $js(rheoconv(t),rheoconv(params))
-
-    @eval $gps(ω::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gp; end
-    @eval $gps(ωa::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gps(ω,params) for ω in ωa]; end
-    @eval $gps(ω::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gps(rheoconv(ω),rheoconv(params))
-
-    @eval $gpps(ω::RheoFloat, params::Array{RheoFloat,1}) = begin $unpack_expr; $Gpp; end
-    @eval $gpps(ωa::Array{RheoFloat,1}, params::Array{RheoFloat,1}) = begin [$gpps(ω,params) for ω in ωa]; end
-    @eval $gpps(ω::Union{Array{T1,1},T1}, params::Array{T2,1}) where {T1<:Real, T2<:Real} = $gpps(rheoconv(ω),rheoconv(params))
-
-
-    return RheoModelClass(name, eval(gs),eval(js),eval(gps),eval(gpps), p, info, expressions)
+    @eval return( RheoModelClass($name, $p,
+        ((t,params) -> begin $unpack_expr; $G; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
+        ((ta,params) -> begin $unpack_expr; [$G for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
+        ((t,params) -> begin $unpack_expr; $J; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
+        ((ta,params) -> begin $unpack_expr; [$J for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
+        ((t,params) -> begin $unpack_expr; $Gp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
+        ((ta,params) -> begin $unpack_expr; [$Gp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
+        ((t,params) -> begin $unpack_expr; $Gpp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
+        ((ta,params) -> begin $unpack_expr; [$Gpp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
+        (params -> begin $unpack_expr; $Ineq; end) |> FunctionWrapper{Bool,Tuple{Array{RheoFloat,1}}},
+        $info, $expressions)   )
 end
 
 
