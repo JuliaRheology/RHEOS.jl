@@ -237,18 +237,18 @@ function modelfit(data::RheoTimeData,
         deriv = derivCD
     end
 
-    modloading = typeof(modloading)==Int ? LoadingType(modloading) : modloading
+    #modloading = typeof(modloading)==Int ? LoadingType(modloading) : modloading
     # get modulus function and derivative
     if modloading == stress_imposed
         dcontrolled = deriv(data.σ, data.t)
         measured = data.ϵ
-        modulus = (t,p)->model.Ja(t,p)
-        modsing = t->model.J(t,p0a)
+        modulus = model.Ja
+        modsing = (t->model.J(t,p0a))
     elseif modloading == strain_imposed
         dcontrolled = deriv(data.ϵ, data.t)
         measured = data.σ
-        modulus = (t,p)->model.Ga(t,p)
-        modsing = t->model.G(t,p0a)
+        modulus = model.Ga
+        modsing = (t->model.G(t,p0a))
     end
 
     @assert ~isnan(modsing(5.0)) "Modulus to use not defined"

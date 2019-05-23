@@ -270,7 +270,6 @@ end
 
 
 
-using FunctionWrappers: FunctionWrapper
 
 
 
@@ -327,7 +326,7 @@ function RheoModelClass(;name::String,
                          info)
 
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
-    unpack_expr = Meta.parse(string(join(string.(p), ","), "=params"))
+    unpack_expr = Meta.parse(string(join(string.(p), ","), ",=params"))
     expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint)
 
     @eval return(RheoModelClass($name, $p,
@@ -523,7 +522,7 @@ Return a new RheoModelClass with some of the parameters frozen to specific value
 
 # Example
 
-julia> SLS2_mod = freeze_params( SLS2, "SLS2_mod", (G₀=2,η₂=3.5))
+julia> SLS2_mod = freeze_params( SLS2, (G₀=2,η₂=3.5))
 [...]
 
 julia> SLS2.G(1,[2,1,2,3,3.5])
@@ -536,7 +535,7 @@ julia> SLS2_mod.G(1,[1,2,3])
 function freeze_params(m::RheoModelClass, nt0::NamedTuple)
 
     # check that every parameter in m exists in the named tuple nt
-    @assert all( i-> i in m.params,keys(nt0)) "A parameter to freeze is not in the model"
+    @assert all( i-> i in m.params,keys(nt0)) "A parameter to freeze is not involved in the model"
     # convert values format for consistency
     nt=NamedTuple{keys(nt0)}([RheoFloat(i) for i in nt0])
 
@@ -547,7 +546,7 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
     info = m.info
 
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
-    unpack_expr = Meta.parse(string(join(string.(p), ","), "=params"))
+    unpack_expr = Meta.parse(string(join(string.(p), ","), ",=params"))
 
     # This section creates moduli expressions with material parameters
     # replaced by specific values.
@@ -556,6 +555,7 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
     J = expr_replace(m.expressions.J, nt)
     Gp = expr_replace(m.expressions.Gp, nt)
     Gpp = expr_replace(m.expressions.Gpp, nt)
+    constraint = expr_replace(m.expressions.constraint, nt)
 
     expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}( ( G, J, Gp, Gpp ) )
 
@@ -569,7 +569,7 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
         ((ta,params) -> begin $unpack_expr; [$Gp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
         ((t,params) -> begin $unpack_expr; $Gpp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
         ((ta,params) -> begin $unpack_expr; [$Gpp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
-        (params -> begin $unpack_expr; $Ineq; end) |> FunctionWrapper{Bool,Tuple{Array{RheoFloat,1}}},
+        (params -> begin $unpack_expr; $constraint; end) |> FunctionWrapper{Bool,Tuple{Array{RheoFloat,1}}},
         $info, $expressions)   )
 end
 

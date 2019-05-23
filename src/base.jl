@@ -470,7 +470,7 @@ function obj_const_nonsing(params, grad, modulus, time_series, dt, prescribed_do
         println("Current Parameters: ", params)
     end
     # Replace parameters inside the viscoelastic modulus
-    mod(t) = modulus(t,params)
+    mod = (t->modulus(t,params))
     convolved = boltzconvolve_nonsing(mod, time_series, dt, prescribed_dot)
 
     cost = sum(0.5*(measured - convolved).^2)
@@ -502,7 +502,7 @@ function obj_const_sing(params, grad,modulus, time_series,dt, prescribed_dot,mea
         println("Current Parameters: ", params)
     end
 
-    mod(t) = modulus(t,params)
+    mod = (t->modulus(t,params))
     # convolved = boltzconvolve_sing(modulus, time_series, dt, params, prescribed_dot)
     convolved = boltzconvolve(mod, time_series, dt, prescribed_dot)
 
@@ -534,7 +534,7 @@ function obj_var_nonsing(params, grad, modulus, time_series, prescribed_dot, mea
         println("Current Parameters: ", params)
     end
 
-    mod(t) = modulus(t,params)
+    mod = (t->modulus(t,params))
     convolved = boltzintegral_nonsing(mod, time_series, prescribed_dot)
 
     cost = sum(0.5*(measured - convolved).^2)
@@ -563,7 +563,7 @@ function obj_var_sing(params, grad, modulus, time_series, prescribed_dot, measur
     if _insight
         println("Current Parameters: ", params)
     end
-    mod(t) = modulus(t,params)
+    mod = (t->modulus(t,params))
     convolved = boltzintegral_sing(mod, time_series, prescribed_dot)
     # don't use first element as singularity exists in model - Edit: INCORRECT COMMENT!
     # cost = sum(0.5*(measured[2:end] - convolved).^2)
@@ -594,7 +594,7 @@ Initialise then begin a least squares fitting of the supplied data.
 - `singularity`: Presence of singularity in model
 """
 function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::Vector{RheoFloat},
-                           hi_bounds::Vector{RheoFloat}, modulus::Function,
+                           hi_bounds::Vector{RheoFloat}, modulus::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
                            time_series::Vector{RheoFloat}, dt::RheoFloat,
                            prescribed_dot::Vector{RheoFloat}, measured::Vector{RheoFloat};
                            insight::Bool = false, sampling::Bool=true,
@@ -670,7 +670,7 @@ function obj_step_nonsing(params, grad, modulus, t, prescribed, measured; _insig
         println("Current Parameters: ", params)
     end
 
-    mod(t) = modulus(t,params)
+    mod = (t->modulus(t,params))
     estimated = prescribed*mod(t)
 
     cost = sum(0.5*(measured - estimated).^2)
@@ -681,14 +681,14 @@ function obj_step_sing(params, grad, modulus, t, prescribed, measured; _insight=
         println("Current Parameters: ", params)
     end
 
-    mod(t) = modulus(t,params)
+    mod = (t->modulus(t,params))
     estimated = prescribed*mod(t)[2:end]
 
     cost = sum(0.5*(measured[2:end] - estimated).^2)
 end
 
 function leastsquares_stepinit(params_init::Array{RheoFloat,1}, low_bounds::Array{RheoFloat,1},
-                           hi_bounds::Array{RheoFloat,1}, modulus::Function,
+                           hi_bounds::Array{RheoFloat,1}, modulus::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
                            time_series::Array{RheoFloat,1}, prescribed::RheoFloat,
                            measured::Array{RheoFloat,1}; insight::Bool = false,
                            singularity::Bool = false, _rel_tol = 1e-4)

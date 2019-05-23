@@ -22,6 +22,8 @@ import Base: +, -, *
 import DelimitedFiles: readdlm, writedlm
 export constantcheck
 
+using FunctionWrappers: FunctionWrapper
+
 ######################################################
 # definitions.jl
 export RheologyData, RheologyModel, RheologyDynamic
