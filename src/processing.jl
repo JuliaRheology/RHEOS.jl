@@ -189,7 +189,7 @@ Fit RheologyData struct to model and return a fitted model as a RheologyModel ob
 """
 function modelfit(data::RheoTimeData,
                   model::RheoModelClass,
-                  modloading::Union{LoadingType,Integer};
+                  modloading::LoadingType;
                   p0::Union{NamedTuple,Tuple} = (),
                   lo::Union{NamedTuple,Tuple} = (),
                   hi::Union{NamedTuple,Tuple} = (),
@@ -237,7 +237,6 @@ function modelfit(data::RheoTimeData,
         deriv = derivCD
     end
 
-    #modloading = typeof(modloading)==Int ? LoadingType(modloading) : modloading
     # get modulus function and derivative
     if modloading == stress_imposed
         dcontrolled = deriv(data.σ, data.t)
@@ -279,11 +278,11 @@ function modelfit(data::RheoTimeData,
 
     #modulusname = string(modulus)
     #log = vcat(data.log, "Fitted $modulusname, Modulus used: $modtouse, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
-    log = vcat(data.log, "Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
+    log = Dict{Any,Any}("data_source"=>data.log, "time"=>timetaken, "stop reason"=>ret, "error"=>minf)
     print("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
     nt = NamedTuple{Tuple(model.params)}(minx)
 
-    return RheoModel(model,nt; log_add = log);
+    return RheoModel(model,nt, log = log);
 
 end
 

@@ -24,7 +24,7 @@ SpringPot =  RheoModelClass(
               end,
         # Constraints
         constraint = quote
-                (β<1) & (β>0)
+                (0<β<1)
                 end,
         # Network
         info= "
