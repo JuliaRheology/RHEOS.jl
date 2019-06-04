@@ -347,27 +347,6 @@ end
 
 
 
-struct RheoModel
-
-    G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
-    Ga::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}
-    J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
-    Ja::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}
-    Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
-    Gpa::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}
-    Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
-    Gppa::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}
-    expressions::NamedTuple
-
-
-    params::NamedTuple
-    info::String
-    log::Vector{String}
-
-end
-
-
-
 # function Base.show(io::IO, m::RheoModelClass)
 #     print(io, "\nModel name: $(m.name)")
 #     ps=join([string(s) for s in m.params], ", ", " and ")
@@ -418,93 +397,6 @@ end
 
 
 
-
-function RheoModel(m::RheoModelClass, nt0::NamedTuple; log_add::Array{String} = [" "])
-
-    # check all parameters are provided and create a well ordered named tuple
-    p = model_parameters(nt0, m.params,"model definition")
-    nt=NamedTuple{Tuple(m.params)}(p)
-    # string printed
-    info = string("\nModel: $(m.name)\n\nParameter values: $nt \n",m.info)
-
-    # This attaches expressions to the models with parameters substituted by values.
-    # Future development: this could be disabled with a key word if processing time is an issue
-    G = expr_replace(m.expressions.G, nt)
-    J = expr_replace(m.expressions.J, nt)
-    Gp = expr_replace(m.expressions.Gp, nt)
-    Gpp = expr_replace(m.expressions.Gpp, nt)
-
-    expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}( ( G, J, Gp, Gpp ) )
-
-    @eval return( RheoModel(
-    (t -> begin $G; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
-    (ta -> begin [$G for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
-    (t -> begin $J; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
-    (ta -> begin [$J for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
-    (t -> begin $Gp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
-    (ta -> begin [$Gp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
-    (t -> begin $Gpp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
-    (ta -> begin [$Gpp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
-    $expressions, $nt, $info, $log_add) )
-end
-
-
-#
-#   This form of the constructor does not work within function, due to world age restrictions
-#   Could be reintegrated later as an option for people who know what they are doing.
-#   https://discourse.julialang.org/t/how-to-bypass-the-world-age-problem/7012/10
-#
-# function RheoModel(m::RheoModelClass, nt0::NamedTuple; log_add::Array{String} = [" "])
-#
-#     # check all parameters are provided and create a well ordered named tuple
-#     p = model_parameters(nt0, m.params,"model definition")
-#     nt=NamedTuple{Tuple(m.params)}(p)
-#     # string printed
-#     info = string("\nModel: $(m.name)\n\nParameter values: $nt \n",m.info)
-#
-#
-#     # This section creates moduli functions with material parameters
-#     # replaced by specific values.
-#       #
-#       #  Need to add unique string to function name to make sure
-#       #   different instances of the same model do not overwrite the functions.
-#       #
-#     gs=Symbol("G_"*m.name)
-#     js=Symbol("J_"*m.name)
-#     gps=Symbol("Gp_"*m.name)
-#     gpps=Symbol("Gpp_"*m.name)
-#     ineq=Symbol("ineq_"*m.name)
-#
-#     G = expr_replace(m.expressions.G, nt)
-#     J = expr_replace(m.expressions.J, nt)
-#     Gp = expr_replace(m.expressions.Gp, nt)
-#     Gpp = expr_replace(m.expressions.Gpp, nt)
-#     Ineq = expr_replace(m.expressions.ineq, nt)
-#
-#     expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}( ( G, J, Gp, Gpp ) )
-#
-#     @eval $gs(t::RheoFloat) = begin $G; end
-#     @eval $gs(ta::Array{RheoFloat,1}) = broadcast($gs, ta)
-#     @eval $gs(t::Union{Array{T1,1},T1}) where T1<:Real = $gs(rheoconv(t))
-#
-#     @eval $js(t::RheoFloat) = begin $J; end
-#     @eval $js(ta::Array{RheoFloat,1}) = broadcast($js, ta)
-#     @eval $js(t::Union{Array{T1,1},T1}) where T1<:Real = $js(rheoconv(t))
-#
-#     @eval $gps(ω::RheoFloat) = begin $Gp; end
-#     @eval $gps(ωa::Array{RheoFloat,1}) = broadcast($gps, ωa)
-#     @eval $gps(ω::Union{Array{T1,1},T1}) where T1<:Real = $gps(rheoconv(ω))
-#
-#     @eval $gpps(ω::RheoFloat) = begin $Gpp; end
-#     @eval $gpps(ωa::Array{RheoFloat,1}) = broadcast($gpps, ωa)
-#     @eval $gpps(ω::Union{Array{T1,1},T1}) where T1<:Real = $gpps(rheoconv(ω))
-#
-#     @eval $ineq() = begin $Ineq; end
-#
-#     @eval tmpmod = RheoModel($gs,$js,$gps,$gpps, $expressions, $nt, $ineq, $info, $log_add)
-#     return tmpmod
-#     #return RheoModel(eval(gs),eval(js),eval(gps),eval(gpps), expressions, nt, eval(ineq), info, log_add)
-# end
 
 
 export freeze_params
@@ -572,6 +464,68 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
         (params -> begin $unpack_expr; $constraint; end) |> FunctionWrapper{Bool,Tuple{Array{RheoFloat,1}}},
         $info, $expressions)   )
 end
+
+
+
+
+
+
+
+
+struct RheoModel
+
+    G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    Ga::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}
+    J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    Ja::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}
+    Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    Gpa::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}
+    Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    Gppa::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}
+    expressions::NamedTuple
+
+
+    params::NamedTuple
+    info::String
+    #log::Vector{String}
+    log::Dict{Any,Any}
+
+end
+
+
+
+
+function RheoModel(m::RheoModelClass, nt0::NamedTuple; log::Dict{Any,Any} = Dict{Any,Any}("init"=>"model created from constructor call"))
+
+    # check all parameters are provided and create a well ordered named tuple
+    p = model_parameters(nt0, m.params,"model definition")
+    nt=NamedTuple{Tuple(m.params)}(p)
+    # string printed
+    info = string("\nModel: $(m.name)\n\nParameter values: $nt \n",m.info)
+
+    # This attaches expressions to the models with parameters substituted by values.
+    # Future development: this could be disabled with a key word if processing time is an issue
+    G = expr_replace(m.expressions.G, nt)
+    J = expr_replace(m.expressions.J, nt)
+    Gp = expr_replace(m.expressions.Gp, nt)
+    Gpp = expr_replace(m.expressions.Gpp, nt)
+
+    expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}( ( G, J, Gp, Gpp ) )
+
+    @eval return( RheoModel(
+    (t -> begin $G; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
+    (ta -> begin [$G for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
+    (t -> begin $J; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
+    (ta -> begin [$J for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
+    (t -> begin $Gp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
+    (ta -> begin [$Gp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
+    (t -> begin $Gpp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
+    (ta -> begin [$Gpp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
+    $expressions, $nt, $info, $log) )
+end
+
+
+
 
 
 
