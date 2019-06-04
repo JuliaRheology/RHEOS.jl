@@ -56,7 +56,7 @@ FractionalKVspring =  RheoModelClass(
               cₐ*t^(-a)/gamma(1 - a) + k
             end,
         # Creep modulus
-        J = quote
+        J = quote      
               (t^(a)/cₐ)*mittleff(a, 1 + a, -k*t^a/cₐ)
             end,
         # Storage modulus
