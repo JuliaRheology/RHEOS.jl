@@ -399,22 +399,27 @@ function modelstepfit(data::RheoTimeData,
                   diff_method="BD") where {T1<:Real, T2<:Real, T3<:Real}
 
     if isempty(p0)
-     p0 = convert(Array{RheoFloat,1}, fill(0.5,length(model.params)))
-          @warn "Initial values for model parameters is set to 0.5 by default"
+        p0a = convert(Array{RheoFloat,1}, fill(0.5,length(model.params)))
+        if length(findall(x->(x==:β)||(x==:a),model.params))==2
+            index = findall(x->x==:a,model.params)
+            p0a[index[1]] = 0.8;
+        end
+        @warn "Initial values for model parameters is set to $p0a by default"
     else
-     p0 = model_parameters(p0,model.params,"initial guess")
+        p0a = model_parameters(p0,model.params,"initial guess")
     end
 
+
     if isempty(lo)
-     lo = convert(Array{RheoFloat,1}, [-1])
+     loa = convert(Array{RheoFloat,1}, [-1])
     else
-     lo = model_parameters(lo,model.params,"low bounds")
+     loa = model_parameters(lo,model.params,"low bounds")
     end
 
     if isempty(hi)
-     hi = convert(Array{RheoFloat,1}, [-1])
+     hia = convert(Array{RheoFloat,1}, [-1])
     else
-     hi = model_parameters(hi,model.params,"high bounds")
+     hia = model_parameters(hi,model.params,"high bounds")
     end
 
     rel_tol = convert(RheoFloat,rel_tol)
@@ -429,10 +434,12 @@ function modelstepfit(data::RheoTimeData,
         dcontrolled = deriv(data.σ, data.t)
         measured = data.ϵ
         modulus = model.Ja
+        modsing = (t->model.J(t,p0a))
     elseif modloading == strain_imposed
         dcontrolled = deriv(data.ϵ, data.t)
         measured = data.σ
         modulus = model.Ga
+        modsing = (t->model.G(t,p0a))
     end
     # get modulus function and derivative
     if (step == nothing)
@@ -442,31 +449,34 @@ function modelstepfit(data::RheoTimeData,
             controlled = data.σ[convert(Integer,round(length(data.σ)/2))]
             measured = data.ϵ
             modulus = model.Ja
+            modsing = (t->model.J(t,p0a))
         elseif (modloading == strain_imposed)
             controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
             measured = data.σ
             modulus = model.Ga
+            modsing = (t->model.G(t,p0a))
         end
     elseif (step != nothing)
         check = RheoTimeDataType(data)
         if (modloading == stress_imposed)
             @assert (check == strain_only)||(check == strain_and_stress) "Strain required"
             modulus = model.Ja
+            modsing = (t->model.J(t,p0a))
             controlled = convert(RheoFloat,step);
             measured = data.ϵ
         elseif (modloading == strain_imposed)
             @assert (check == stress_only)||(check == strain_and_stress) "Stress required"
             measured = data.σ
             modulus = model.Ga
+            modsing = (t->model.G(t,p0a))
             controlled =convert(RheoFloat, step);
         end
     end
 
-    mod(t) = modulus(t,p0)
 
-    @assert ~isnan(mod(5.0)) "Modulus to use not defined"
+    @assert ~isnan(modsing(5.0)) "Modulus to use not defined"
     # get singularity presence
-    sing = singularitytest(mod)
+    sing = singularitytest(modsing)
 
     # TEMP - CHECK WITH ALE AND ALEXANDRE BUT IS DEFINITELY NECESSARY
     # time must start at 0 for convolution to work properly!
@@ -474,9 +484,9 @@ function modelstepfit(data::RheoTimeData,
 
 
     # start fit
-    (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed leastsquares_stepinit(p0,
-                                                                                        lo,
-                                                                                        hi,
+    (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed leastsquares_stepinit(p0a,
+                                                                                        loa,
+                                                                                        hia,
                                                                                         modulus,
                                                                                         t_zeroed,
                                                                                         controlled,
@@ -485,11 +495,12 @@ function modelstepfit(data::RheoTimeData,
                                                                                         singularity = sing,
                                                                                         _rel_tol = rel_tol)
 
-    modulusname = string(modulus)
-    log = vcat(data.log, "Fitted $modulusname, Modulus used: $modtouse, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
+    log = Dict{Any,Any}("data_source"=>data.log, "time"=>timetaken, "stop reason"=>ret, "error"=>minf)
+    print("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
     nt = NamedTuple{Tuple(model.params)}(minx)
 
-    return RheoModel(model,nt; log_add = log);
+    return RheoModel(model,nt, log = log);
+
 
 end
 

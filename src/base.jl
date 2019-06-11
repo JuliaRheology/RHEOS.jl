@@ -3,7 +3,7 @@
 #######################
 #~ Utility Functions ~#
 #######################
-export derivCD, derivBD, trapz
+export derivCD, derivBD, trapz, closestindex
 
 """
     trapz(y, x; init=0.0)
@@ -214,8 +214,8 @@ function fixed_resample(x::Vector{T}, y::Vector{T},boundaries::Vector{U}, elperi
                     y_add =  y[k] .+ (x_add[1:end].-x[k]) .* (y[k+1].-y[k])./(x[k+1].-x[k])
                     yᵦ = append!(yᵦ,y_add)
              end
-                xᵦ = append!(xᵦ,x[end])
-                yᵦ = append!(yᵦ,y[end])
+                # xᵦ = append!(xᵦ,x[end])
+                # yᵦ = append!(yᵦ,y[end])
 
         # downsampling, simply takes every N element as in downsample function
         elseif signbit(elperiods[i]) #under/sampling
