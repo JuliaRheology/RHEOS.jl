@@ -525,9 +525,11 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
 
     if (check == strain_only)
         modulus = model.Ga
+        modsing = model.G
         controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
     elseif (check == stress_only)
         modulus = model.Ja
+        modsing = model.J
         print(round(length(data.σ)))
         controlled = data.σ[convert(Integer,round(length(data.σ)/2))]
     end
@@ -535,7 +537,8 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
     # check singularity presence at time closest to step
     stepon_el = closestindex(data.t, step_on)
 
-    sing = singularitytest(modulus; t1 = convert(RheoFloat,(data.t[stepon_el] - step_on)))
+        sing = singularitytest(modsing)
+    #sing = singularitytest(modulus; t1 = convert(RheoFloat,(data.t[stepon_el] - step_on)))
 
     # get predicted
     if !sing
@@ -557,10 +560,23 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
     end
 
     # store operation
-    log = vcat(data.log, "Predicted data from model:", model.log)
+    if (check == stress_only)
+        sigma = data.σ
+        epsilon = predicted
+        pred_mod = "creep function J"
+    elseif (check == strain_only)
+        sigma = predicted
+        epsilon = data.ϵ
+        pred_mod = "relaxation function G"
+    end
+    time = data.t
 
-    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), data.t, log)
+    modparam = model.params
+    # store operation
+    log = vcat( data.log, "Predicted data using: $pred_mod, Parameters: $modparam")
 
+
+    return RheoTimeData(sigma,epsilon,time, log)
 end
 
 
