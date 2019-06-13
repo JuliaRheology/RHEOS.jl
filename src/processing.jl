@@ -86,7 +86,7 @@ Smooth data using a Gaussian Kernel to time scale τ (approximately half power).
 Smooths both σ and ϵ. Essentially a low pass filter with frequencies of 1/τ being cut to approximately
 half power. For other pad types available see ImageFiltering documentation.
 """
-function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
+function smooth(self::RheoTimeData, τ::Real; pad::String="symmetric")
 
     @eval import ImageFiltering: imfilter, Kernel
 
@@ -537,8 +537,7 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
     # check singularity presence at time closest to step
     stepon_el = closestindex(data.t, step_on)
 
-        sing = singularitytest(modsing)
-    #sing = singularitytest(modulus; t1 = convert(RheoFloat,(data.t[stepon_el] - step_on)))
+    sing = singularitytest(modsing)
 
     # get predicted
     if !sing
@@ -767,12 +766,18 @@ frequencies and model given as arguments.
 """
 function dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
 
-    # get results
-    predGp = model.Gp(data.ω)
-    predGpp = model.Gpp(data.ω)
+    print(typeof(data))
 
+    # get results
+    predGp = model.Gpa(data.ω)
+    predGpp = model.Gppa(data.ω)
+
+    pred_mod = "Storage and loss moduli Gp, Gpp "
+
+    modparam = model.params
     # store operation
-    log = vcat(data.log, "Predicted data from model:", model.log)
-    RheoFreqData(predGp, predGpp,data.ω, log)
+    log = vcat( data.log, "Predicted data using: $pred_mod, Parameters: $modparam")
+
+    return RheoFreqData(predGp, predGpp,data.ω, log)
 
 end
