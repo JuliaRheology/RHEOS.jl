@@ -4,7 +4,7 @@ function _trapz(tol)
     x = [i for i in -5.0:0.01:5.0]
     y = 3*x.^2
 
-    (RHEOS.trapz(y, x) - 250.0)<tol
+    isapprox(RHEOS.trapz(y, x), 250.0, atol=tol)
 end
 @test _trapz(tol)
 
@@ -14,7 +14,7 @@ function _derivCD(tol)
     dy = 2*x
     dy_numeric = RHEOS.derivCD(y, x)
 
-    all(i -> (dy[i]-dy_numeric[i])<tol, 1:length(dy_numeric))
+    isapprox(dy_numeric, dy, atol=tol)
 end
 @test _derivCD(tol)
 
@@ -23,13 +23,14 @@ function _derivBD(tol)
     y = x.^2
     dy = 2*x
     dy_numeric = RHEOS.derivBD(y, x)
-
-    all(i -> (dy[i]-dy_numeric[i])<tol, 1:length(dy_numeric))
+    # note that the backwards difference method has a weaker
+    # numerical test than derivCD as it is less accurate
+    all(i -> (dy[i]-dy_numeric[i])<tol, eachindex(dy_numeric))
 end
 @test _derivBD(tol)
 
-@test RHEOS.quasinull([-1.0])==true
-@test RHEOS.quasinull([1.0])==false
+# @test RHEOS.quasinull([-1.0])==true
+# @test RHEOS.quasinull([1.0])==false
 
 @test RHEOS.constantcheck([1.0, 2.0, 3.0])==true
 @test RHEOS.constantcheck([1.0, 2.0, 4.0])==false

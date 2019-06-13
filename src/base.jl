@@ -34,7 +34,6 @@ function trapz(y, x; init=0.0)
 
 end
 
-
 """
     derivCD(y, x)
 
@@ -97,33 +96,31 @@ function derivBD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
         ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
     end
 
-    return convert(Vector{RheoFloat},ydot)
+    return convert(Vector{RheoFloat}, ydot)
 end
 
-function quasinull(x::Array{RheoFloat,1})
+# function quasinull(x::Array{RheoFloat,1})
+# 
+#     if x == convert(Array{RheoFloat,1},[-1.0])
+#         return true
+#     else
+#         return false
+#     end
+# 
+# end
 
-    if x == convert(Array{RheoFloat,1},[-1.0])
-        return true
-    else
-        return false
-    end
-
-end
-
-function constantcheck(t::Vector{RheoFloat} )
-
-    diff = round.(t[2:end]-t[1:end-1]; digits=4)
-    # check if any element is not equal to 1st element
-    check = !any(x -> x != diff[1], diff)
-
+function constantcheck(t::Vector{RheoFloat})
+    # get array of differences
+    diff = t[2:end] - t[1:end-1]
+    # check if any element is not approximately equal to 1st element
+    check = all(x -> x ≈ diff[1], diff)
 end
 
 function getsampleperiod(t::Vector{RheoFloat})
-
+    # check sample rate is constant, otherwise sample period varies
     @assert constantcheck(t) "Sample-rate must be constant"
-
-    rate = t[2]-t[1]
-
+    # return sample period
+    rate = t[2] - t[1]
 end
 
 #############################
@@ -154,7 +151,7 @@ end
 
 Find the index of the array element closest to val.
 """
-function closestindex(x::Vector{T1}, val::T2) where {T1<:Real,T2<:Real}
+function closestindex(x::Vector{T1}, val::T2) where {T1<:Real, T2<:Real}
 
     # intialise closest match variable, assuming best match is index 1
     ibest = 1
