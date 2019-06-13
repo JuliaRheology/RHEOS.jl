@@ -86,7 +86,7 @@ Smooth data using a Gaussian Kernel to time scale τ (approximately half power).
 Smooths both σ and ϵ. Essentially a low pass filter with frequencies of 1/τ being cut to approximately
 half power. For other pad types available see ImageFiltering documentation.
 """
-function smooth(self::RheoTimeData, τ::Real; pad::String="symmetric")
+function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
 
     @eval import ImageFiltering: imfilter, Kernel
 
