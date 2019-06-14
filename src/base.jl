@@ -120,35 +120,12 @@ function getsampleperiod(t::Vector{RheoFloat})
     rate = t[2] - t[1]
 end
 
-#############################
-#~ Preprocessing Functions ~#
-#############################
-
-"""
-    getsigma(τ, samplerate)
-
-Generate sigma/std deviation for gaussian smoothing kernel.
-
-Acts as a low pass filter. Information of time scale τ will be half power,
-faster will be increasingly cut. Called by smoothgauss function.
-"""
-function getsigma(τ::Real, samplerate::Real)
-
-    # get freq, reduce to half power and generate gaussian std. deviation
-    smoothfreq = 1.0/τ
-
-    sF_halfpower = smoothfreq/sqrt(2.0*log(2.0))
-
-    σ = samplerate/(2.0*π*sF_halfpower)
-
-end
-
 """
     closestindex(x, val)
 
 Find the index of the array element closest to val.
 """
-function closestindex(x::Vector{T1}, val::T2) where {T1<:Real, T2<:Real}
+function closestindex(x::Vector{T1}, val::Real) where {T1<:Real, T2<:Real}
 
     # intialise closest match variable, assuming best match is index 1
     ibest = 1
@@ -176,8 +153,32 @@ returns array of indices.
 """
 closestindices(x::Vector{T1}, vals::Vector{T2}) where {T1<:Real, T2<:Real} = broadcast(closestindex, (x,), vals)
 
+#############################
+#~ Preprocessing Functions ~#
+#############################
+
 """
-    fixed_resample(x::Array{RheoFloat,1}, y::Array{RheoFloat,1}, boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
+    getsigma(τ, samplerate)
+
+Generate sigma/std deviation for gaussian smoothing kernel.
+
+Acts as a low pass filter. Information of time scale τ will be half power,
+faster will be increasingly cut. Called by smoothgauss function.
+"""
+function getsigma(τ::Real, samplerate::Real)
+
+    # get freq, reduce to half power and generate gaussian std. deviation
+    smoothfreq = 1.0/τ
+
+    sF_halfpower = smoothfreq/sqrt(2.0*log(2.0))
+
+    σ = samplerate/(2.0*π*sF_halfpower)
+    
+    RheoFloat(σ)
+end
+
+"""
+    fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elperiods::Union{Vector{U}, U}) where T<:RheoFloat where U<:Integer
 
 Resample two arrays with new sample rate(s).
 It can either reduce the sample rate by not taking every array element or it can increase the sample
@@ -185,17 +186,16 @@ rate by inserting new elements. If the number of elements per period (elperiods)
 it is negative it downsamples.
 
 The function returns the resampled x and y arrays.
-
 """
-function fixed_resample(x::Vector{T}, y::Vector{T},boundaries::Vector{U}, elperiods::Union{Vector{U},U}) where T<:RheoFloat where U<:Integer
+function fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elperiods::Union{Vector{U}, U}) where T<:RheoFloat where U<:Integer
 
     # assert correct function signature
     @assert length(x)==length(y) "X and Y arrays must have same length."
     @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
 
     # initialise resampled arrays as empty
-    xᵦ = zeros(RheoFloat,0)
-    yᵦ = zeros(RheoFloat,0)
+    xᵦ = zeros(RheoFloat, 0)
+    yᵦ = zeros(RheoFloat, 0)
 
     # loop through boundaries
     for i in 1:length(boundaries)-1
@@ -203,10 +203,10 @@ function fixed_resample(x::Vector{T}, y::Vector{T},boundaries::Vector{U}, elperi
         # upsampling, starts at each element then intepolates up N times
         if !signbit(elperiods[i])
             for k in boundaries[i]:(boundaries[i+1]-1)
-                    x_add  = range(x[k],stop=x[k+1], length=elperiods[i]+2)[1:end-1]
-                    xᵦ = append!(xᵦ,x_add)
+                    x_add  = range(x[k], stop=x[k+1], length=elperiods[i]+2)[1:end-1]
+                    xᵦ = append!(xᵦ, x_add)
                     y_add =  y[k] .+ (x_add[1:end].-x[k]) .* (y[k+1].-y[k])./(x[k+1].-x[k])
-                    yᵦ = append!(yᵦ,y_add)
+                    yᵦ = append!(yᵦ, y_add)
              end
                 # xᵦ = append!(xᵦ,x[end])
                 # yᵦ = append!(yᵦ,y[end])
@@ -228,9 +228,6 @@ function fixed_resample(x::Vector{T}, y::Vector{T},boundaries::Vector{U}, elperi
 
     return xᵦ, yᵦ
 end
-
-
-
 
 # function fixed_resample(x::Vector{T}, y::Vector{T},boundaries::Vector{U}, elperiods::Union{Vector{U},U}) where T<:RheoFloat where U<:Integer
 #

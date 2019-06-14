@@ -29,16 +29,11 @@ function _derivBD(tol)
 end
 @test _derivBD(tol)
 
-# @test RHEOS.quasinull([-1.0])==true
-# @test RHEOS.quasinull([1.0])==false
-
 @test RHEOS.constantcheck([1.0, 2.0, 3.0])==true
 @test RHEOS.constantcheck([1.0, 2.0, 4.0])==false
 
 @test RHEOS.sampleratecompare([1.0, 2.0, 3.0], [2.0, 3.0, 4.0])==true
 @test RHEOS.sampleratecompare([1.0, 2.0, 3.0], [0.1, 0.2, 0.3])==false
-
-# @test _var_resample()
 
 @test RHEOS.closestindex([1.0, 2.0, 3.0], 1.7)==2
 
