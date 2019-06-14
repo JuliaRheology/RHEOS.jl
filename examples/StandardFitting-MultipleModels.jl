@@ -23,23 +23,23 @@ sls_fit_fix = modelfit(data_resampled_fix, SLS2, strain_imposed, verbose=true)
 sls_predicted_fix = modelpredict(data_predict, sls_fit_fix)
 
 # SLS fit - No singularity - variable sampling
-sls_fit_var = modelfit(data_resampled_var, SLS(), strain_imposed, verbose=true)
+sls_fit_var = modelfit(data_resampled_var, SLS, strain_imposed, verbose=true)
 sls_predicted_var = modelpredict(data_predict_var, sls_fit_var)
 
 # Fractional model: η, cβ, β, k - Singularity - constant sampling
-p0 = [1e4, 1e3, 0.3, 4e2]
-lb = [0.1, 0.1, 0.1, 0.1]
-ub = [Inf, Inf, 0.99, Inf]
-fractspecial_fit_fix = modelfit(data_resampled_fix, FractionalSpecial(), strain_imposed; p0 = p0, lo=lb, hi=ub, verbose=true)
+p0 = (η = 1e4, cᵦ= 1e3, β = 0.3, k = 4e2)
+lb = (η =0.1, cᵦ= 0.1, β = 0.1, k = 0.1]
+ub = (η =Inf, cᵦ= Inf, β = 0.99,k = Inf]
+fractspecial_fit_fix = modelfit(data_resampled_fix, FractionalSpecial, strain_imposed; p0 = p0, lo=lb, hi=ub, verbose=true)
 fracspecial_predicted_fix = modelpredict(data_predict, fractspecial_fit_fix)
 
 # Fractional model - Singularity - variable sampling
-fractspecial_fit_var = modelfit(data_resampled_var, FractionalSpecial(), strain_imposed; p0 = p0, lo=lb, hi=ub, verbose=true)
+fractspecial_fit_var = modelfit(data_resampled_var, FractionalSpecial, strain_imposed; p0 = p0, lo=lb, hi=ub, verbose=true)
 fracspecial_predicted_var = modelpredict(data_predict_var, fractspecial_fit_var)
 
 
 # Step Fit
-fractspecial_fit_step = modelstepfit(data_resampled_fix, FractionalSpecial(),strain_imposed; step = 0.3)
+fractspecial_fit_step = modelstepfit(data_resampled_fix, FractionalSpecial,strain_imposed; step = 0.3)
 fracspecial_predicted_step = modelsteppredict(data_predict, fractspecial_fit_step)
 
 # plot all data

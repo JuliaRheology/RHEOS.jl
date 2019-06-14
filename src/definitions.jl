@@ -18,7 +18,7 @@ empty_rheodata_vector=RheoFloat[]
 
 
 """
-    RheoTimeData(;σ::Vector{T1}, ϵ::Vector{T2}, t::Vector{T3}, log::Vector{String}) where {T1<:Real, T2<:Real, T3<:Real}
+    RheoTimeData(;σ::Vector{T1}, ϵ::Vector{T2}, t::Vector{T3}, log::OrderedDict{Any,Any}) where {T1<:Real, T2<:Real, T3<:Real}
 
 RheoTimeData struct contains stress, strain and time data.
 
@@ -40,14 +40,15 @@ struct RheoTimeData
     ϵ::Vector{RheoFloat}
     t::Vector{RheoFloat}
 
-    log::Vector{String}
-    #log::Dict{Any,Any}
+    #log::Vector{String}
+    log::OrderedDict{Any,Any}
 
 end
 
 function RheoTimeData(;ϵ::Vector{T1} = empty_rheodata_vector, σ::Vector{T2} = empty_rheodata_vector, t::Vector{T3} = empty_rheodata_vector, source="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
-    s_datatype = string("Data type: ",check_time_data_consistency(t,ϵ,σ))
-    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), [source,s_datatype])   #Dict{Any,Any}("source"=> source, "datatype"=>check_time_data_consistency(t,ϵ,σ))
+    typecheck = check_time_data_consistency(t,ϵ,σ)
+    log = OrderedDict{Any,Any}("activity"=>"Import", "data_source"=>source, "type"=>typecheck)
+    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), log)   #Dict{Any,Any}("source"=> source, "datatype"=>check_time_data_consistency(t,ϵ,σ))
 end
 
 
@@ -92,7 +93,7 @@ end
 
 
 """
-    RheoFreqData(Gp::Vector{T1}, Gpp::Vector{T2}, ω::Vector{T3}, log::Vector{String}) where {T1<:Real, T2<:Real, T3<:Real}
+    RheoFreqData(Gp::Vector{T1}, Gpp::Vector{T2}, ω::Vector{T3}, log::OrderedDict{Any,Any}) where {T1<:Real, T2<:Real, T3<:Real}
 
 RheologyDynamic contains storage modulus, loss modulus and frequency data.
 
@@ -114,14 +115,16 @@ struct RheoFreqData
     ω::Vector{RheoFloat}
 
     # operations applied, stores history of which functions (including arguments)
-    log::Vector{String}
+    #log::Vector{String}
+    log::OrderedDict{Any,Any}
 
 end
 
 
-function RheoFreqData(;Gp::Vector{T1} = empty_rheodata_vector, Gpp::Vector{T2} = empty_rheodata_vector, ω::Vector{T3} = empty_rheodata_vector, info="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
-    s_datatype = string("Data type: ",check_freq_data_consistency(ω,Gp,Gpp))
-    RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω), [info,s_datatype])
+function RheoFreqData(;Gp::Vector{T1} = empty_rheodata_vector, Gpp::Vector{T2} = empty_rheodata_vector, ω::Vector{T3} = empty_rheodata_vector,source="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
+    typecheck = check_freq_data_consistency(ω,Gp,Gpp)
+    log = OrderedDict{Any,Any}("operation"=>"Import", "data_source"=>source, "type"=>typecheck)
+    RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω), log)
 end
 
 
@@ -175,7 +178,7 @@ function +(self1::RheoTimeData, self2::RheoTimeData)
     @assert (self1.t == self2.t) "Addition error: timelines inconsistent"
 
     # Operation on the logs - not so clear what it should be
-    log = vcat(self1.log, self2.log, ["previous two logs added"])
+    log = OrderedDict{Any,Any}("activity"=>"addition", "left"=>self1.log, "right"=>self2.log)
 
     if (type1==strain_only) && (type2==strain_only)
         return RheoTimeData(empty_rheodata_vector, self1.ϵ+self2.ϵ, self1.t, log)
@@ -196,14 +199,14 @@ function -(self1::RheoTimeData, self2::RheoTimeData)
 
     type1 = RheoTimeDataType(self1)
     type2 = RheoTimeDataType(self2)
-    @assert (type1!=invalid_time_data) "Addition error: first parameter invalid"
-    @assert (type2!=invalid_time_data) "Addition error: second parameter invalid"
-    @assert (type1==type2) "Addition error: parameters inconsistent"
-    @assert (type1!=time_only) "Addition error: time only data cannot be added"
-    @assert (self1.t == self2.t) "Addition error: timelines inconsistent"
+    @assert (type1!=invalid_time_data) "Subtraction error: first parameter invalid"
+    @assert (type2!=invalid_time_data) "Subtraction error: second parameter invalid"
+    @assert (type1==type2) "Subtraction error: parameters inconsistent"
+    @assert (type1!=time_only) "Subtraction error: time only data cannot be added"
+    @assert (self1.t == self2.t) "Subtraction error: timelines inconsistent"
 
     # Operation on the logs - not so clear what it should be
-    log = vcat(self1.log, self2.log, ["previous two logs added"])
+    log = OrderedDict{Any,Any}("activity"=>"subtraction", "left"=>self1.log, "right"=>self2.log)
 
     if (type1==strain_only) && (type2==strain_only)
         return RheoTimeData(empty_rheodata_vector, self1.ϵ-self2.ϵ, self1.t, log)
@@ -227,7 +230,8 @@ function -(self1::RheoTimeData)
     @assert (type1!=time_only) "unary - error: time only data cannot be manipulated this way"
 
     # log
-    log = vcat(self1.log, ["multiplied by -1"])
+    log = self1.log
+    log["activity"] = "unary negation"
 
     return RheoTimeData(-self1.σ, -self1.ϵ, self1.t, log)
 
@@ -242,7 +246,8 @@ function *(operand::Real, self1::RheoTimeData)
     @assert (type1!=time_only) "* error: time only data cannot be manipulated this way"
 
     # log
-    log = vcat(self1.log, ["multiplied data by $operand"])
+    log = self1.log
+    log["activity"] = "multiplication by $operand"
 
     return RheoTimeData(operand*self1.σ, operand*self1.ϵ, self1.t, log)
 end
@@ -334,10 +339,10 @@ function RheoModelClass(;name::String,
         ((ta,params) -> begin $unpack_expr; [$G for t in ta]; end)  |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
         ((t,params) -> begin $unpack_expr; $J; end)                 |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
         ((ta,params) -> begin $unpack_expr; [$J for t in ta]; end)  |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
-        ((t,params) -> begin $unpack_expr; $Gp; end)                |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
-        ((ta,params) -> begin $unpack_expr; [$Gp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
-        ((t,params) -> begin $unpack_expr; $Gpp; end)               |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
-        ((ta,params) -> begin $unpack_expr; [$Gpp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
+        ((ω,params) -> begin $unpack_expr; $Gp; end)                |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
+        ((ωa,params) -> begin $unpack_expr; [$Gp for ω in ωa]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
+        ((ω,params) -> begin $unpack_expr; $Gpp; end)               |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
+        ((ωa,params) -> begin $unpack_expr; [$Gpp for ω in ωa]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
         (params -> begin $unpack_expr; $constraint; end)            |> FunctionWrapper{Bool,Tuple{Array{RheoFloat,1}}},
         $info, $expressions) )
 end
@@ -457,10 +462,10 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
         ((ta,params) -> begin $unpack_expr; [$G for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
         ((t,params) -> begin $unpack_expr; $J; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
         ((ta,params) -> begin $unpack_expr; [$J for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
-        ((t,params) -> begin $unpack_expr; $Gp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
-        ((ta,params) -> begin $unpack_expr; [$Gp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
-        ((t,params) -> begin $unpack_expr; $Gpp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
-        ((ta,params) -> begin $unpack_expr; [$Gpp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
+        ((ω,params) -> begin $unpack_expr; $Gp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
+        ((ωa,params) -> begin $unpack_expr; [$Gp for ω in ωa]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
+        ((ω,params) -> begin $unpack_expr; $Gpp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}},
+        ((ωa,params) -> begin $unpack_expr; [$Gpp for ω in ωa]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
         (params -> begin $unpack_expr; $constraint; end) |> FunctionWrapper{Bool,Tuple{Array{RheoFloat,1}}},
         $info, $expressions)   )
 end
@@ -487,15 +492,14 @@ struct RheoModel
 
     params::NamedTuple
     info::String
-    #log::Vector{String}
-    log::Dict{Any,Any}
+    log::OrderedDict{Any,Any}
 
 end
 
 
 
 
-function RheoModel(m::RheoModelClass, nt0::NamedTuple; log::Dict{Any,Any} = Dict{Any,Any}("init"=>"model created from constructor call"))
+function RheoModel(m::RheoModelClass, nt0::NamedTuple; log::OrderedDict{Any,Any} = OrderedDict{Any,Any}("activity"=>"model creation", "data_source"=>"constructor call"))
 
     # check all parameters are provided and create a well ordered named tuple
     p = model_parameters(nt0, m.params,"model definition")
@@ -517,10 +521,10 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple; log::Dict{Any,Any} = Dict
     (ta -> begin [$G for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
     (t -> begin $J; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
     (ta -> begin [$J for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
-    (t -> begin $Gp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
-    (ta -> begin [$Gp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
-    (t -> begin $Gpp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
-    (ta -> begin [$Gpp for t in ta]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
+    (ω -> begin $Gp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
+    (ωa -> begin [$Gp for ω in ωa]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
+    (ω -> begin $Gpp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
+    (ωa -> begin [$Gpp for ω in ωa]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
     $expressions, $nt, $info, $log) )
 end
 

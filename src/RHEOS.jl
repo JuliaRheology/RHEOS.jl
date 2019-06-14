@@ -12,7 +12,6 @@ RheoFloat = Float64
 using InverseLaplace
 using NLopt
 using JLD2
-#using Interpolations
 import DSP.conv
 # Base and stdlib imports
 using Base.Cartesian
@@ -21,6 +20,7 @@ import SpecialFunctions.gamma
 import Base: +, -, *
 import DelimitedFiles: readdlm, writedlm
 export constantcheck
+using DataStructures
 
 using FunctionWrappers: FunctionWrapper
 #using MittagLeffler

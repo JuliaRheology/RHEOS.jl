@@ -39,9 +39,11 @@ function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_bound
     end
 
     # add record of operation applied
-    log = vcat(self.log, "fixed_resample - boundaries: $boundaries, elperiods: $elperiods")
+    #log = vcat(self.log, "fixed_resample - boundaries: $boundaries, elperiods: $elperiods")
 
-    self_new = RheoTimeData(sigma, epsilon, time, log)
+    log = OrderedDict{Any,Any}("activity"=>"fixed resample", "data_source"=>self.log, "boundaries"=>boundaries, "elperiods"=>elperiods)
+
+    return RheoTimeData(sigma, epsilon, time, log)
 
 end
 
@@ -72,7 +74,9 @@ function cutting(self::RheoTimeData, time_on::T1,time_off::T2) where {T1<:Number
         epsilon = self.ϵ[boundary_on:boundary_off]
         sigma = self.σ[boundary_on:boundary_off]
     end
-    log = vcat(self.log, "Data from $time_on to $time_off extracted.")
+    log = OrderedDict{Any,Any}("activity"=>"cutting", "data_source"=>self.log, "time range"=>[time_on,time_off])
+
+    #log = vcat(self.log, "Data from $time_on to $time_off extracted.")
 
     return RheoTimeData(sigma,epsilon,time,log)
 
@@ -108,9 +112,12 @@ function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
     end
 
     # add record of operation applied
-    log = vcat(self.log, "smooth - τ: $τ")
+    #log = vcat(self.log, "smooth - τ: $τ")
 
-    self_new = RheoTimeData(sigma, epsilon, self.t, log)
+    log = OrderedDict{Any,Any}("activity"=>"smooth", "data_source"=>self.log, "tau"=>τ)
+
+
+    RheoTimeData(sigma, epsilon, self.t, log)
 
 end
 
@@ -137,15 +144,15 @@ function extract(self::Union{RheoTimeData,RheoFreqData}, type::Union{TimeDataTyp
 
         if type == time_only
             @assert check!= invalid_time_data "Time not available"
-            log = vcat(self.log,"Time extracted")
+            log = OrderedDict{Any,Any}("activity"=>"extract", "data_source"=>self.log, "type"=>"Time extracted")
             return RheoTimeData([], [],self.t,log)
         elseif type == strain_only
             @assert (check == strain_and_stress) || (check == strain_only) "Strain not available"
-            log = vcat(self.log,"Time and strain extracted")
+            log = OrderedDict{Any,Any}("activity"=>"extract", "data_source"=>self.log, "type"=>"Time and strain extracted")
             return RheoTimeData([], self.ϵ,self.t,log)
         elseif type == stress_only
             @assert (check == strain_and_stress) || (check == stress_only) "Stress not available"
-            log = vcat(self.log,"Time and stress extracted")
+            log = OrderedDict{Any,Any}("activity"=>"extract", "data_source"=>self.log, "type"=>"Time and stress extracted")
             return RheoTimeData(self.σ, [], self.t,log)
         end
 
@@ -157,7 +164,7 @@ function extract(self::Union{RheoTimeData,RheoFreqData}, type::Union{TimeDataTyp
         @assert (type!= invalid_freq_data) "Cannot extract information from invalid frequency data"
         check = RheoFreqDataType(self)
         @assert (check == with_modulus) "Frequency and modulii required"
-        log = vcat(self.log,"Frequency extracted")
+        log = OrderedDict{Any,Any}("activity"=>"extract", "data_source"=>self.log, "type"=>"Frequency extracted")
         return RheoFreqData([], [],self.ω,log)
     end
 
@@ -278,7 +285,7 @@ function modelfit(data::RheoTimeData,
 
     #modulusname = string(modulus)
     #log = vcat(data.log, "Fitted $modulusname, Modulus used: $modtouse, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
-    log = Dict{Any,Any}("data_source"=>data.log, "time"=>timetaken, "stop reason"=>ret, "error"=>minf)
+    log = OrderedDict{Any,Any}("activity"=>"fitting","data_source"=>data.log, "time"=>timetaken, "stop reason"=>ret, "error"=>minf)
     print("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
     nt = NamedTuple{Tuple(model.params)}(minx)
 
@@ -359,7 +366,7 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
 
     modparam = model.params
     # store operation
-    log = vcat( data.log, "Predicted data using: $pred_mod, Parameters: $modparam")
+    log = OrderedDict{Any,Any}("activity"=>"predicted data", "data_source"=>data.log, "modulus"=>pred_mod, "parameters"=>modparam)
 
 
     return RheoTimeData(sigma,epsilon,time, log)
@@ -404,7 +411,7 @@ function modelstepfit(data::RheoTimeData,
             index = findall(x->x==:a,model.params)
             p0a[index[1]] = 0.8;
         end
-        @warn "Initial values for model parameters is set to $p0a by default"
+        @warn "Initial values for mod[el parameters is set to $p0a by default"
     else
         p0a = model_parameters(p0,model.params,"initial guess")
     end
@@ -495,7 +502,7 @@ function modelstepfit(data::RheoTimeData,
                                                                                         singularity = sing,
                                                                                         _rel_tol = rel_tol)
 
-    log = Dict{Any,Any}("data_source"=>data.log, "time"=>timetaken, "stop reason"=>ret, "error"=>minf)
+    log = OrderedDict{Any,Any}("activity"=>"fitting", "data_source"=>data.log, "time"=>timetaken, "stop reason"=>ret, "error"=>minf)
     print("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
     nt = NamedTuple{Tuple(model.params)}(minx)
 
@@ -525,9 +532,11 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
 
     if (check == strain_only)
         modulus = model.Ga
+        modsing = model.G
         controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
     elseif (check == stress_only)
         modulus = model.Ja
+        modsing = model.J
         print(round(length(data.σ)))
         controlled = data.σ[convert(Integer,round(length(data.σ)/2))]
     end
@@ -535,7 +544,7 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
     # check singularity presence at time closest to step
     stepon_el = closestindex(data.t, step_on)
 
-    sing = singularitytest(modulus; t1 = convert(RheoFloat,(data.t[stepon_el] - step_on)))
+    sing = singularitytest(modsing)
 
     # get predicted
     if !sing
@@ -557,10 +566,24 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
     end
 
     # store operation
-    log = vcat(data.log, "Predicted data from model:", model.log)
+    if (check == stress_only)
+        sigma = data.σ
+        epsilon = predicted
+        pred_mod = "creep function J"
+    elseif (check == strain_only)
+        sigma = predicted
+        epsilon = data.ϵ
+        pred_mod = "relaxation function G"
+    end
+    time = data.t
 
-    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), data.t, log)
+    modparam = model.params
+    # store operation
+    #log = vcat( data.log, "Predicted data using: $pred_mod, Parameters: $modparam")
+    log = OrderedDict{Any,Any}("activity"=>"predicted data", "data_source"=>data.log, "modulus"=>pred_mod, "parameters"=>modparam)
 
+
+    return RheoTimeData(sigma,epsilon,time, log)
 end
 
 
@@ -735,8 +758,11 @@ function dynamicmodelfit(data::RheoFreqData,
 
 
     modelname = string(model)
-    log = vcat(data.log, "Fitted Gp, Gpp of $modelname, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
+
+    log = OrderedDict{Any,Any}("activity"=>"fitting Gp and Gpp", "data_source"=>data.log, "time"=>timetaken, "stop reason"=>ret, "error"=>minf)
+    print("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
     nt = NamedTuple{Tuple(model.params)}(minx)
+
 
     return RheoModel(model,nt; log_add = log);
 
@@ -751,12 +777,19 @@ frequencies and model given as arguments.
 """
 function dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
 
-    # get results
-    predGp = model.Gp(data.ω)
-    predGpp = model.Gpp(data.ω)
+    print(typeof(data))
 
+    # get results
+    predGp = model.Gpa(data.ω)
+    predGpp = model.Gppa(data.ω)
+
+    pred_mod = "Storage and loss moduli Gp, Gpp "
+
+    modparam = model.params
     # store operation
-    log = vcat(data.log, "Predicted data from model:", model.log)
-    RheoFreqData(predGp, predGpp,data.ω, log)
+    log = OrderedDict{Any,Any}("activity"=>"predicted data", "data_source"=>data.log, "modulus"=>pred_mod, "parameters"=>modparam)
+    #log = vcat( data.log, "Predicted data using: $pred_mod, Parameters: $modparam")
+
+    return RheoFreqData(predGp, predGpp,data.ω, log)
 
 end
