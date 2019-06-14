@@ -3,34 +3,26 @@
 #######################
 #~ Utility Functions ~#
 #######################
-export derivCD, derivBD, trapz, closestindex
-
 """
-    trapz(y, x; init=0.0)
+    trapz(y, x)
 
 Array based trapezoidal integration of y with respect to x.
 
-Limits of integration defined by the start and end points of the arrays. 'init'
-keyword argument is used for setting an initial condition.
+Limits of integration defined by the start and end points of the arrays.
 """
-function trapz(y, x; init=0.0)
+function trapz(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 
     n = length(x)
 
     @assert n==length(y) "X and Y array length must match."
+    n==1 && return zero(RheoFloat)
 
-    # init*2 to simplify final division by 2
-    r = 2.0*init
-
-    if n==1; return r; end
-
-    # trapezoidal rule
-    @inbounds for i in 2:length(x)
+    r = zero(RheoFloat)
+    @inbounds for i in 2:n
         r += (y[i-1] + y[i])*(x[i] - x[i-1])
     end
-
-    # return summation
-    r/2.0
+    
+    r/2
 
 end
 
@@ -53,7 +45,9 @@ function derivCD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 
     # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
     # this is a physical assumption that material is at rest before first data point.
-    @inbounds ydot[1] = (y[1] - 0.0)/(x[2] - x[1])
+    # Could be problematic in some cases if sudden jump as we are actually missing
+    # important information about how quickly that jump happened.
+    @inbounds ydot[1] = y[1]/(x[2] - x[1])
 
     # central difference with uneven spacing for general case of constant or variable sample rate
     @inbounds for i in 2:(N-1)
@@ -65,7 +59,7 @@ function derivCD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
     # 1st order backwards difference for last element
     ydot[N] = (y[N] - y[N-1])/(x[N] - x[N-1])
 
-    return convert(Vector{RheoFloat},ydot)
+    return ydot
 
 end
 
@@ -74,7 +68,7 @@ end
 
 Given two arrays of data, x and y, calculate dy/dx using 1st order
 backward difference. Assumes y==0 at a previous point, i.e.
-y is 'at rest'. Captures instantaneous loading where derivCD will not.
+y is 'at rest'. Captures instantaneous loading where derivCD will smooth.
 """
 function derivBD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 
@@ -89,14 +83,17 @@ function derivBD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 
     # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
     # this is a physical assumption that material is at rest before first data point.
-    @inbounds ydot[1] = (y[1] - 0.0)/(x[2] - x[1])
+    # Could be problematic in some cases if sudden jump as we are actually missing
+    # important information about how quickly that jump happened.    
+    @inbounds ydot[1] = y[1]/(x[2] - x[1])
 
     # backwards difference method for rest of points
     @inbounds for i in 2:N
         ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
     end
 
-    return convert(Vector{RheoFloat}, ydot)
+    return ydot
+
 end
 
 # function quasinull(x::Array{RheoFloat,1})
@@ -110,7 +107,7 @@ end
 # end
 
 function constantcheck(t::Vector{RheoFloat})
-    # get array of differences
+    # get array of backward differences
     diff = t[2:end] - t[1:end-1]
     # check if any element is not approximately equal to 1st element
     check = all(x -> x ≈ diff[1], diff)

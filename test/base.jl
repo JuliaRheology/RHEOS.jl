@@ -1,4 +1,4 @@
-tol = 1e-2
+tol = (eps(RHEOS.RheoFloat))^(0.125) 
 
 function _trapz(tol)
     x = [i for i in -5.0:0.01:5.0]
@@ -9,7 +9,7 @@ end
 @test _trapz(tol)
 
 function _derivCD(tol)
-    x = collect(0.0:0.001:1.5)
+    x = Vector(0.0:0.001:1.5)
     y = x.^2
     dy = 2*x
     dy_numeric = RHEOS.derivCD(y, x)
