@@ -7,16 +7,16 @@
 export cutting, extract
 
 """
-    fixedresample(self::RheoTimeData, elperiods::Union{Vector{K},K}; time_boundaries::Vector{T}= [-1])
+    resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Vector{T}= [-1])
 
 Resample data with new sample rate(s).
 
-Fixedresample can downsample or upsample data. If the number of elperiods is negative it is going to reduce the number of samples,
+resample can downsample or upsample data. If the number of elperiods is negative it is going to reduce the number of samples,
 viceversa if it is positive. If time boundaries are not specified, resampling is applied to the whole set of data.
 If number of elements per period (elperiods) is 1 or -1 it returns the original RheoTimeData, whilst 0 is not accepted as valid
 number for elperiods.
 """
-function fixedresample(self::RheoTimeData, elperiods::Union{Vector{K},K}; time_boundaries::Vector{T}= [-1]) where {K<:Integer,T<:Real}
+function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Vector{T}= [-1]) where {K<:Integer,T<:Real}
 
     @assert (count(iszero,elperiods)==0) "Number of elements cannot be zero"
     # convert boundaries from times to element indicies

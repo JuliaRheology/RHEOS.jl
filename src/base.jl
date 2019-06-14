@@ -3,37 +3,28 @@
 #######################
 #~ Utility Functions ~#
 #######################
-export derivCD, derivBD, trapz, closestindex
-
 """
-    trapz(y, x; init=0.0)
+    trapz(y, x)
 
 Array based trapezoidal integration of y with respect to x.
 
-Limits of integration defined by the start and end points of the arrays. 'init'
-keyword argument is used for setting an initial condition.
+Limits of integration defined by the start and end points of the arrays.
 """
-function trapz(y, x; init=0.0)
+function trapz(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 
     n = length(x)
 
     @assert n==length(y) "X and Y array length must match."
+    n==1 && return zero(RheoFloat)
 
-    # init*2 to simplify final division by 2
-    r = 2.0*init
-
-    if n==1; return r; end
-
-    # trapezoidal rule
-    @inbounds for i in 2:length(x)
+    r = zero(RheoFloat)
+    @inbounds for i in 2:n
         r += (y[i-1] + y[i])*(x[i] - x[i-1])
     end
-
-    # return summation
-    r/2.0
+    
+    r/2
 
 end
-
 
 """
     derivCD(y, x)
@@ -54,7 +45,9 @@ function derivCD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 
     # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
     # this is a physical assumption that material is at rest before first data point.
-    @inbounds ydot[1] = (y[1] - 0.0)/(x[2] - x[1])
+    # Could be problematic in some cases if sudden jump as we are actually missing
+    # important information about how quickly that jump happened.
+    @inbounds ydot[1] = y[1]/(x[2] - x[1])
 
     # central difference with uneven spacing for general case of constant or variable sample rate
     @inbounds for i in 2:(N-1)
@@ -66,7 +59,7 @@ function derivCD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
     # 1st order backwards difference for last element
     ydot[N] = (y[N] - y[N-1])/(x[N] - x[N-1])
 
-    return convert(Vector{RheoFloat},ydot)
+    return ydot
 
 end
 
@@ -75,7 +68,7 @@ end
 
 Given two arrays of data, x and y, calculate dy/dx using 1st order
 backward difference. Assumes y==0 at a previous point, i.e.
-y is 'at rest'. Captures instantaneous loading where derivCD will not.
+y is 'at rest'. Captures instantaneous loading where derivCD will smooth.
 """
 function derivBD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 
@@ -90,14 +83,17 @@ function derivBD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 
     # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
     # this is a physical assumption that material is at rest before first data point.
-    @inbounds ydot[1] = (y[1] - 0.0)/(x[2] - x[1])
+    # Could be problematic in some cases if sudden jump as we are actually missing
+    # important information about how quickly that jump happened.    
+    @inbounds ydot[1] = y[1]/(x[2] - x[1])
 
     # backwards difference method for rest of points
     @inbounds for i in 2:N
         ydot[i] = (y[i] - y[i-1])/(x[i] - x[i-1])
     end
 
-    return convert(Vector{RheoFloat},ydot)
+    return ydot
+
 end
 
 function quasinull(x::Array{RheoFloat,1})
@@ -110,43 +106,18 @@ function quasinull(x::Array{RheoFloat,1})
 
 end
 
-function constantcheck(t::Vector{RheoFloat} )
-
-    diff = round.(t[2:end]-t[1:end-1]; digits=4)
-    # check if any element is not equal to 1st element
-    check = !any(x -> x != diff[1], diff)
-
+function constantcheck(t::Vector{RheoFloat})
+    # get array of backward differences
+    diff = t[2:end] - t[1:end-1]
+    # check if any element is not approximately equal to 1st element
+    check = all(x -> x ≈ diff[1], diff)
 end
 
 function getsampleperiod(t::Vector{RheoFloat})
-
+    # check sample rate is constant, otherwise sample period varies
     @assert constantcheck(t) "Sample-rate must be constant"
-
-    rate = t[2]-t[1]
-
-end
-
-#############################
-#~ Preprocessing Functions ~#
-#############################
-
-"""
-    getsigma(τ, samplerate)
-
-Generate sigma/std deviation for gaussian smoothing kernel.
-
-Acts as a low pass filter. Information of time scale τ will be half power,
-faster will be increasingly cut. Called by smoothgauss function.
-"""
-function getsigma(τ::Real, samplerate::Real)
-
-    # get freq, reduce to half power and generate gaussian std. deviation
-    smoothfreq = 1.0/τ
-
-    sF_halfpower = smoothfreq/sqrt(2.0*log(2.0))
-
-    σ = samplerate/(2.0*π*sF_halfpower)
-
+    # return sample period
+    rate = t[2] - t[1]
 end
 
 """
@@ -154,7 +125,7 @@ end
 
 Find the index of the array element closest to val.
 """
-function closestindex(x::Vector{T1}, val::T2) where {T1<:Real,T2<:Real}
+function closestindex(x::Vector{T1}, val::Real) where {T1<:Real, T2<:Real}
 
     # intialise closest match variable, assuming best match is index 1
     ibest = 1
@@ -182,8 +153,32 @@ returns array of indices.
 """
 closestindices(x::Vector{T1}, vals::Vector{T2}) where {T1<:Real, T2<:Real} = broadcast(closestindex, (x,), vals)
 
+#############################
+#~ Preprocessing Functions ~#
+#############################
+
 """
-    fixed_resample(x::Array{RheoFloat,1}, y::Array{RheoFloat,1}, boundaries::Array{Int64,1}, elperiods::Array{Int64,1})
+    getsigma(τ, samplerate)
+
+Generate sigma/std deviation for gaussian smoothing kernel.
+
+Acts as a low pass filter. Information of time scale τ will be half power,
+faster will be increasingly cut. Called by smoothgauss function.
+"""
+function getsigma(τ::Real, samplerate::Real)
+
+    # get freq, reduce to half power and generate gaussian std. deviation
+    smoothfreq = 1.0/τ
+
+    sF_halfpower = smoothfreq/sqrt(2.0*log(2.0))
+
+    σ = samplerate/(2.0*π*sF_halfpower)
+    
+    RheoFloat(σ)
+end
+
+"""
+    fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elperiods::Union{Vector{U}, U}) where T<:RheoFloat where U<:Integer
 
 Resample two arrays with new sample rate(s).
 It can either reduce the sample rate by not taking every array element or it can increase the sample
@@ -191,17 +186,16 @@ rate by inserting new elements. If the number of elements per period (elperiods)
 it is negative it downsamples.
 
 The function returns the resampled x and y arrays.
-
 """
-function fixed_resample(x::Vector{T}, y::Vector{T},boundaries::Vector{U}, elperiods::Union{Vector{U},U}) where T<:RheoFloat where U<:Integer
+function fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elperiods::Union{Vector{U}, U}) where T<:RheoFloat where U<:Integer
 
     # assert correct function signature
     @assert length(x)==length(y) "X and Y arrays must have same length."
     @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
 
     # initialise resampled arrays as empty
-    xᵦ = zeros(RheoFloat,0)
-    yᵦ = zeros(RheoFloat,0)
+    xᵦ = zeros(RheoFloat, 0)
+    yᵦ = zeros(RheoFloat, 0)
 
     # loop through boundaries
     for i in 1:length(boundaries)-1
@@ -209,10 +203,10 @@ function fixed_resample(x::Vector{T}, y::Vector{T},boundaries::Vector{U}, elperi
         # upsampling, starts at each element then intepolates up N times
         if !signbit(elperiods[i])
             for k in boundaries[i]:(boundaries[i+1]-1)
-                    x_add  = range(x[k],stop=x[k+1], length=elperiods[i]+2)[1:end-1]
-                    xᵦ = append!(xᵦ,x_add)
+                    x_add  = range(x[k], stop=x[k+1], length=elperiods[i]+2)[1:end-1]
+                    xᵦ = append!(xᵦ, x_add)
                     y_add =  y[k] .+ (x_add[1:end].-x[k]) .* (y[k+1].-y[k])./(x[k+1].-x[k])
-                    yᵦ = append!(yᵦ,y_add)
+                    yᵦ = append!(yᵦ, y_add)
              end
                 # xᵦ = append!(xᵦ,x[end])
                 # yᵦ = append!(yᵦ,y[end])
@@ -234,9 +228,6 @@ function fixed_resample(x::Vector{T}, y::Vector{T},boundaries::Vector{U}, elperi
 
     return xᵦ, yᵦ
 end
-
-
-
 
 # function fixed_resample(x::Vector{T}, y::Vector{T},boundaries::Vector{U}, elperiods::Union{Vector{U},U}) where T<:RheoFloat where U<:Integer
 #
