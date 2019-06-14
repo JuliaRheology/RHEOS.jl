@@ -48,16 +48,16 @@ function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ
             end
         end
         data = data[newstartingval:newendingval,:]
-
+        source = filedir
         # generate RheologyData struct and output
         if (ϵ_col!=-1) & (σ_col!=-1)
-            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], σ = data[:,σ_col], source = "Imported data: file $filedir, stress and strain")
+            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], σ = data[:,σ_col], source = source)
         elseif (ϵ_col!=-1) & (σ_col==-1)
-            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], source = "Imported data: file $filedir, only strain")
+            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], source = source)
         elseif (σ_col!=-1) & (ϵ_col==-1)
-            return RheoTimeData(t = data[:,t_col], σ = data[:,σ_col], source = "Imported data: file $filedir, only stress")
+            return RheoTimeData(t = data[:,t_col], σ = data[:,σ_col], source = source)
         elseif (t_col!=-1) & (σ_col==-1) &  (ϵ_col==-1)
-            return RheoTimeData(t = data[:,t_col], source = "Imported data: file $filedir, only time")
+            return RheoTimeData(t = data[:,t_col], source = source)
         end
 
     elseif ω_col!=-1
@@ -69,11 +69,25 @@ function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ
         data = readdlm(filedir, delimiter)
 
         # generate RheologyDynamic struct and output
-        return RheoFreqData(ω = data[:,ω_col], Gp = data[:,Gp_col], Gpp = data[:,Gpp_col], info = "Imported data: $filedir")
+        return RheoFreqData(ω = data[:,ω_col], Gp = data[:,Gp_col], Gpp = data[:,Gpp_col], source = filedir)
 
     end
 
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 """
     exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".csv", delimiter=',')

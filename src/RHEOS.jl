@@ -21,6 +21,7 @@ import SpecialFunctions.gamma
 import Base: +, -, *
 import DelimitedFiles: readdlm, writedlm
 export constantcheck
+using DataStructures
 
 using FunctionWrappers: FunctionWrapper
 #using MittagLeffler
