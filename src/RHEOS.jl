@@ -12,7 +12,6 @@ RheoFloat = Float64
 using InverseLaplace
 using NLopt
 using JLD2
-#using Interpolations
 import DSP.conv
 # Base and stdlib imports
 using Base.Cartesian
