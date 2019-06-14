@@ -42,6 +42,13 @@ end
 @test RHEOS.mapback([1.0, 1.23, 1.24, 1.5], [1.0, 1.1, 1.2, 1.3, 1.4, 1.5])==[1, 3, 6]
 @test RHEOS.mapback([1.0, 1.23, 1.24, 1.5], [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]; return_indices=false)==[1.0, 1.2, 1.5]
 
-# function _downsample()
-# end
-# @test RHEOS.
+function _downsample_1region()
+    x0 = collect(0.0:0.01:1.0)
+    y0 = x.^2
+
+    x1 = collect(0.0:0.1:1.0)
+    y1 = x.^2
+    
+
+end
+@test RHEOS.
