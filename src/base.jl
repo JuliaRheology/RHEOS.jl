@@ -96,15 +96,15 @@ function derivBD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 
 end
 
-# function quasinull(x::Array{RheoFloat,1})
-# 
-#     if x == convert(Array{RheoFloat,1},[-1.0])
-#         return true
-#     else
-#         return false
-#     end
-# 
-# end
+function quasinull(x::Array{RheoFloat,1})
+
+    if x == convert(Array{RheoFloat,1},[-1.0])
+        return true
+    else
+        return false
+    end
+
+end
 
 function constantcheck(t::Vector{RheoFloat})
     # get array of backward differences

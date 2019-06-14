@@ -44,11 +44,13 @@ end
 
 function _downsample_1region()
     x0 = collect(0.0:0.01:1.0)
-    y0 = x.^2
+    y0 = x0.^2
 
     x1 = collect(0.0:0.1:1.0)
-    y1 = x.^2
+    y1 = x1.^2
     
+    xout, yout = RHEOS.fixed_resample(x0, y0, [1,length(x0)], [-10])
 
+    yout==y1 && xout==x1 
 end
-@test RHEOS.
+@test _downsample_1region()
