@@ -123,7 +123,7 @@ end
 
 function RheoFreqData(;Gp::Vector{T1} = empty_rheodata_vector, Gpp::Vector{T2} = empty_rheodata_vector, ω::Vector{T3} = empty_rheodata_vector,source="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_freq_data_consistency(ω,Gp,Gpp)
-    log = Dict{Any,Any}("operation"=>"Import", "data_source"=>source, "type"=>typecheck)
+    log = OrderedDict{Any,Any}("operation"=>"Import", "data_source"=>source, "type"=>typecheck)
     RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω), log)
 end
 
@@ -178,7 +178,7 @@ function +(self1::RheoTimeData, self2::RheoTimeData)
     @assert (self1.t == self2.t) "Addition error: timelines inconsistent"
 
     # Operation on the logs - not so clear what it should be
-    log = OrderedDict{Any,Any}("activity"=>"addition", "self1"=>self1.log, "self2"=>self2.log)
+    log = OrderedDict{Any,Any}("activity"=>"addition", "left"=>self1.log, "right"=>self2.log)
 
     if (type1==strain_only) && (type2==strain_only)
         return RheoTimeData(empty_rheodata_vector, self1.ϵ+self2.ϵ, self1.t, log)
@@ -206,7 +206,7 @@ function -(self1::RheoTimeData, self2::RheoTimeData)
     @assert (self1.t == self2.t) "Subtraction error: timelines inconsistent"
 
     # Operation on the logs - not so clear what it should be
-    log = OrderedDict{Any,Any}("activity"=>"subtraction", "self1"=>self1.log, "self2"=>self2.log)
+    log = OrderedDict{Any,Any}("activity"=>"subtraction", "left"=>self1.log, "right"=>self2.log)
 
     if (type1==strain_only) && (type2==strain_only)
         return RheoTimeData(empty_rheodata_vector, self1.ϵ-self2.ϵ, self1.t, log)
@@ -230,8 +230,8 @@ function -(self1::RheoTimeData)
     @assert (type1!=time_only) "unary - error: time only data cannot be manipulated this way"
 
     # log
-    log = OrderedDict{Any,Any}("activity"=>"negative_moltiplication", "self1"=>self1.log)
-    #log = vcat(self1.log, ["multiplied by -1"])
+    log = self1.log
+    log["activity"] = "unary negation"
 
     return RheoTimeData(-self1.σ, -self1.ϵ, self1.t, log)
 
@@ -246,8 +246,8 @@ function *(operand::Real, self1::RheoTimeData)
     @assert (type1!=time_only) "* error: time only data cannot be manipulated this way"
 
     # log
-    log = OrderedDict{Any,Any}("activity"=>"moltiplication", "self1"=>self1.log, "operand"=>operand)
-    #log = vcat(self1.log, ["multiplied data by $operand"])
+    log = self1.log
+    log["activity"] = "multiplication by $operand"
 
     return RheoTimeData(operand*self1.σ, operand*self1.ϵ, self1.t, log)
 end
@@ -492,7 +492,6 @@ struct RheoModel
 
     params::NamedTuple
     info::String
-    #log::Vector{String}
     log::OrderedDict{Any,Any}
 
 end
