@@ -47,7 +47,7 @@ end
 
 function RheoTimeData(;ϵ::Vector{T1} = empty_rheodata_vector, σ::Vector{T2} = empty_rheodata_vector, t::Vector{T3} = empty_rheodata_vector, source="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_time_data_consistency(t,ϵ,σ)
-    log = OrderedDict{Any,Any}("activity"=>"Import", "data_source"=>source, "type"=>typecheck)
+    log = OrderedDict{Any,Any}(:n=>1,"activity"=>"import", "data_source"=>source, "type"=>typecheck)
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), log)   #Dict{Any,Any}("source"=> source, "datatype"=>check_time_data_consistency(t,ϵ,σ))
 end
 
@@ -123,7 +123,7 @@ end
 
 function RheoFreqData(;Gp::Vector{T1} = empty_rheodata_vector, Gpp::Vector{T2} = empty_rheodata_vector, ω::Vector{T3} = empty_rheodata_vector,source="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_freq_data_consistency(ω,Gp,Gpp)
-    log = OrderedDict{Any,Any}("operation"=>"Import", "data_source"=>source, "type"=>typecheck)
+    log = OrderedDict{Any,Any}(:n=>1, "activity"=>"import", "data_source"=>source, "type"=>typecheck)
     RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω), log)
 end
 
@@ -178,7 +178,7 @@ function +(self1::RheoTimeData, self2::RheoTimeData)
     @assert (self1.t == self2.t) "Addition error: timelines inconsistent"
 
     # Operation on the logs - not so clear what it should be
-    log = OrderedDict{Any,Any}("activity"=>"addition", "left"=>self1.log, "right"=>self2.log)
+    log = OrderedDict{Any,Any}(:n=>1,"activity"=>"addition", "left"=>self1.log, "right"=>self2.log)
 
     if (type1==strain_only) && (type2==strain_only)
         return RheoTimeData(empty_rheodata_vector, self1.ϵ+self2.ϵ, self1.t, log)
@@ -206,7 +206,7 @@ function -(self1::RheoTimeData, self2::RheoTimeData)
     @assert (self1.t == self2.t) "Subtraction error: timelines inconsistent"
 
     # Operation on the logs - not so clear what it should be
-    log = OrderedDict{Any,Any}("activity"=>"subtraction", "left"=>self1.log, "right"=>self2.log)
+    log = OrderedDict{Any,Any}(:n=>1,"activity"=>"subtraction", "left"=>self1.log, "right"=>self2.log)
 
     if (type1==strain_only) && (type2==strain_only)
         return RheoTimeData(empty_rheodata_vector, self1.ϵ-self2.ϵ, self1.t, log)
@@ -231,7 +231,8 @@ function -(self1::RheoTimeData)
 
     # log
     log = self1.log
-    log["activity"] = "unary negation"
+    log[:n] = log[:n] +1
+    log[string("activity_",log[:n])] = "unary negation"
 
     return RheoTimeData(-self1.σ, -self1.ϵ, self1.t, log)
 
@@ -247,7 +248,8 @@ function *(operand::Real, self1::RheoTimeData)
 
     # log
     log = self1.log
-    log["activity"] = "multiplication by $operand"
+    log[:n] = log[:n] +1
+    log[string("activity_",log[:n])] = "multiplication by $operand"
 
     return RheoTimeData(operand*self1.σ, operand*self1.ϵ, self1.t, log)
 end
