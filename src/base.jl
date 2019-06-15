@@ -194,8 +194,8 @@ function fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elper
     @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
 
     # initialise resampled arrays as empty
-    xᵦ = zeros(RheoFloat, 0)
-    yᵦ = zeros(RheoFloat, 0)
+    xᵦ = Vector{RheoFloat}(undef, 0)
+    yᵦ = Vector{RheoFloat}(undef, 0)
 
     # loop through boundaries
     for i in 1:length(boundaries)-1
@@ -203,24 +203,21 @@ function fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elper
         # upsampling, starts at each element then intepolates up N times
         if !signbit(elperiods[i])
             for k in boundaries[i]:(boundaries[i+1]-1)
-                    x_add  = range(x[k], stop=x[k+1], length=elperiods[i]+2)[1:end-1]
+                    x_add  = range(x[k], x[k+1]; length=elperiods[i]+1)[1:end-1]
+                    y_add =  y[k] .+ (x_add[1:end] .- x[k]).*(y[k+1] .- y[k])./(x[k+1] .- x[k])
                     xᵦ = append!(xᵦ, x_add)
-                    y_add =  y[k] .+ (x_add[1:end].-x[k]) .* (y[k+1].-y[k])./(x[k+1].-x[k])
                     yᵦ = append!(yᵦ, y_add)
              end
-                # xᵦ = append!(xᵦ,x[end])
-                # yᵦ = append!(yᵦ,y[end])
 
         # downsampling, simply takes every N element as in downsample function
-        elseif signbit(elperiods[i]) #under/sampling
+        elseif signbit(elperiods[i]) 
             append!(xᵦ,x[boundaries[i]:abs(elperiods[i]):(boundaries[i+1]-1)])
             append!(yᵦ,y[boundaries[i]:abs(elperiods[i]):(boundaries[i+1]-1)])
         end
     end
 
-    # last element is missed out due to algorithm spec, needs to be added in after
+    # last element may be missed, so check and add if needed
     lastel = boundaries[end]
-    # safety check then append
     if xᵦ[end]<x[lastel]
         append!(xᵦ,x[lastel])
         append!(yᵦ,y[lastel])
@@ -228,58 +225,6 @@ function fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elper
 
     return xᵦ, yᵦ
 end
-
-# function fixed_resample(x::Vector{T}, y::Vector{T},boundaries::Vector{U}, elperiods::Union{Vector{U},U}) where T<:RheoFloat where U<:Integer
-#
-#     #@eval using Interpolations
-#
-#     # assert correct function signature
-#     @assert length(x)==length(y) "X and Y arrays must have same length."
-#     @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
-#
-#     # y as callable interpolations, used for upsampled regions
-#     yInterp = Base.invokelatest(interpolate, (x,), y, Base.invokelatest(Gridded, Base.invokelatest(Linear)))
-#
-#     # initialise resampled arrays as empty
-#     xᵦ = zeros(RheoFloat,0)
-#     yᵦ = zeros(RheoFloat,0)
-#
-#     # loop through boundaries
-#     for i in 1:length(boundaries)-1
-#
-#         # upsampling, starts at each element then intepolates up N times
-#         if !signbit(elperiods[i])
-#             for k in boundaries[i]:(boundaries[i+1]-1)
-#                 # starting element
-#                 append!(xᵦ, x[k])
-#                 append!(yᵦ, yInterp[x[k]])
-#
-#                 # dx increment up
-#                 Δ = (x[k+1]-x[k])/elperiods[i]
-#                 for N in 1:(elperiods[i]-1)
-#                     # add N increments to starting element
-#                     append!(xᵦ, x[k]+N*Δ)
-#                     append!(yᵦ, yInterp[x[k]+N*Δ])
-#                 end
-#             end
-#
-#         # downsampling, simply takes every N element as in downsample function
-#         elseif signbit(elperiods[i]) #under/sampling
-#             append!(xᵦ,x[boundaries[i]:abs(elperiods[i]):(boundaries[i+1]-1)])
-#             append!(yᵦ,y[boundaries[i]:abs(elperiods[i]):(boundaries[i+1]-1)])
-#         end
-#     end
-#
-#     # last element is missed out due to algorithm spec, needs to be added in after
-#     lastel = boundaries[end]
-#     # safety check then append
-#     if xᵦ[end]<x[lastel]
-#         append!(xᵦ,x[lastel])
-#         append!(yᵦ,y[lastel])
-#     end
-#
-#     return xᵦ, yᵦ
-# end
 
 ##########################
 #~ Processing Functions ~#

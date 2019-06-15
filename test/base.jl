@@ -49,8 +49,22 @@ function _downsample_1region()
     x1 = collect(0.0:0.1:1.0)
     y1 = x1.^2
     
-    xout, yout = RHEOS.fixed_resample(x0, y0, [1,length(x0)], [-10])
+    xout, yout = RHEOS.fixed_resample(x0, y0, [1, length(x0)], [-10])
 
-    yout==y1 && xout==x1 
+    xout==x1 && yout==y1 
 end
 @test _downsample_1region()
+
+function _upsample_1region()
+    # must be linear as interpolation for upsampling is linear  
+    x0 = collect(0.0:0.1:10.0)
+    y0 = 2*x0
+
+    x1 = collect(0.0:0.01:10.0)
+    y1 = 2*x1
+    
+    xout, yout = RHEOS.fixed_resample(x0, y0, [1, length(x0)], [10])
+
+    xout≈x1 && yout≈y1
+end
+@test _upsample_1region()
