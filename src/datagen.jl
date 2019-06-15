@@ -25,7 +25,7 @@ Generate RheoTimeData struct with only the time data
 - `step`: Time between sample
 """
 function time_line(;t_start::Real=0., t_end::Real=10., step::Real=(t_end-t_start)/250.)
-    log = OrderedDict{Any,Any}("activity"=>"timeline created", "t_start"=>t_start, "t_end"=>t_end, "step"=>step)
+    log = OrderedDict{Any,Any}(:n=>1,"activity"=>"timeline created - t_start: $t_start, t_end: $t_end, step: $step")
     RheoTimeData([],[],collect(t_start:step:t_end), log)
 end
 
@@ -51,12 +51,18 @@ end
 
 
 function strainfunction(d::RheoTimeData, f::T) where T<:Function
-    log = OrderedDict{Any,Any}("activity"=>"strain function", "data_source"=>d.log)
+    log = copy(data.log)
+    log[:n] = log[:n]+1
+    log[string("activity_",log[:n])] = "Strain generated"
+    #log = OrderedDict{Any,Any}("activity"=>"strain function", "data_source"=>d.log)
     return RheoTimeData(d.σ,convert(Vector{RheoFloat},map(f,d.t)),d.t, log)
 end
 
 function stressfunction(d::RheoTimeData, f::T) where T<:Function
-    log = OrderedDict{Any,Any}("activity"=>"stress function", "data_source"=>d.log)
+    log = copy(data.log)
+    log[:n] = log[:n]+1
+    log[string("activity_",log[:n])] = "Stress generated"
+    #log = OrderedDict{Any,Any}("activity"=>"stress function", "data_source"=>d.log)
     return RheoTimeData(convert(Vector{RheoFloat},map(f,d.t)), d.ϵ, d.t, log)
 end
 
@@ -127,7 +133,7 @@ end
 
 
 function frequency_spec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(ω_end-ω_start)/1.0e5)
-    log = OrderedDict{Any,Any}("activity"=>"frequency_spec created", "ω_start"=>ω_start, "ω_end"=>ω_end, "step"=>step)
+    log = OrderedDict{Any,Any}(:n=>1,"activity"=>"frequency_spec created: ω_start: $ω_start, ω_end: $ω_end, step: $step")
     RheoFreqData([],[],collect(ω_start:step:ω_end),log)
 end
 
