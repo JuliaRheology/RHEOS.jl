@@ -1,5 +1,8 @@
 #!/usr/bin/env julia
 
+# To delete: quasinull
+# To reassess: singularitytest 
+
 #######################
 #~ Utility Functions ~#
 #######################
@@ -230,7 +233,7 @@ end
 #~ Processing Functions ~#
 ##########################
 
-function singularitytest(modulus; t1::RheoFloat=convert(RheoFloat,0.0))
+function singularitytest(modulus; t1::RheoFloat=zero(RheoFloat))
 
     startval = modulus(t1)[1]
 
@@ -281,7 +284,6 @@ function boltzintegral_nonsing(modulus, time_series, prescribed_dot)
     I[2] = (prescribed_dot[1]*modulus(time_series)*(time_series[2] - time_series[1]))[1]
 
     I[2:end]
-
 
 end
 

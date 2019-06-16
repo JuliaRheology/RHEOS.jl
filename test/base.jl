@@ -94,5 +94,7 @@ function _upanddown_multipleregions()
     xout, yout = RHEOS.fixed_resample(x0, y0, indices, [5, -2, 10, -4])
 
     xout==x1 && yout≈y1
-  end
-  @test _upanddown_multipleregions()
+end
+@test _upanddown_multipleregions()
+
+
