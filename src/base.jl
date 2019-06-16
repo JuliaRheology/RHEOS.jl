@@ -2,7 +2,7 @@
 
 # To delete: quasinull
 # To reassess: singularitytest 
-
+# change 0.5* cost function to (1/m), as an argument so that minimal computation is done
 #######################
 #~ Utility Functions ~#
 #######################
@@ -233,7 +233,7 @@ end
 #~ Processing Functions ~#
 ##########################
 
-function singularitytest(modulus; t1::RheoFloat=zero(RheoFloat))
+function singularitytest(modulus::Function; t1::RheoFloat=zero(RheoFloat))
 
     startval = modulus(t1)[1]
 
