@@ -97,4 +97,7 @@ function _upanddown_multipleregions()
 end
 @test _upanddown_multipleregions()
 
+@test RHEOS.singularitytest(x->1/x)
+@test RHEOS.singularitytest(x->1/(x-5.0), t1 = 5.0)
+@test RHEOS.singularitytest(x->NaN)
 
