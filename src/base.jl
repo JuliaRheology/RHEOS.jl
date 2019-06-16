@@ -235,7 +235,7 @@ end
 
 function singularitytest(modulus::Function; t1::RheoFloat=zero(RheoFloat))
 
-    startval = modulus(t1)[1]
+    startval = modulus(t1)
 
     if isnan(startval) || startval == Inf
         return true
