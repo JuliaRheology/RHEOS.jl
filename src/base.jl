@@ -125,7 +125,7 @@ end
 
 Find the index of the array element closest to val.
 """
-function closestindex(x::Vector{T1}, val::Real) where {T1<:Real, T2<:Real}
+function closestindex(x::Vector{T}, val::Real) where {T<:Real}
 
     # intialise closest match variable, assuming best match is index 1
     ibest = 1
