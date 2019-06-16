@@ -64,7 +64,11 @@ function _upsample_1region()
     y1 = 2*x1
     
     xout, yout = RHEOS.fixed_resample(x0, y0, [1, length(x0)], [10])
-
-    xout≈x1 && yout≈y1
+    
+    # note that we expect x (generated from range) to be exactly
+    # the same as target higher-sampled data. y will only be the
+    # same within floating point error, hence the approximate
+    # comparison
+    xout==x1 && yout≈y1
 end
 @test _upsample_1region()
