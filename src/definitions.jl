@@ -501,7 +501,7 @@ end
 
 
 function RheoModel(m::RheoModelClass; log::OrderedDict{Any,Any} = OrderedDict{Any,Any}("activity"=>"model creation", "data_source"=>"constructor call"), kwargs...)
-    return(RheoModel(m,kwargs.data,log)
+    return(RheoModel(m,kwargs.data,log))
 end
 
 function RheoModel(m::RheoModelClass, nt0::NamedTuple; log::OrderedDict{Any,Any} = OrderedDict{Any,Any}("activity"=>"model creation", "data_source"=>"constructor call"))
