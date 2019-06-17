@@ -49,8 +49,55 @@ function _downsample_1region()
     x1 = collect(0.0:0.1:1.0)
     y1 = x1.^2
     
-    xout, yout = RHEOS.fixed_resample(x0, y0, [1,length(x0)], [-10])
+    xout, yout = RHEOS.fixed_resample(x0, y0, [1, length(x0)], [-10])
 
-    yout==y1 && xout==x1 
+    xout==x1 && yout==y1 
 end
 @test _downsample_1region()
+
+function _upsample_1region()
+    # must be linear as interpolation for upsampling is linear  
+    x0 = collect(0.0:0.1:10.0)
+    y0 = 2*x0
+
+    x1 = collect(0.0:0.01:10.0)
+    y1 = 2*x1
+    
+    xout, yout = RHEOS.fixed_resample(x0, y0, [1, length(x0)], [10])
+    
+    # note that we expect x (generated from range) to be exactly
+    # the same as target higher-sampled data. y will only be the
+    # same within floating point error, hence the approximate
+    # comparison
+    xout==x1 && yout≈y1
+end
+@test _upsample_1region()
+
+function _upanddown_multipleregions()
+    # data to be resampled
+    x0 = collect(-10.0:0.5:10.0)
+    y0 = 2*x0
+
+    # data for comparison composed
+    # of multiple sections
+    x1a = collect(-10.0:0.1:-5.1)
+    x1b = collect(-5.0:1.0:0.0)
+    x1c = collect(0.05:0.05:4.95)
+    x1d = collect(5.0:2.0:10.0)
+    x1e = [x0[end]]
+
+    x1 = vcat(x1a, x1b, x1c, x1d, x1e)
+    y1 = 2*x1
+
+    indices = [1, RHEOS.closestindex(x0, -5.0), RHEOS.closestindex(x0, 0.0), RHEOS.closestindex(x0, 5.0), length(x0)]
+
+    xout, yout = RHEOS.fixed_resample(x0, y0, indices, [5, -2, 10, -4])
+
+    xout==x1 && yout≈y1
+end
+@test _upanddown_multipleregions()
+
+@test RHEOS.singularitytest(x->1/x)
+@test RHEOS.singularitytest(x->1/(x-5.0), t1 = 5.0)
+@test RHEOS.singularitytest(x->NaN)
+
