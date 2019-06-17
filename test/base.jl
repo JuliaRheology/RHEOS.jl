@@ -42,6 +42,8 @@ end
 @test RHEOS.mapback([1.0, 1.23, 1.24, 1.5], [1.0, 1.1, 1.2, 1.3, 1.4, 1.5])==[1, 3, 6]
 @test RHEOS.mapback([1.0, 1.23, 1.24, 1.5], [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]; return_indices=false)==[1.0, 1.2, 1.5]
 
+@test RHEOS.getsigma(10.0, 1000.0)≈1873.9062512927758
+
 function _downsample_1region()
     x0 = collect(0.0:0.01:1.0)
     y0 = x0.^2
@@ -100,4 +102,22 @@ end
 @test RHEOS.singularitytest(x->1/x)
 @test RHEOS.singularitytest(x->1/(x-5.0), t1 = 5.0)
 @test RHEOS.singularitytest(x->NaN)
+
+function _boltzintegral_nonsing_linear(tol)
+    # response of Maxwell model to
+    # a linear load in strain
+    t = Vector{RHEOS.RheoFloat}(0.0:0.1:100.0)
+    exact_response = 1 .- exp.(-t)
+    
+    loading_derivative = ones(RHEOS.RheoFloat, length(t)) 
+    integration_response = RHEOS.boltzintegral_nonsing(x->exp.(-x), t, loading_derivative)
+
+    plot(t, exact_response)
+    plot(t, integration_response, "--")
+    show()
+
+    all(i -> isapprox(exact_response[i], integration_response[i], atol=10*tol), eachindex(exact_response))
+    true
+end
+@test _boltzintegral_nonsing_linear(tol)
 
