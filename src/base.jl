@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 # To delete: quasinull
-# To reassess: singularitytest 
+# To reassess: singularitytest
 # change 0.5* cost function to (1/m), as an argument so that minimal computation is done
 #######################
 #~ Utility Functions ~#
@@ -24,7 +24,7 @@ function trapz(y::Vector{RheoFloat}, x::Vector{RheoFloat})
     @inbounds for i in 2:n
         r += (y[i-1] + y[i])*(x[i] - x[i-1])
     end
-    
+
     r/2
 
 end
@@ -87,7 +87,7 @@ function derivBD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
     # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
     # this is a physical assumption that material is at rest before first data point.
     # Could be problematic in some cases if sudden jump as we are actually missing
-    # important information about how quickly that jump happened.    
+    # important information about how quickly that jump happened.
     @inbounds ydot[1] = y[1]/(x[2] - x[1])
 
     # backwards difference method for rest of points
@@ -176,7 +176,7 @@ function getsigma(τ::Real, samplerate::Real)
     sF_halfpower = smoothfreq/sqrt(2.0*log(2.0))
 
     σ = samplerate/(2.0*π*sF_halfpower)
-    
+
     RheoFloat(σ)
 end
 
@@ -213,7 +213,7 @@ function fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elper
              end
 
         # downsampling, simply takes every N element as in downsample function
-        elseif signbit(elperiods[i]) 
+        elseif signbit(elperiods[i])
             append!(xᵦ,x[boundaries[i]:abs(elperiods[i]):(boundaries[i+1]-1)])
             append!(yᵦ,y[boundaries[i]:abs(elperiods[i]):(boundaries[i+1]-1)])
         end
@@ -233,7 +233,7 @@ end
 #~ Processing Functions ~#
 ##########################
 
-function singularitytest(modulus::Function; t1::RheoFloat=zero(RheoFloat))
+function singularitytest(modulus; t1::RheoFloat=zero(RheoFloat))
 
     startval = modulus(t1)
 
