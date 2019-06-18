@@ -280,25 +280,33 @@ function boltzintegral_nonsing(modulus, time_series::Vector{RheoFloat}, prescrib
     end
     # fix initial point
     I[2] = (prescribed_dot[1]*modulus(time_series)*(time_series[2] - time_series[1]))[1]
-    I[3:end] = I[3:end] .+ (I[2] - I[3]) 
+    #I[3:end] = I[3:end] .+ (I[2] - I[3]) 
     I[2:end]
 
 end
-function boltzintegral_nonsing2(modulus, time_series::Vector{RheoFloat}, prescribed_dot::Vector{RheoFloat})
+function boltzintegral_nonsing_special(modulus, time_series::Vector{RheoFloat},  prescribed_dot::Vector{RheoFloat})
+    dt_init = time_series[2] - time_series[1]
+    # need to add an additional 'previous' time point to capture any instantaneous loading
+    time_mod = vcat([0.0], time_series .+ dt_init)
+    # material is assumed at rest at this 'previous' time
+    prescribed_dot_mod = vcat([0.0], prescribed_dot)
 
-    I = zeros(length(time_series))
-    @inbounds for (i,v) in enumerate(time_series)
+    I = zeros(length(time_mod))
+    @inbounds for (i,v) in enumerate(time_mod)
         # generate integral for each time step
-        τ = time_series[1:i]
+        τ = time_mod[1:i]
         Modulus_arg = v .- τ
         Modulusᵢ = modulus(Modulus_arg)
-        df_dtᵢ = prescribed_dot[1:i]
+        df_dtᵢ = prescribed_dot_mod[1:i]
         intergrand = Modulusᵢ.*df_dtᵢ
 
         I[i] = trapz(intergrand, τ)
     end
+    # fix initial point
+    I[2] = (prescribed_dot[1]*modulus(time_series)*(dt_init))[1]
+    #I[3:end] = I[3:end] .+ (I[2] - I[3]) 
+    I[2:end]
 
-    I
 end
 
 
