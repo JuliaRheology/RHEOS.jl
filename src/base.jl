@@ -259,7 +259,7 @@ than the convolution method. However, it works for variable sample rate.
 - `time_series`: The array of times
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
-function boltzintegral_nonsing(modulus::Function, time_series::Vector{RheoFloat}, prescribed_dot::Vector{RheoFloat})
+function boltzintegral_nonsing(modulus, time_series::Vector{RheoFloat}, prescribed_dot::Vector{RheoFloat})
 
     # need to add an additional 'previous' time point to capture any instantaneous loading
     time_previous = time_series[1] - (time_series[2] - time_series[1])

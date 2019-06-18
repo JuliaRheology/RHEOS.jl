@@ -3,10 +3,8 @@ __precompile__(true)
 
 module RHEOS
 
-
 # This defines the data type for all arrays, parameters and processing
 RheoFloat = Float64
-
 
 # installed from Julia package repository
 using InverseLaplace
@@ -21,9 +19,7 @@ import Base: +, -, *
 import DelimitedFiles: readdlm, writedlm
 export constantcheck
 using DataStructures
-
 using FunctionWrappers: FunctionWrapper
-#using MittagLeffler
 
 ######################################################
 # definitions.jl
