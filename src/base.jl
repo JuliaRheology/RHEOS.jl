@@ -282,10 +282,27 @@ function boltzintegral_nonsing(modulus, time_series::Vector{RheoFloat}, prescrib
     # I[2] = (prescribed_dot[1]*modulus([0.0], params)*(time_series[2] - time_series[1]))[1]
     # to catch weird bug in InverseLaplace
     I[2] = (prescribed_dot[1]*modulus(time_series)*(time_series[2] - time_series[1]))[1]
-
+    I[3:end] = I[3:end] .+ (I[2] - I[3]) 
     I[2:end]
 
 end
+function boltzintegral_nonsing2(modulus, time_series::Vector{RheoFloat}, prescribed_dot::Vector{RheoFloat})
+
+    I = zeros(length(time_series))
+    @inbounds for (i,v) in enumerate(time_series)
+        # generate integral for each time step
+        τ = time_series[1:i]
+        Modulus_arg = v .- τ
+        Modulusᵢ = modulus(Modulus_arg)
+        df_dtᵢ = prescribed_dot[1:i]
+        intergrand = Modulusᵢ.*df_dtᵢ
+
+        I[i] = trapz(intergrand, τ)
+    end
+
+    I
+end
+
 
 # """
 #     boltzintegral_sing(modulus::Function, time_series::Array{RheoFloat,1}, params::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1})
@@ -326,7 +343,6 @@ end
 
 function boltzintegral_sing(modulus, time_series, prescribed_dot)
 
-
     # init time diff, used to cope with singularity
     init_offset = (time_series[2] - time_series[1])/10.0;
 
@@ -356,8 +372,6 @@ function boltzintegral_sing(modulus, time_series, prescribed_dot)
 
     I[2:end]
 end
-
-
 
 # """
 #     boltzconvolve_sing(modulus::Function, time_series::Array{RheoFloat,1}, dt::RheoFloat, params::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1})
@@ -418,7 +432,7 @@ than the integral method. However, it works for constant sample rate.
 - `dt`: Constant time step (sample period)
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
-function boltzconvolve_nonsing(modulus, time_series, dt,prescribed_dot)
+function boltzconvolve_nonsing(modulus, time_series, dt, prescribed_dot)
 
     Modulus = modulus(time_series)
     Modulus = convert(typeof(prescribed_dot),Modulus)

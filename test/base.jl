@@ -103,21 +103,66 @@ end
 @test RHEOS.singularitytest(x->1/(x-5.0), t1 = 5.0)
 @test RHEOS.singularitytest(x->NaN)
 
+# Test, double check boltzintegral_nonsing has strange first point
 function _boltzintegral_nonsing_linear(tol)
     # response of Maxwell model to
     # a linear load in strain
-    t = Vector{RHEOS.RheoFloat}(0.0:0.1:100.0)
+    dt = 0.001
+    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
     exact_response = 1 .- exp.(-t)
-    
-    loading_derivative = ones(RHEOS.RheoFloat, length(t)) 
+   #loading = t .+ 1 
+   #loading_derivative = RHEOS.derivBD(loading, t)
+  # println(loading_derivative)
+   loading_derivative = ones(RHEOS.RheoFloat, length(t)) 
     integration_response = RHEOS.boltzintegral_nonsing(x->exp.(-x), t, loading_derivative)
 
-    plot(t, exact_response)
-    plot(t, integration_response, "--")
-    show()
+    conv_response = RHEOS.boltzconvolve_nonsing(x->exp.(-x), t, dt, loading_derivative)
+
+   plot(t, exact_response)
+   plot(t, conv_response)
+   plot(t, integration_response, "--")
+   legend(loc="best")
+   grid()
+   show()
 
     all(i -> isapprox(exact_response[i], integration_response[i], atol=10*tol), eachindex(exact_response))
     true
 end
 @test _boltzintegral_nonsing_linear(tol)
+# same issue as above integral test
+function _boltzintegral_nonsing_parabolic(tol)
+    # response of Maxwell model to
+    # a parabola: 2500 - (t-50)^2
+    t = Vector{RHEOS.RheoFloat}(0.0:0.01:20.0)
+    exact_response = 102 .- 100*exp.(-t) .- 2t
 
+    loading_derivative = 100 .- 2t
+    integration_response = RHEOS.boltzintegral_nonsing(x->exp.(-x), t, loading_derivative)
+
+   # plot(t, exact_response)
+   # plot(t, integration_response, "--")
+   # grid()
+   # show()
+
+    all(i -> isapprox(exact_response[i], integration_response[i], atol=10*tol), eachindex(exact_response))
+    true
+end
+@test _boltzintegral_nonsing_parabolic(tol)
+
+function _boltzintegral_nonsing_linear2(tol)
+    # response of Maxwell model to
+    # a linear load in strain
+    t = Vector{RHEOS.RheoFloat}(0.0:0.01:20.0)
+    loading = [1.0 for i in t]    
+    loading_derivative = RHEOS.derivBD(loading, t) 
+    integration_response = RHEOS.boltzintegral_nonsing2(x->exp.(-x), t, loading_derivative)
+
+   #plot(t, integration_response, "-")
+   #grid()
+   #show()
+
+    #all(i -> isapprox(exact_response[i], integration_response[i], atol=10*tol), eachindex(exact_response))
+    true
+end
+@test _boltzintegral_nonsing_linear2(tol)
+#
