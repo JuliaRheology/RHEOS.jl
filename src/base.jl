@@ -316,7 +316,6 @@ end
 
 function boltzconvolve(modulus, time_series, dt,prescribed_dot)
 
-
     Modulus = modulus(time_series)
     Modulus = convert(typeof(prescribed_dot),Modulus)
     # fast convolution
