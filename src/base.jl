@@ -280,72 +280,9 @@ function boltzintegral_nonsing(modulus, time_series::Vector{RheoFloat}, prescrib
     end
     # fix initial point
     I[2] = (prescribed_dot[1]*modulus(time_series)*(time_series[2] - time_series[1]))[1]
-    #I[3:end] = I[3:end] .+ (I[2] - I[3]) 
     I[2:end]
 
 end
-function boltzintegral_nonsing_special(modulus, time_series::Vector{RheoFloat},  prescribed_dot::Vector{RheoFloat})
-    dt_init = time_series[2] - time_series[1]
-    # need to add an additional 'previous' time point to capture any instantaneous loading
-    time_mod = vcat([0.0], time_series .+ dt_init)
-    # material is assumed at rest at this 'previous' time
-    prescribed_dot_mod = vcat([0.0], prescribed_dot)
-
-    I = zeros(length(time_mod))
-    @inbounds for (i,v) in enumerate(time_mod)
-        # generate integral for each time step
-        τ = time_mod[1:i]
-        Modulus_arg = v .- τ
-        Modulusᵢ = modulus(Modulus_arg)
-        df_dtᵢ = prescribed_dot_mod[1:i]
-        intergrand = Modulusᵢ.*df_dtᵢ
-
-        I[i] = trapz(intergrand, τ)
-    end
-    # fix initial point
-    I[2] = (prescribed_dot[1]*modulus(time_series)*(dt_init))[1]
-    #I[3:end] = I[3:end] .+ (I[2] - I[3]) 
-    I[2:end]
-
-end
-
-
-# """
-#     boltzintegral_sing(modulus::Function, time_series::Array{RheoFloat,1}, params::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1})
-
-# Calculate Boltzmann Superposition integral using direct integration method.
-
-# This is much slower and slightly less accurate (depending on sample resolution)
-# than the convolution method. However, it works for variable sample rate.
-
-# Should be used when viscoelastic model contains a singularity and should be compared
-# with [2:end] of reference array when fitting.
-
-# # Arguments
-
-# - `modulus`: Viscoelastic modulus function
-# - `time_series`: The array of times
-# - `params`: Parameters passed to viscoelastic modulus
-# - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
-# """
-# function boltzintegral_sing(modulus::Function, time_series::Array{RheoFloat,1}, params::Array{RheoFloat,1},
-#                     prescribed_dot::Array{RheoFloat,1})::Array{RheoFloat,1}
-
-#     I = zeros(length(time_series)-1)
-#     # only traverse after time t=0, first element
-#     @inbounds for (i, v) in enumerate(time_series[2:end])
-#         # generate integral for each time step
-#         τ = time_series[1:i]
-#         Modulus_arg = v - τ
-#         Modulusᵢ = modulus(Modulus_arg, params)
-#         df_dtᵢ = prescribed_dot[1:i]
-#         intergrand = Modulusᵢ.*df_dtᵢ
-#         I[i] = trapz(intergrand, τ)
-#     end
-
-#     I
-
-# end
 
 function boltzintegral_sing(modulus, time_series, prescribed_dot)
 
@@ -370,46 +307,12 @@ function boltzintegral_sing(modulus, time_series, prescribed_dot)
         intergrand = Modulusᵢ.*df_dtᵢ
 
         I[i] = trapz(intergrand, τ)
-
     end
-
     # fix initial point
     I[2] = (prescribed_dot[1]*modulus([init_offset])*(time_series[2] - time_series[1]))[1]
-
     I[2:end]
+
 end
-
-# """
-#     boltzconvolve_sing(modulus::Function, time_series::Array{RheoFloat,1}, dt::RheoFloat, params::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1})
-
-# Calculate Boltzmann Superposition integral using convolution method.
-
-# This is much faster and slightly more accurate (depending on sample resolution)
-# than the integral method. However, it works for constant sample rate.
-
-# Should be used when singularity exists in viscoelastic model and should be compared
-# with [2:end] of reference array when fitting.
-
-# # Arguments
-
-# - `modulus`: Viscoelastic modulus function
-# - `time_series`: The array of times
-# - `dt`: Constant time step (sample period)
-# - `params`: Parameters passed to viscoelastic modulus
-# - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
-# """
-# function boltzconvolve_sing(modulus::Function, time_series::Array{RheoFloat,1}, dt::RheoFloat,
-#                         params::Array{RheoFloat,1}, prescribed_dot::Array{RheoFloat,1})::Array{RheoFloat,1}
-
-#     # convolved length will be original_length-1
-#     len = length(time_series)-1
-#     Modulus = modulus(time_series, params)
-#     # fast convolution, ignoring initial singularity
-#     β = convn(Modulus[2:end], prescribed_dot[1:end])
-#     # pick out relevant elements (1st half) and multiply by dt
-#     β = β[1:len]*dt
-
-# end
 
 function boltzconvolve(modulus, time_series, dt,prescribed_dot)
 

@@ -110,15 +110,25 @@ function _boltzintegral_nonsing_linear(tol)
     dt = 0.01
     t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
     exact_response = 1 .- exp.(-t)
-    #loading = ones(length(t)) 
+    ramp_loading = t
+    ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
+    step_loading = ones(length(t))
+    step_loading_deriv = RHEOS.derivBD(step_loading,t)
+   #loading = ones(length(t)) 
    #loading_derivative = RHEOS.derivBD(loading, t)
-  # println(loading_derivative)
-   loading_derivative = ones(RHEOS.RheoFloat, length(t)) 
-    integration_response = RHEOS.boltzintegral_nonsing(x->exp.(-x), t, loading_derivative)
-    integration_response_special = RHEOS.boltzintegral_nonsing_special(x->exp.(-x), t, loading_derivative)
-   plot(t, exact_response, label="exact")
-   plot(t, integration_response_special, label="integrated special")
-   plot(t, integration_response, "--", label="integrated")
+   #println(loading_derivative)
+   #loading = t
+   #loading_derivative = RHEOS.derivBD(t, t) 
+   ramp_respon = RHEOS.boltzintegral_nonsing(x->exp.(-x/10.0), t, ramp_loading_derivative)
+   #integration_response_special = RHEOS.boltzintegral_nonsing_special(x->exp.(-x), t, loading_derivative)
+   #plot(t, exact_response, label="exact")
+   step_respon = RHEOS.boltzintegral_nonsing(x->exp.(-x), t, step_loading_deriv)
+
+   combined_respon = ramp_respon.+step_respon
+
+   plot(t, ramp_respon, "-", label="ramp")
+   plot(t, step_respon, "--", label="step")
+   plot(t, combined_respon, "--", label="combined")
    legend(loc="best")
    grid()
    show()
