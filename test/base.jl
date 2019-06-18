@@ -107,20 +107,20 @@ end
 function _boltzintegral_nonsing_linear(tol)
     # response of Maxwell model to
     # a linear load in strain
-    dt = 0.001
+    dt = 0.005
     t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
-    exact_response = 1 .- exp.(-t)
-   #loading = t .+ 1 
-   #loading_derivative = RHEOS.derivBD(loading, t)
+    #exact_response = 1 .- exp.(-t)
+   loading = t .+ 1 
+   loading_derivative = RHEOS.derivBD(loading, t)
   # println(loading_derivative)
-   loading_derivative = ones(RHEOS.RheoFloat, length(t)) 
+   #loading_derivative = ones(RHEOS.RheoFloat, length(t)) 
     integration_response = RHEOS.boltzintegral_nonsing(x->exp.(-x), t, loading_derivative)
 
     conv_response = RHEOS.boltzconvolve_nonsing(x->exp.(-x), t, dt, loading_derivative)
 
-   plot(t, exact_response)
-   plot(t, conv_response)
-   plot(t, integration_response, "--")
+   #plot(t, exact_response, label="exact")
+   plot(t, conv_response, label="conv")
+   plot(t, integration_response, "--", label="integrated")
    legend(loc="best")
    grid()
    show()

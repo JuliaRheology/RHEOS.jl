@@ -279,8 +279,6 @@ function boltzintegral_nonsing(modulus, time_series::Vector{RheoFloat}, prescrib
         I[i] = trapz(intergrand, τ)
     end
     # fix initial point
-    # I[2] = (prescribed_dot[1]*modulus([0.0], params)*(time_series[2] - time_series[1]))[1]
-    # to catch weird bug in InverseLaplace
     I[2] = (prescribed_dot[1]*modulus(time_series)*(time_series[2] - time_series[1]))[1]
     I[3:end] = I[3:end] .+ (I[2] - I[3]) 
     I[2:end]
