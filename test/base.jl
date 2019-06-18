@@ -145,24 +145,20 @@ function _boltzintegral_linearcombo(tol)
     all(i -> isapprox(combined_response[i], (step_response[i] + ramp_response[i]), atol=tol), eachindex(combined_response))
 end
 @test _boltzintegral_linearcombo(tol)
+# TO INVESTIGATE BELOW!
+function _boltzintegral_nonsing_parabolic(tol)
+    # response of Maxwell model to
+    # a parabola: 2500 - (t-50)^2
+    t = Vector{RHEOS.RheoFloat}(0.0:0.005:20.0)
+    exact_response = 102 .- 102*exp.(-t) .- 2t
+    
+    loading = 2500.0 .- (t .- 50).^2
+    loading_derivative = RHEOS.derivBD(loading, t)
 
-#function _boltzintegral_nonsing_parabolic(tol)
-#    # response of Maxwell model to
-#    # a parabola: 2500 - (t-50)^2
-#    t = Vector{RHEOS.RheoFloat}(0.0:0.01:20.0)
-#    exact_response = 102 .- 100*exp.(-t) .- 2t
-#
-#    loading_derivative = 100 .- 2t
-#    integration_response = RHEOS.boltzintegral_nonsing(x->exp.(-x), t, loading_derivative)
-#
-#   # plot(t, exact_response)
-#   # plot(t, integration_response, "--")
-#   # grid()
-#   # show()
-#
-#    all(i -> isapprox(exact_response[i], integration_response[i], atol=10*tol), eachindex(exact_response))
-#    true
-#end
-##@test _boltzintegral_nonsing_parabolic(tol)
+    integration_response = RHEOS.boltzintegral_nonsing(x->exp.(-x), t, loading_derivative)
+
+    all(i -> isapprox(exact_response[i], integration_response[i], atol=100*tol), eachindex(exact_response))
+end
+@test _boltzintegral_nonsing_parabolic(tol)
 
 
