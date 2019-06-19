@@ -158,13 +158,57 @@ function _boltzintegral_nonsing_parabolic(tol)
     integration_response = RHEOS.boltzintegral_nonsing(x->exp.(-x), t, loading_derivative)
 
     # note that tol is 5x higher here (and sample rate is higher)
-    # as trapezoidal method is relatively innacurate.
+    # as trapezoidal method is relatively innacurate.
     all(i -> isapprox(exact_response[i], integration_response[i], atol=5*tol), eachindex(exact_response))
 end
 @test _boltzintegral_nonsing_parabolic(tol)
 
 function _boltzintegral_sing_linear(tol)
-    gamma(1.0)
-    true
+    # response of a power-law model
+    # to a linear loading: t
+    t = Vector{RHEOS.RheoFloat}(0.0:0.01:20.0)
+    β = 0.5
+    exact_response = t.^(1.0 - 0.5) / (1.0 - 0.5)
+
+    loading = t
+    loading_derivative = RHEOS.derivBD(loading, t)
+
+    integration_response = RHEOS.boltzintegral_sing(x->x.^(-β), t, loading_derivative)
+
+    all(i -> isapprox(exact_response[i], integration_response[i], atol=4*tol), eachindex(exact_response))
 end
 @test _boltzintegral_sing_linear(tol)
+
+function _boltzintegral_sing_step(tol)
+    # response of a power-law model
+    # to a step loading
+    t = Vector{RHEOS.RheoFloat}(0.0:0.01:20.0)
+    β = 0.5
+    exact_response = t.^(-0.5)
+
+    loading = ones(length(t))
+    loading_derivative = RHEOS.derivBD(loading, t)
+
+    integration_response = RHEOS.boltzintegral_sing(x->x.^(-β), t, loading_derivative)
+    
+    # note that first element is skipped due to singularity
+    all(i -> isapprox(exact_response[i], integration_response[i], atol=tol), 2:length(t))
+end
+@test _boltzintegral_sing_step(tol)
+  
+function _boltzintegral_sing_parabola(tol)
+    # response of power-law model to
+    # a parabola: 2500 - (t-50)^2
+    t = Vector{RHEOS.RheoFloat}(0.0:0.001:20.0)
+    β = 0.5
+    exact_response = (100/(1-β))*t.^(1-β) .- (2/((1-β)(2-β)))*t.^(2-β)
+    
+    loading = 2500.0 .- (t .- 50).^2
+    loading_derivative = RHEOS.derivBD(loading, t)
+
+    integration_response = RHEOS.boltzintegral_sing(x->x.(-β), t, loading_derivative)
+
+    all(i -> isapprox(exact_response[i], integration_response[i], atol=tol), eachindex(exact_response))
+end
+@test _boltzintegral_nonsing_parabolic(tol)
+
