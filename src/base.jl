@@ -1,7 +1,6 @@
 #!/usr/bin/env julia
 
 # To delete: quasinull
-# change 0.5* cost function to (1/m), as an argument so that minimal computation is done
 #######################
 #~ Utility Functions ~#
 #######################
