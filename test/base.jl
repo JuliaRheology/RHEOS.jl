@@ -149,7 +149,7 @@ end
 function _boltzintegral_nonsing_parabolic(tol)
     # response of Maxwell model to
     # a parabola: 2500 - (t-50)^2
-    t = Vector{RHEOS.RheoFloat}(0.0:0.005:20.0)
+    t = Vector{RHEOS.RheoFloat}(0.0:0.001:20.0)
     exact_response = 102 .- 102*exp.(-t) .- 2t
     
     loading = 2500.0 .- (t .- 50).^2
@@ -157,16 +157,14 @@ function _boltzintegral_nonsing_parabolic(tol)
 
     integration_response = RHEOS.boltzintegral_nonsing(x->exp.(-x), t, loading_derivative)
 
-    plot(t, integration_response)
-    plot(t, exact_response, "--")
-    show()
-    println(maximum(exact_response .- integration_response))
-    maxind = findmax(exact_response .- integration_response
-    println(maxind)
-    println(t[maxind])
-
-    all(i -> isapprox(exact_response[i], integration_response[i], atol=100*tol), eachindex(exact_response))
+    # note that tol is 5x higher here (and sample rate is higher)
+    # as trapezoidal method is relatively innacurate.
+    all(i -> isapprox(exact_response[i], integration_response[i], atol=5*tol), eachindex(exact_response))
 end
 @test _boltzintegral_nonsing_parabolic(tol)
 
-
+function _boltzintegral_sing_linear(tol)
+    gamma(1.0)
+    true
+end
+@test _boltzintegral_sing_linear(tol)

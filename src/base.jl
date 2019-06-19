@@ -282,6 +282,48 @@ function boltzintegral_nonsing(modulus, time_series::Vector{RheoFloat}, prescrib
 
 end
 
+"""
+    obj_var_nonsing(params, grad, modulus, time_series, prescribed_dot, measured; _insight::Bool = false)
+
+Generate the sum-of-squares of the difference between `measured` and the Boltzmann
+convolution integral of the selected `modulus` and `prescribed_dot`. Used when
+sample rate is variable and no singularity in model.
+
+# Arguments
+
+- `params`: Array of parameters sent to `modulus`
+- `grad`: Gradient argument used by NLOpt
+- `modulus`: Viscoelastic modulus function
+- `time_series`: Array of time data
+- `prescribed_dot`: Convolved with `modulus` over `time_series`, usually dϵ/dt for stress relaxation and dσ/dt for creep
+- `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
+- `_insight`: Declare whether insight info should be shown when this function is called, true or false
+"""
+function obj_var_nonsing(params, grad, modulus, time_series, prescribed_dot, measured; _insight::Bool = false)
+
+    _insight && println("Current Parameters: ", params)
+
+    mod = (t->modulus(t,params))
+    convolved = boltzintegral_nonsing(mod, time_series, prescribed_dot)
+
+    cost = sum((measured - convolved).^2)
+
+end
+
+"""
+    boltzintegral_sing(modulus, time_series, prescribed_dot)
+
+Calculate Boltzmann Superposition integral using direct integration method.
+
+This is much slower and slightly less accurate (depending on sample resolution)
+than the convolution method. However, it works for variable sample rate.
+
+# Arguments
+
+- `modulus`: Viscoelastic modulus function in which the parameters have been substituted
+- `time_series`: The array of times
+- `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
+"""
 function boltzintegral_sing(modulus, time_series, prescribed_dot)
 
     # init time diff, used to cope with singularity
@@ -312,24 +354,42 @@ function boltzintegral_sing(modulus, time_series, prescribed_dot)
 
 end
 
-function boltzconvolve(modulus, time_series, dt,prescribed_dot)
+"""
+    obj_var_sing(params, grad, modulus, time_series, prescribed_dot, measured; _insight::Bool = false)
 
-    Modulus = modulus(time_series)
-    Modulus = convert(typeof(prescribed_dot),Modulus)
-    # fast convolution
-    β = convn(Modulus, prescribed_dot)
-    # pick out relevant elements (1st half) and multiply by dt
-    β = β[1:length(time_series)]*dt
+Generate the sum-of-squares of the difference between `measured` and the Boltzmann
+convolution integral of the selected `modulus` and `prescribed_dot`. Used when
+sample rate is variable and there IS singularity in model.
+
+# Arguments
+
+- `params`: Array of parameters sent to `modulus`
+- `grad`: Gradient argument used by NLOpt
+- `modulus`: Viscoelastic modulus function
+- `time_series`: Array of time data
+- `prescribed_dot`: Convolved with `modulus` over `time_series`, usually dϵ/dt for stress relaxation and dσ/dt for creep
+- `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
+- `_insight`: Declare whether insight info should be shown when this function is called, true or false
+"""
+function obj_var_sing(params, grad, modulus, time_series, prescribed_dot, measured; _insight::Bool = false)
+
+    _insight && println("Current Parameters: ", params)
+
+    mod = (t->modulus(t,params))
+    convolved = boltzintegral_sing(mod, time_series, prescribed_dot)
+
+    # skip first point for error computation, workaround for singularity approximation error
+    cost = sum((measured[2:end] - convolved[2:end]).^2)
 
 end
 
 """
-    boltzconvolve_nonsing(modulus, time_series, dt::RheoFloat,prescribed_dot)
+    boltzconvolve(modulus, time_series, dt::RheoFloat,prescribed_dot)
 
 Calculate Boltzmann Superposition integral using convolution method.
 
 This is much faster and slightly more accurate (depending on sample resolution)
-than the integral method. However, it works for constant sample rate.
+than the integral method. However, it only works for constant sample rate.
 
 # Arguments
 
@@ -338,11 +398,11 @@ than the integral method. However, it works for constant sample rate.
 - `dt`: Constant time step (sample period)
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
-function boltzconvolve_nonsing(modulus, time_series, dt, prescribed_dot)
+function boltzconvolve(modulus, time_series, dt, prescribed_dot)
 
     Modulus = modulus(time_series)
     Modulus = convert(typeof(prescribed_dot),Modulus)
-
+    # fast convolution
     β = convn(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
     β = β[1:length(time_series)]*dt
@@ -369,12 +429,11 @@ sample rate is constant and model does not feature singularity.
 """
 function obj_const_nonsing(params, grad, modulus, time_series, dt, prescribed_dot, measured; _insight::Bool = false)
 
-    if _insight
-        println("Current Parameters: ", params)
-    end
+    _insight && println("Current Parameters: ", params)
+
     # Replace parameters inside the viscoelastic modulus
     mod = (t->modulus(t,params))
-    convolved = boltzconvolve_nonsing(mod, time_series, dt, prescribed_dot)
+    convolved = boltzconvolve(mod, time_series, dt, prescribed_dot)
 
     cost = sum((measured - convolved).^2)
     return convert(RheoFloat,cost)
@@ -401,75 +460,11 @@ sample rate is constant and model does feature singularity.
 """
 function obj_const_sing(params, grad,modulus, time_series,dt, prescribed_dot,measured; _insight::Bool = false)
 
-    if _insight
-        println("Current Parameters: ", params)
-    end
+    _insight && println("Current Parameters: ", params) 
 
     mod = (t->modulus(t,params))
     # convolved = boltzconvolve_sing(modulus, time_series, dt, params, prescribed_dot)
     convolved = boltzconvolve(mod, time_series, dt, prescribed_dot)
-
-    # skip first point for error computation, workaround for singularity approximation error
-    cost = sum((measured[2:end] - convolved[2:end]).^2)
-
-end
-
-"""
-    obj_var_nonsing(params, grad, modulus, time_series, prescribed_dot, measured; _insight::Bool = false)
-
-Generate the sum-of-squares of the difference between `measured` and the Boltzmann
-convolution integral of the selected `modulus` and `prescribed_dot`. Used when
-sample rate is variable and no singularity in model.
-
-# Arguments
-
-- `params`: Array of parameters sent to `modulus`
-- `grad`: Gradient argument used by NLOpt
-- `modulus`: Viscoelastic modulus function
-- `time_series`: Array of time data
-- `prescribed_dot`: Convolved with `modulus` over `time_series`, usually dϵ/dt for stress relaxation and dσ/dt for creep
-- `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
-- `_insight`: Declare whether insight info should be shown when this function is called, true or false
-"""
-function obj_var_nonsing(params, grad, modulus, time_series, prescribed_dot, measured; _insight::Bool = false)
-
-    if _insight
-        println("Current Parameters: ", params)
-    end
-
-    mod = (t->modulus(t,params))
-    convolved = boltzintegral_nonsing(mod, time_series, prescribed_dot)
-
-    cost = sum((measured - convolved).^2)
-
-end
-
-"""
-    obj_var_sing(params, grad, modulus, time_series, prescribed_dot, measured; _insight::Bool = false)
-
-Generate the sum-of-squares of the difference between `measured` and the Boltzmann
-convolution integral of the selected `modulus` and `prescribed_dot`. Used when
-sample rate is variable and there IS singularity in model.
-
-# Arguments
-
-- `params`: Array of parameters sent to `modulus`
-- `grad`: Gradient argument used by NLOpt
-- `modulus`: Viscoelastic modulus function
-- `time_series`: Array of time data
-- `prescribed_dot`: Convolved with `modulus` over `time_series`, usually dϵ/dt for stress relaxation and dσ/dt for creep
-- `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
-- `_insight`: Declare whether insight info should be shown when this function is called, true or false
-"""
-function obj_var_sing(params, grad, modulus, time_series, prescribed_dot, measured; _insight::Bool = false)
-
-    if _insight
-        println("Current Parameters: ", params)
-    end
-    mod = (t->modulus(t,params))
-    convolved = boltzintegral_sing(mod, time_series, prescribed_dot)
-    # don't use first element as singularity exists in model - Edit: INCORRECT COMMENT!
-    # cost = sum(0.5*(measured[2:end] - convolved).^2)
 
     # skip first point for error computation, workaround for singularity approximation error
     cost = sum((measured[2:end] - convolved[2:end]).^2)
