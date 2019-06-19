@@ -1,7 +1,6 @@
 #!/usr/bin/env julia
 
 # To delete: quasinull
-# To reassess: singularitytest
 # change 0.5* cost function to (1/m), as an argument so that minimal computation is done
 #######################
 #~ Utility Functions ~#
@@ -378,7 +377,7 @@ function obj_const_nonsing(params, grad, modulus, time_series, dt, prescribed_do
     mod = (t->modulus(t,params))
     convolved = boltzconvolve_nonsing(mod, time_series, dt, prescribed_dot)
 
-    cost = sum(0.5*(measured - convolved).^2)
+    cost = sum((measured - convolved).^2)
     return convert(RheoFloat,cost)
 
 end
@@ -412,7 +411,7 @@ function obj_const_sing(params, grad,modulus, time_series,dt, prescribed_dot,mea
     convolved = boltzconvolve(mod, time_series, dt, prescribed_dot)
 
     # do as this has been taken care of in convolution!
-    cost = sum(0.5*(measured - convolved).^2)
+    cost = sum((measured - convolved).^2)
 
 end
 
@@ -442,7 +441,7 @@ function obj_var_nonsing(params, grad, modulus, time_series, prescribed_dot, mea
     mod = (t->modulus(t,params))
     convolved = boltzintegral_nonsing(mod, time_series, prescribed_dot)
 
-    cost = sum(0.5*(measured - convolved).^2)
+    cost = sum((measured - convolved).^2)
 
 end
 
@@ -474,7 +473,7 @@ function obj_var_sing(params, grad, modulus, time_series, prescribed_dot, measur
     # cost = sum(0.5*(measured[2:end] - convolved).^2)
 
     # do as this has been taken care of in convolution!
-    cost = sum(0.5*(measured - convolved).^2)
+    cost = sum((measured - convolved).^2)
 
 
 end
