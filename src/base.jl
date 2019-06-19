@@ -409,8 +409,8 @@ function obj_const_sing(params, grad,modulus, time_series,dt, prescribed_dot,mea
     # convolved = boltzconvolve_sing(modulus, time_series, dt, params, prescribed_dot)
     convolved = boltzconvolve(mod, time_series, dt, prescribed_dot)
 
-    # do as this has been taken care of in convolution!
-    cost = sum((measured - convolved).^2)
+    # skip first point for error computation, workaround for singularity approximation error
+    cost = sum((measured[2:end] - convolved[2:end]).^2)
 
 end
 
@@ -471,9 +471,8 @@ function obj_var_sing(params, grad, modulus, time_series, prescribed_dot, measur
     # don't use first element as singularity exists in model - Edit: INCORRECT COMMENT!
     # cost = sum(0.5*(measured[2:end] - convolved).^2)
 
-    # do as this has been taken care of in convolution!
-    cost = sum((measured - convolved).^2)
-
+    # skip first point for error computation, workaround for singularity approximation error
+    cost = sum((measured[2:end] - convolved[2:end]).^2)
 
 end
 
