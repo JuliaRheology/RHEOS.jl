@@ -324,7 +324,7 @@ than the convolution method. However, it works for variable sample rate.
 - `time_series`: The array of times
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
-function boltzintegral_sing(modulus, time_series, prescribed_dot)
+function boltzintegral_sing(modulus, time_series::Vector{RheoFloat}, prescribed_dot::Vector{RheoFloat})
 
     # init time diff, used to cope with singularity
     init_offset = (time_series[2] - time_series[1])/10.0;
