@@ -458,7 +458,7 @@ sample rate is constant and model does feature singularity.
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
 - `_insight`: Declare whether insight info should be shown when this function is called, true or false
 """
-function obj_const_sing(params, grad,modulus, time_series,dt, prescribed_dot,measured; _insight::Bool = false)
+function obj_const_sing(params, grad,modulus, time_series,dt, prescribed_dot, measured; _insight::Bool = false)
 
     _insight && println("Current Parameters: ", params) 
 
