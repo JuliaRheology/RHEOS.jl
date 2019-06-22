@@ -281,7 +281,6 @@ function modelfit(data::RheoTimeData,
     # get time step (only needed for convolution, which requires constant dt so t[2]-t[1] is sufficient)
     dt = data.t[2] - data.t[1]
 
-    # TEMP - CHECK WITH ALE AND ALEXANDRE BUT IS DEFINITELY NECESSARY
     # time must start at 0 for convolution to work properly!
     t_zeroed = data.t .- minimum(data.t)
 
@@ -297,7 +296,7 @@ function modelfit(data::RheoTimeData,
                                                                                     dcontrolled,
                                                                                     measured;
                                                                                     insight = verbose,
-                                                                                    sampling = sampling_check,
+                                                                                    constant_sampling = sampling_check,
                                                                                     singularity = sing,
                                                                                     _rel_tol = rel_tol)
 

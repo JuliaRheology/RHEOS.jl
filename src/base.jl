@@ -257,7 +257,7 @@ than the convolution method. However, it works for variable sample rate.
 - `time_series`: The array of times
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
-function boltzintegral_nonsing(modulus, time_series::Vector{RheoFloat}, prescribed_dot::Vector{RheoFloat})
+function boltzintegral_nonsing(modulus, time_series::Vector{Float64}, prescribed_dot::Vector{Float64})
 
     # need to add an additional 'previous' time point to capture any instantaneous loading
     time_previous = time_series[1] - (time_series[2] - time_series[1])
@@ -324,7 +324,7 @@ than the convolution method. However, it works for variable sample rate.
 - `time_series`: The array of times
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
-function boltzintegral_sing(modulus, time_series::Vector{RheoFloat}, prescribed_dot::Vector{RheoFloat})
+function boltzintegral_sing(modulus, time_series::Vector{Float64}, prescribed_dot::Vector{Float64})
 
     # init time diff, used to cope with singularity
     init_offset = (time_series[2] - time_series[1])/10.0;
@@ -491,10 +491,10 @@ Initialise then begin a least squares fitting of the supplied data.
 - `singularity`: Presence of singularity in model
 """
 function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::Vector{RheoFloat},
-                           hi_bounds::Vector{RheoFloat}, modulus::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
+                           hi_bounds::Vector{RheoFloat}, modulus,
                            time_series::Vector{RheoFloat}, dt::RheoFloat,
                            prescribed_dot::Vector{RheoFloat}, measured::Vector{RheoFloat};
-                           insight::Bool = false, sampling::Bool=true,
+                           insight::Bool = false, constant_sampling::Bool=true,
                            singularity::Bool = false, _rel_tol = 1e-4)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
@@ -512,9 +512,7 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::Vector{Rh
     # set relative tolerance
     xtol_rel!(opt, _rel_tol)
 
-    # set Opt object as a minimisation objective. Use a closure for additional
-    # arguments sent to object objectivefunc
-
+    # Convert to float64 to avoid conversion by NLOpt
     params_init = convert(Vector{Float64},params_init)
     low_bounds = convert(Vector{Float64},low_bounds)
     hi_bounds = convert(Vector{Float64}, hi_bounds)
@@ -522,15 +520,16 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::Vector{Rh
     prescribed_dot = convert(Vector{Float64},prescribed_dot)
     measured = convert(Vector{Float64},measured)
 
-
-    if !singularity && sampling
+    # set Opt object as a minimisation objective. Use a closure for additional
+    # arguments sent to object objectivefunc
+    if !singularity && constant_sampling
 
         min_objective!(opt, (params, grad) -> obj_const_nonsing(params, grad, modulus,
                                                             time_series, dt,
                                                             prescribed_dot, measured;
                                                             _insight = insight))
 
-    elseif singularity && sampling
+    elseif singularity && constant_sampling
         # remove singularity, just go close to it, 1/10th over first sample period
         time_series[1] = 0.0 + (time_series[2] - time_series[1])/10.0
         min_objective!(opt, (params, grad) -> obj_const_sing(params, grad, modulus,
@@ -538,13 +537,13 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::Vector{Rh
                                                         prescribed_dot, measured;
                                                         _insight = insight))
 
-    elseif !singularity && !sampling
+    elseif !singularity && !constant_sampling
 
         min_objective!(opt, (params, grad) -> obj_var_nonsing(params, grad, modulus,
                                                         time_series, prescribed_dot,
                                                         measured; _insight = insight))
 
-    elseif singularity && !sampling
+    elseif singularity && !constant_sampling
 
         min_objective!(opt, (params, grad) -> obj_var_sing(params, grad, modulus,
                                                         time_series, prescribed_dot,
