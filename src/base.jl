@@ -486,7 +486,7 @@ Initialise then begin a least squares fitting of the supplied data.
 - `dt`: Constant time step (sample period)
 - `prescribed_dot`: Convolved with `modulus` over `time_series`, usually dϵ/dt for stress relaxation and dσ/dt for creep
 - `measured`: Data for comparison against, usually σ for stress relaxation and ϵ for creep
-- `sampling`: Declare whether sample rate is `constant` or `variable` so that convolution or integration is used respectively
+- `constant_sampling`: true if sample rate is constant, false otherwise
 - `insight`: Declare whether insight info should be shown when this function is called, true or false
 - `singularity`: Presence of singularity in model
 """
