@@ -519,6 +519,7 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::Vector{Rh
     time_series = convert(Vector{Float64},time_series)
     prescribed_dot = convert(Vector{Float64},prescribed_dot)
     measured = convert(Vector{Float64},measured)
+    dt = convert(Float64, dt)
 
     # set Opt object as a minimisation objective. Use a closure for additional
     # arguments sent to object objectivefunc

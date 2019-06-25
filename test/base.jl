@@ -465,7 +465,8 @@ function _leastsquares_init_ramp(tol)
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
     #ramp_response = RHEOS.boltzconvolve(x->exp.(-x), t, dt, ramp_loading_derivative)
     modulus = (t, params)->(params[1] .- params[2]*exp.(-t))
-    leastsquares_init([1.0, 1.0], [0.99, 0.99], [1.01, 1.01], modulus, t, dt  
+
+    leastsquares_init([1.0, 1.0], [0.99, 0.99], [1.01, 1.01], modulus, t, dt, ramp_loading_derivative,   
 end
 @test _leastsquares_init_ramp(tol)
 
