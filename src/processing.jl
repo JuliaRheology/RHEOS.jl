@@ -1,8 +1,10 @@
 #!/usr/bin/env julia
 
-#############################
-#~ Preprocessing Functions ~#
-#############################
+#=
+-----------------------
+Preprocessing functions
+-----------------------
+=#
 """
     resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Vector{T}= [-1])
 
@@ -182,13 +184,11 @@ function extract(self::Union{RheoTimeData,RheoFreqData}, type::Union{TimeDataTyp
 
 end
 
-
-
-
-##########################
-#~ Processing Functions ~#
-##########################
-
+#=
+--------------------------------
+Fitting and predicting functions
+--------------------------------
+=#
 """
     modelfit(data::RheoTimeData, model::RheoModelClass, modloading::Symbol; p0::Union{NamedTuple,Tuple} = (), lo::Union{NamedTuple,Tuple} = (), hi::Union{NamedTuple,Tuple} = (), verbose::Bool = false, rel_tol = 1e-4, diff_method="BD")
 

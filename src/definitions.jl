@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 # Empty vector mostly used as default parameters to indicate missing/unspecified data.
-empty_rheodata_vector=RheoFloat[]
+empty_rheodata_vector = RheoFloat[]
 
 """
     RheoTimeData(;σ::Vector{T1}, ϵ::Vector{T2}, t::Vector{T3}, log::OrderedDict{Any,Any}) where {T1<:Real, T2<:Real, T3<:Real}
