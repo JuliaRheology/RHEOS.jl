@@ -1,14 +1,10 @@
 #!/usr/bin/env julia
 
-#- timeline(end; start=0; stepsize=(end-start)/250)
-#	→ RheolTimeData with time only defined
-
-#- strainfunction!(RheolData, Function)
-#- stressfunction!(RheolData, Function)
-
-#d=timeline(100; stepsize=0.1)
-#strainfunction!(d,t->step(t,ts=10)+rand())
-
+#=
+----------------------------------------------------------------------------
+timeline generation function forms the basis of any load-generation workflow
+----------------------------------------------------------------------------
+=#
 """
     timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end-t_start)/250.)
 
@@ -27,37 +23,44 @@ function timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end-t_start)
     RheoTimeData([], [], collect(t_start:step:t_end), log)
 end
 
-#
-#   These functions provide convenient tools to design steps, ramps and
-#   other input patterns for the stress and strain data
-#
-#   Functions may also return an anonymous function if the parameter t is omitted.
-#
-
-function strainfunction(d::RheoTimeData, f::T) where T<:Function
+#=
+------------------------------------------------------------------------
+strainfunction and stressfunction can be used to impose strain of stress
+respectively. The subsequent convenience functions are passed to them to 
+generate the appropriate loading.
+------------------------------------------------------------------------
+=#
+function strainfunction(data::RheoTimeData, f::T) where T<:Function
     log = copy(data.log)
     log[:n] = log[:n] + 1
     log[string("activity_", log[:n])] = "Strain generated"
     #log = OrderedDict{Any,Any}("activity"=>"strain function", "data_source"=>d.log)
-    return RheoTimeData(d.σ, convert(Vector{RheoFloat}, map(f, d.t)), d.t, log)
+    return RheoTimeData(data.σ, convert(Vector{RheoFloat}, map(f, data.t)), data.t, log)
 end
 
 function stressfunction(d::RheoTimeData, f::T) where T<:Function
     log = copy(data.log)
     log[:n] = log[:n] + 1
     log[string("activity_", log[:n])] = "Stress generated"
-    #log = OrderedDict{Any,Any}("activity"=>"stress function", "data_source"=>d.log)
-    return RheoTimeData(convert(Vector{RheoFloat}, map(f, d.t)), d.ϵ, d.t, log)
+    #log = OrderedDict{Any,Any}("activity"=>"stress function", "data_source"=>data.log)
+    return RheoTimeData(convert(Vector{RheoFloat}, map(f, data.t)), data.ϵ, data.t, log)
 end
 
-function hstep(t;offset=0.,amp=1.)
+#=
+------------------------------------------------------------------------------
+These functions provide convenient tools to design steps, ramps and
+other input patterns for the stress and strain data
+
+Functions may also return an anonymous function if the parameter t is omitted.
+------------------------------------------------------------------------------
+=#
+function hstep(t; offset=0., amp=1.)
     return (t<offset) ? 0 : amp
 end
 
-function hstep(;offset=0.,amp=1.)
+function hstep(; offset=0., amp=1.)
     return t->(t<offset) ? 0 : amp
 end
-
 
 function ramp(t;offset=0., amp=1.)
     return (t<offset) ? 0 : (t-offset) * amp
@@ -83,7 +86,6 @@ function square(;offset=0., amp=1., period=1., width=0.5*period)
     return t -> t<offset ? 0. : ( ((t-offset)%period) <width ? amp : 0.)
 end
 
-
 function sawtooth(t;offset=0., amp=1., period=1.)
     return t<offset ? 0. : amp*((t-offset)%period)/period
 end
@@ -91,8 +93,6 @@ end
 function sawtooth(;offset=0., amp=1., period=1.)
     return t -> t<offset ? 0. : amp*((t-offset)%period)/period
 end
-
-
 
 function triangle(t;offset=0., amp=1., period=1., width=0.5*period)
     if t<offset
@@ -115,40 +115,10 @@ function frequency_spec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(
     RheoFreqData([],[],collect(ω_start:step:ω_end),log)
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-    linegen(t_total::Real; stepsize::Real = 1.0)
-
-Generate RheologyData struct with a simple line loading of height 1.0.
-
-# Arguments
-
-- `t_total`: Total time length of data
-- `stepsize`: Time sampling period
-"""
-function linegen(t_total::Real; stepsize::Real = 1.0)
-
-    t = collect(0.0:stepsize:t_total)
-
-    data = zeros(eltype(t), length(t)) .+ 1.0
-
-    RheologyData(data, t, ["linegen: t_total: $t_total, stepsize: $stepsize"])
-
-end
+#=
+-----------------------------------------------------------------------------------
+Functionality not yet brought integrated with new data generation format, see TODO:
+-----------------------------------------------------------------------------------
 
 """
     stepgen(t_total::Real, t_on::Real; t_trans::Real = 0.0, stepsize::Real = 1.0)
@@ -188,80 +158,6 @@ function stepgen(t_total::Real,
     end
 
     RheologyData(data, t, ["stepgen: t_total: $t_total, t_on: $t_on, t_trans: $t_trans, stepsize: $stepsize"])
-
-end
-
-"""
-    rampgen(t_total::Real, t_start::Real, t_stop::Real; amplitude::Real = 1.0, baseval::Real = 0.0, stepsize::Real = 1.0)
-
-Generate RheologyData struct with a ramp function. Reaches amplitude of 1.0 at t_stop.
-
-# Arguments
-
-- `t_total`: Total time length of data
-- `t_start`: Time for starting ramp
-- `t_stop`: Time of stopping ramp
-- `stepsize`: Time sampling period
-"""
-function rampgen(t_total::Real,
-                  t_start::Real,
-                  t_stop::Real;
-                  stepsize::Real = 1.0)
-
-    t = collect(0.0:stepsize:t_total)
-
-    # line form is "load = m*t + c"
-    m = 1.0/(t_stop - t_start)
-    c = -1.0*t_start/(t_stop - t_start)
-
-    data = zeros(length(t))
-
-    for (i, v) in enumerate(t)
-
-        if t_start<=v<t_stop
-            data[i] += m*v + c
-        elseif v>=t_stop
-            data[i] = 1.0
-        end
-
-    end
-
-    RheologyData(data, t, ["rampgen: t_total: $t_total, t_start: $t_start, t_stop: $t_stop, stepsize: $stepsize"])
-
-end
-
-"""
-    singen(t_total::Real, frequency::Real; t_start::Real = 0.0, phase::Real = 0.0, stepsize::Real = 1.0)
-
-Generate RheologyData struct with a sinusoidal loading of amplitude 1.0.
-
-# Arguments
-
-- `t_total`: Total time length of data
-- `frequency`: Frequency of oscillation (Hz)
-- `t_start`: Time for oscillation to begin
-- `phase`: Phase of oscillation (radians)
-- `stepsize`: Time sampling period
-"""
-function singen(t_total::Real,
-                frequency::Real;
-                t_start::Real = 0.0,
-                phase::Real = 0.0,
-                stepsize::Real = 1.0)
-
-    t = collect(0.0:stepsize:t_total)
-
-    data = zeros(length(t))
-
-    for (i, v) in enumerate(t)
-
-        if v>=t_start
-            data[i] = sin(2*π*frequency*(v - t_start) + phase)
-        end
-
-    end
-
-    RheologyData(data, t, ["singen: t_total: $t_total, frequency: $frequency, t_start: $t_start, phase: $phase, stepsize: $stepsize"])
 
 end
 
@@ -364,3 +260,4 @@ function repeatdata(self::RheologyData, n::Integer; t_trans = 0.0)
     end
 
 end
+=#

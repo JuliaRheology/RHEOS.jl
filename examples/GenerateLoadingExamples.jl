@@ -2,6 +2,16 @@
 # using RHEOS
 # using PyPlot
 
+# NEW EXAMPLES FROM ALE/ALEXANDRE? COPY-PASTED FROM SOURCE FILE
+# timeline(end; start=0; stepsize=(end-start)/250)
+# → RheolTimeData with time only defined
+
+# strainfunction(RheolData, Function)
+# stressfunction(RheolData, Function)
+
+# d=timeline(100; stepsize=0.1)
+# strainfunction!(d,t->step(t,ts=10)+rand())
+
 # foo = stepgen(1000.0, 100.0)
 # bar = stepgen(1000.0, 500.0)
 # baz = foo - bar
