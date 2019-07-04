@@ -116,10 +116,9 @@ function frequency_spec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(
 end
 
 #=
------------------------------------------------------------------------------------
-Functionality not yet brought integrated with new data generation format, see TODO:
------------------------------------------------------------------------------------
-
+---------------------------------------------------------------------------
+Functionality not yet integrated with new data generation format, see TODO:
+---------------------------------------------------------------------------
 """
     stepgen(t_total::Real, t_on::Real; t_trans::Real = 0.0, stepsize::Real = 1.0)
 
