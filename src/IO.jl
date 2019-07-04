@@ -72,22 +72,7 @@ function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ
         return RheoFreqData(ω = data[:,ω_col], Gp = data[:,Gp_col], Gpp = data[:,Gpp_col], source = filedir)
 
     end
-
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 """
     exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".csv", delimiter=',')

@@ -1,10 +1,5 @@
 #!/usr/bin/env julia
 
-export RheoTimeData, RheoTimeDataType, RheoFreqData, RheoFreqDataType, check_time_data_consistency
-export LoadingType, strain_imposed, stress_imposed
-export TimeDataType, time_only, strain_only, stress_only, strain_and_stress
-export FreqDataType, invalid_freq_data, frec_only, with_modulus
-
 # Empty vector mostly used as default parameters to indicate missing/unspecified data.
 empty_rheodata_vector=RheoFloat[]
 
@@ -281,9 +276,6 @@ function Base.show(io::IO, m::RheoModelClass)
     print(io, m.info)
     return
 end
-
-
-export rheoconv,invLaplace
 
 rheoconv(t::Real) = RheoFloat(t)
 rheoconv(t::Array{T,1}) where T<:Real = convert(Vector{RheoFloat},t)

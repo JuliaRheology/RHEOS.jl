@@ -1,8 +1,5 @@
 #!/usr/bin/env julia
 
-
-export time_line,strainfunction,stressfunction, frequency_spec
-
 #- timeline(end; start=0; stepsize=(end-start)/250)
 #	→ RheolTimeData with time only defined
 
@@ -12,11 +9,10 @@ export time_line,strainfunction,stressfunction, frequency_spec
 #d=timeline(100; stepsize=0.1)
 #strainfunction!(d,t->step(t,ts=10)+rand())
 
-
 """
     timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end-t_start)/250.)
 
-Generate RheoTimeData struct with only the time data
+Generate RheoTimeData struct with only the time data abd kig,
 
 # Arguments
 
@@ -25,50 +21,36 @@ Generate RheoTimeData struct with only the time data
 - `step`: Time between sample
 """
 function time_line(;t_start::Real=0., t_end::Real=10., step::Real=(t_end-t_start)/250.)
+
     log = OrderedDict{Any,Any}(:n=>1,"activity"=>"timeline created - t_start: $t_start, t_end: $t_end, step: $step")
-    RheoTimeData([],[],collect(t_start:step:t_end), log)
+
+    RheoTimeData([], [], collect(t_start:step:t_end), log)
 end
-
-
-
-
-function strainfunction!(d::RheoTimeData, f)
-    d.ϵ=convert(Vector{RheoFloat},map(f,d.t))
-end
-
-function stressfunction!(d::RheoTimeData, f)
-    d.σ=convert(Vector{RheoFloat},map(f,d.t))
-end
-
-
 
 #
 #   These functions provide convenient tools to design steps, ramps and
 #   other input patterns for the stress and strain data
 #
-#   Functions may also return an anonimous function if the parameter t is omitted.
+#   Functions may also return an anonymous function if the parameter t is omitted.
 #
-
 
 function strainfunction(d::RheoTimeData, f::T) where T<:Function
     log = copy(data.log)
-    log[:n] = log[:n]+1
-    log[string("activity_",log[:n])] = "Strain generated"
+    log[:n] = log[:n] + 1
+    log[string("activity_", log[:n])] = "Strain generated"
     #log = OrderedDict{Any,Any}("activity"=>"strain function", "data_source"=>d.log)
-    return RheoTimeData(d.σ,convert(Vector{RheoFloat},map(f,d.t)),d.t, log)
+    return RheoTimeData(d.σ, convert(Vector{RheoFloat}, map(f, d.t)), d.t, log)
 end
 
 function stressfunction(d::RheoTimeData, f::T) where T<:Function
     log = copy(data.log)
-    log[:n] = log[:n]+1
-    log[string("activity_",log[:n])] = "Stress generated"
+    log[:n] = log[:n] + 1
+    log[string("activity_", log[:n])] = "Stress generated"
     #log = OrderedDict{Any,Any}("activity"=>"stress function", "data_source"=>d.log)
-    return RheoTimeData(convert(Vector{RheoFloat},map(f,d.t)), d.ϵ, d.t, log)
+    return RheoTimeData(convert(Vector{RheoFloat}, map(f, d.t)), d.ϵ, d.t, log)
 end
 
-
 export hstep, ramp, stairs, square, sawtooth, triangle
-
 
 function hstep(t;offset=0.,amp=1.)
     return (t<offset) ? 0 : amp
@@ -129,8 +111,6 @@ end
 function triangle(;offset=0., amp=1., period=1., width=0.5*period)
     return t -> triangle(t,offset=offset, amp=amp, period=period, width=width)
 end
-
-
 
 function frequency_spec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(ω_end-ω_start)/1.0e5)
     log = OrderedDict{Any,Any}(:n=>1,"activity"=>"frequency_spec created: ω_start: $ω_start, ω_end: $ω_end, step: $step")
