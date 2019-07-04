@@ -1,9 +1,12 @@
 #!/usr/bin/env julia
 
 # To delete: quasinull
-#######################
-#~ Utility Functions ~#
-#######################
+
+#=
+-----------------
+Utility Functions
+-----------------
+=#
 """
     trapz(y, x)
 
@@ -154,10 +157,11 @@ returns array of indices.
 """
 closestindices(x::Vector{T1}, vals::Vector{T2}) where {T1<:Real, T2<:Real} = broadcast(closestindex, (x,), vals)
 
-#############################
-#~ Preprocessing Functions ~#
-#############################
-
+#=
+--------------------------------
+Preprocessing base functionality
+--------------------------------
+=#
 """
     getsigma(τ, samplerate)
 
@@ -227,10 +231,11 @@ function fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elper
     return xᵦ, yᵦ
 end
 
-##########################
-#~ Processing Functions ~#
-##########################
-
+#=
+-----------------------------------------
+Fitting and predicting base functionality
+-----------------------------------------
+=#
 function singularitytest(modulus; t1::RheoFloat=zero(RheoFloat))
 
     startval = modulus(t1)
@@ -562,6 +567,11 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::Vector{Rh
 
 end
 
+#=
+----------------------------------------------
+Step fitting and predicting base functionality
+----------------------------------------------
+=#
 function obj_step_nonsing(params, grad, modulus, t, prescribed, measured; _insight=false)
     if _insight
         println("Current Parameters: ", params)

@@ -3,9 +3,6 @@
 #############################
 #~ Preprocessing Functions ~#
 #############################
-
-export cutting, extract
-
 """
     resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Vector{T}= [-1])
 
@@ -18,7 +15,7 @@ number for elperiods.
 """
 function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Vector{T}= [-1]) where {K<:Integer,T<:Real}
 
-    @assert (count(iszero,elperiods)==0) "Number of elements cannot be zero"
+    @assert (count(iszero, elperiods)==0) "Number of elements cannot be zero"
     # convert boundaries from times to element indicies
     if time_boundaries ==[-1]
         boundaries = [1,length(self.t)];
@@ -49,14 +46,14 @@ function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_bound
 end
 
 """
-    function cutting(self::RheoTimeData, time_on::T1,time_off::T2) where {T1<:Number, T2<:Number}
+    cutting(self::RheoTimeData, time_on::T1, time_off::T2) where {T1<:Number, T2<:Number}
 
 Remove the data outside a specified time interval.
 
 By specifing a time interval (time_on, time_off), a new RheoTimeData is returned without the data
 laying outside time interval.
 """
-function cutting(self::RheoTimeData, time_on::T1,time_off::T2) where {T1<:Number, T2<:Number}
+function cutting(self::RheoTimeData, time_on::T1, time_off::T2) where {T1<:Number, T2<:Number}
 
     @assert isreal(time_on) && isreal(time_off) "Boundaries cannot be complex numbers"
 
@@ -88,7 +85,7 @@ function cutting(self::RheoTimeData, time_on::T1,time_off::T2) where {T1<:Number
 end
 
 """
-function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
+    smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
 
 Smooth data using a Gaussian Kernel to time scale τ (approximately half power).
 
@@ -120,7 +117,6 @@ function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
     #log = vcat(self.log, "smooth - τ: $τ")
     #log = OrderedDict{Any,Any}("activity"=>"smooth", "data_source"=>self.log, "tau"=>τ)
 
-
     log = copy(self.log)
     log[:n] = log[:n]+1
     log[string("activity_",log[:n])] = "Smooth - tau: $τ"
@@ -130,7 +126,7 @@ function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
 end
 
 """
-    function extract(self::Union{RheoTimeData,RheoFreqData}, type::Union{TimeDataType,FreqDataType,Integer})
+    extract(self::Union{RheoTimeData,RheoFreqData}, type::Union{TimeDataType,FreqDataType,Integer})
 
 Extract specific fields form RheoTimeData or RheoFreqData.
 

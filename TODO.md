@@ -1,3 +1,3 @@
 - Increase test coverage
 - Add FFT fitting to handle singularities and sidestep Mittag-Leffler bottleneck
-- Update stepgen (with sigmoidal transition), noisegen and repeatdata (with sigmoidal transition) so that they integrate with new workflow.
+- Update stepgen (with sigmoidal transition), noisegen and repeatdata (with sigmoidal transition) so that they integrate with new workflow

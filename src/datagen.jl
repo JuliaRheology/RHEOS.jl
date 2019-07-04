@@ -79,11 +79,11 @@ function stairs(;offset=0., amp=1., width=1.)
 end
 
 function square(t;offset=0., amp=1., period=1., width=0.5*period)
-    return t<offset ? 0. : ( ((t-offset)%period) <width ? amp : 0.)
+    return t<offset ? 0. : ( ((t-offset)%period) < width ? amp : 0.)
 end
 
 function square(;offset=0., amp=1., period=1., width=0.5*period)
-    return t -> t<offset ? 0. : ( ((t-offset)%period) <width ? amp : 0.)
+    return t -> t<offset ? 0. : ( ((t-offset)%period) < width ? amp : 0.)
 end
 
 function sawtooth(t;offset=0., amp=1., period=1.)

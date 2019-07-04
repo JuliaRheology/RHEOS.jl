@@ -44,11 +44,14 @@ export JeffreysPT
 export SLS2, PowerLawPlateau
 
 # datagen.jl
-export timeline, strainfunction, stressfunction, frequency_spec
+export timeline
+export strainfunction, stressfunction
 export hstep, ramp, stairs, square, sawtooth, triangle
+export frequency_spec
 
 # processing.jl
-export resample, smooth, zerotime
+export resample, cutting, smooth, zerotime
+export cutting, extract
 export modelfit, modelpredict, modelstepfit, modelsteppredict
 export dynamicmodelfit, dynamicmodelpredict
 

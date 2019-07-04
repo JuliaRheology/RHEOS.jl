@@ -137,19 +137,6 @@ end
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 function +(self1::RheoTimeData, self2::RheoTimeData)
 
     type1 = RheoTimeDataType(self1)
@@ -176,7 +163,6 @@ function +(self1::RheoTimeData, self2::RheoTimeData)
     end
 
 end
-
 
 function -(self1::RheoTimeData, self2::RheoTimeData)
 
@@ -205,7 +191,6 @@ function -(self1::RheoTimeData, self2::RheoTimeData)
 
 end
 
-
 function -(self1::RheoTimeData)
 
     type1 = RheoTimeDataType(self1)
@@ -220,8 +205,6 @@ function -(self1::RheoTimeData)
     return RheoTimeData(-self1.σ, -self1.ϵ, self1.t, log)
 
 end
-
-
 
 function *(operand::Real, self1::RheoTimeData)
 
@@ -799,36 +782,6 @@ function *(self1::RheologyData, self2::RheologyData)
 
 end
 
-function -(self::RheologyData)
-
-    ϵ = -self.ϵ
-    σ = -self.σ
-
-    # log
-    log = vcat(self.log, ["multiplied by -1"])
-
-    RheologyData(σ, ϵ, self.t, "constant", log)
-
-end
-
-function *(self::RheologyData, operand::Real)
-
-    ϵ = self.ϵ*operand
-    σ = self.σ*operand
-
-    # log
-    log = vcat(self.log, ["multiplied data by $operand"])
-
-    RheologyData(σ, ϵ, self.t, "constant", log)
-
-end
-
-function *(operand::Real, self::RheologyData)
-
-    # multiplication commutes so call function as defined for opposite operand order
-    return self*operand
-
-end
 
 
 
