@@ -1,7 +1,7 @@
 name = "RHEOS"
 uuid = "728860ae-c896-11e8-0b91-0f38ecad5046"
-authors = ["Louis Kaplan <louis.kaplan@slcu.cam.ac.uk>"]
-version = "0.1.0"
+authors = ["J Louis Kaplan <jonathanlouiskaplan@outlook.com>", "Alessandra Bonfanti <bonfantiale.ab@gmail.com>", "Alexandre Kabla <ajk61@cam.ac.uk>"]
+version = "0.5.0"
 
 [deps]
 DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"

@@ -5,17 +5,8 @@ export LoadingType, strain_imposed, stress_imposed
 export TimeDataType, time_only, strain_only, stress_only, strain_and_stress
 export FreqDataType, invalid_freq_data, frec_only, with_modulus
 
-
-
-
-
-
-
-
-
 # Empty vector mostly used as default parameters to indicate missing/unspecified data.
 empty_rheodata_vector=RheoFloat[]
-
 
 """
     RheoTimeData(;σ::Vector{T1}, ϵ::Vector{T2}, t::Vector{T3}, log::OrderedDict{Any,Any}) where {T1<:Real, T2<:Real, T3<:Real}
@@ -40,7 +31,6 @@ struct RheoTimeData
     ϵ::Vector{RheoFloat}
     t::Vector{RheoFloat}
 
-    #log::Vector{String}
     log::OrderedDict{Any,Any}
 
 end
@@ -50,8 +40,6 @@ function RheoTimeData(;ϵ::Vector{T1} = empty_rheodata_vector, σ::Vector{T2} = 
     log = OrderedDict{Any,Any}(:n=>1,"activity"=>"import", "data_source"=>source, "type"=>typecheck)
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), log)   #Dict{Any,Any}("source"=> source, "datatype"=>check_time_data_consistency(t,ϵ,σ))
 end
-
-
 
 @enum TimeDataType invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
 
@@ -231,7 +219,7 @@ function -(self1::RheoTimeData)
 
     # log
     log = self1.log
-    log[:n] = log[:n] +1
+    log[:n] = log[:n] + 1
     log[string("activity_",log[:n])] = "unary negation"
 
     return RheoTimeData(-self1.σ, -self1.ϵ, self1.t, log)
@@ -248,7 +236,7 @@ function *(operand::Real, self1::RheoTimeData)
 
     # log
     log = self1.log
-    log[:n] = log[:n] +1
+    log[:n] = log[:n] + 1
     log[string("activity_",log[:n])] = "multiplication by $operand"
 
     return RheoTimeData(operand*self1.σ, operand*self1.ϵ, self1.t, log)
@@ -258,27 +246,11 @@ function *(self1::RheoTimeData, operand::Real)
     return operand*self1
 end
 
-
-
-
-
 #  Time shift operator >>
 #  shift time by a certain amount, trash the end and pad at the start with 0
 
 #  Union operator |
 #  Combine stress_only data and strain_only data into stress_strain
-
-
-
-
-
-
-
-
-
-
-
-
 
 struct RheoModelClass
 
@@ -926,8 +898,6 @@ function RheologyDynamic(colnames::Vector{String}, data1::Vector{T}, data2::Vect
     if filedir != "none" || length(log)==0
         push!(log, string("complete data loaded from:", filedir))
     end
-
-
 
     # return class with all fields initialised
     RheologyDynamic(Gp, Gpp, ω, log)
