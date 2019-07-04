@@ -41,7 +41,8 @@ export FractionalSpecial
 export JeffreysPT
 export SLS2, PowerLawPlateau
 # datagen.jl
-export time_line,strainfunction,stressfunction, frequency_spec
+export time_line, strainfunction,stressfunction, frequency_spec
+export hstep, ramp, stairs, square, sawtooth, triangle
 export linegen, stepgen, rampgen, singen, noisegen, repeatdata
 # processing.jl
 export variableresample, downsample, fixedresample, smooth, zerotime

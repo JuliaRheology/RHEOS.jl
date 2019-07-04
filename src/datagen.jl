@@ -20,7 +20,7 @@ Generate RheoTimeData struct with only the time data abd kig,
 - `t_end`: End time
 - `step`: Time between sample
 """
-function time_line(;t_start::Real=0., t_end::Real=10., step::Real=(t_end-t_start)/250.)
+function timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end-t_start)/250.)
 
     log = OrderedDict{Any,Any}(:n=>1,"activity"=>"timeline created - t_start: $t_start, t_end: $t_end, step: $step")
 
@@ -49,8 +49,6 @@ function stressfunction(d::RheoTimeData, f::T) where T<:Function
     #log = OrderedDict{Any,Any}("activity"=>"stress function", "data_source"=>d.log)
     return RheoTimeData(convert(Vector{RheoFloat}, map(f, d.t)), d.ϵ, d.t, log)
 end
-
-export hstep, ramp, stairs, square, sawtooth, triangle
 
 function hstep(t;offset=0.,amp=1.)
     return (t<offset) ? 0 : amp
