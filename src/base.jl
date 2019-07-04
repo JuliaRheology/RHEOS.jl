@@ -1,7 +1,5 @@
 #!/usr/bin/env julia
 
-# To delete: quasinull
-
 #=
 -----------------
 Utility Functions
