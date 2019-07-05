@@ -27,8 +27,20 @@ end
 
 function _hstep()
     time_instance = timeline(t_start=0.0, t_end=15.0, step=0.1)
-    step_stress_imposed = stressfunction(time_instance, hstep(offset=1.0, amp=2.0))
+    imposed = stressfunction(time_instance, hstep(offset=1.0, amp=2.0))
 
-    step_stress_imposed.σ==(0.0:0.1:15.0)
+    all(v -> v==0, imposed.σ[1:10]) && all(v -> v==2.0, imposed.σ[11:end])
 end
 @test _hstep()
+
+function _ramp()
+    time_instance = timeline(t_start=0.0, t_end=15.0, step=0.5)
+    imposed = stressfunction(time_instance, ramp(offset=1.0, gradient=1.0))
+    
+    all(v -> v==0, imposed.σ[1:3]) && imposed.σ[4]≈0.5 && imposed.σ[end]≈14.0
+end
+@test _ramp()
+
+
+
+# plot(imposed.t, imposed.σ, "-o")

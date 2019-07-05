@@ -63,8 +63,8 @@ function hstep(; kwargs...)
 end
 
 
-function ramp(t; offset=0., amp=1.)
-    return (t<offset) ? 0 : (t-offset) * amp
+function ramp(t; offset=0., gradient=1.)
+    return (t<offset) ? 0 : (t-offset) * gradient
 end
 
 function ramp(; kwargs...)
