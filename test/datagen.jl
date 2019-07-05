@@ -43,7 +43,6 @@ function _ramp()
 end
 @test _ramp()
 
-# delayed by one element, need to check, may need fix.
 # function _stairs()
 #     time_instance = timeline(t_start=0.0, t_end=15.0, step=0.5)
 #     imposed = stressfunction(time_instance, stairs(offset=5.0, amp=1.0, width=5.0))
@@ -58,7 +57,7 @@ function _square()
     dt = 0.1
     time_instance = timeline(t_start=0.0, t_end=3.0, step=dt)
     imposed = stressfunction(time_instance, square(offset=1.0, amp=1.0, period=1.0, width=0.5))
-    
+
     testresult = all(v -> v==0, imposed.σ[imposed.t.<1.0])
     ons = [1.0, 1.1, 1.2, 1.3, 1.4, 2.0, 2.1, 2.2, 2.3, 2.4, 3.0]
     offs = [1.5, 1.6, 1.7, 1.8, 1.9, 2.5, 2.6, 2.7, 2.8, 2.9]
@@ -78,9 +77,20 @@ end
 #     imposed = stressfunction(time_instance, sawtooth(offset=1.0, amp=1.0, period=1.0))
 #     plot(imposed.t, imposed.σ, "-o")
 #     grid()
-#     # all(v -> v==0, imposed.σ[1:3]) && imposed.σ[4]≈0.5 && imposed.σ[end]≈14.0
 #     true
 # end
 # @test _sawtooth()
 
-# plot(imposed.t, imposed.σ, "-o")
+# function _triangle()
+#     time_instance = timeline(t_start=0.0, t_end=5.0, step=0.1)
+#     imposed = stressfunction(time_instance, triangle(offset=1.0, amp=1.0, period=1.0))
+#     plot(imposed.t, imposed.σ, "-o")
+#     grid()
+#     true
+# end
+# @test _triangle()
+
+# function _frequency_spec
+
+# end
+# @test _frequency_spec

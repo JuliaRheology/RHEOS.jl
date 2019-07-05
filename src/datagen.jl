@@ -73,7 +73,6 @@ end
 
 
 function stairs(t; offset=0., amp=1., width=1.)
-    # time for first step on is one element delayed compared to step. Is this expected behaviour?
     return (t<offset) ? 0 : amp * ceil((t-offset)/width)
 end
 
