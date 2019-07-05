@@ -1,3 +1,5 @@
+- check PowerLawPlateau is in new format, add if not
+- check if generalised Maxwell model is in new format, add if not
 - Remove use of quasinull and quasinull function itself
 - Increase test coverage
 - Add FFT fitting to handle singularities and sidestep Mittag-Leffler bottleneck

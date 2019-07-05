@@ -38,7 +38,7 @@ function strainfunction(data::RheoTimeData, f::T) where T<:Function
     return RheoTimeData(data.σ, convert(Vector{RheoFloat}, map(f, data.t)), data.t, log)
 end
 
-function stressfunction(d::RheoTimeData, f::T) where T<:Function
+function stressfunction(data::RheoTimeData, f::T) where T<:Function
     log = copy(data.log)
     log[:n] = log[:n] + 1
     log[string("activity_", log[:n])] = "Stress generated"
@@ -58,43 +58,48 @@ function hstep(t; offset=0., amp=1.)
     return (t<offset) ? 0 : amp
 end
 
-function hstep(; offset=0., amp=1.)
-    return t->(t<offset) ? 0 : amp
+function hstep(; kwargs...)
+    return t -> hstep(t; kwargs...)
 end
 
-function ramp(t;offset=0., amp=1.)
+
+function ramp(t; offset=0., amp=1.)
     return (t<offset) ? 0 : (t-offset) * amp
 end
 
-function ramp(;offset=0., amp=1.)
-    return t -> (t<offset) ? 0 : (t-offset) * amp
+function ramp(; kwargs...)
+    return t -> ramp(t; kwargs...)
 end
 
-function stairs(t;offset=0., amp=1., width=1.)
+
+function stairs(t; offset=0., amp=1., width=1.)
     return (t<offset) ? 0 : amp * ceil((t-offset)/width)
 end
 
-function stairs(;offset=0., amp=1., width=1.)
-    return t -> (t<offset) ? 0 : amp * ceil((t-offset)/width)
+function stairs(; kwargs...)
+    return t -> stairs(t; kwargs...)
 end
 
-function square(t;offset=0., amp=1., period=1., width=0.5*period)
+
+function square(t; offset=0., amp=1., period=1., width=0.5*period)
     return t<offset ? 0. : ( ((t-offset)%period) < width ? amp : 0.)
 end
 
-function square(;offset=0., amp=1., period=1., width=0.5*period)
-    return t -> t<offset ? 0. : ( ((t-offset)%period) < width ? amp : 0.)
+function square(; kwargs...)
+    return t -> square(t; kwargs...)
 end
 
-function sawtooth(t;offset=0., amp=1., period=1.)
+
+function sawtooth(t; offset=0., amp=1., period=1.)
     return t<offset ? 0. : amp*((t-offset)%period)/period
 end
 
-function sawtooth(;offset=0., amp=1., period=1.)
-    return t -> t<offset ? 0. : amp*((t-offset)%period)/period
+function sawtooth(; kwargs...)
+    return t -> sawtooth(t; kwargs...)
 end
 
-function triangle(t;offset=0., amp=1., period=1., width=0.5*period)
+
+function triangle(t; offset=0., amp=1., period=1., width=0.5*period)
     if t<offset
         return 0.
     end
@@ -106,12 +111,14 @@ function triangle(t;offset=0., amp=1., period=1., width=0.5*period)
     end
 end
 
-function triangle(;offset=0., amp=1., period=1., width=0.5*period)
-    return t -> triangle(t,offset=offset, amp=amp, period=period, width=width)
+function triangle(; kwargs...)
+    return t -> triangle(t, kwargs...)
 end
+
 
 function frequency_spec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(ω_end-ω_start)/1.0e5)
     log = OrderedDict{Any,Any}(:n=>1,"activity"=>"frequency_spec created: ω_start: $ω_start, ω_end: $ω_end, step: $step")
+
     RheoFreqData([],[],collect(ω_start:step:ω_end),log)
 end
 
