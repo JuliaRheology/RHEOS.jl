@@ -1,13 +1,14 @@
 name = "RHEOS"
 uuid = "728860ae-c896-11e8-0b91-0f38ecad5046"
-authors = ["Louis Kaplan <louis.kaplan@slcu.cam.ac.uk>"]
-version = "0.1.0"
+authors = ["J Louis Kaplan <jonathanlouiskaplan@outlook.com>", "Alessandra Bonfanti <bonfantiale.ab@gmail.com>", "Alexandre Kabla <ajk61@cam.ac.uk>"]
+version = "0.5.0"
 
 [deps]
 DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+FunctionWrappers = "069b7b12-0de2-55c6-9aab-29f3d0a68a2e"
 ImageFiltering = "6a3955dd-da59-5b1f-98d4-e7296123deb5"
-Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 InverseLaplace = "e24f45a5-4790-5a38-8b2c-33d770a4e70f"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 NLopt = "76087f3c-5699-56af-9a33-bf431cd00edd"

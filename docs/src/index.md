@@ -1,5 +1,8 @@
 # RHEOS - RHEology Open Source
 
+## Please Note
+RHEOS is currently undergoing a major update. The documentation is being updated accordingly. The API section will be the first page to be updated. The tutorials from the previous documentation will be updated after this.
+
 ## Overview
 RHEOS is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:
 
@@ -17,7 +20,7 @@ RHEOS is a software package written in the Julia programming language that provi
 The sections in this documentation each aim to provide tutorials in different elements of RHEOS. The [API](@ref) section is a comprehensive list of RHEOS types and functions, and brief descriptions of their use. For corrections or further questions, please create an issue on the [Github repository](https://github.com/JuliaRheology/RHEOS.jl). **Note that whenever you restart your Julia session you will have to reload RHEOS by typing `using RHEOS`, to avoid repetition this line is not included in every piece of example code.**
 
 ## Installation
-1. Install Julia, version 1.0.2
+1. Install Julia, version 1.1.1
 2. From Julia REPL, enter pkg mode by pressing ```]```
 3. (Optional) Enable desired Project.toml environment
 4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```

@@ -1,21 +1,11 @@
 # API
 
-This page is a list of all types and functions defined by RHEOS that are intended for general use.
-
-## RHEOS Types
-```@docs
-RheologyData
-RheologyDynamic
-RheologyModel
-```
-
 ## Sampling and Filtering Functions
 ```@docs
-downsample
-fixedresample
-variableresample
+resample
+cutting
 smooth
-zerotime
+extract
 ```
 
 ## Fitting and Predicting Functions
@@ -30,20 +20,11 @@ dynamicmodelpredict
 
 ## Data Generation Functions
 ```@docs
-linegen
-stepgen
-rampgen
-singen
-noisegen
-repeatdata
-```
-
-## File I/O
-```@docs
-importdata
-exportdata
-savedata
-loaddata
-savemodel
-loadmodel
+timeline
+strainfunction
+stressfunction
+hstep
+ramp
+stairs
+square
 ```

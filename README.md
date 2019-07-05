@@ -1,4 +1,4 @@
-<a name="logo"/>
+﻿<a name="logo"/>
 <div align="center">
 <img src="docs/Logo.png" height="130"></img>
 </a>
@@ -22,38 +22,14 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 
 - Artificial loading conditions can be generated within RHEOS to better understand a model's response
 
-## Code Example
-The code below demonstrates how simple it is to load in data, fit a model and then predict its response using RHEOS.
-```
-# load in data from CSV using RHEOS convenience function
-data = importdata(["stress","strain", "time"], "DataRelaxation.csv")
-
-# fit a Standard Linear Solid model to the data via its relaxation modulus, G
-fitted_SLS_model = modelfit(data, SLS(), :G)
-
-# based on the original strain data and the SLS model fitted in the line above
-# predict the stress using the SLS relaxation modulus
-SLS_predicted = modelpredict(data, fitted_SLS_model, :G)
-```
-
-## Documentation
-
-RHEOS is fully documented with comprehensive tutorials that assume minimal knowledge about Julia programming. The documentation can be accessed by [clicking here](https://juliarheology.github.io/RHEOS.jl/latest/) or the blue 'docs' badge near the top of this page (just below the RHEOS logo).
+## Please Note
+RHEOS is currently undergoing a major update. The documentation is being updated accordingly. The API section will be the first page to be updated. The tutorials from the previous documentation will be updated after this.
 
 ## Installation
-1. Install Julia, version 1.0.2
+1. Install Julia, version 1.1.1
 2. From Julia REPL, enter pkg mode by pressing ```]```
 3. (Optional) Enable desired Project.toml environment
 4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
-
-## To do
-- [ ] Increase Test Coverage
-- [ ] Implement derived singularity approximation
-- [ ] Remove "sampling" field from RheologyData, add tests where required
-- [ ] Add default constraints for fractional models for convenience in broad parameter searches
-- [ ] Add FFT fitting to handle singularities and sidestep Mittag-Leffler bottleneck
-- [ ] Test integration-by-parts singularity handling
-- [ ] Add Sync Interpolation for going from variable to constant sample rate
 
 ## Included Dependencies
 #### [FastConv.jl](https://github.com/aamini/FastConv.jl)
