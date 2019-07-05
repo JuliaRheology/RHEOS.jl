@@ -3,4 +3,4 @@ using Test
 
 # run base tests
 # include("base.jl")
-include("processing.jl")
+include("datagen.jl")

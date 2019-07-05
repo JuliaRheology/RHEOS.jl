@@ -8,7 +8,7 @@ timeline generation function forms the basis of any load-generation workflow
 """
     timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end-t_start)/250.)
 
-Generate RheoTimeData struct with only the time data abd kig,
+Generate RheoTimeData struct with only the time data.
 
 # Arguments
 
