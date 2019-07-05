@@ -2,7 +2,7 @@ using Documenter, RHEOS
 
 makedocs(modules=[RHEOS],
          doctest=false, clean=true,
-         format =:html,
+         format =Documenter.HTML(),
          sitename=" ",
          authors="Louis Kaplan",
          pages = [
