@@ -7,12 +7,12 @@ makedocs(modules=[RHEOS],
          authors="Louis Kaplan",
          pages = [
              "Home" => "index.md",
-             "Fitting Data" => "fittingdata.md",
-             "Predicting Responses" => "predictingresponse.md",
-             "Generating Data" => "generatingdata.md",
-             "Sampling and Filtering" => "samplingandfiltering.md",
-             "File I/O" => "fileIO.md",
-             "Models" => "models.md",
+            #  "Fitting Data" => "fittingdata.md",
+            #  "Predicting Responses" => "predictingresponse.md",
+            #  "Generating Data" => "generatingdata.md",
+            #  "Sampling and Filtering" => "samplingandfiltering.md",
+            #  "File I/O" => "fileIO.md",
+            #  "Models" => "models.md",
              "API" => "API.md"
          ]
          )

@@ -30,6 +30,15 @@ respectively. The subsequent convenience functions are passed to them to
 generate the appropriate loading.
 ------------------------------------------------------------------------
 =#
+"""
+    strainfunction(data::RheoTimeData, f::T) where T<:Function
+
+Accepts a RheoTimeData and outputs a new RheoTimeData with a strain imposed.
+The strain signal is determined by the function provided, which should take
+time as its only argument. The original data's time signal is used.
+
+Normally used with a RheoTimeData generated using the `timeline` function.
+"""
 function strainfunction(data::RheoTimeData, f::T) where T<:Function
     log = copy(data.log)
     log[:n] = log[:n] + 1
@@ -38,6 +47,15 @@ function strainfunction(data::RheoTimeData, f::T) where T<:Function
     return RheoTimeData(data.σ, convert(Vector{RheoFloat}, map(f, data.t)), data.t, log)
 end
 
+"""
+    stressfunction(data::RheoTimeData, f::T) where T<:Function
+
+Accepts a RheoTimeData and outputs a new RheoTimeData with a stress imposed.
+The stress signal is determined by the function provided, which should take
+time as its only argument. The original data's time signal is used.
+
+Normally used with a RheoTimeData generated using the `timeline` function.
+"""
 function stressfunction(data::RheoTimeData, f::T) where T<:Function
     log = copy(data.log)
     log[:n] = log[:n] + 1
@@ -54,6 +72,13 @@ other input patterns for the stress and strain data
 Functions may also return an anonymous function if the parameter t is omitted.
 ------------------------------------------------------------------------------
 =#
+"""
+    hstep(t; offset=0., amp=1.)
+
+Step generation function for use with `stressfunction` or `strainfunction`.
+`offset` keyword arguent determines start of step. `amp` argument determines
+amplitude (height) of step.
+"""
 function hstep(t; offset=0., amp=1.)
     return (t<offset) ? 0 : amp
 end
@@ -62,7 +87,13 @@ function hstep(; kwargs...)
     return t -> hstep(t; kwargs...)
 end
 
+"""
+    ramp(t; offset=0., gradient=1.)
 
+Ramp signal generation function for use with `stressfunction` or `strainfunction`.
+`offset` keyword arguent determines start of ramp. `gradient` argument determines
+the linear gradient of the ramp.
+"""
 function ramp(t; offset=0., gradient=1.)
     return (t<offset) ? 0 : (t-offset) * gradient
 end
@@ -71,7 +102,14 @@ function ramp(; kwargs...)
     return t -> ramp(t; kwargs...)
 end
 
+"""
+    stairs(t; offset=0., amp=1., width=1.)
 
+Stairs signal generation function for use with `stressfunction` or `strainfunction`.
+Equivalent to additional steps being added every `width` seconds. `offset` keyword
+arguent determines start of stairs signal. `amp` argument determines the height
+of each additional step.
+"""
 function stairs(t; offset=0., amp=1., width=1.)
     return (t<offset) ? 0 : amp * ceil((t-offset)/width)
 end
@@ -80,7 +118,14 @@ function stairs(; kwargs...)
     return t -> stairs(t; kwargs...)
 end
 
+"""
+    square(t; offset=0., amp=1., period=1., width=0.5*period)
 
+Square signal generation function for use with `stressfunction` or `strainfunction`.
+`offset` keyword arguent determines start of square signal. `amp` argument determines 
+the height of each square pulse. `period` determines the period of one off/on section
+of the square wave signal. `width` determines the width of each square pulse. 
+"""
 function square(t; offset=0., amp=1., period=1., width=0.5*period)
     return t<offset ? 0. : ( ((t-offset)%period) < width ? amp : 0.)
 end
