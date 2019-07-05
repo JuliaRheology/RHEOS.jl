@@ -6,7 +6,7 @@ timeline generation function forms the basis of any load-generation workflow
 ----------------------------------------------------------------------------
 =#
 """
-    timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end-t_start)/250.)
+    timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end - t_start)/250.)
 
 Generate RheoTimeData struct with only the time data.
 
@@ -16,7 +16,7 @@ Generate RheoTimeData struct with only the time data.
 - `t_end`: End time
 - `step`: Time between sample
 """
-function timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end-t_start)/250.)
+function timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end - t_start)/250.)
 
     log = OrderedDict{Any,Any}(:n=>1,"activity"=>"timeline created - t_start: $t_start, t_end: $t_end, step: $step")
 

@@ -41,6 +41,14 @@ function _ramp()
 end
 @test _ramp()
 
+function _stairs()
+    time_instance = timeline(t_start=0.0, t_end=15.0, step=0.1)
+    imposed = stressfunction(time_instance, stairs(offset=5.0, amp=1.0, width=5.0))
+    # plot(imposed.t, imposed.σ, "-o")
+    all(v -> v==0.0, imposed.σ[1:50]) && all(v -> v==1.0, imposed.σ[51:100]) #&& all(v -> v==2.0, imposed.σ[101:150])
+end
+@test _stairs()
+
 
 
 # plot(imposed.t, imposed.σ, "-o")
