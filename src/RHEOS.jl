@@ -3,9 +3,6 @@ __precompile__(true)
 
 module RHEOS
 
-# This defines the data type for all arrays, parameters and processing
-RheoFloat = Float64
-
 # installed from Julia package repository
 using InverseLaplace
 using NLopt
@@ -21,7 +18,14 @@ export constantcheck
 using DataStructures
 using FunctionWrappers: FunctionWrapper
 
-######################################################
+######################################################################
+
+# This defines the data type for all arrays, parameters and processing
+# it is defined as a const to avoid any performance penalties.
+# See julia docs for more info on this.
+const RheoFloat = Float64
+
+######################################################################
 # definitions.jl
 export RheologyData, RheologyModel, RheologyDynamic
 export RheoTimeData, RheoTimeDataType, RheoFreqData, RheoFreqDataType, check_time_data_consistency
