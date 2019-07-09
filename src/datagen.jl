@@ -177,7 +177,7 @@ end
 function frequency_spec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(ω_end-ω_start)/1.0e5)
     log = OrderedDict{Any,Any}(:n=>1,"activity"=>"frequency_spec created: ω_start: $ω_start, ω_end: $ω_end, step: $step")
 
-    RheoFreqData([],[],collect(ω_start:step:ω_end),log)
+    RheoFreqData([], [], collect(ω_start:step:ω_end), log)
 end
 
 #=

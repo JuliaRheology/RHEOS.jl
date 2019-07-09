@@ -86,13 +86,14 @@ function _triangle()
     _amp = 1.0
     _offset = 1.0
     imposed = stressfunction(time_instance, triangle(offset=_offset, amp=1.0, period=1.0, width=0.5))
-    plot(imposed.t, imposed.σ, "-o")
-    grid()
+
     all(v -> v==0, imposed.σ[imposed.t.<_offset]) && all(v -> v==0.0, imposed.σ[imposed.t.%1.0.==0.0]) && all(v -> v==_amp, imposed.σ[((imposed.t.%1.0).==0.5) .& (imposed.t.>_offset)])
 end
 @test _triangle()
 
-# function _frequency_spec
+function _frequency_spec()
+    freq_instance = frequency_spec(ω_start=0.0, ω_end=15.0, step=0.1)
 
-# end
-# @test _frequency_spec
+    typeof(freq_instance)==RheoFreqData && freq_instance.ω==(0.0:0.1:15.0)
+end
+@test _frequency_spec()
