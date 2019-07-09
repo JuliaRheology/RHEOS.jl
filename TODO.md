@@ -8,7 +8,9 @@
 
 - Check if generalised Maxwell model is in new format, add if not
 
-- - Update stepgen (with sigmoidal transition), noisegen and repeatdata (with sigmoidal transition) so that they integrate with new workflow
+- Update stepgen (with sigmoidal transition), noisegen and repeatdata (with sigmoidal transition) so that they integrate with new workflow
+
+- decide on style guide? frequency_spec vs frequencyspec, time_line vs timeline.
 
 - Remove use of quasinull, replace with Union{Nothing, x} types and remove quasinull function itself
 
