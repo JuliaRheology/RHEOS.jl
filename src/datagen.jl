@@ -134,7 +134,13 @@ function square(; kwargs...)
     return t -> square(t; kwargs...)
 end
 
+"""
+    sawtooth(t; offset=0., amp=1., period=1.)
 
+Sawtooth signal generation function for use with `stressfunction` or `strainfunction`.
+`offset` keyword arguent determines start of sawtooth signal. `amp` argument determines 
+the height of each sawtooth pulse. `period` determines the period of the sawtooth wave signal.
+"""
 function sawtooth(t; offset=0., amp=1., period=1.)
     return t<offset ? 0. : amp*((t-offset)%period)/period
 end
@@ -143,7 +149,14 @@ function sawtooth(; kwargs...)
     return t -> sawtooth(t; kwargs...)
 end
 
+"""
+    triangle(t; offset=0., amp=1., period=1.)
 
+Triangle signal generation function for use with `stressfunction` or `strainfunction`.
+`offset` keyword arguent determines start of triangle signal. `amp` argument determines 
+the height of each triangle pulse. `period` determines the period of the triangle wave signal.
+`width` determines the width of the triangles.
+"""
 function triangle(t; offset=0., amp=1., period=1., width=0.5*period)
     if t<offset
         return 0.

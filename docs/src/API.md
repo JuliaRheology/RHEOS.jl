@@ -27,4 +27,6 @@ hstep
 ramp
 stairs
 square
+sawtooth
+triangle
 ```

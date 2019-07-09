@@ -72,23 +72,23 @@ function _square()
 end
 @test _square()
 
-# function _sawtooth()
-#     time_instance = timeline(t_start=0.0, t_end=5.0, step=0.1)
-#     imposed = stressfunction(time_instance, sawtooth(offset=1.0, amp=1.0, period=1.0))
-#     plot(imposed.t, imposed.σ, "-o")
-#     grid()
-#     true
-# end
-# @test _sawtooth()
+function _sawtooth()
+    time_instance = timeline(t_start=0.0, t_end=5.0, step=0.1)
+    _offset = 1.0
+    imposed = stressfunction(time_instance, sawtooth(offset=_offset, amp=1.0, period=1.0))
+    # this test could be improved
+    all(v -> v==0, imposed.σ[imposed.t.<_offset]) && all(v -> v==0.0, imposed.σ[imposed.t.%1.0.==0.0])
+end
+@test _sawtooth()
 
-# function _triangle()
-#     time_instance = timeline(t_start=0.0, t_end=5.0, step=0.1)
-#     imposed = stressfunction(time_instance, triangle(offset=1.0, amp=1.0, period=1.0))
-#     plot(imposed.t, imposed.σ, "-o")
-#     grid()
-#     true
-# end
-# @test _triangle()
+function _triangle()
+    time_instance = timeline(t_start=0.0, t_end=5.0, step=0.1)
+    imposed = stressfunction(time_instance, triangle(offset=1.0, amp=1.0, period=1.0))
+    plot(imposed.t, imposed.σ, "-o")
+    grid()
+    true
+end
+@test _triangle()
 
 # function _frequency_spec
 

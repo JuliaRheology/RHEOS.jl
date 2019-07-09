@@ -21,7 +21,7 @@ using FunctionWrappers: FunctionWrapper
 ######################################################################
 
 # This defines the data type for all arrays, parameters and processing
-# it is defined as a const to avoid any performance penalties.
+# it is defined as a const to avoid performance penalties.
 # See julia docs for more info on this.
 const RheoFloat = Float64
 
