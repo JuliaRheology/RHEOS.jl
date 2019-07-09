@@ -173,7 +173,17 @@ function triangle(; kwargs...)
     return t -> triangle(t; kwargs...)
 end
 
+"""
+    frequency_spec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(ω_end-ω_start)/1.0e5)
 
+Generate RheoFreqData struct with only the frequency data.
+
+# Arguments
+
+- `ω_start`: Starting time, typically 0
+- `ω_end`: End time
+- `step`: Step between frequencies
+"""
 function frequency_spec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(ω_end-ω_start)/1.0e5)
     log = OrderedDict{Any,Any}(:n=>1,"activity"=>"frequency_spec created: ω_start: $ω_start, ω_end: $ω_end, step: $step")
 
