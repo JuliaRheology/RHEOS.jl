@@ -29,4 +29,5 @@ stairs
 square
 sawtooth
 triangle
+frequency_spec
 ```
