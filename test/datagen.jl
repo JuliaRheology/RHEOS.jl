@@ -83,10 +83,12 @@ end
 
 function _triangle()
     time_instance = timeline(t_start=0.0, t_end=5.0, step=0.1)
-    imposed = stressfunction(time_instance, triangle(offset=1.0, amp=1.0, period=1.0))
+    _amp = 1.0
+    _offset = 1.0
+    imposed = stressfunction(time_instance, triangle(offset=_offset, amp=1.0, period=1.0, width=0.5))
     plot(imposed.t, imposed.σ, "-o")
     grid()
-    true
+    all(v -> v==0, imposed.σ[imposed.t.<_offset]) && all(v -> v==0.0, imposed.σ[imposed.t.%1.0.==0.0]) && all(v -> v==_amp, imposed.σ[((imposed.t.%1.0).==0.5) .& (imposed.t.>_offset)])
 end
 @test _triangle()
 

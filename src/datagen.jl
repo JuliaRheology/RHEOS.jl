@@ -170,7 +170,7 @@ function triangle(t; offset=0., amp=1., period=1., width=0.5*period)
 end
 
 function triangle(; kwargs...)
-    return t -> triangle(t, kwargs...)
+    return t -> triangle(t; kwargs...)
 end
 
 
