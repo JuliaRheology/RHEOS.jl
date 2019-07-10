@@ -1,6 +1,18 @@
 #!/usr/bin/env julia
 
 """
+    nanremove(arr::Array{T,2}) where T<:Real
+
+For a real 2D array with columns of e.g. time, stress and strain, or frequency, G' and G'',
+find any row which contains NaN values and remove that row completely.
+"""
+function nanremove(arr::Array{T,2}) where T<:Real
+    nanrows = sum(arr, dims=2)
+
+    arr[vec(.!isnan.(nanrows)), :]
+end
+
+"""
     importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ_col::Integer=-1, ω_col::Integer= -1, Gp_col::Integer = -1, Gpp_col::Integer = -1, delimiter=',')
 
 Load data from a CSV file (two/three columns, comma seperated by default but
@@ -21,33 +33,11 @@ function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ
 
         @assert (Gp_col==-1) & (Gpp_col ==-1) "Loss and storage modulus not allowed for time data"
         # read data from file
-        data = readdlm(filedir, delimiter)
+        dataraw = readdlm(filedir, delimiter)
 
-        # test for NaNs at the beginning and end of the data
-        newstartingval = 1
-        for i in 1:length(data[:,t_col])
-            if !isnan(sum(data[i,:]))
-                newstartingval = i
-                break
-            end
-        end
+        # remove and rows with NaN values in any of the columns
+        data = nanremove(dataraw)
 
-        # TO DO LATER: We need to add the check of nans within the data not just at the beginning and end
-        # el_del = []
-        # for i in newstartingval:length(data[:,t_col])
-        #     if !isnan(sum(data[i,:]))
-        #         el_del = i
-        #     end
-        # end
-
-        newendingval = 1
-        for i=length(data[:,t_col]):-1:1
-            if !isnan(sum(data[i,:]))
-                newendingval = i
-                break
-            end
-        end
-        data = data[newstartingval:newendingval,:]
         source = filedir
         # generate RheologyData struct and output
         if (ϵ_col!=-1) & (σ_col!=-1)

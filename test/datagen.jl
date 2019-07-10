@@ -1,5 +1,3 @@
-tol = (eps(RHEOS.RheoFloat))^(0.125)
-
 function _timeline()
     time_instance = timeline(t_start=0.0, t_end=15.0, step=0.1)
 
