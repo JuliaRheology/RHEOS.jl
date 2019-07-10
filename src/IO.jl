@@ -27,13 +27,13 @@ and proceeds accordingly. For oscillatory data, all three columns (Gp, Gpp, Freq
 must be provided. For regular viscoelastic data only time, or time-stress, or time-strain or
 time-stress-strain data can be provided.
 """
-function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ_col::Integer=-1, ω_col::Integer= -1, Gp_col::Integer = -1, Gpp_col::Integer = -1, delimiter=',')
+function importdata(filedir::String; t_col::Union{Integer, Nothing}= nothing, σ_col::Union{Integer, Nothing}= nothing, ϵ_col::Union{Integer, Nothing}=nothing, ω_col::Union{Integer, Nothing}= nothing, Gp_col::Union{Integer, Nothing} = nothing, Gpp_col::Union{Integer, Nothing} = nothing, delimiter=',')
 
-    @assert ((t_col!=-1)&(ω_col==-1)) || ((t_col==-1)&(ω_col!=-1)) "Data must contain either \"time\" or \"frequency\" "
+    @assert (!isnothing(t_col) && isnothing(ω_col)) | (isnothing(t_col==-1) && !isnothing(ω_col)) "Data must contain either \"time\" or \"frequency\" "
 
-    if t_col!=-1
+    if !isnothing(t_col)
 
-        @assert (Gp_col==-1) & (Gpp_col ==-1) "Loss and storage modulus not allowed for time data"
+        @assert isnothing(Gp_col) & isnothing(Gpp_col) "Loss and storage modulus not allowed for time data"
         # read data from file
         dataraw = readdlm(filedir, delimiter)
 

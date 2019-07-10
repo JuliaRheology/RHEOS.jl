@@ -33,6 +33,22 @@ function _importdata_ω_withnans()
     rheodata3 = importdata(fildir; ω_col = 2, Gp_col = 3, Gpp_col = 1)
     test3 = (rheodata3.ω == [10.0, 11.0] && rheodata3.Gp == [15.0, 16.0] && rheodata3.Gpp == [5.0, 6.0])
 
-    test1 #&& test2 && test3
+    test1 && test2 && test3
 end
 @test _importdata_ω_withnans()
+
+function _importdata_t_partial()
+    fildir = joinpath(@__DIR__, "testdata", "datapartial.csv")
+
+    rheodata1 = importdata(fildir; t_col = 1)
+    test1 = (rheodata1.t == [1.0, 2.0, 3.0, 4.0, 5.0])
+    
+    rheodata2 = importdata(fildir; t_col = 1, σ_col = 2)
+    test2 = (rheodata2.t == [1.0, 2.0, 3.0, 4.0, 5.0] && rheodata2.σ == [10.0, 20.0, 30.0, 40.0, 50.0])
+
+    rheodata3 = importdata(fildir; t_col = 1, ϵ_col = 1)
+    test3 = (rheodata3.t == [1.0, 2.0, 3.0, 4.0, 5.0] && rheodata3.ϵ == [10.0, 20.0, 30.0, 40.0, 50.0])
+
+    test1 && test2 && test3
+end
+@test _importdata_t_withnans()
