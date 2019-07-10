@@ -10,7 +10,7 @@ function nanremove(arr::Array{T,2}) where T<:Real
     # get 1D array which is NaN for any corresponding row with NaNs in
     rowsums = sum(arr, dims=2)
 
-    # extract only those rows who did not evaluate to NaN in previous line
+    # extract only those rows whose sum did not evaluate to NaN
     arr[vec(.!isnan.(rowsums)), :]
 end
 
@@ -21,7 +21,7 @@ Load data from a CSV file (two/three columns, comma seperated by default but
 delimiter can be specified in the `delimiter` keyword argument). Arguments must be
 identified by providing the number of the column in which they are contained.
 
-Can be used to construct either a RheologyData instance or a RheologyDynamic
+Can be used to construct either a RheoTimeData instance or a RheoFreqData
 instance. Function detects whether "time" or "frequency" has been included
 and proceeds accordingly. For oscillatory data, all three columns (Gp, Gpp, Frequency)
 must be provided. For regular viscoelastic data only time, or time-stress, or time-strain or
@@ -43,13 +43,13 @@ function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ
         source = filedir
         # generate RheologyData struct and output
         if (ϵ_col!=-1) & (σ_col!=-1)
-            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], σ = data[:,σ_col], source = source)
+            return RheoTimeData(t = data[:, t_col], ϵ = data[:, ϵ_col], σ = data[:, σ_col], source = source)
         elseif (ϵ_col!=-1) & (σ_col==-1)
-            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], source = source)
+            return RheoTimeData(t = data[:, t_col], ϵ = data[:, ϵ_col], source = source)
         elseif (σ_col!=-1) & (ϵ_col==-1)
-            return RheoTimeData(t = data[:,t_col], σ = data[:,σ_col], source = source)
+            return RheoTimeData(t = data[:, t_col], σ = data[:, σ_col], source = source)
         elseif (t_col!=-1) & (σ_col==-1) &  (ϵ_col==-1)
-            return RheoTimeData(t = data[:,t_col], source = source)
+            return RheoTimeData(t = data[:, t_col], source = source)
         end
 
     elseif ω_col!=-1
@@ -58,7 +58,9 @@ function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ
         @assert Gp_col!=-1 & Gpp_col!=-1 "\"Gp\" and \"Gpp\" are required."
 
         # read data from file
-        data = readdlm(filedir, delimiter)
+        dataraw = readdlm(filedir, delimiter)
+        # remove and rows with NaN values in any of the columns
+        data = nanremove(dataraw)
 
         # generate RheologyDynamic struct and output
         return RheoFreqData(ω = data[:,ω_col], Gp = data[:,Gp_col], Gpp = data[:,Gpp_col], source = filedir)
