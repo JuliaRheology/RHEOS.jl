@@ -7,9 +7,11 @@ For a real 2D array with columns of e.g. time, stress and strain, or frequency, 
 find any row which contains NaN values and remove that row completely.
 """
 function nanremove(arr::Array{T,2}) where T<:Real
-    nanrows = sum(arr, dims=2)
+    # get 1D array which is NaN for any corresponding row with NaNs in
+    rowsums = sum(arr, dims=2)
 
-    arr[vec(.!isnan.(nanrows)), :]
+    # extract only those rows who did not evaluate to NaN in previous line
+    arr[vec(.!isnan.(rowsums)), :]
 end
 
 """
