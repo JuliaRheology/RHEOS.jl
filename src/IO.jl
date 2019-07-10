@@ -15,7 +15,7 @@ function nanremove(arr::Array{T,2}) where T<:Real
 end
 
 """
-    importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ_col::Integer=-1, ω_col::Integer= -1, Gp_col::Integer = -1, Gpp_col::Integer = -1, delimiter=',')
+    importdata(filedir::String; t_col::Union{Integer, Nothing}= nothing, σ_col::Union{Integer, Nothing}= nothing, ϵ_col::Union{Integer, Nothing}=nothing, ω_col::Union{Integer, Nothing}= nothing, Gp_col::Union{Integer, Nothing} = nothing, Gpp_col::Union{Integer, Nothing} = nothing, delimiter=',')
 
 Load data from a CSV file (two/three columns, comma seperated by default but
 delimiter can be specified in the `delimiter` keyword argument). Arguments must be
@@ -29,11 +29,11 @@ time-stress-strain data can be provided.
 """
 function importdata(filedir::String; t_col::Union{Integer, Nothing}= nothing, σ_col::Union{Integer, Nothing}= nothing, ϵ_col::Union{Integer, Nothing}=nothing, ω_col::Union{Integer, Nothing}= nothing, Gp_col::Union{Integer, Nothing} = nothing, Gpp_col::Union{Integer, Nothing} = nothing, delimiter=',')
 
-    @assert (!isnothing(t_col) && isnothing(ω_col)) | (isnothing(t_col==-1) && !isnothing(ω_col)) "Data must contain either \"time\" or \"frequency\" "
+    @assert (!isnothing(t_col) && isnothing(ω_col)) || (isnothing(t_col) && !isnothing(ω_col)) "Data must contain either \"time\" or \"frequency\" "
 
     if !isnothing(t_col)
 
-        @assert isnothing(Gp_col) & isnothing(Gpp_col) "Loss and storage modulus not allowed for time data"
+        @assert isnothing(Gp_col) && isnothing(Gpp_col) "Loss and storage modulus not allowed for time data"
         # read data from file
         dataraw = readdlm(filedir, delimiter)
 
@@ -42,20 +42,20 @@ function importdata(filedir::String; t_col::Union{Integer, Nothing}= nothing, σ
 
         source = filedir
         # generate RheologyData struct and output
-        if (ϵ_col!=-1) & (σ_col!=-1)
+        if !isnothing(ϵ_col) && !isnothing(σ_col)
             return RheoTimeData(t = data[:, t_col], ϵ = data[:, ϵ_col], σ = data[:, σ_col], source = source)
-        elseif (ϵ_col!=-1) & (σ_col==-1)
+        elseif !isnothing(ϵ_col) && isnothing(σ_col)
             return RheoTimeData(t = data[:, t_col], ϵ = data[:, ϵ_col], source = source)
-        elseif (σ_col!=-1) & (ϵ_col==-1)
+        elseif !isnothing(σ_col) && isnothing(ϵ_col)
             return RheoTimeData(t = data[:, t_col], σ = data[:, σ_col], source = source)
-        elseif (t_col!=-1) & (σ_col==-1) &  (ϵ_col==-1)
+        elseif !isnothing(t_col) && isnothing(σ_col) && isnothing(ϵ_col)
             return RheoTimeData(t = data[:, t_col], source = source)
         end
 
-    elseif ω_col!=-1
+    elseif !isnothing(ω_col)
         # check colnames length is correct
-        @assert (σ_col==-1) & (ϵ_col ==-1) "Stress and strain not allowed for frequency data"
-        @assert Gp_col!=-1 & Gpp_col!=-1 "\"Gp\" and \"Gpp\" are required."
+        @assert isnothing(σ_col) || isnothing(ϵ_col) "Stress and strain not allowed for frequency data"
+        @assert !isnothing(Gp_col) && !isnothing(Gpp_col) "\"Gp\" and \"Gpp\" are required."
 
         # read data from file
         dataraw = readdlm(filedir, delimiter)
