@@ -1,8 +1,5 @@
 #!/usr/bin/env julia
 
-# Empty vector mostly used as default parameters to indicate missing/unspecified data.
-empty_rheodata_vector = RheoFloat[]
-
 """
     RheoTimeData(;σ::Vector{T1}, ϵ::Vector{T2}, t::Vector{T3}, log::OrderedDict{Any,Any}) where {T1<:Real, T2<:Real, T3<:Real}
 
@@ -30,7 +27,7 @@ struct RheoTimeData
 
 end
 
-function RheoTimeData(;ϵ::Vector{T1} = empty_rheodata_vector, σ::Vector{T2} = empty_rheodata_vector, t::Vector{T3} = empty_rheodata_vector, source="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoTimeData(;ϵ::Vector{T1} = RheoFloat[], σ::Vector{T2} = RheoFloat[], t::Vector{T3} = RheoFloat[], source="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_time_data_consistency(t,ϵ,σ)
     log = OrderedDict{Any,Any}(:n=>1,"activity"=>"import", "data_source"=>source, "type"=>typecheck)
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), log)   #Dict{Any,Any}("source"=> source, "datatype"=>check_time_data_consistency(t,ϵ,σ))
@@ -41,8 +38,8 @@ end
 function check_time_data_consistency(t,e,s)
     @assert (length(t)>0)  "Time data empty"
 
-    sdef=(s != empty_rheodata_vector)
-    edef=(e != empty_rheodata_vector)
+    sdef=(s != RheoFloat[])
+    edef=(e != RheoFloat[])
     if (sdef && edef)
         @assert (length(s)==length(t)) && (length(e)==length(t)) "Time data length inconsistent"
         return strain_and_stress
@@ -71,9 +68,6 @@ function RheoTimeDataType(d::RheoTimeData)
 end
 
 @enum LoadingType strain_imposed=1 stress_imposed=2
-
-
-
 
 """
     RheoFreqData(Gp::Vector{T1}, Gpp::Vector{T2}, ω::Vector{T3}, log::OrderedDict{Any,Any}) where {T1<:Real, T2<:Real, T3<:Real}
@@ -104,7 +98,7 @@ struct RheoFreqData
 end
 
 
-function RheoFreqData(;Gp::Vector{T1} = empty_rheodata_vector, Gpp::Vector{T2} = empty_rheodata_vector, ω::Vector{T3} = empty_rheodata_vector,source="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat[], ω::Vector{T3} = RheoFloat[], source="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_freq_data_consistency(ω,Gp,Gpp)
     log = OrderedDict{Any,Any}(:n=>1, "activity"=>"import", "data_source"=>source, "type"=>typecheck)
     RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω), log)
@@ -112,12 +106,11 @@ end
 
 
 @enum FreqDataType invalid_freq_data=-1 frec_only=0 with_modulus=1
-
 function check_freq_data_consistency(o,gp,gpp)
     @assert (length(o)>0)  "Freq data empty"
 
-    gpdef=(gp != empty_rheodata_vector)
-    gppdef=(gpp != empty_rheodata_vector)
+    gpdef=(gp != RheoFloat[])
+    gppdef=(gpp != RheoFloat[])
     if (gpdef && gppdef)
         @assert (length(gp)==length(o)) && (length(gpp)==length(o)) "Data length inconsistent"
         return with_modulus
@@ -135,8 +128,6 @@ function RheoFreqDataType(d::RheoFreqData)
     return check_freq_data_consistency(d.ω,d.Gp,d.Gpp)
 end
 
-
-
 function +(self1::RheoTimeData, self2::RheoTimeData)
 
     type1 = RheoTimeDataType(self1)
@@ -151,11 +142,11 @@ function +(self1::RheoTimeData, self2::RheoTimeData)
     log = OrderedDict{Any,Any}(:n=>1,"activity"=>"addition", "left"=>self1.log, "right"=>self2.log)
 
     if (type1==strain_only) && (type2==strain_only)
-        return RheoTimeData(empty_rheodata_vector, self1.ϵ+self2.ϵ, self1.t, log)
+        return RheoTimeData(RheoFloat[], self1.ϵ+self2.ϵ, self1.t, log)
     end
 
     if (type1==stress_only) && (type2==stress_only)
-        return RheoTimeData(self1.σ+self2.σ, empty_rheodata_vector, self1.t, log)
+        return RheoTimeData(self1.σ+self2.σ, RheoFloat[], self1.t, log)
     end
 
     if (type1==strain_and_stress) && (type2==strain_and_stress)
@@ -178,11 +169,11 @@ function -(self1::RheoTimeData, self2::RheoTimeData)
     log = OrderedDict{Any,Any}(:n=>1,"activity"=>"subtraction", "left"=>self1.log, "right"=>self2.log)
 
     if (type1==strain_only) && (type2==strain_only)
-        return RheoTimeData(empty_rheodata_vector, self1.ϵ-self2.ϵ, self1.t, log)
+        return RheoTimeData(RheoFloat[], self1.ϵ-self2.ϵ, self1.t, log)
     end
 
     if (type1==stress_only) && (type2==stress_only)
-        return RheoTimeData(self1.σ-self2.σ, empty_rheodata_vector, self1.t, log)
+        return RheoTimeData(self1.σ-self2.σ, RheoFloat[], self1.t, log)
     end
 
     if (type1==strain_and_stress) && (type2==strain_and_stress)
