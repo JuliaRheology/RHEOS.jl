@@ -1,8 +1,4 @@
-- Check stairs behaviour is as expected - it currently steps on exactly one element after one might expect due to the way the 'ceil' function rounds up. Decide, fix if necessary and and uncomment test once done.
-
-- Check sawtooth behaviour is as expected. At present, the maximum value never reaches the specified 'amp' value. It only approaches it as the sample rate is reduced. Update test as appropriate if it changes.
-
-- In definitions.jl, consider replacing empty_rheodata_vector with simply RheoFloat[] as it is self explanatory and actually shorter, more readable. What is the advantage of empty_rheodata_vector? If it must be kept then define it as a 'const' in the same way that RheoFloat is now defined.
+- Fix stairs behaviour - it currently steps on exactly one element after expected due to the way 'ceil' function rounds up. Fix and uncomment test once done.
 
 - Check PowerLawPlateau is in new format, add if not
 
