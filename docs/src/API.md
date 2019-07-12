@@ -31,3 +31,8 @@ sawtooth
 triangle
 frequency_spec
 ```
+
+## Data IO
+```@docs
+importdata
+```

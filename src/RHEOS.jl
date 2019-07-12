@@ -25,6 +25,9 @@ using FunctionWrappers: FunctionWrapper
 # See julia docs for more info on this.
 const RheoFloat = Float64
 
+# convenience data type for int or nothing used as in many function parameters
+const IntOrNone = Union{Integer, Nothing}
+
 ######################################################################
 # definitions.jl
 export RheologyData, RheologyModel, RheologyDynamic

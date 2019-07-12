@@ -15,7 +15,7 @@ function nanremove(arr::Array{T,2}) where T<:Real
 end
 
 """
-    importdata(filedir::String; t_col::Union{Integer, Nothing}= nothing, σ_col::Union{Integer, Nothing}= nothing, ϵ_col::Union{Integer, Nothing}=nothing, ω_col::Union{Integer, Nothing}= nothing, Gp_col::Union{Integer, Nothing} = nothing, Gpp_col::Union{Integer, Nothing} = nothing, delimiter=',')
+    importdata(filedir::String; t_col::IntOrNone= nothing, σ_col::IntOrNone= nothing, ϵ_col::IntOrNone=nothing, ω_col::IntOrNone= nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',')
 
 Load data from a CSV file (two/three columns, comma seperated by default but
 delimiter can be specified in the `delimiter` keyword argument). Arguments must be
@@ -27,7 +27,7 @@ and proceeds accordingly. For oscillatory data, all three columns (Gp, Gpp, Freq
 must be provided. For regular viscoelastic data only time, or time-stress, or time-strain or
 time-stress-strain data can be provided.
 """
-function importdata(filedir::String; t_col::Union{Integer, Nothing}= nothing, σ_col::Union{Integer, Nothing}= nothing, ϵ_col::Union{Integer, Nothing}=nothing, ω_col::Union{Integer, Nothing}= nothing, Gp_col::Union{Integer, Nothing} = nothing, Gpp_col::Union{Integer, Nothing} = nothing, delimiter=',')
+function importdata(filedir::String; t_col::IntOrNone= nothing, σ_col::IntOrNone= nothing, ϵ_col::IntOrNone=nothing, ω_col::IntOrNone= nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',')
 
     @assert (!isnothing(t_col) && isnothing(ω_col)) || (isnothing(t_col) && !isnothing(ω_col)) "Data must contain either \"time\" or \"frequency\" "
 
