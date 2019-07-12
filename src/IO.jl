@@ -69,32 +69,40 @@ function importdata(filedir::String; t_col::IntOrNone= nothing, σ_col::IntOrNon
 end
 
 """
-    exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".csv", delimiter=',')
+    
 
-Export RheologyData or RheologyDynamic type to csv format. Exports three columns in order:
-stress, strain, time for standard viscoelastic data. Or: Gp, Gpp, frequency for oscillatory data.
+Export RheoTimeData or RheoFreqData type to csv format. May be useful for plotting/analysis in other software.
+
+<Notes on column ordering and partial data>
+
 File extension can be modified using the `ext` keyword argument. As with `importdata`, the delimiter
 can also be set by keyword argument.
-
-Useful for plotting/analysis in other software.
 """
-function exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".csv", delimiter=',')
+function exportdata(self::Union{RheoTimeData, RheoFreqData}, filedir::String; ext = ".csv", delimiter=',', colorder=nothing)
+
+    if typeof(self)==RheoTimeData
+        # invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
+        datacontained = RheoTimeDataType(self)
+
+    elseif typeof(self)==RheoFreqData
+        # invalid_freq_data=-1 frec_only=0 with_modulus=1
+        datacontained = RheoFreqDataType(self)
+    end
+
+    # tup = (a = 1, b = 2)
+    # sortedkeys = collect(keys(tup))
+    # towrite = sort(sortedkeys, by=i->getfield(tup, i))
+
+    # dataraw = getfield.((dat,), towrite)
+    # dataout = hcat(dataraw...)
+
+    (σ, ϵ, t)
+    (Gp, Gpp, ω)
 
     fulldir = string(filedir, ext)
-
-    subtype = eltype(self)
-
-    if typeof(self)==RheologyData{subtype}
-        fulldata_array = hcat(self.σ, self.ϵ, self.t)
-        open(fulldir, "w") do io
-            writedlm(fulldir, fulldata_array, delimiter)
-        end
-
-    elseif typeof(self)==RheologyDynamic{subtype}
-        fulldata_array = hcat(self.Gp, self.Gpp, self.ω)
-        open(fulldir, "w") do io
-            writedlm(fulldir, fulldata_array, delimiter)
-        end
+    dataout = hcat(dataraw...)
+    open(fulldir, "w") do io
+        writedlm(fulldir, dataout, delimiter)
     end
 end
 

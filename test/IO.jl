@@ -52,3 +52,8 @@ function _importdata_t_partial()
     test1 && test2 && test3
 end
 @test _importdata_t_withnans()
+
+function _exportdata_full()
+    fildir = joinpath(@__DIR__, "testdata", "datapartial.csv")
+
+    rheodata1 = importdata(fildir; t_col = 1, σ_col = 2, ϵ_col = 3)
