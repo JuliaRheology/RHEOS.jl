@@ -29,7 +29,7 @@ stairs
 square
 sawtooth
 triangle
-frequency_spec
+frequencyspec
 ```
 
 ## Data IO

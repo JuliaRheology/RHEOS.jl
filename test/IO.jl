@@ -98,13 +98,41 @@ end
 function _exportcsv_freqfull()
     fildir = joinpath(@__DIR__, "testdata", "datanonans.csv")
 
-    rheotimedataIN = importcsv(fildir; ω_col = 1, Gp_col = 2, Gpp_col = 3)
+    rheofreqdataIN = importcsv(fildir; ω_col = 1, Gp_col = 2, Gpp_col = 3)
 
     # default column ordering for full time data is (Gp, Gpp, ω)
     testdir = joinpath(@__DIR__, "testdata", "testloop.csv")
-    exportcsv(rheotimedataIN, testdir)
-    rheotimedataOUT = importcsv(testdir; ω_col = 3, Gp_col = 1, Gpp_col = 2)
+    exportcsv(rheofreqdataIN, testdir)
+    rheofreqdataOUT = importcsv(testdir; ω_col = 3, Gp_col = 1, Gpp_col = 2)
 
-    rheotimedataIN.ω == rheotimedataOUT.ω && rheotimedataIN.Gp == rheotimedataOUT.Gp && rheotimedataIN.Gpp == rheotimedataOUT.Gpp  
+    rheofreqdataIN.ω == rheofreqdataOUT.ω && rheofreqdataIN.Gp == rheofreqdataOUT.Gp && rheofreqdataIN.Gpp == rheofreqdataOUT.Gpp  
 end
 @test _exportcsv_freqfull()
+
+# function _saveload_timefull()
+#     fildir = joinpath(@__DIR__, "testdata", "datanonans.csv")
+
+#     rheotimedataIN = importcsv(fildir; t_col = 1, σ_col = 2, ϵ_col = 3)
+
+#     # default column ordering for full time data is (σ, ϵ, t)
+#     testdir = joinpath(@__DIR__, "testdata", "testbinaryloop.jld2")
+#     savedata(rheotimedataIN, testdir)
+#     rheotimedataOUT = loaddata(testdir)
+
+#     rheotimedataIN.σ == rheotimedataOUT.σ && rheotimedataIN.ϵ == rheotimedataOUT.ϵ && rheotimedataIN.t == rheotimedataOUT.t  
+# end
+# @test _saveload_timefull()
+
+# function _saveload_freqfull()
+#     fildir = joinpath(@__DIR__, "testdata", "datanonans.csv")
+
+#     rheofreqdataIN = importcsv(fildir; ω_col = 1, Gp_col = 2, Gpp_col = 3)
+
+#     # default column ordering for full time data is (Gp, Gpp, ω)
+#     testdir = joinpath(@__DIR__, "testdata", "testbinaryloop.jld2")
+#     savedata(rheofreqdataIN, testdir)
+#     rheofreqdataOUT = loaddata(testdir)
+
+#     rheofreqdataIN.ω == rheofreqdataOUT.ω && rheofreqdataIN.Gp == rheofreqdataOUT.Gp && rheofreqdataIN.Gpp == rheofreqdataOUT.Gpp  
+# end
+# @test _saveload_freqfull()

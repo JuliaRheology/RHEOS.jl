@@ -30,7 +30,7 @@ time-stress-strain data can be provided.
 function importcsv(filedir::String; t_col::IntOrNone= nothing, σ_col::IntOrNone= nothing, ϵ_col::IntOrNone=nothing, ω_col::IntOrNone= nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',')
 
     @assert (!isnothing(t_col) && isnothing(ω_col)) || (isnothing(t_col) && !isnothing(ω_col)) "Data must contain either \"time\" or \"frequency\" "
-    @assert endswith(filedir, ".csv") "filedir must be a .csv file."
+    @assert endswith(lowercase(filedir), ".csv") "filedir must be a .csv file."
 
     if !isnothing(t_col)
 
@@ -68,7 +68,7 @@ function importcsv(filedir::String; t_col::IntOrNone= nothing, σ_col::IntOrNone
 end
 
 """
-    exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; ext = ".csv", delimiter=',', colorder=nothing)
+    exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; delimiter=',', colorder=nothing)
 
 Export RheoTimeData or RheoFreqData type to csv format. May be useful for plotting/analysis in other software.
 By default, full time data will be exported with columns ordered as (σ, ϵ, t). Partial time data will be ordered
@@ -78,7 +78,7 @@ order (t, σ, ϵ). As with `importcsv`, the delimiter can be set by keyword argu
 """
 function exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; delimiter=',', colorder=nothing)
 
-    @assert endswith(filedir, ".csv") "filedir must be a .csv file."
+    @assert endswith(lowercase(filedir), ".csv") "filedir must be a .csv file."
 
     # if ordering of columns not provided, get default ordering depending on data contained in struct
     if isnothing(colorder)
@@ -109,25 +109,27 @@ function exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; del
 end
 
 # """
-#     savedata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".jld2")
+#     savedata(self::Union{RheoTimeData, RheoFreqData}, filedir::String)
 
-# Save RheologyData or RheologyDynamic object using JLD2 format reuse in
+# Save RheoTimeData or RheoFreqData object using JLD2 format for re-use in
 # a later Julia session.
 # """
-# function savedata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".jld2")
+# function savedata(self::Union{RheoTimeData, RheoFreqData}, filedir::String)
 
-#     fulldir = string(filedir, ext)
+#     @assert endswith(lowercase(filedir), ".jld2") "filedir must be a .jld2 file."
 
-#     @save fulldir self
+#     @save filedir self
 
 # end
 
 # """
 #     loaddata(filedir::String)
 
-# Loads RheologyData or RheologyDynamic object from a jld2 file.
+# Loads RheoTimeData or RheoFreqData object from a jld2 file.
 # """
 # function loaddata(filedir::String)
+
+#     @assert endswith(lowercase(filedir), ".jld2") "filedir must be a .jld2 file."
 
 #     @load filedir self
 
