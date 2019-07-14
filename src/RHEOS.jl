@@ -38,7 +38,7 @@ export FreqDataType, invalid_freq_data, frec_only, with_modulus
 export rheoconv,invLaplace
 
 # IO.jl
-export importdata, exportdata, savedata, loaddata, savemodel, loadmodel
+export importcsv, exportcsv#, savedata, loaddata, savemodel, loadmodel
 
 # models.jl
 export null_modulus

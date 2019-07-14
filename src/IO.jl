@@ -15,7 +15,7 @@ function nanremove(arr::Array{T,2}) where T<:Real
 end
 
 """
-    importdata(filedir::String; t_col::IntOrNone= nothing, σ_col::IntOrNone= nothing, ϵ_col::IntOrNone=nothing, ω_col::IntOrNone= nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',')
+    importcsv(filedir::String; t_col::IntOrNone= nothing, σ_col::IntOrNone= nothing, ϵ_col::IntOrNone=nothing, ω_col::IntOrNone= nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',')
 
 Load data from a CSV file (two/three columns, comma seperated by default but
 delimiter can be specified in the `delimiter` keyword argument). Arguments must be
@@ -27,9 +27,10 @@ and proceeds accordingly. For oscillatory data, all three columns (Gp, Gpp, Freq
 must be provided. For regular viscoelastic data only time, or time-stress, or time-strain or
 time-stress-strain data can be provided.
 """
-function importdata(filedir::String; t_col::IntOrNone= nothing, σ_col::IntOrNone= nothing, ϵ_col::IntOrNone=nothing, ω_col::IntOrNone= nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',')
+function importcsv(filedir::String; t_col::IntOrNone= nothing, σ_col::IntOrNone= nothing, ϵ_col::IntOrNone=nothing, ω_col::IntOrNone= nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',')
 
     @assert (!isnothing(t_col) && isnothing(ω_col)) || (isnothing(t_col) && !isnothing(ω_col)) "Data must contain either \"time\" or \"frequency\" "
+    @assert endswith(filedir, ".csv") "filedir must be a .csv file."
 
     if !isnothing(t_col)
 
@@ -48,8 +49,6 @@ function importdata(filedir::String; t_col::IntOrNone= nothing, σ_col::IntOrNon
             return RheoTimeData(t = data[:, t_col], ϵ = data[:, ϵ_col], source = source)
         elseif !isnothing(σ_col) && isnothing(ϵ_col)
             return RheoTimeData(t = data[:, t_col], σ = data[:, σ_col], source = source)
-        elseif !isnothing(t_col) && isnothing(σ_col) && isnothing(ϵ_col)
-            return RheoTimeData(t = data[:, t_col], source = source)
         end
 
     elseif !isnothing(ω_col)
@@ -69,92 +68,95 @@ function importdata(filedir::String; t_col::IntOrNone= nothing, σ_col::IntOrNon
 end
 
 """
-    
+    exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; ext = ".csv", delimiter=',', colorder=nothing)
 
 Export RheoTimeData or RheoFreqData type to csv format. May be useful for plotting/analysis in other software.
-
-<Notes on column ordering and partial data>
-
-File extension can be modified using the `ext` keyword argument. As with `importdata`, the delimiter
-can also be set by keyword argument.
+By default, full time data will be exported with columns ordered as (σ, ϵ, t). Partial time data will be ordered
+as either (σ, t) or (ϵ, t). Full frequency data will be ordered as (Gp, Gpp, ω). The order of columns can be customised
+by passing a NamedTuple to the `colorder` arguments. For example (σ = 2, t = 1, ϵ = 3) would export the columns in the
+order (t, σ, ϵ). As with `importcsv`, the delimiter can be set by keyword argument.
 """
-function exportdata(self::Union{RheoTimeData, RheoFreqData}, filedir::String; ext = ".csv", delimiter=',', colorder=nothing)
+function exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; delimiter=',', colorder=nothing)
 
-    if typeof(self)==RheoTimeData
-        # invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
-        datacontained = RheoTimeDataType(self)
+    @assert endswith(filedir, ".csv") "filedir must be a .csv file."
 
-    elseif typeof(self)==RheoFreqData
-        # invalid_freq_data=-1 frec_only=0 with_modulus=1
-        datacontained = RheoFreqDataType(self)
+    # if ordering of columns not provided, get default ordering depending on data contained in struct
+    if isnothing(colorder)
+        if typeof(self)==RheoTimeData
+            datacontained = RheoTimeDataType(self)
+            if datacontained == stress_only
+                colorder = (σ=1, t=2)
+            elseif datacontained == strain_only
+                colorder = (ϵ=1, t=2)           
+            elseif datacontained == strain_and_stress
+                colorder = (σ=1, ϵ=2, t=3)
+            end
+
+        elseif typeof(self)==RheoFreqData
+            # invalid_freq_data=-1 frec_only=0 with_modulus=1
+            datacontained = RheoFreqDataType(self)
+            colorder = (Gp = 1, Gpp = 2, ω = 3)
+        end
     end
 
-    # tup = (a = 1, b = 2)
-    # sortedkeys = collect(keys(tup))
-    # towrite = sort(sortedkeys, by=i->getfield(tup, i))
-
-    # dataraw = getfield.((dat,), towrite)
-    # dataout = hcat(dataraw...)
-
-    (σ, ϵ, t)
-    (Gp, Gpp, ω)
-
-    fulldir = string(filedir, ext)
+    cols = collect(keys(colorder))
+    sortedcols = sort(cols, by=i->getfield(colorder, i))
+    dataraw = getfield.((self,), sortedcols)
     dataout = hcat(dataraw...)
-    open(fulldir, "w") do io
-        writedlm(fulldir, dataout, delimiter)
+    open(filedir, "w") do io
+        writedlm(filedir, dataout, delimiter)
     end
 end
 
-"""
-    savedata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".jld2")
+# """
+#     savedata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".jld2")
 
-Save RheologyData or RheologyDynamic object using JLD2 format reuse in
-a later Julia session.
-"""
-function savedata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".jld2")
+# Save RheologyData or RheologyDynamic object using JLD2 format reuse in
+# a later Julia session.
+# """
+# function savedata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".jld2")
 
-    fulldir = string(filedir, ext)
+#     fulldir = string(filedir, ext)
 
-    @save fulldir self
+#     @save fulldir self
 
-end
+# end
 
-"""
-    loaddata(filedir::String)
+# """
+#     loaddata(filedir::String)
 
-Loads RheologyData or RheologyDynamic object from a jld2 file.
-"""
-function loaddata(filedir::String)
+# Loads RheologyData or RheologyDynamic object from a jld2 file.
+# """
+# function loaddata(filedir::String)
 
-    @load filedir self
+#     @load filedir self
 
-    return self
+#     return self
 
-end
+# end
 
-"""
-    savemodel(self::RheologyModel, filedir::String; ext = ".jld2")
+# """
+#     savemodel(self::RheologyModel, filedir::String; ext = ".jld2")
 
-Save RheologyModel object using JLD2 format reuse in a later Julia session.
-"""
-function savemodel(self::RheologyModel, filedir::String; ext = ".jld2")
+# Save RheologyModel object using JLD2 format reuse in a later Julia session.
+# """
+# function savemodel(self::RheologyModel, filedir::String; ext = ".jld2")
 
-    fulldir = string(filedir, ext)
+#     fulldir = string(filedir, ext)
 
-    @save fulldir self
+#     @save fulldir self
 
-end
+# end
 
-"""
-    loaddata(filedir::String)
+# """
+#     loaddata(filedir::String)
 
-Loads RheologyModel from a JLD2 file.
-"""
-function loadmodel(filedir::String)
+# Loads RheologyModel from a JLD2 file.
+# """
+# function loadmodel(filedir::String)
 
-    @load filedir self
+#     @load filedir self
 
-    return self
+#     return self
 
-end
+# end

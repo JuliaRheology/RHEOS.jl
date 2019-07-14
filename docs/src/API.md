@@ -34,5 +34,6 @@ frequency_spec
 
 ## Data IO
 ```@docs
-importdata
+importcsv
+exportcsv
 ```
