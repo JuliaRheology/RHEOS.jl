@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 """
-    importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ_col::Integer=-1, ω_col::Integer= -1, Gp_col::Integer = -1, Gpp_col::Integer = -1, delimiter=',')
+    importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ_col::Integer=-1, ω_col::Integer= -1, Gp_col::Integer = -1, Gpp_col::Integer = -1, delimiter=',', comment="")
 
 Load data from a CSV file (two/three columns, comma seperated by default but
 delimiter can be specified in the `delimiter` keyword argument). Arguments must be
@@ -13,7 +13,7 @@ and proceeds accordingly. For oscillatory data, all three columns (Gp, Gpp, Freq
 must be provided. For regular viscoelastic data only time, or time-stress, or time-strain or
 time-stress-strain data can be provided.
 """
-function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ_col::Integer=-1, ω_col::Integer= -1, Gp_col::Integer = -1, Gpp_col::Integer = -1, delimiter=',')
+function importdata(filename::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ_col::Integer=-1, ω_col::Integer= -1, Gp_col::Integer = -1, Gpp_col::Integer = -1, delimiter=',', comment="")
 
     @assert ((t_col!=-1)&(ω_col==-1)) || ((t_col==-1)&(ω_col!=-1)) "Data must contain either \"time\" or \"frequency\" "
 
@@ -21,7 +21,7 @@ function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ
 
         @assert (Gp_col==-1) & (Gpp_col ==-1) "Loss and storage modulus not allowed for time data"
         # read data from file
-        data = readdlm(filedir, delimiter)
+        data = readdlm(filename, delimiter)
 
         # test for NaNs at the beginning and end of the data
         newstartingval = 1
@@ -31,36 +31,40 @@ function importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ
                 break
             end
         end
-
-        # TO DO LATER: We need to add the check of nans within the data not just at the beginning and end
-        # el_del = []
-        # for i in newstartingval:length(data[:,t_col])
+        #
+        # # TO DO LATER: We need to add the check of nans within the data not just at the beginning and end
+        # # el_del = []
+        # # for i in newstartingval:length(data[:,t_col])
+        # #     if !isnan(sum(data[i,:]))
+        # #         el_del = i
+        # #     end
+        # # end
+        #
+        # newendingval = 1
+        # for i=length(data[:,t_col]):-1:1
         #     if !isnan(sum(data[i,:]))
-        #         el_del = i
+        #         newendingval = i
+        #         break
         #     end
         # end
+        # data = data[newstartingval:newendingval,:]
 
-        newendingval = 1
-        for i=length(data[:,t_col]):-1:1
-            if !isnan(sum(data[i,:]))
-                newendingval = i
-                break
-            end
-        end
-        data = data[newstartingval:newendingval,:]
-        source = filedir
-        # generate RheologyData struct and output
+        info=(comment=comment, folder=pwd(), stats=(t_min=data[1,t_col],t_max=data[end,t_col], n_sample=size(data[:,t_col])))
+        log = RheoLogItem( (type=:source, funct=:importdata, params=(filename=filename,), keywords=(t_col=t_col, σ_col=σ_col, ϵ_col=ϵ_col)), info )
         if (ϵ_col!=-1) & (σ_col!=-1)
-            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], σ = data[:,σ_col], source = source)
+            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], σ = data[:,σ_col], log = log )
         elseif (ϵ_col!=-1) & (σ_col==-1)
-            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], source = source)
+            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], log = log )
         elseif (σ_col!=-1) & (ϵ_col==-1)
-            return RheoTimeData(t = data[:,t_col], σ = data[:,σ_col], source = source)
+            return RheoTimeData(t = data[:,t_col], σ = data[:,σ_col], log = log )
         elseif (t_col!=-1) & (σ_col==-1) &  (ϵ_col==-1)
-            return RheoTimeData(t = data[:,t_col], source = source)
+            return RheoTimeData(t = data[:,t_col], log = log )
         end
 
     elseif ω_col!=-1
+        info=(comment=comment, folder=pwd(), stats=(ω_min=data[1,ω_col],ω_max=data[end,ω_col], n_sample=size(data[:,ω_col])))
+        log = RheoLogItem( (type=:source, funct=:importdata, params=(filedir=filedir,), keywords=(ω_col=ω_col, Gp_col=Gp_col, Gpp_col=Gpp_col)), info )
+
         # check colnames length is correct
         @assert (σ_col==-1) & (ϵ_col ==-1) "Stress and strain not allowed for frequency data"
         @assert Gp_col!=-1 & Gpp_col!=-1 "\"Gp\" and \"Gpp\" are required."

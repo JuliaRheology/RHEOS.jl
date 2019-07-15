@@ -3,15 +3,91 @@
 # Empty vector mostly used as default parameters to indicate missing/unspecified data.
 empty_rheodata_vector = RheoFloat[]
 
+
+
+struct RheoLogItem
+   action      # Nothing, or NamedTuple with fields:
+               #     type::Symbol, funct::Symbol, params::NamedTuple, keywords::NamedTuple
+   info        # NamedTuple for process output, comments, etc.
+end
+
+# different types of actions
+# source: create new data (import, model simulation, etc)
+# process: takes data -> new data returned  (cut, resample, filter, etc)
+# analysis: data provded, returns outcome of analysis, and log changes on original data (scale, modelfit, etc.)
+
+# process=(type= :process, funct=:test, params=(x=1,y=1) , keywords=(k=1, l=2))
+
+
+
+#
+#  Constructors
+#
+
+# simply pass text as comment
+function RheoLogItem(s::String)
+   return(RheoLogItem(Nothing,(comment=s,)))
+end
+
+# store info data in log from arbitrary keyword arguments
+function RheoLogItem(;kwargs...)
+   return(RheoLogItem(Nothing, kwargs.data))
+end
+
+
+
+#
+#  Internal functions to apply a logged creation/process/analysis to data
+#
+
+
+function rheolog_run(rli::RheoLogItem, d=nothing)
+
+      if typeof(rli.action) <: NamedTuple && :type in keys(rli.action)
+         type=rli.action.type
+         if type==:source && d==nothing
+            return(eval(rli.action.funct)(rli.action.params...;rli.action.keywords...))
+         elseif type==:process && d!=nothing
+            return(eval(rli.action.funct)(d,rli.action.params...;rli.action.keywords...))
+        elseif type==:analysis && d!=nothing
+            return(eval(rli.action.funct)(d,rli.action.params...;rli.action.keywords...))
+         end
+      end
+   println(rli.info)
+end
+
+
+function rheolog_run(arli::Vector{RheoLogItem}, d=nothing)
+   # check first item is a source?
+   # to do...
+
+  for rli in arli
+      if typeof(rli.action) <: NamedTuple && :type in keys(rli.action)
+          type=rli.action.type
+          if type==:analysis && d!=nothing
+              rheolog_run(rli, d)
+          else  d=rheolog_run(rli, d)
+          end
+      else
+          println(rli.info)
+      end
+  end
+  return(d)
+end
+
+
+
+
+
+
+
 """
-    RheoTimeData(;σ::Vector{T1}, ϵ::Vector{T2}, t::Vector{T3}, log::OrderedDict{Any,Any}) where {T1<:Real, T2<:Real, T3<:Real}
+    RheoTimeData(;σ::Vector{T1}, ϵ::Vector{T2}, t::Vector{T3}) where {T1<:Real, T2<:Real, T3<:Real}
 
 RheoTimeData struct contains stress, strain and time data.
 
 If preferred, an instance can be generated manually by just providing the three data
-vectors in the right order, sampling type will be checked automatically. If loading
-partial data (either stress or strain), fill the other vector as a vector of zeros
-of the same length as the others.
+vectors in the right order, sampling type will be checked automatically.
 
 # Fields
 
@@ -26,15 +102,19 @@ struct RheoTimeData
     ϵ::Vector{RheoFloat}
     t::Vector{RheoFloat}
 
-    log::OrderedDict{Any,Any}
+    log::Vector{RheoLogItem}
 
 end
 
-function RheoTimeData(;ϵ::Vector{T1} = empty_rheodata_vector, σ::Vector{T2} = empty_rheodata_vector, t::Vector{T3} = empty_rheodata_vector, source="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoTimeData(;ϵ::Vector{T1} = empty_rheodata_vector, σ::Vector{T2} = empty_rheodata_vector, t::Vector{T3} = empty_rheodata_vector, comment="", log=RheoLogItem(comment))  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_time_data_consistency(t,ϵ,σ)
-    log = OrderedDict{Any,Any}(:n=>1,"activity"=>"import", "data_source"=>source, "type"=>typecheck)
-    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), log)   #Dict{Any,Any}("source"=> source, "datatype"=>check_time_data_consistency(t,ϵ,σ))
+    #log = OrderedDict{Any,Any}(:n=>1,"activity"=>"import", "data_source"=>source, "type"=>typecheck)
+    #RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), log)   #Dict{Any,Any}("source"=> source, "datatype"=>check_time_data_consistency(t,ϵ,σ))
+    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
+    [RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
+
 end
+
 
 @enum TimeDataType invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
 
@@ -97,17 +177,16 @@ struct RheoFreqData
     Gpp::Vector{RheoFloat}
     ω::Vector{RheoFloat}
 
-    # operations applied, stores history of which functions (including arguments)
-    #log::Vector{String}
-    log::OrderedDict{Any,Any}
-
+    log::Vector{RheoLogItem}
 end
 
 
-function RheoFreqData(;Gp::Vector{T1} = empty_rheodata_vector, Gpp::Vector{T2} = empty_rheodata_vector, ω::Vector{T3} = empty_rheodata_vector,source="User provided data.")  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoFreqData(;Gp::Vector{T1} = empty_rheodata_vector, Gpp::Vector{T2} = empty_rheodata_vector, ω::Vector{T3} = empty_rheodata_vector, comment="", log=RheoLogItem(comment))  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_freq_data_consistency(ω,Gp,Gpp)
-    log = OrderedDict{Any,Any}(:n=>1, "activity"=>"import", "data_source"=>source, "type"=>typecheck)
-    RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω), log)
+    #log = OrderedDict{Any,Any}(:n=>1, "activity"=>"import", "data_source"=>source, "type"=>typecheck)
+    #RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω), log)
+    RheoTimeData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω),
+    [RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
 end
 
 
@@ -440,18 +519,18 @@ struct RheoModel
 
 
     params::NamedTuple
-    info::String
-    log::OrderedDict{Any,Any}
+    info::String    # do we need this?
+    # log::OrderedDict{Any,Any}
 
 end
 
 
 
-function RheoModel(m::RheoModelClass; log::OrderedDict{Any,Any} = OrderedDict{Any,Any}("activity"=>"model creation", "data_source"=>"constructor call"), kwargs...)
-    return(RheoModel(m,kwargs.data,log))
+function RheoModel(m::RheoModelClass; kwargs...)
+    return(RheoModel(m,kwargs.data))
 end
 
-function RheoModel(m::RheoModelClass, nt0::NamedTuple; log::OrderedDict{Any,Any} = OrderedDict{Any,Any}("activity"=>"model creation", "data_source"=>"constructor call"))
+function RheoModel(m::RheoModelClass, nt0::NamedTuple)
 
     # check all parameters are provided and create a well ordered named tuple
     p = model_parameters(nt0, m.params,"model definition")
@@ -477,7 +556,7 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple; log::OrderedDict{Any,Any}
     (ωa -> begin [$Gp for ω in ωa]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
     (ω -> begin $Gpp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
     (ωa -> begin [$Gpp for ω in ωa]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
-    $expressions, $nt, $info, $log) )
+    $expressions, $nt, $info) )
 end
 
 

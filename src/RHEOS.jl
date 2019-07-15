@@ -27,7 +27,8 @@ const RheoFloat = Float64
 
 ######################################################################
 # definitions.jl
-export RheologyData, RheologyModel, RheologyDynamic
+#export RheologyData, RheologyModel, RheologyDynamic
+export RheoLogItem, rheolog_run
 export RheoTimeData, RheoTimeDataType, RheoFreqData, RheoFreqDataType, check_time_data_consistency
 export LoadingType, strain_imposed, stress_imposed
 export TimeDataType, time_only, strain_only, stress_only, strain_and_stress

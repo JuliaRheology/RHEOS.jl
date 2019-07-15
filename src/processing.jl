@@ -138,9 +138,7 @@ If self is a RheoTimeData, the type that can be extracted is time_only (or 0), s
 Note that strain_and_stress (or 3) is not allowed.
 If self is a RheoFreqData, the type that can be extracted is frec_only (or 0).
 """
-function extract(self::Union{RheoTimeData,RheoFreqData}, type::Union{TimeDataType,FreqDataType,Integer})
-
-    if (typeof(self)==RheoTimeData)
+function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
 
         type = typeof(type)==Int ? TimeDataType(type) : type
         @assert (typeof(type)==TimeDataType) || (typeof(type)==Int) "Cannot extract frequency data from RheoTimeData"
@@ -148,40 +146,38 @@ function extract(self::Union{RheoTimeData,RheoFreqData}, type::Union{TimeDataTyp
         @assert (type!= invalid_time_data) "Cannot extract information from invalid time data"
         check = RheoTimeDataType(self)
 
-        log = copy(self.log)
-        log[:n] = log[:n]+1
+
+        log = [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
+                                            (comment="Data field extraction, $type from $check",) ) ]
 
 
         if type == time_only
             @assert check!= invalid_time_data "Time not available"
-            log[string("activity_",log[:n])] = "Time extracted"
-            #log = OrderedDict{Any,Any}("activity"=>"extract", "data_source"=>self.log, "type"=>"Time extracted")
             return RheoTimeData([], [],self.t,log)
         elseif type == strain_only
             @assert (check == strain_and_stress) || (check == strain_only) "Strain not available"
-            log[string("activity_",log[:n])] = "Time and strain extracted"
-            #log = OrderedDict{Any,Any}("activity"=>"extract", "data_source"=>self.log, "type"=>"Time and strain extracted")
             return RheoTimeData([], self.ϵ,self.t,log)
         elseif type == stress_only
             @assert (check == strain_and_stress) || (check == stress_only) "Stress not available"
-            log[string("activity_",log[:n])] = "Time and stress extracted"
-            #log = OrderedDict{Any,Any}("activity"=>"extract", "data_source"=>self.log, "type"=>"Time and stress extracted")
             return RheoTimeData(self.σ, [], self.t,log)
         end
 
-    elseif (typeof(self)==RheoFreqData)
+end
+
+
+function extract(self::RheoFreqData, type::Union{FreqDataType,Integer})
 
         type = typeof(type)==Int ? FreqDataType(type) : type
-        @assert (typeof(type)==FreqDataType) || (typeof(type)==Int) "Cannot extract time data from RheoFreqData"
         @assert (type!= with_modulus) "Cannot extract frequency with moduli"
         @assert (type!= invalid_freq_data) "Cannot extract information from invalid frequency data"
         check = RheoFreqDataType(self)
         @assert (check == with_modulus) "Frequency and modulii required"
-        log[string("activity_",log[:n])] = "Frequency extracted"
-        #log = OrderedDict{Any,Any}("activity"=>"extract", "data_source"=>self.log, "type"=>"Frequency extracted")
-        return RheoFreqData([], [],self.ω,log)
-    end
 
+
+
+        log = [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
+                                            (comment="Frequency field extraction",) ) ]
+        return RheoFreqData([], [],self.ω,log)
 end
 
 #=
@@ -283,33 +279,33 @@ function modelfit(data::RheoTimeData,
     # fit
     sampling_check = constantcheck(data.t)
 
-    (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed leastsquares_init(p0a,
-                                                                                    loa,
-                                                                                    hia,
-                                                                                    modulus,
-                                                                                    t_zeroed,
-                                                                                    dt,
-                                                                                    dcontrolled,
-                                                                                    measured;
-                                                                                    insight = verbose,
-                                                                                    constant_sampling = sampling_check,
-                                                                                    singularity = sing,
-                                                                                    _rel_tol = rel_tol)
+    (minf, minx, ret), timetaken, bytes, gctime, memalloc =
+                    @timed leastsquares_init(   p0a,
+                                                loa,
+                                                hia,
+                                                modulus,
+                                                t_zeroed,
+                                                dt,
+                                                dcontrolled,
+                                                measured;
+                                                insight = verbose,
+                                                constant_sampling = sampling_check,
+                                                singularity = sing,
+                                                _rel_tol = rel_tol)
 
-    #modulusname = string(modulus)
-    #log = vcat(data.log, "Fitted $modulusname, Modulus used: $modtouse, Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
-    log = copy(data.log)
-    log[:n] = log[:n]+1
-    log[string("activity_",log[:n])] = "Fitted $(model.name) modulus $modused"
-    log[string("time_",log[:n])] = timetaken
-    log[string("stop_",log[:n])] = ret
-    log[string("error_",log[:n])] = minf
+    println("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
 
-    #log = OrderedDict{Any,Any}("activity"=>"fitting","data_source"=>data.log, "time"=>timetaken, "stop reason"=>ret, "error"=>minf)
-    print("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
     nt = NamedTuple{Tuple(model.params)}(minx)
 
-    return RheoModel(model,nt, log = log);
+    # Preparation of data for log item
+    info=(comment="Fiting rheological model to data", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
+    params=(model=model, modloading=modloading)
+    keywords=(p0=p0, lo=lo, hi=hi, rel_tol=rel_tol, diff_method=diff_method)
+    # Add data to the log
+    push!(data.log, RheoLogItem( (type=:analysis, funct=:modelfit, params=params, keywords=keywords), info))
+
+
+    return RheoModel(model,nt);
 
 end
 
@@ -384,13 +380,9 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
     end
     time = data.t
 
-    modparam = model.params
-    # store operation
-    log = copy(data.log)
-    log[:n] = log[:n]+1
-    log[string("activity_",log[:n])] = "Predicted data - modulus: $pred_mod, parameters:$modparam"
-
     #log = OrderedDict{Any,Any}("activity"=>"predicted data", "data_source"=>data.log, "modulus"=>pred_mod, "parameters"=>modparam)
+    log = [data.log; RheoLogItem( (type=:process, funct=:modelpredict, params=(model::RheoModel,), keywords=(diff_method="BD",)),
+                                    (comment="Predicted data - modulus: $pred_mod, parameters:$(model.params)",) ) ]
 
     return RheoTimeData(sigma,epsilon,time, log)
 
