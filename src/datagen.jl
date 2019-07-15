@@ -17,16 +17,14 @@ Generate RheoTimeData struct with only the time data.
 - `step`: Time between sample
 """
 function timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end - t_start)/250.)
-
-    log = OrderedDict{Any,Any}(:n=>1,"activity"=>"timeline created - t_start: $t_start, t_end: $t_end, step: $step")
-
-    RheoTimeData([], [], collect(t_start:step:t_end), log)
+    log = RheoLogItem( (type=:source, funct=:timeline, params=(), keywords=(t_start=t_start, t_end=t_end, step=step)), (comment="timeline created",))
+    RheoTimeData([], [], collect(t_start:step:t_end), [log])
 end
 
 #=
 ------------------------------------------------------------------------
 strainfunction and stressfunction can be used to impose strain of stress
-respectively. The subsequent convenience functions are passed to them to 
+respectively. The subsequent convenience functions are passed to them to
 generate the appropriate loading.
 ------------------------------------------------------------------------
 =#
@@ -40,10 +38,9 @@ time as its only argument. The original data's time signal is used.
 Normally used with a RheoTimeData generated using the `timeline` function.
 """
 function strainfunction(data::RheoTimeData, f::T) where T<:Function
-    log = copy(data.log)
-    log[:n] = log[:n] + 1
-    log[string("activity_", log[:n])] = "Strain generated"
-    #log = OrderedDict{Any,Any}("activity"=>"strain function", "data_source"=>d.log)
+    log = [data.log; RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
+                                    (comment="strain function applied to timeline",) ) ]
+
     return RheoTimeData(data.σ, convert(Vector{RheoFloat}, map(f, data.t)), data.t, log)
 end
 
@@ -57,10 +54,8 @@ time as its only argument. The original data's time signal is used.
 Normally used with a RheoTimeData generated using the `timeline` function.
 """
 function stressfunction(data::RheoTimeData, f::T) where T<:Function
-    log = copy(data.log)
-    log[:n] = log[:n] + 1
-    log[string("activity_", log[:n])] = "Stress generated"
-    #log = OrderedDict{Any,Any}("activity"=>"stress function", "data_source"=>data.log)
+    log = [data.log; RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
+                                    (comment="stress function applied to timeline",) ) ]
     return RheoTimeData(convert(Vector{RheoFloat}, map(f, data.t)), data.ϵ, data.t, log)
 end
 
@@ -122,9 +117,9 @@ end
     square(t; offset=0., amp=1., period=1., width=0.5*period)
 
 Square signal generation function for use with `stressfunction` or `strainfunction`.
-`offset` keyword arguent determines start of square signal. `amp` argument determines 
+`offset` keyword arguent determines start of square signal. `amp` argument determines
 the height of each square pulse. `period` determines the period of one off/on section
-of the square wave signal. `width` determines the width of each square pulse. 
+of the square wave signal. `width` determines the width of each square pulse.
 """
 function square(t; offset=0., amp=1., period=1., width=0.5*period)
     return t<offset ? 0. : ( ((t-offset)%period) < width ? amp : 0.)
@@ -138,7 +133,7 @@ end
     sawtooth(t; offset=0., amp=1., period=1.)
 
 Sawtooth signal generation function for use with `stressfunction` or `strainfunction`.
-`offset` keyword arguent determines start of sawtooth signal. `amp` argument determines 
+`offset` keyword arguent determines start of sawtooth signal. `amp` argument determines
 the height of each sawtooth pulse. `period` determines the period of the sawtooth wave signal.
 """
 function sawtooth(t; offset=0., amp=1., period=1.)
@@ -153,7 +148,7 @@ end
     triangle(t; offset=0., amp=1., period=1.)
 
 Triangle signal generation function for use with `stressfunction` or `strainfunction`.
-`offset` keyword arguent determines start of triangle signal. `amp` argument determines 
+`offset` keyword arguent determines start of triangle signal. `amp` argument determines
 the height of each triangle pulse. `period` determines the period of the triangle wave signal.
 `width` determines the width of the triangles.
 """
