@@ -30,7 +30,7 @@ time-stress-strain data can be provided.
 function importcsv(filename::String; t_col::IntOrNone= nothing, σ_col::IntOrNone= nothing, ϵ_col::IntOrNone=nothing, ω_col::IntOrNone= nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',', comment="")
 
     @assert (!isnothing(t_col) && isnothing(ω_col)) || (isnothing(t_col) && !isnothing(ω_col)) "Data must contain either \"time\" or \"frequency\" "
-    @assert endswith(lowercase(filedir), ".csv") "filedir must be a .csv file."
+    @assert endswith(lowercase(filename), ".csv") "filename must be a .csv file."
 
     if !isnothing(t_col)
 
@@ -42,9 +42,8 @@ function importcsv(filename::String; t_col::IntOrNone= nothing, σ_col::IntOrNon
         data = nanremove(dataraw)
 
         info=(comment=comment, folder=pwd(), stats=(t_min=data[1,t_col],t_max=data[end,t_col], n_sample=size(data[:,t_col])))
-        log = RheoLogItem( (type=:source, funct=:importdata, params=(filename=filename,), keywords=(t_col=t_col, σ_col=σ_col, ϵ_col=ϵ_col)), info )
+        log = RheoLogItem( (type=:source, funct=:importcsv, params=(filename=filename,), keywords=(t_col=t_col, σ_col=σ_col, ϵ_col=ϵ_col)), info )
 
-        source = filedir
         # generate RheologyData struct and output
         if !isnothing(ϵ_col) && !isnothing(σ_col)
             return RheoTimeData(t = data[:, t_col], ϵ = data[:, ϵ_col], σ = data[:, σ_col], log = log)
@@ -61,13 +60,13 @@ function importcsv(filename::String; t_col::IntOrNone= nothing, σ_col::IntOrNon
         @assert !isnothing(Gp_col) && !isnothing(Gpp_col) "\"Gp\" and \"Gpp\" are required."
 
         # read data from file
-        dataraw = readdlm(filedir, delimiter)
+        dataraw = readdlm(filename, delimiter)
         # remove and rows with NaN values in any of the columns
         data = nanremove(dataraw)
 
         # generate RheologyDynamic struct and output
         info=(comment=comment, folder=pwd(), stats=(ω_min=data[1,ω_col],ω_max=data[end,ω_col], n_sample=size(data[:,ω_col])))
-        log = RheoLogItem( (type=:source, funct=:importdata, params=(filedir=filedir,), keywords=(ω_col=ω_col, Gp_col=Gp_col, Gpp_col=Gpp_col)), info )
+        log = RheoLogItem( (type=:source, funct=:importcsv, params=(filedir=filedir,), keywords=(ω_col=ω_col, Gp_col=Gp_col, Gpp_col=Gpp_col)), info )
 
         return RheoFreqData(ω = data[:,ω_col], Gp = data[:,Gp_col], Gpp = data[:,Gpp_col], log = log)
 
