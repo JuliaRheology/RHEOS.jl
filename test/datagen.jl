@@ -36,7 +36,7 @@ function _ramp()
     _offset = 1.0
     time_instance = timeline(t_start=0.0, t_end=15.0, step=dt)
     imposed = stressfunction(time_instance, ramp(offset=_offset, gradient=1.0))
-    
+
     all(v -> v==0, imposed.σ[imposed.t.<_offset]) && imposed.σ[imposed.t.==(_offset+dt)]≈[dt] && imposed.σ[end]≈14.0
 end
 @test _ramp()
@@ -89,9 +89,9 @@ function _triangle()
 end
 @test _triangle()
 
-function _frequency_spec()
-    freq_instance = frequency_spec(ω_start=0.0, ω_end=15.0, step=0.1)
+function _frequencyspec()
+    freq_instance = frequencyspec(ω_start=0.0, ω_end=15.0, step=0.1)
 
     typeof(freq_instance)==RheoFreqData && freq_instance.ω==(0.0:0.1:15.0)
 end
-@test _frequency_spec()
+@test _frequencyspec()
