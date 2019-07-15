@@ -180,9 +180,8 @@ Generate RheoFreqData struct with only the frequency data.
 - `step`: Step between frequencies
 """
 function frequencyspec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(ω_end-ω_start)/1.0e5)
-    log = OrderedDict{Any,Any}(:n=>1,"activity"=>"frequency_spec created: ω_start: $ω_start, ω_end: $ω_end, step: $step")
-
-    RheoFreqData([], [], collect(ω_start:step:ω_end), log)
+    log = RheoLogItem( (type=:source, funct=:frequencyspec, params=(), keywords=(ω_start=ω_start, ω_end=ω_end, step=step)), (comment="frequency range created",))
+    RheoFreqData([], [], collect(ω_start:step:ω_end), [log])
 end
 
 #=

@@ -33,7 +33,7 @@ time-stress-strain data can be provided.
 function importcsv(filepath::String; t_col::IntOrNone= nothing, σ_col::IntOrNone= nothing, ϵ_col::IntOrNone=nothing, ω_col::IntOrNone= nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter = ',', comment = "", savelog = true)
 
     @assert (!isnothing(t_col) && isnothing(ω_col)) || (isnothing(t_col) && !isnothing(ω_col)) "Data must contain either \"time\" or \"frequency\" "
-    @assert endswith(lowercase(filepath), ".csv") "filedir must point to a .csv file."
+    @assert endswith(lowercase(filepath), ".csv") "filepath must point to a .csv file."
 
     if !isnothing(t_col)
 
