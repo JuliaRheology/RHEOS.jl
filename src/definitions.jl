@@ -38,7 +38,7 @@ end
 #
 
 
-function rheolog_run(rli::RheoLogItem, d=nothing)
+function rheologrun(rli::RheoLogItem, d=nothing)
 
       if typeof(rli.action) <: NamedTuple && :type in keys(rli.action)
          type=rli.action.type
@@ -54,7 +54,7 @@ function rheolog_run(rli::RheoLogItem, d=nothing)
 end
 
 
-function rheolog_run(arli::Vector{RheoLogItem}, d=nothing)
+function rheologrun(arli::Vector{RheoLogItem}, d=nothing)
    # check first item is a source?
    # to do...
 
@@ -99,16 +99,81 @@ struct RheoTimeData
     ϵ::Vector{RheoFloat}
     t::Vector{RheoFloat}
 
-    log::Vector{RheoLogItem}
+    log::Union{Vector{RheoLogItem},Nothing}
 
 end
 
+
+"""
+    RheoFreqData(Gp::Vector{T1}, Gpp::Vector{T2}, ω::Vector{T3}, log::OrderedDict{Any,Any}) where {T1<:Real, T2<:Real, T3<:Real}
+
+RheologyDynamic contains storage modulus, loss modulus and frequency data.
+
+If preferred, an instance can be generated manually by just providing the three data
+vectors in the right order.
+
+# Fields
+
+- Gp: storage modulus
+- Gpp: loss modulus
+- ω: frequency
+- log: a log of struct's events, e.g. preprocessing
+"""
+struct RheoFreqData
+
+    # Complex modulus data
+    Gp::Vector{RheoFloat}
+    Gpp::Vector{RheoFloat}
+    ω::Vector{RheoFloat}
+
+    log::Union{Vector{RheoLogItem},Nothing}
+end
+
+
+
+
+function hasrheolog(d::Union{RheoTimeData,RheoFreqData})
+   d.log!=nothing
+end
+
+
+macro rheologtest(b,e)
+     quote
+         if $b
+            eval($e)
+         end
+     end
+end
+
+
+
+macro rheologadd(d::Union{RheoTimeData,RheoFreqData},e)
+     quote
+         if hasrheolog($d)
+            [$d.log;eval($e)]
+         end
+     end
+end
+
+ macro rheologadd!(d::Union{RheoTimeData,RheoFreqData},e)
+      quote
+          if hasrheolog($x)
+             push!($d.log,eval($e))
+          end;
+      end
+end
+
+
+
+
+
+
+
 function RheoTimeData(;ϵ::Vector{T1} = RheoFloat[], σ::Vector{T2} = RheoFloat[], t::Vector{T3} = RheoFloat[], comment="", log=RheoLogItem(comment))  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_time_data_consistency(t,ϵ,σ)
-    #log = OrderedDict{Any,Any}(:n=>1,"activity"=>"import", "data_source"=>source, "type"=>typecheck)
-    #RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t), log)   #Dict{Any,Any}("source"=> source, "datatype"=>check_time_data_consistency(t,ϵ,σ))
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
-    [RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
+    #[ @rheologtest log!=nothing RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
+    [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
 
 end
 
@@ -148,31 +213,6 @@ function RheoTimeDataType(d::RheoTimeData)
 end
 
 @enum LoadingType strain_imposed=1 stress_imposed=2
-
-"""
-    RheoFreqData(Gp::Vector{T1}, Gpp::Vector{T2}, ω::Vector{T3}, log::OrderedDict{Any,Any}) where {T1<:Real, T2<:Real, T3<:Real}
-
-RheologyDynamic contains storage modulus, loss modulus and frequency data.
-
-If preferred, an instance can be generated manually by just providing the three data
-vectors in the right order.
-
-# Fields
-
-- Gp: storage modulus
-- Gpp: loss modulus
-- ω: frequency
-- log: a log of struct's events, e.g. preprocessing
-"""
-struct RheoFreqData
-
-    # Complex modulus data
-    Gp::Vector{RheoFloat}
-    Gpp::Vector{RheoFloat}
-    ω::Vector{RheoFloat}
-
-    log::Vector{RheoLogItem}
-end
 
 
 function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat[], ω::Vector{T3} = RheoFloat[], comment="", log=RheoLogItem(comment))  where {T1<:Real, T2<:Real, T3<:Real}
@@ -233,6 +273,19 @@ function +(self1::RheoTimeData, self2::RheoTimeData)
     end
 
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function -(self1::RheoTimeData, self2::RheoTimeData)
 
@@ -299,6 +352,13 @@ end
 
 #  Union operator |
 #  Combine stress_only data and strain_only data into stress_strain
+
+
+
+
+
+
+
 
 struct RheoModelClass
 

@@ -383,9 +383,9 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
     end
     time = data.t
 
-    #log = OrderedDict{Any,Any}("activity"=>"predicted data", "data_source"=>data.log, "modulus"=>pred_mod, "parameters"=>modparam)
-    log = [data.log; RheoLogItem( (type=:process, funct=:modelpredict, params=(model::RheoModel,), keywords=(diff_method="BD",)),
-                                    (comment="Predicted data - modulus: $pred_mod, parameters:$(model.params)",) ) ]
+    log = [ data.log;
+            RheoLogItem( (type=:process, funct=:modelpredict, params=(model::RheoModel,), keywords=(diff_method="BD",)),
+                         (comment="Predicted data - modulus: $pred_mod, parameters:$(model.params)",) ) ]
 
     return RheoTimeData(sigma,epsilon,time, log)
 
