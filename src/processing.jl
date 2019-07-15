@@ -353,6 +353,9 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
 
     # get convolution
     if !sing && constantcheck(data.t)
+        #
+        #   /!\ This function is missing
+        #
         convolved = boltzconvolve_nonsing(modulus, t_zeroed, dt, dcontrolled)
 
     elseif sing && constantcheck(data.t)
