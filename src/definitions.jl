@@ -219,7 +219,7 @@ function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat
     typecheck = check_freq_data_consistency(ω,Gp,Gpp)
     #log = OrderedDict{Any,Any}(:n=>1, "activity"=>"import", "data_source"=>source, "type"=>typecheck)
     #RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω), log)
-    RheoTimeData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω),
+    RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω),
     [RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
 end
 

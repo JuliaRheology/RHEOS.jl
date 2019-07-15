@@ -7,6 +7,9 @@ For a real 2D array with columns of e.g. time, stress and strain, or frequency, 
 find any row which contains NaN values and remove that row completely.
 """
 function nanremove(arr::Array{T,2}) where T<:Real
+    # raise warning
+    @warn "Please note that NaN data rows are not included in resultant data struct."
+
     # get 1D array which is NaN for any corresponding row with NaNs in
     rowsums = sum(arr, dims=2)
 
@@ -15,7 +18,7 @@ function nanremove(arr::Array{T,2}) where T<:Real
 end
 
 """
-    importcsv(filename::String; t_col::IntOrNone= nothing, σ_col::IntOrNone= nothing, ϵ_col::IntOrNone=nothing, ω_col::IntOrNone= nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',')
+    importcsv(filedir::String; t_col::IntOrNone= nothing, σ_col::IntOrNone= nothing, ϵ_col::IntOrNone=nothing, ω_col::IntOrNone= nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',')
 
 Load data from a CSV file (two/three columns, comma seperated by default but
 delimiter can be specified in the `delimiter` keyword argument). Arguments must be
@@ -30,13 +33,13 @@ time-stress-strain data can be provided.
 function importcsv(filename::String; t_col::IntOrNone= nothing, σ_col::IntOrNone= nothing, ϵ_col::IntOrNone=nothing, ω_col::IntOrNone= nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter = ',', comment = "", savelog = true)
 
     @assert (!isnothing(t_col) && isnothing(ω_col)) || (isnothing(t_col) && !isnothing(ω_col)) "Data must contain either \"time\" or \"frequency\" "
-    @assert endswith(lowercase(filename), ".csv") "filename must be a .csv file."
+    @assert endswith(lowercase(filedir), ".csv") "filedir must point to a .csv file."
 
     if !isnothing(t_col)
 
         @assert isnothing(Gp_col) && isnothing(Gpp_col) "Loss and storage modulus not allowed for time data"
         # read data from file
-        dataraw = readdlm(filename, delimiter)
+        dataraw = readdlm(filedir, delimiter)
 
         # remove and rows with NaN values in any of the columns
         data = nanremove(dataraw)
@@ -61,7 +64,7 @@ function importcsv(filename::String; t_col::IntOrNone= nothing, σ_col::IntOrNon
         @assert !isnothing(Gp_col) && !isnothing(Gpp_col) "\"Gp\" and \"Gpp\" are required."
 
         # read data from file
-        dataraw = readdlm(filename, delimiter)
+        dataraw = readdlm(filedir, delimiter)
         # remove and rows with NaN values in any of the columns
         data = nanremove(dataraw)
 
