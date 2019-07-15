@@ -25,6 +25,9 @@ using FunctionWrappers: FunctionWrapper
 # See julia docs for more info on this.
 const RheoFloat = Float64
 
+# convenience data type for int or nothing used as in many function parameters
+const IntOrNone = Union{Integer, Nothing}
+
 ######################################################################
 # definitions.jl
 #export RheologyData, RheologyModel, RheologyDynamic
@@ -36,7 +39,7 @@ export FreqDataType, invalid_freq_data, frec_only, with_modulus
 export rheoconv,invLaplace
 
 # IO.jl
-export importdata, exportdata, savedata, loaddata, savemodel, loadmodel
+export importcsv, exportcsv#, savedata, loaddata, savemodel, loadmodel
 
 # models.jl
 export null_modulus
@@ -52,7 +55,7 @@ export SLS2, PowerLawPlateau
 export timeline
 export strainfunction, stressfunction
 export hstep, ramp, stairs, square, sawtooth, triangle
-export frequency_spec
+export frequencyspec
 
 # processing.jl
 export resample, cutting, smooth, extract

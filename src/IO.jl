@@ -1,162 +1,171 @@
 #!/usr/bin/env julia
 
 """
-    importdata(filedir::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ_col::Integer=-1, ω_col::Integer= -1, Gp_col::Integer = -1, Gpp_col::Integer = -1, delimiter=',', comment="")
+    nanremove(arr::Array{T,2}) where T<:Real
+
+For a real 2D array with columns of e.g. time, stress and strain, or frequency, G' and G'',
+find any row which contains NaN values and remove that row completely.
+"""
+function nanremove(arr::Array{T,2}) where T<:Real
+    # get 1D array which is NaN for any corresponding row with NaNs in
+    rowsums = sum(arr, dims=2)
+
+    # extract only those rows whose sum did not evaluate to NaN
+    arr[vec(.!isnan.(rowsums)), :]
+end
+
+"""
+    importcsv(filename::String; t_col::IntOrNone= nothing, σ_col::IntOrNone= nothing, ϵ_col::IntOrNone=nothing, ω_col::IntOrNone= nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',')
 
 Load data from a CSV file (two/three columns, comma seperated by default but
 delimiter can be specified in the `delimiter` keyword argument). Arguments must be
 identified by providing the number of the column in which they are contained.
 
-Can be used to construct either a RheologyData instance or a RheologyDynamic
+Can be used to construct either a RheoTimeData instance or a RheoFreqData
 instance. Function detects whether "time" or "frequency" has been included
 and proceeds accordingly. For oscillatory data, all three columns (Gp, Gpp, Frequency)
 must be provided. For regular viscoelastic data only time, or time-stress, or time-strain or
 time-stress-strain data can be provided.
 """
-function importdata(filename::String; t_col::Integer= -1, σ_col::Integer= -1, ϵ_col::Integer=-1, ω_col::Integer= -1, Gp_col::Integer = -1, Gpp_col::Integer = -1, delimiter=',', comment="")
+function importcsv(filename::String; t_col::IntOrNone= nothing, σ_col::IntOrNone= nothing, ϵ_col::IntOrNone=nothing, ω_col::IntOrNone= nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',', comment="")
 
-    @assert ((t_col!=-1)&(ω_col==-1)) || ((t_col==-1)&(ω_col!=-1)) "Data must contain either \"time\" or \"frequency\" "
+    @assert (!isnothing(t_col) && isnothing(ω_col)) || (isnothing(t_col) && !isnothing(ω_col)) "Data must contain either \"time\" or \"frequency\" "
+    @assert endswith(lowercase(filedir), ".csv") "filedir must be a .csv file."
 
-    if t_col!=-1
+    if !isnothing(t_col)
 
-        @assert (Gp_col==-1) & (Gpp_col ==-1) "Loss and storage modulus not allowed for time data"
+        @assert isnothing(Gp_col) && isnothing(Gpp_col) "Loss and storage modulus not allowed for time data"
         # read data from file
-        data = readdlm(filename, delimiter)
+        dataraw = readdlm(filename, delimiter)
 
-        # test for NaNs at the beginning and end of the data
-        newstartingval = 1
-        for i in 1:length(data[:,t_col])
-            if !isnan(sum(data[i,:]))
-                newstartingval = i
-                break
-            end
-        end
-        #
-        # # TO DO LATER: We need to add the check of nans within the data not just at the beginning and end
-        # # el_del = []
-        # # for i in newstartingval:length(data[:,t_col])
-        # #     if !isnan(sum(data[i,:]))
-        # #         el_del = i
-        # #     end
-        # # end
-        #
-        # newendingval = 1
-        # for i=length(data[:,t_col]):-1:1
-        #     if !isnan(sum(data[i,:]))
-        #         newendingval = i
-        #         break
-        #     end
-        # end
-        # data = data[newstartingval:newendingval,:]
+        # remove and rows with NaN values in any of the columns
+        data = nanremove(dataraw)
 
         info=(comment=comment, folder=pwd(), stats=(t_min=data[1,t_col],t_max=data[end,t_col], n_sample=size(data[:,t_col])))
         log = RheoLogItem( (type=:source, funct=:importdata, params=(filename=filename,), keywords=(t_col=t_col, σ_col=σ_col, ϵ_col=ϵ_col)), info )
-        if (ϵ_col!=-1) & (σ_col!=-1)
-            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], σ = data[:,σ_col], log = log )
-        elseif (ϵ_col!=-1) & (σ_col==-1)
-            return RheoTimeData(t = data[:,t_col], ϵ = data[:,ϵ_col], log = log )
-        elseif (σ_col!=-1) & (ϵ_col==-1)
-            return RheoTimeData(t = data[:,t_col], σ = data[:,σ_col], log = log )
-        elseif (t_col!=-1) & (σ_col==-1) &  (ϵ_col==-1)
-            return RheoTimeData(t = data[:,t_col], log = log )
+
+        source = filedir
+        # generate RheologyData struct and output
+        if !isnothing(ϵ_col) && !isnothing(σ_col)
+            return RheoTimeData(t = data[:, t_col], ϵ = data[:, ϵ_col], σ = data[:, σ_col], log = log)
+        elseif !isnothing(ϵ_col) && isnothing(σ_col)
+            return RheoTimeData(t = data[:, t_col], ϵ = data[:, ϵ_col], log = log)
+        elseif !isnothing(σ_col) && isnothing(ϵ_col)
+            return RheoTimeData(t = data[:, t_col], σ = data[:, σ_col], log = log)
         end
 
-    elseif ω_col!=-1
+    elseif !isnothing(ω_col)
+
+        # check colnames length is correct
+        @assert isnothing(σ_col) || isnothing(ϵ_col) "Stress and strain not allowed for frequency data"
+        @assert !isnothing(Gp_col) && !isnothing(Gpp_col) "\"Gp\" and \"Gpp\" are required."
+
+        # read data from file
+        dataraw = readdlm(filedir, delimiter)
+        # remove and rows with NaN values in any of the columns
+        data = nanremove(dataraw)
+
+        # generate RheologyDynamic struct and output
         info=(comment=comment, folder=pwd(), stats=(ω_min=data[1,ω_col],ω_max=data[end,ω_col], n_sample=size(data[:,ω_col])))
         log = RheoLogItem( (type=:source, funct=:importdata, params=(filedir=filedir,), keywords=(ω_col=ω_col, Gp_col=Gp_col, Gpp_col=Gpp_col)), info )
 
-        # check colnames length is correct
-        @assert (σ_col==-1) & (ϵ_col ==-1) "Stress and strain not allowed for frequency data"
-        @assert Gp_col!=-1 & Gpp_col!=-1 "\"Gp\" and \"Gpp\" are required."
-
-        # read data from file
-        data = readdlm(filedir, delimiter)
-
-        # generate RheologyDynamic struct and output
-        return RheoFreqData(ω = data[:,ω_col], Gp = data[:,Gp_col], Gpp = data[:,Gpp_col], source = filedir)
+        return RheoFreqData(ω = data[:,ω_col], Gp = data[:,Gp_col], Gpp = data[:,Gpp_col], log = log)
 
     end
 end
 
 """
-    exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".csv", delimiter=',')
+    exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; delimiter=',', colorder=nothing)
 
-Export RheologyData or RheologyDynamic type to csv format. Exports three columns in order:
-stress, strain, time for standard viscoelastic data. Or: Gp, Gpp, frequency for oscillatory data.
-File extension can be modified using the `ext` keyword argument. As with `importdata`, the delimiter
-can also be set by keyword argument.
-
-Useful for plotting/analysis in other software.
+Export RheoTimeData or RheoFreqData type to csv format. May be useful for plotting/analysis in other software.
+By default, full time data will be exported with columns ordered as (σ, ϵ, t). Partial time data will be ordered
+as either (σ, t) or (ϵ, t). Full frequency data will be ordered as (Gp, Gpp, ω). The order of columns can be customised
+by passing a NamedTuple to the `colorder` arguments. For example (σ = 2, t = 1, ϵ = 3) would export the columns in the
+order (t, σ, ϵ). As with `importcsv`, the delimiter can be set by keyword argument.
 """
-function exportdata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".csv", delimiter=',')
+function exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; delimiter=',', colorder=nothing)
 
-    fulldir = string(filedir, ext)
+    @assert endswith(lowercase(filedir), ".csv") "filedir must be a .csv file."
 
-    subtype = eltype(self)
+    # if ordering of columns not provided, get default ordering depending on data contained in struct
+    if isnothing(colorder)
+        if typeof(self)==RheoTimeData
+            datacontained = RheoTimeDataType(self)
+            if datacontained == stress_only
+                colorder = (σ=1, t=2)
+            elseif datacontained == strain_only
+                colorder = (ϵ=1, t=2)
+            elseif datacontained == strain_and_stress
+                colorder = (σ=1, ϵ=2, t=3)
+            end
 
-    if typeof(self)==RheologyData{subtype}
-        fulldata_array = hcat(self.σ, self.ϵ, self.t)
-        open(fulldir, "w") do io
-            writedlm(fulldir, fulldata_array, delimiter)
+        elseif typeof(self)==RheoFreqData
+            # invalid_freq_data=-1 frec_only=0 with_modulus=1
+            datacontained = RheoFreqDataType(self)
+            colorder = (Gp = 1, Gpp = 2, ω = 3)
         end
+    end
 
-    elseif typeof(self)==RheologyDynamic{subtype}
-        fulldata_array = hcat(self.Gp, self.Gpp, self.ω)
-        open(fulldir, "w") do io
-            writedlm(fulldir, fulldata_array, delimiter)
-        end
+    cols = collect(keys(colorder))
+    sortedcols = sort(cols, by=i->getfield(colorder, i))
+    dataraw = getfield.((self,), sortedcols)
+    dataout = hcat(dataraw...)
+    open(filedir, "w") do io
+        writedlm(filedir, dataout, delimiter)
     end
 end
 
-"""
-    savedata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".jld2")
+# """
+#     savedata(self::Union{RheoTimeData, RheoFreqData}, filedir::String)
 
-Save RheologyData or RheologyDynamic object using JLD2 format reuse in
-a later Julia session.
-"""
-function savedata(self::Union{RheologyData, RheologyDynamic}, filedir::String; ext = ".jld2")
+# Save RheoTimeData or RheoFreqData object using JLD2 format for re-use in
+# a later Julia session.
+# """
+# function savedata(self::Union{RheoTimeData, RheoFreqData}, filedir::String)
 
-    fulldir = string(filedir, ext)
+#     @assert endswith(lowercase(filedir), ".jld2") "filedir must be a .jld2 file."
 
-    @save fulldir self
+#     @save filedir self
 
-end
+# end
 
-"""
-    loaddata(filedir::String)
+# """
+#     loaddata(filedir::String)
 
-Loads RheologyData or RheologyDynamic object from a jld2 file.
-"""
-function loaddata(filedir::String)
+# Loads RheoTimeData or RheoFreqData object from a jld2 file.
+# """
+# function loaddata(filedir::String)
 
-    @load filedir self
+#     @assert endswith(lowercase(filedir), ".jld2") "filedir must be a .jld2 file."
 
-    return self
+#     @load filedir self
 
-end
+#     return self
 
-"""
-    savemodel(self::RheologyModel, filedir::String; ext = ".jld2")
+# end
 
-Save RheologyModel object using JLD2 format reuse in a later Julia session.
-"""
-function savemodel(self::RheologyModel, filedir::String; ext = ".jld2")
+# """
+#     savemodel(self::RheologyModel, filedir::String; ext = ".jld2")
 
-    fulldir = string(filedir, ext)
+# Save RheologyModel object using JLD2 format reuse in a later Julia session.
+# """
+# function savemodel(self::RheologyModel, filedir::String; ext = ".jld2")
 
-    @save fulldir self
+#     fulldir = string(filedir, ext)
 
-end
+#     @save fulldir self
 
-"""
-    loaddata(filedir::String)
+# end
 
-Loads RheologyModel from a JLD2 file.
-"""
-function loadmodel(filedir::String)
+# """
+#     loaddata(filedir::String)
 
-    @load filedir self
+# Loads RheologyModel from a JLD2 file.
+# """
+# function loadmodel(filedir::String)
 
-    return self
+#     @load filedir self
 
-end
+#     return self
+
+# end

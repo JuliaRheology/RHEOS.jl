@@ -1,5 +1,3 @@
-const tol = (eps(RHEOS.RheoFloat))^(0.125) 
-
 function _trapz(tol)
     x = [i for i in -5.0:0.01:5.0]
     y = 3*x.^2
