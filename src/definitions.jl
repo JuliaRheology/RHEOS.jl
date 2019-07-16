@@ -132,46 +132,10 @@ end
 
 
 
-function hasrheolog(d::Union{RheoTimeData,RheoFreqData})
-   d.log!=nothing
-end
-
-# if b true --> eval e and return rli
-# else --> nothing
-
-
-macro rheologtest(b,e)
-   if eval(b)
-       eval(e)
-   else
-       nothing
-   end
-end
-
-
-macro rheologadd(d::Union{RheoTimeData,RheoFreqData},e)
-     quote
-         if hasrheolog($d)
-            [$d.log;eval($e)]
-         end
-     end
-end
-
- macro rheologadd!(d::Union{RheoTimeData,RheoFreqData},e)
-      quote
-          if hasrheolog($x)
-             push!($d.log,eval($e))
-          end;
-      end
-end
 
 
 
-
-
-
-
-function RheoTimeData(;ϵ::Vector{T1} = RheoFloat[], σ::Vector{T2} = RheoFloat[], t::Vector{T3} = RheoFloat[], comment="Created from generic constructor", log = RheoLogItem(comment))  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoTimeData(;ϵ::Vector{T1} = RheoFloat[], σ::Vector{T2} = RheoFloat[], t::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_time_data_consistency(t,ϵ,σ)
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
     log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
@@ -212,10 +176,16 @@ function RheoTimeDataType(d::RheoTimeData)
     return check_time_data_consistency(d.t,d.ϵ,d.σ)
 end
 
+
+
+
 @enum LoadingType strain_imposed=1 stress_imposed=2
 
 
-function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat[], ω::Vector{T3} = RheoFloat[], comment="", log=RheoLogItem(comment))  where {T1<:Real, T2<:Real, T3<:Real}
+
+
+
+function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat[], ω::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_freq_data_consistency(ω,Gp,Gpp)
     RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω),
     log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
