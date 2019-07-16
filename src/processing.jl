@@ -371,13 +371,12 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
         epsilon = data.ϵ
         pred_mod = "relaxation function G"
     end
-    time = data.t
 
     log = data.log == nothing ? nothing : [ data.log;
             RheoLogItem( (type=:process, funct=:modelpredict, params=(model::RheoModel,), keywords=(diff_method = diff_method,)),
                          (comment="Predicted data - modulus: $pred_mod, parameters:$(model.params)",) ) ]
 
-    return RheoTimeData(sigma,epsilon,time, log)
+    return RheoTimeData(sigma, epsilon, data.t, log)
 
 end
 
@@ -518,6 +517,7 @@ function modelstepfit(data::RheoTimeData,
 
 
 
+    nt = NamedTuple{Tuple(model.params)}(minx)
 
     if data.log != nothing
         # Preparation of data for log item
@@ -530,7 +530,6 @@ function modelstepfit(data::RheoTimeData,
 
 
     print("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
-    nt = NamedTuple{Tuple(model.params)}(minx)
 
     return RheoModel(model,nt, log = log);
 
@@ -783,18 +782,19 @@ function dynamicmodelfit(data::RheoFreqData,
     println(ret)
 
 
-    modelname = string(model)
+    nt = NamedTuple{Tuple(model.params)}(minx)
 
-    #log = OrderedDict{Any,Any}("activity"=>"fitting Gp and Gpp", "data_source"=>data.log, "time"=>timetaken, "stop reason"=>ret, "error"=>minf)
-    log = copy(data.log)
-    log[:n] = log[:n]+1
-    log[string("activity_",log[:n])] = "Fitted Gp and Gpp $(model.name)"
-    log[string("time_",log[:n])] = timetaken
-    log[string("stop_",log[:n])] = ret
-    log[string("error_",log[:n])] = minf
+
+    if data.log != nothing
+        # Preparation of data for log item
+        info = (comment="Fiting rheological model to frequency spectrum", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
+        params = (model=model, )
+        keywords = (p0=p0, lo=lo, hi=hi, rel_tol=rel_tol, weights=weights)
+        # Add data to the log
+        push!(data.log, RheoLogItem( (type=:analysis, funct=:dynamicmodelfit, params=params, keywords=keywords), info))
+    end
 
     print("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
-    nt = NamedTuple{Tuple(model.params)}(minx)
 
 
     return RheoModel(model,nt; log_add = log);
@@ -810,22 +810,13 @@ frequencies and model given as arguments.
 """
 function dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
 
-    print(typeof(data))
-
-    # get results
     predGp = model.Gpa(data.ω)
     predGpp = model.Gppa(data.ω)
 
-    pred_mod = "Storage and loss moduli Gp, Gpp "
+    log = data.log == nothing ? nothing : [ data.log;
+            RheoLogItem( (type=:process, funct=:dynamicmodelpredict, params=(model::RheoModel,), keywords=() ),
+                         (comment="Calculated frequency spectrum - model $(model.name), parameters:$(model.params)",) ) ]
 
-    modparam = model.params
-    # store operation
-    #log = OrderedDict{Any,Any}("activity"=>"predicted data", "data_source"=>data.log, "modulus"=>pred_mod, "parameters"=>modparam)
-    #log = vcat( data.log, "Predicted data using: $pred_mod, Parameters: $modparam")
-    log = copy(data.log)
-    log[:n] = log[:n]+1
-    log[string("activity_",log[:n])] = "Predicted data: Gp and Gpp, model $(model.name), parameters: $modparam"
-
-    return RheoFreqData(predGp, predGpp,data.ω, log)
+    return RheoFreqData(predGp, predGpp, data.ω, log)
 
 end
