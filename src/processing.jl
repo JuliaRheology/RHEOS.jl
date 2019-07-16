@@ -10,7 +10,7 @@ Preprocessing functions
 
 Resample data with new sample rate(s).
 
-resample can downsample or upsample data. If the number of elperiods is negative it is going to reduce the number of samples,
+Resample can downsample or upsample data. If the number of elperiods is negative it is going to reduce the number of samples,
 viceversa if it is positive. If time boundaries are not specified, resampling is applied to the whole set of data.
 If number of elements per period (elperiods) is 1 or -1 it returns the original RheoTimeData, whilst 0 is not accepted as a valid
 argument for elperiods.
@@ -37,11 +37,8 @@ function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_bound
         (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods)
     end
 
-    # add record of operation applied
-    #log = vcat(self.log, "fixed_resample - boundaries: $boundaries, elperiods: $elperiods")
-    log = copy(self.log)
-    log[:n] = log[:n]+1
-    log[string("activity_",log[:n])] = "Resample - boundaries: $boundaries, elperiods: $elperiods"
+    log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:resample, params=(elperiods = elperiods, ), keywords=(time_boundaries = time_boundaries, ) ),
+                                        (comment="Resample the data",) ) ]
 
     return RheoTimeData(sigma, epsilon, time, log)
 
@@ -75,12 +72,8 @@ function cutting(self::RheoTimeData, time_on::T1, time_off::T2) where {T1<:Numbe
         sigma = self.σ[boundary_on:boundary_off]
     end
 
-    log = copy(self.log)
-    log[:n] = log[:n]+1
-    log[string("activity_",log[:n])] = "Cutting - time on: $time_on, time_off: $time_off"
-
-    #log = OrderedDict{Any,Any}("activity"=>"cutting", "data_source"=>self.log, "time range"=>[time_on,time_off])
-    #log = vcat(self.log, "Data from $time_on to $time_off extracted.")
+    log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:cutting, params=(time_on = time_on, time_off = time_off), keywords=() ),
+                                        (comment="Cut section of the data between $time_on and $time_off",) ) ]
 
     return RheoTimeData(sigma,epsilon,time,log)
 
@@ -115,13 +108,9 @@ function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
         epsilon = Base.invokelatest(imfilter, self.ϵ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
     end
 
-    # add record of operation applied
-    #log = vcat(self.log, "smooth - τ: $τ")
-    #log = OrderedDict{Any,Any}("activity"=>"smooth", "data_source"=>self.log, "tau"=>τ)
 
-    log = copy(self.log)
-    log[:n] = log[:n]+1
-    log[string("activity_",log[:n])] = "Smooth - tau: $τ"
+    log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:smooth, params=(τ = τ,), keywords=(pad = pad,) ),
+                                        (comment="Smooth data with timescale $τ",) ) ]
 
     RheoTimeData(sigma, epsilon, self.t, log)
 
@@ -175,7 +164,7 @@ function extract(self::RheoFreqData, type::Union{FreqDataType,Integer})
 
 
 
-        log = [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
+        log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
                                             (comment="Frequency field extraction",) ) ]
         return RheoFreqData([], [],self.ω,log)
 end
@@ -357,7 +346,7 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
         #
         #   /!\ This function is missing
         #
-        convolved = boltzconvolve_nonsing(modulus, t_zeroed, dt, dcontrolled)
+        convolved = boltzconvolve(modulus, t_zeroed, dt, dcontrolled)
 
     elseif sing && constantcheck(data.t)
         # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, dcontrolled)
@@ -385,7 +374,7 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
     time = data.t
 
     log = data.log == nothing ? nothing : [ data.log;
-            RheoLogItem( (type=:process, funct=:modelpredict, params=(model::RheoModel,), keywords=(diff_method="BD",)),
+            RheoLogItem( (type=:process, funct=:modelpredict, params=(model::RheoModel,), keywords=(diff_method = diff_method,)),
                          (comment="Predicted data - modulus: $pred_mod, parameters:$(model.params)",) ) ]
 
     return RheoTimeData(sigma,epsilon,time, log)
@@ -527,13 +516,18 @@ function modelstepfit(data::RheoTimeData,
                                                                                         singularity = sing,
                                                                                         _rel_tol = rel_tol)
 
-    #log = OrderedDict{Any,Any}("activity"=>"fitting", "data_source"=>data.log, "time"=>timetaken, "stop reason"=>ret, "error"=>minf)
-    log = copy(data.log)
-    log[:n] = log[:n]+1
-    log[string("activity_",log[:n])] = "Fitted $(model.name) modulus $modused"
-    log[string("time_",log[:n])] = timetaken
-    log[string("stop_",log[:n])] = ret
-    log[string("error_",log[:n])] = minf
+
+
+
+    if data.log != nothing
+        # Preparation of data for log item
+        info=(comment="Fiting rheological model to data (step input assumed)", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
+        params = (model = model, modloading = modloading)
+        keywords = (step = step, p0 = p0, lo = lo, hi = hi, rel_tol = rel_tol, diff_method = diff_method)
+        # Add data to the log
+        push!(data.log, RheoLogItem( (type=:analysis, funct=:modelstepfit, params=params, keywords=keywords), info))
+    end
+
 
     print("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
     nt = NamedTuple{Tuple(model.params)}(minx)
@@ -609,13 +603,10 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
     end
     time = data.t
 
-    modparam = model.params
-    # store operation
-    #log = vcat( data.log, "Predicted data using: $pred_mod, Parameters: $modparam")
-    #log = OrderedDict{Any,Any}("activity"=>"predicted data", "data_source"=>data.log, "modulus"=>pred_mod, "parameters"=>modparam)
-    log = copy(data.log)
-    log[:n] = log[:n]+1
-    log[string("activity_",log[:n])] = "Predicted data - modulus: $pred_mod, parameters:$modparam"
+
+    log = data.log == nothing ? nothing : [ data.log;
+            RheoLogItem( (type=:process, funct=:modelsteppredict, params=(model::RheoModel,), keywords=(step_on = step_on, diff_method = diff_method,)),
+                         (comment="Predicted step response - modulus: $pred_mod, parameters:$(model.params)",) ) ]
 
 
     return RheoTimeData(sigma,epsilon,time, log)
