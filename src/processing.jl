@@ -147,7 +147,7 @@ function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
         check = RheoTimeDataType(self)
 
 
-        log = [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
+        log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
                                             (comment="Data field extraction, $type from $check",) ) ]
 
 
@@ -297,13 +297,14 @@ function modelfit(data::RheoTimeData,
 
     nt = NamedTuple{Tuple(model.params)}(minx)
 
-    # Preparation of data for log item
-    info=(comment="Fiting rheological model to data", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
-    params=(model=model, modloading=modloading)
-    keywords=(p0=p0, lo=lo, hi=hi, rel_tol=rel_tol, diff_method=diff_method)
-    # Add data to the log
-    push!(data.log, RheoLogItem( (type=:analysis, funct=:modelfit, params=params, keywords=keywords), info))
-
+    if data.log != nothing
+        # Preparation of data for log item
+        info=(comment="Fiting rheological model to data", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
+        params=(model=model, modloading=modloading)
+        keywords=(p0=p0, lo=lo, hi=hi, rel_tol=rel_tol, diff_method=diff_method)
+        # Add data to the log
+        push!(data.log, RheoLogItem( (type=:analysis, funct=:modelfit, params=params, keywords=keywords), info))
+    end
 
     return RheoModel(model,nt);
 
@@ -383,7 +384,7 @@ function modelpredict(data::RheoTimeData,model::RheoModel; diff_method="BD")
     end
     time = data.t
 
-    log = [ data.log;
+    log = data.log == nothing ? nothing : [ data.log;
             RheoLogItem( (type=:process, funct=:modelpredict, params=(model::RheoModel,), keywords=(diff_method="BD",)),
                          (comment="Predicted data - modulus: $pred_mod, parameters:$(model.params)",) ) ]
 

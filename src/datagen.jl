@@ -16,10 +16,30 @@ Generate RheoTimeData struct with only the time data.
 - `t_end`: End time
 - `step`: Time between sample
 """
-function timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end - t_start)/250.)
-    log = RheoLogItem( (type=:source, funct=:timeline, params=(), keywords=(t_start=t_start, t_end=t_end, step=step)), (comment="timeline created",))
-    RheoTimeData([], [], collect(t_start:step:t_end), [log])
+function timeline(;t_start::Real = 0., t_end::Real = 10., step::Real = (t_end - t_start)/250., savelog = true)
+    log = savelog ? [RheoLogItem( (type=:source, funct=:timeline, params=(), keywords=(t_start=t_start, t_end=t_end, step=step)), (comment="timeline created",))] : nothing
+    RheoTimeData([], [], collect(t_start:step:t_end), log)
 end
+
+
+"""
+    frequencyspec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(ω_end-ω_start)/1.0e5)
+
+Generate RheoFreqData struct with only the frequency data.
+
+# Arguments
+
+- `ω_start`: Starting time, typically 0
+- `ω_end`: End time
+- `step`: Step between frequencies
+"""
+function frequencyspec(;ω_start::Real = 1.0e-2, ω_end::Real = 1.0e2, step::Real = (ω_end-ω_start)/1.0e5, savelog = true)
+    log = savelog ? [ RheoLogItem( (type=:source, funct=:frequencyspec, params=(), keywords=(ω_start=ω_start, ω_end=ω_end, step=step)), (comment="frequency range created",)) ] : nothing
+    RheoFreqData([], [], collect(ω_start:step:ω_end), log)
+end
+
+
+
 
 #=
 ------------------------------------------------------------------------
@@ -38,7 +58,7 @@ time as its only argument. The original data's time signal is used.
 Normally used with a RheoTimeData generated using the `timeline` function.
 """
 function strainfunction(data::RheoTimeData, f::T) where T<:Function
-    log = [data.log; RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
+    log = data.log == nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
                                     (comment="strain function applied to timeline",) ) ]
 
     return RheoTimeData(data.σ, convert(Vector{RheoFloat}, map(f, data.t)), data.t, log)
@@ -54,7 +74,7 @@ time as its only argument. The original data's time signal is used.
 Normally used with a RheoTimeData generated using the `timeline` function.
 """
 function stressfunction(data::RheoTimeData, f::T) where T<:Function
-    log = [data.log; RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
+    log = data.log == nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
                                     (comment="stress function applied to timeline",) ) ]
     return RheoTimeData(convert(Vector{RheoFloat}, map(f, data.t)), data.ϵ, data.t, log)
 end
@@ -168,21 +188,9 @@ function triangle(; kwargs...)
     return t -> triangle(t; kwargs...)
 end
 
-"""
-    frequencyspec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(ω_end-ω_start)/1.0e5)
 
-Generate RheoFreqData struct with only the frequency data.
 
-# Arguments
 
-- `ω_start`: Starting time, typically 0
-- `ω_end`: End time
-- `step`: Step between frequencies
-"""
-function frequencyspec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(ω_end-ω_start)/1.0e5)
-    log = RheoLogItem( (type=:source, funct=:frequencyspec, params=(), keywords=(ω_start=ω_start, ω_end=ω_end, step=step)), (comment="frequency range created",))
-    RheoFreqData([], [], collect(ω_start:step:ω_end), [log])
-end
 
 #=
 ---------------------------------------------------------------------------

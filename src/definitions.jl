@@ -136,15 +136,17 @@ function hasrheolog(d::Union{RheoTimeData,RheoFreqData})
    d.log!=nothing
 end
 
+# if b true --> eval e and return rli
+# else --> nothing
+
 
 macro rheologtest(b,e)
-     quote
-         if $b
-            eval($e)
-         end
-     end
+   if eval(b)
+       eval(e)
+   else
+       nothing
+   end
 end
-
 
 
 macro rheologadd(d::Union{RheoTimeData,RheoFreqData},e)
@@ -169,12 +171,10 @@ end
 
 
 
-function RheoTimeData(;ϵ::Vector{T1} = RheoFloat[], σ::Vector{T2} = RheoFloat[], t::Vector{T3} = RheoFloat[], comment="", log=RheoLogItem(comment))  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoTimeData(;ϵ::Vector{T1} = RheoFloat[], σ::Vector{T2} = RheoFloat[], t::Vector{T3} = RheoFloat[], comment="Created from generic constructor", log = RheoLogItem(comment))  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_time_data_consistency(t,ϵ,σ)
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
-    #[ @rheologtest log!=nothing RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
-    [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
-
+    log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
 end
 
 
@@ -217,10 +217,8 @@ end
 
 function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat[], ω::Vector{T3} = RheoFloat[], comment="", log=RheoLogItem(comment))  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_freq_data_consistency(ω,Gp,Gpp)
-    #log = OrderedDict{Any,Any}(:n=>1, "activity"=>"import", "data_source"=>source, "type"=>typecheck)
-    #RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω), log)
     RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω),
-    [RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
+    log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
 end
 
 
