@@ -31,7 +31,7 @@ const IntOrNone = Union{Integer, Nothing}
 ######################################################################
 # definitions.jl
 #export RheologyData, RheologyModel, RheologyDynamic
-export RheoLogItem, rheolog_run
+export RheoLogItem, rheologrun
 export RheoTimeData, RheoTimeDataType, RheoFreqData, RheoFreqDataType, check_time_data_consistency
 export LoadingType, strain_imposed, stress_imposed
 export TimeDataType, time_only, strain_only, stress_only, strain_and_stress
@@ -39,7 +39,7 @@ export FreqDataType, invalid_freq_data, frec_only, with_modulus
 export rheoconv,invLaplace
 
 # IO.jl
-export importcsv, exportcsv#, savedata, loaddata, savemodel, loadmodel
+export importdata, exportdata, savedata, loaddata, savemodel, loadmodel
 
 # models.jl
 export null_modulus
@@ -55,7 +55,7 @@ export SLS2, PowerLawPlateau
 export timeline
 export strainfunction, stressfunction
 export hstep, ramp, stairs, square, sawtooth, triangle
-export frequencyspec
+export frequency_spec
 
 # processing.jl
 export resample, cutting, smooth, extract

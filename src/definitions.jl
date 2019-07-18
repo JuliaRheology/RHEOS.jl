@@ -8,6 +8,8 @@ struct RheoLogItem
    info        # NamedTuple for process output, comments, etc.
 end
 
+const RheoLog = Vector{RheoLogItem}
+
 # different types of actions
 # source: create new data (import, model simulation, etc)
 # process: takes data -> new data returned  (cut, resample, filter, etc)
@@ -31,46 +33,6 @@ function RheoLogItem(;kwargs...)
    return(RheoLogItem(Nothing, kwargs.data))
 end
 
-
-
-#
-#  Internal functions to apply a logged creation/process/analysis to data
-#
-
-
-function rheologrun(rli::RheoLogItem, d=nothing)
-
-      if typeof(rli.action) <: NamedTuple && :type in keys(rli.action)
-         type=rli.action.type
-         if type==:source && d==nothing
-            return(eval(rli.action.funct)(rli.action.params...;rli.action.keywords...))
-         elseif type==:process && d!=nothing
-            return(eval(rli.action.funct)(d,rli.action.params...;rli.action.keywords...))
-        elseif type==:analysis && d!=nothing
-            return(eval(rli.action.funct)(d,rli.action.params...;rli.action.keywords...))
-         end
-      end
-   println(rli.info)
-end
-
-
-function rheologrun(arli::Vector{RheoLogItem}, d=nothing)
-   # check first item is a source?
-   # to do...
-
-  for rli in arli
-      if typeof(rli.action) <: NamedTuple && :type in keys(rli.action)
-          type=rli.action.type
-          if type==:analysis && d!=nothing
-              rheolog_run(rli, d)
-          else  d=rheolog_run(rli, d)
-          end
-      else
-          println(rli.info)
-      end
-  end
-  return(d)
-end
 
 
 
@@ -99,7 +61,7 @@ struct RheoTimeData
     ϵ::Vector{RheoFloat}
     t::Vector{RheoFloat}
 
-    log::Union{Vector{RheoLogItem},Nothing}
+    log::Union{RheoLog,Nothing}
 
 end
 
@@ -126,7 +88,7 @@ struct RheoFreqData
     Gpp::Vector{RheoFloat}
     ω::Vector{RheoFloat}
 
-    log::Union{Vector{RheoLogItem},Nothing}
+    log::Union{RheoLog,Nothing}
 end
 
 
@@ -140,6 +102,7 @@ function RheoTimeData(;ϵ::Vector{T1} = RheoFloat[], σ::Vector{T2} = RheoFloat[
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
     log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
 end
+
 
 
 @enum TimeDataType invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
@@ -215,33 +178,111 @@ function RheoFreqDataType(d::RheoFreqData)
     return check_freq_data_consistency(d.ω,d.Gp,d.Gpp)
 end
 
-function +(self1::RheoTimeData, self2::RheoTimeData)
 
-    type1 = RheoTimeDataType(self1)
-    type2 = RheoTimeDataType(self2)
+
+
+
+
+
+
+#
+#  Internal functions to regenerate data from a log
+#
+
+
+function rheologrun(rli::RheoLogItem, d=nothing)
+
+      if typeof(rli.action) <: NamedTuple && :type in keys(rli.action)
+         type=rli.action.type
+         if type==:source && d==nothing
+            return(eval(rli.action.funct)(rli.action.params...;rli.action.keywords...))
+         elseif type==:process && d!=nothing
+            return(eval(rli.action.funct)(d,rli.action.params...;rli.action.keywords...))
+         elseif type==:analysis && d!=nothing
+            return(eval(rli.action.funct)(d,rli.action.params...;rli.action.keywords...))
+         end
+      end
+   println(rli.info)
+end
+
+
+function rheologrun(arli::RheoLog, d::Union{RheoTimeData,RheoFreqData,Nothing} = nothing)
+
+  # check first item is a source item
+  if d == nothing
+        @assert typeof(arli[1].action) <: NamedTuple && :type in keys(arli[1].action) && arli[1].action.type == :source
+                "Source missing in RheoLog"
+        end
+
+
+  for rli in arli
+      if typeof(rli.action) <: NamedTuple && :type in keys(rli.action)
+          type=rli.action.type
+          if type==:analysis && d!=nothing
+              rheologrun(rli, d)
+          else  d=rheologrun(rli, d)
+          end
+      else
+          println(rli.info)
+      end
+  end
+  return(d)
+end
+
+
+
+
+
+
+
+
+
+#=
+Expected behaviour of the operators
+
++ and - of two rheodata type
+action = (type = :source, funct = :+, params = (self1 = self1.log, self2 = self2.log), keywords = ())
+info = ()
+=#
+
+
+
+
+
+function +(d1::RheoTimeData, d2::RheoTimeData)
+
+    type1 = RheoTimeDataType(d1)
+    type2 = RheoTimeDataType(d2)
     @assert (type1!=invalid_time_data) "Addition error: first parameter invalid"
     @assert (type2!=invalid_time_data) "Addition error: second parameter invalid"
     @assert (type1==type2) "Addition error: parameters inconsistent"
     @assert (type1!=time_only) "Addition error: time only data cannot be added"
-    @assert (self1.t == self2.t) "Addition error: timelines inconsistent"
+    @assert (d1.t == d2.t) "Addition error: timelines inconsistent"
 
-    # Operation on the logs - not so clear what it should be
-    log = OrderedDict{Any,Any}(:n=>1,"activity"=>"addition", "left"=>self1.log, "right"=>self2.log)
+    log =   if (d1.log == nothing) || (d2.log == nothing)
+                nothing
+            else
+                [ RheoLogItem( (type = :source, funct = :+, params = (rl1 = d1.log, rl2 = d2.log), keywords = ()), ()  ) ]
+            end
 
     if (type1==strain_only) && (type2==strain_only)
-        return RheoTimeData(RheoFloat[], self1.ϵ+self2.ϵ, self1.t, log)
+        return RheoTimeData(RheoFloat[], d1.ϵ+d2.ϵ, d1.t, log)
     end
 
     if (type1==stress_only) && (type2==stress_only)
-        return RheoTimeData(self1.σ+self2.σ, RheoFloat[], self1.t, log)
+        return RheoTimeData(d1.σ+d2.σ, RheoFloat[], d1.t, log)
     end
 
     if (type1==strain_and_stress) && (type2==strain_and_stress)
-        return RheoTimeData(self1.σ+self2.σ, self1.ϵ+self2.ϵ, self1.t, log)
+        return RheoTimeData(d1.σ+d2.σ, d1.ϵ+d2.ϵ, d1.t, log)
     end
 
 end
 
+
+function +(rl1::RheoLog, rl2::RheoLog)
+    return(rheologrun(rl1) + rheologrun(rl2))
+end
 
 
 
@@ -320,6 +361,13 @@ end
 
 #  Union operator |
 #  Combine stress_only data and strain_only data into stress_strain
+
+
+
+
+#
+#  WHAT ABOUT OPERATORS ON RheoFreqData ?
+#
 
 
 
@@ -596,164 +644,164 @@ export RheoModelClass, RheoModel, model_parameters
 #
 #  Do we still need this function?
 #
-function null_modulus(t::Vector{RheoFloat}, params::Vector{T}) where T<:Real
-    return [-1.0]
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-    RheologyModel(G::T, J::T, Gp::T, Gpp::T, parameters::Vector{S<:Real} log::Vector{String}) where T<:Function
-
-RheologyModel contains a model's various moduli, parameters, and log of activity.
-
-For incomplete models, an alternative constructor is available where all arguments
-are keyword arguments and moduli not provided default to a null modulus which
-always returns [-1.0].
-
-# Fields
-
-- G: Relaxation modulus
-- J: Creep modulus
-- Gp: Storage modulus
-- Gpp: Loss modulus
-- parameters: Used for predicting and as default starting parameters in fitting
-- log: a log of struct's events, e.g. what file it was fitted to
-"""
-struct RheologyModel
-
-    G::Function
-
-    J::Function
-
-    Gp::Function
-
-    Gpp::Function
-
-    parameters::Vector{RheoFloat}
-
-    log::Vector{String}
-
-end
-
-
-RheologyModel(;G::Function = null_modulus,
-               J::Function = null_modulus,
-               Gp::Function = null_modulus,
-               Gpp::Function = null_modulus,
-               params::Vector{T} where T<:Real = [-1.0],
-               log::Vector{String} = ["model created by user with parameters $params"]) = RheologyModel(G, J, Gp, Gpp, convert(Vector{RheoFloat},params), log)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function RheologyData(σ::Vector{T}, ϵ::Vector{T}, t::Vector{T}; log::Vector{String}=["Manually Created."]) where T<:Real
-
-    sampling = constantcheck(t) ? "constant" : "variable"
-
-    RheologyData(σ, ϵ, t, sampling, log)
-
-end
-
-function RheologyData(data::Vector{T}, t::Vector{T}, log::Vector{String}) where T<:Real
-    # used when generating data so always constant
-    RheologyData(data, data, t, "constant", log)
-
-end
-
-
-
-
-"""
-    RheologyDynamic(Gp::Vector{T}, Gpp::Vector{T}, ω::Vector{T}, log::Vector{String}) where T<:Real
-
-RheologyDynamic contains storage modulus, loss modulus and frequency data.
-
-If preferred, an instance can be generated manually by just providing the three data
-vectors in the right order.
-
-# Fields
-
-- Gp: storage modulus
-- Gpp: loss modulus
-- ω: frequency
-- log: a log of struct's events, e.g. preprocessing
-"""
-struct RheologyDynamic{T<:Real}
-
-    # original data
-    Gp::Vector{T}
-    Gpp::Vector{T}
-    ω::Vector{T}
-
-    # operations applied, stores history of which functions (including arguments)
-    log::Vector{String}
-
-end
-
-eltype(::RheologyDynamic{T}) where T = T
-
-function RheologyDynamic(colnames::Vector{String}, data1::Vector{T}, data2::Vector{T}, data3::Vector{T}; filedir::String="none", log::Vector{String}=Array{String}(undef, 0)) where T<:Real
-
-    # checks
-    @assert length(data1)==length(data2) "Data arrays must be same length"
-    @assert length(data1)==length(data3) "Data arrays must be same length"
-
-    # get data in correct variables
-    data = [data1, data2, data3]
-    Gp = Array{T}(undef, 0)
-    Gpp = Array{T}(undef, 0)
-    ω = Array{T}(undef, 0)
-
-    for (i, v) in enumerate(colnames)
-        if v == "Gp"
-            Gp = data[i]
-        elseif v == "Gpp"
-            Gpp = data[i]
-        elseif v == "frequency"
-            ω = data[i]
-        else
-            @assert false "Incorrect Column Names"
-        end
-    end
-
-    # set up log for three cases, file dir given, derived from other data so filedir
-    # in log already, no file name or log given.
-    if filedir != "none" || length(log)==0
-        push!(log, string("complete data loaded from:", filedir))
-    end
-
-    # return class with all fields initialised
-    RheologyDynamic(Gp, Gpp, ω, log)
-
-end
-
-function RheologyDynamic(Gp::Vector{T}, Gpp::Vector{T}, ω::Vector{T}; log::Vector{String}=["Manually Created."]) where T<:Real
-
-    RheologyDynamic(Gp, Gpp, ω, log)
-
-end
+# function null_modulus(t::Vector{RheoFloat}, params::Vector{T}) where T<:Real
+#     return [-1.0]
+# end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
+# """
+#     RheologyModel(G::T, J::T, Gp::T, Gpp::T, parameters::Vector{S<:Real} log::Vector{String}) where T<:Function
+#
+# RheologyModel contains a model's various moduli, parameters, and log of activity.
+#
+# For incomplete models, an alternative constructor is available where all arguments
+# are keyword arguments and moduli not provided default to a null modulus which
+# always returns [-1.0].
+#
+# # Fields
+#
+# - G: Relaxation modulus
+# - J: Creep modulus
+# - Gp: Storage modulus
+# - Gpp: Loss modulus
+# - parameters: Used for predicting and as default starting parameters in fitting
+# - log: a log of struct's events, e.g. what file it was fitted to
+# """
+# struct RheologyModel
+#
+#     G::Function
+#
+#     J::Function
+#
+#     Gp::Function
+#
+#     Gpp::Function
+#
+#     parameters::Vector{RheoFloat}
+#
+#     log::Vector{String}
+#
+# end
+#
+#
+# RheologyModel(;G::Function = null_modulus,
+#                J::Function = null_modulus,
+#                Gp::Function = null_modulus,
+#                Gpp::Function = null_modulus,
+#                params::Vector{T} where T<:Real = [-1.0],
+#                log::Vector{String} = ["model created by user with parameters $params"]) = RheologyModel(G, J, Gp, Gpp, convert(Vector{RheoFloat},params), log)
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+# function RheologyData(σ::Vector{T}, ϵ::Vector{T}, t::Vector{T}; log::Vector{String}=["Manually Created."]) where T<:Real
+#
+#     sampling = constantcheck(t) ? "constant" : "variable"
+#
+#     RheologyData(σ, ϵ, t, sampling, log)
+#
+# end
+#
+# function RheologyData(data::Vector{T}, t::Vector{T}, log::Vector{String}) where T<:Real
+#     # used when generating data so always constant
+#     RheologyData(data, data, t, "constant", log)
+#
+# end
+#
+#
+#
+#
+# """
+#     RheologyDynamic(Gp::Vector{T}, Gpp::Vector{T}, ω::Vector{T}, log::Vector{String}) where T<:Real
+#
+# RheologyDynamic contains storage modulus, loss modulus and frequency data.
+#
+# If preferred, an instance can be generated manually by just providing the three data
+# vectors in the right order.
+#
+# # Fields
+#
+# - Gp: storage modulus
+# - Gpp: loss modulus
+# - ω: frequency
+# - log: a log of struct's events, e.g. preprocessing
+# """
+# struct RheologyDynamic{T<:Real}
+#
+#     # original data
+#     Gp::Vector{T}
+#     Gpp::Vector{T}
+#     ω::Vector{T}
+#
+#     # operations applied, stores history of which functions (including arguments)
+#     log::Vector{String}
+#
+# end
+#
+# eltype(::RheologyDynamic{T}) where T = T
+#
+# function RheologyDynamic(colnames::Vector{String}, data1::Vector{T}, data2::Vector{T}, data3::Vector{T}; filedir::String="none", log::Vector{String}=Array{String}(undef, 0)) where T<:Real
+#
+#     # checks
+#     @assert length(data1)==length(data2) "Data arrays must be same length"
+#     @assert length(data1)==length(data3) "Data arrays must be same length"
+#
+#     # get data in correct variables
+#     data = [data1, data2, data3]
+#     Gp = Array{T}(undef, 0)
+#     Gpp = Array{T}(undef, 0)
+#     ω = Array{T}(undef, 0)
+#
+#     for (i, v) in enumerate(colnames)
+#         if v == "Gp"
+#             Gp = data[i]
+#         elseif v == "Gpp"
+#             Gpp = data[i]
+#         elseif v == "frequency"
+#             ω = data[i]
+#         else
+#             @assert false "Incorrect Column Names"
+#         end
+#     end
+#
+#     # set up log for three cases, file dir given, derived from other data so filedir
+#     # in log already, no file name or log given.
+#     if filedir != "none" || length(log)==0
+#         push!(log, string("complete data loaded from:", filedir))
+#     end
+#
+#     # return class with all fields initialised
+#     RheologyDynamic(Gp, Gpp, ω, log)
+#
+# end
+#
+# function RheologyDynamic(Gp::Vector{T}, Gpp::Vector{T}, ω::Vector{T}; log::Vector{String}=["Manually Created."]) where T<:Real
+#
+#     RheologyDynamic(Gp, Gpp, ω, log)
+#
+# end
