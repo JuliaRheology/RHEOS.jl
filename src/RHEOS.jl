@@ -55,7 +55,7 @@ export SLS2, PowerLawPlateau
 export timeline
 export strainfunction, stressfunction
 export hstep, ramp, stairs, square, sawtooth, triangle
-export frequency_spec
+export frequencyspec
 
 # processing.jl
 export resample, cutting, smooth, extract
