@@ -253,7 +253,7 @@ d=2*d1 - (-d2) + d2
 d3=rheologrun(d.log)
 
 @assert d3.ϵ == d.ϵ
-@assert all([ abs(e-2.)<=eps(Float64) for e in d.ϵ ])
+@assert all([ abs(e-2.)<=eps(RheoFloat) for e in d.ϵ ])
 =#
 
 
