@@ -10,7 +10,7 @@ function _importcsv_t_withnans()
 
     rheodata1 = importcsv(fildir; t_col = 1, σ_col = 2, ϵ_col = 3)
     test1 = (rheodata1.t == [5.0, 6.0] && rheodata1.σ == [10.0, 11.0] && rheodata1.ϵ == [15.0, 16.0])
-    
+
     rheodata2 = importcsv(fildir; t_col = 3, σ_col = 1, ϵ_col = 2)
     test2 = (rheodata2.t == [15.0, 16.0] && rheodata2.σ == [5.0, 6.0] && rheodata2.ϵ == [10.0, 11.0])
 
@@ -26,7 +26,7 @@ function _importcsv_ω_withnans()
 
     rheodata1 = importcsv(fildir; ω_col = 1, Gp_col = 2, Gpp_col = 3)
     test1 = (rheodata1.ω == [5.0, 6.0] && rheodata1.Gp == [10.0, 11.0] && rheodata1.Gpp == [15.0, 16.0])
-    
+
     rheodata2 = importcsv(fildir; ω_col = 3, Gp_col = 1, Gpp_col = 2)
     test2 = (rheodata2.ω == [15.0, 16.0] && rheodata2.Gp == [5.0, 6.0] && rheodata2.Gpp == [10.0, 11.0])
 
@@ -42,7 +42,7 @@ function _importcsv_t_partial()
 
     rheodata1 = importcsv(fildir; t_col = 1)
     test1 = (rheodata1.t == [1.0, 2.0, 3.0, 4.0, 5.0])
-    
+
     rheodata2 = importcsv(fildir; t_col = 1, σ_col = 2)
     test2 = (rheodata2.t == [1.0, 2.0, 3.0, 4.0, 5.0] && rheodata2.σ == [10.0, 20.0, 30.0, 40.0, 50.0])
 
@@ -63,7 +63,7 @@ function _exportcsv_timestress()
     exportcsv(rheotimedataIN, testdir)
     rheotimedataOUT = importcsv(testdir; t_col = 2, σ_col = 1)
 
-    rheotimedataIN.σ == rheotimedataOUT.σ && rheotimedataIN.ϵ == rheotimedataOUT.ϵ && rheotimedataIN.t == rheotimedataOUT.t  
+    rheotimedataIN.σ == rheotimedataOUT.σ && rheotimedataIN.ϵ == rheotimedataOUT.ϵ && rheotimedataIN.t == rheotimedataOUT.t
 end
 @test _exportcsv_timestress()
 
@@ -77,7 +77,7 @@ function _exportcsv_timestrain()
     exportcsv(rheotimedataIN, testdir)
     rheotimedataOUT = importcsv(testdir; t_col = 2, ϵ_col = 1)
 
-    rheotimedataIN.σ == rheotimedataOUT.σ && rheotimedataIN.ϵ == rheotimedataOUT.ϵ && rheotimedataIN.t == rheotimedataOUT.t  
+    rheotimedataIN.σ == rheotimedataOUT.σ && rheotimedataIN.ϵ == rheotimedataOUT.ϵ && rheotimedataIN.t == rheotimedataOUT.t
 end
 @test _exportcsv_timestrain()
 
@@ -91,7 +91,7 @@ function _exportcsv_timefull()
     exportcsv(rheotimedataIN, testdir)
     rheotimedataOUT = importcsv(testdir; t_col = 3, ϵ_col = 2, σ_col = 1)
 
-    rheotimedataIN.σ == rheotimedataOUT.σ && rheotimedataIN.ϵ == rheotimedataOUT.ϵ && rheotimedataIN.t == rheotimedataOUT.t  
+    rheotimedataIN.σ == rheotimedataOUT.σ && rheotimedataIN.ϵ == rheotimedataOUT.ϵ && rheotimedataIN.t == rheotimedataOUT.t
 end
 @test _exportcsv_timefull()
 
@@ -105,7 +105,7 @@ function _exportcsv_freqfull()
     exportcsv(rheofreqdataIN, testdir)
     rheofreqdataOUT = importcsv(testdir; ω_col = 3, Gp_col = 1, Gpp_col = 2)
 
-    rheofreqdataIN.ω == rheofreqdataOUT.ω && rheofreqdataIN.Gp == rheofreqdataOUT.Gp && rheofreqdataIN.Gpp == rheofreqdataOUT.Gpp  
+    rheofreqdataIN.ω == rheofreqdataOUT.ω && rheofreqdataIN.Gp == rheofreqdataOUT.Gp && rheofreqdataIN.Gpp == rheofreqdataOUT.Gpp
 end
 @test _exportcsv_freqfull()
 
@@ -119,7 +119,7 @@ end
 #     savedata(rheotimedataIN, testdir)
 #     rheotimedataOUT = loaddata(testdir)
 
-#     rheotimedataIN.σ == rheotimedataOUT.σ && rheotimedataIN.ϵ == rheotimedataOUT.ϵ && rheotimedataIN.t == rheotimedataOUT.t  
+#     rheotimedataIN.σ == rheotimedataOUT.σ && rheotimedataIN.ϵ == rheotimedataOUT.ϵ && rheotimedataIN.t == rheotimedataOUT.t
 # end
 # @test _saveload_timefull()
 
@@ -133,6 +133,6 @@ end
 #     savedata(rheofreqdataIN, testdir)
 #     rheofreqdataOUT = loaddata(testdir)
 
-#     rheofreqdataIN.ω == rheofreqdataOUT.ω && rheofreqdataIN.Gp == rheofreqdataOUT.Gp && rheofreqdataIN.Gpp == rheofreqdataOUT.Gpp  
+#     rheofreqdataIN.ω == rheofreqdataOUT.ω && rheofreqdataIN.Gp == rheofreqdataOUT.Gp && rheofreqdataIN.Gpp == rheofreqdataOUT.Gpp
 # end
 # @test _saveload_freqfull()
