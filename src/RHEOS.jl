@@ -29,9 +29,10 @@ const RheoFloat = Float64
 const IntOrNone = Union{Integer, Nothing}
 
 ######################################################################
+export RheoFloat
+
 # definitions.jl
-#export RheologyData, RheologyModel, RheologyDynamic
-export RheoLogItem, rheologrun
+export RheoLogItem, RheoLog, rheologrun
 export RheoTimeData, RheoTimeDataType, RheoFreqData, RheoFreqDataType, check_time_data_consistency
 export LoadingType, strain_imposed, stress_imposed
 export TimeDataType, time_only, strain_only, stress_only, strain_and_stress
