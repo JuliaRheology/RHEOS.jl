@@ -243,6 +243,17 @@ Expected behaviour of the operators
 + and - of two rheodata type
 action = (type = :source, funct = :+, params = (self1 = self1.log, self2 = self2.log), keywords = ())
 info = ()
+
+Unit test for these operations.
+
+d1=strainfunction(timeline(),t->exp(-t))
+d2=strainfunction(timeline(),t->1-exp(-t))
+d=2*d1 - (-d2) + d2
+
+d3=rheologrun(d.log)
+
+@assert d3.ϵ == d.ϵ
+@assert all([ abs(e-2.)<=eps(Float64) for e in d.ϵ ])
 =#
 
 
@@ -296,65 +307,73 @@ end
 
 
 
-function -(self1::RheoTimeData, self2::RheoTimeData)
+function -(d1::RheoTimeData, d2::RheoTimeData)
 
-    type1 = RheoTimeDataType(self1)
-    type2 = RheoTimeDataType(self2)
+    type1 = RheoTimeDataType(d1)
+    type2 = RheoTimeDataType(d2)
     @assert (type1!=invalid_time_data) "Subtraction error: first parameter invalid"
     @assert (type2!=invalid_time_data) "Subtraction error: second parameter invalid"
     @assert (type1==type2) "Subtraction error: parameters inconsistent"
     @assert (type1!=time_only) "Subtraction error: time only data cannot be added"
-    @assert (self1.t == self2.t) "Subtraction error: timelines inconsistent"
+    @assert (d1.t == d2.t) "Subtraction error: timelines inconsistent"
 
-    # Operation on the logs - not so clear what it should be
-    log = OrderedDict{Any,Any}(:n=>1,"activity"=>"subtraction", "left"=>self1.log, "right"=>self2.log)
+    log =   if (d1.log == nothing) || (d2.log == nothing)
+                nothing
+            else
+                [ RheoLogItem( (type = :source, funct = :-, params = (rl1 = d1.log, rl2 = d2.log), keywords = ()), ()  ) ]
+            end
 
     if (type1==strain_only) && (type2==strain_only)
-        return RheoTimeData(RheoFloat[], self1.ϵ-self2.ϵ, self1.t, log)
+        return RheoTimeData(RheoFloat[], d1.ϵ-d2.ϵ, d1.t, log)
     end
 
     if (type1==stress_only) && (type2==stress_only)
-        return RheoTimeData(self1.σ-self2.σ, RheoFloat[], self1.t, log)
+        return RheoTimeData(d1.σ-d2.σ, RheoFloat[], d1.t, log)
     end
 
     if (type1==strain_and_stress) && (type2==strain_and_stress)
-        return RheoTimeData(self1.σ-self2.σ, self1.ϵ-self2.ϵ, self1.t, log)
+        return RheoTimeData(d1.σ-d2.σ, d1.ϵ-d2.ϵ, d1.t, log)
     end
 
 end
 
-function -(self1::RheoTimeData)
+function -(rl1::RheoLog, rl2::RheoLog)
+    return(rheologrun(rl1) - rheologrun(rl2))
+end
 
-    type1 = RheoTimeDataType(self1)
-    @assert (type1!=invalid_time_data) "unary - error: parameter invalid"
-    @assert (type1!=time_only) "unary - error: time only data cannot be manipulated this way"
 
-    # log
-    log = self1.log
-    log[:n] = log[:n] + 1
-    log[string("activity_",log[:n])] = "unary negation"
 
-    return RheoTimeData(-self1.σ, -self1.ϵ, self1.t, log)
+
+
+
+function -(d::RheoTimeData)
+
+    type = RheoTimeDataType(d)
+    @assert (type!=invalid_time_data) "unary - error: parameter invalid"
+    @assert (type!=time_only) "unary - error: time only data cannot be manipulated this way"
+
+    log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:-, params=(), keywords=() ), () ) ]
+
+    return RheoTimeData(-d.σ, -d.ϵ, d.t, log)
 
 end
 
-function *(operand::Real, self1::RheoTimeData)
 
-    type1 = RheoTimeDataType(self1)
-    @assert (type1!=invalid_time_data) "* error: parameter invalid"
-    @assert (type1!=time_only) "* error: time only data cannot be manipulated this way"
+function *(operand::Real, d::RheoTimeData)
 
-    # log
-    log = self1.log
-    log[:n] = log[:n] + 1
-    log[string("activity_",log[:n])] = "multiplication by $operand"
+    type = RheoTimeDataType(d)
+    @assert (type!=invalid_time_data) "* error: parameter invalid"
+    @assert (type!=time_only) "* error: time only data cannot be manipulated this way"
 
-    return RheoTimeData(operand*self1.σ, operand*self1.ϵ, self1.t, log)
+    log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:*, params=(operand = operand), keywords=() ), () ) ]
+
+    return( RheoTimeData(operand .* d.σ, operand .* d.ϵ, d.t, log) )
 end
 
-function *(self1::RheoTimeData, operand::Real)
-    return operand*self1
+function *(d::RheoTimeData, operand::Real)
+    return(operand * d)
 end
+
 
 #  Time shift operator >>
 #  shift time by a certain amount, trash the end and pad at the start with 0
