@@ -7,5 +7,4 @@ function _operators_logs()
 
     (d3.ϵ == d.ϵ) && all([ abs(e-2.)<=eps(RheoFloat) for e in d.ϵ ])
 end
-
 @test _operators_logs()

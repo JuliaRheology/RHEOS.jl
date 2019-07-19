@@ -6,7 +6,7 @@ Preprocessing functions
 -----------------------
 =#
 """
-    resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Vector{T}= [-1])
+    resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing)
 
 Resample data with new sample rate(s).
 
@@ -15,11 +15,11 @@ viceversa if it is positive. If time boundaries are not specified, resampling is
 If number of elements per period (elperiods) is 1 or -1 it returns the original RheoTimeData, whilst 0 is not accepted as a valid
 argument for elperiods.
 """
-function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Vector{T}= [-1]) where {K<:Integer,T<:Real}
+function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing) where {K<:Integer,T<:Real}
 
     @assert (count(iszero, elperiods)==0) "Number of elements cannot be zero"
     # convert boundaries from times to element indicies
-    if time_boundaries ==[-1]
+    if isnothing(time_boundaries)
         boundaries = [1,length(self.t)];
     else
         boundaries = closestindices(self.t, time_boundaries)
@@ -62,20 +62,20 @@ function cutting(self::RheoTimeData, time_on::T1, time_off::T2) where {T1<:Numbe
 
     check = RheoTimeDataType(self)
     if (check == strain_only)
-        epsilon = self.ϵ[boundary_on:boundary_off]
-        sigma = [];
+        ϵ = self.ϵ[boundary_on:boundary_off]
+        σ = [];
     elseif (check == stress_only)
-        sigma = self.σ[boundary_on:boundary_off]
-        epsilon = [];
+        σ = self.σ[boundary_on:boundary_off]
+        ϵ = [];
     elseif (check == strain_and_stress)
-        epsilon = self.ϵ[boundary_on:boundary_off]
-        sigma = self.σ[boundary_on:boundary_off]
+        ϵ = self.ϵ[boundary_on:boundary_off]
+        σ = self.σ[boundary_on:boundary_off]
     end
 
     log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:cutting, params=(time_on = time_on, time_off = time_off), keywords=() ),
                                         (comment="Cut section of the data between $time_on and $time_off",) ) ]
 
-    return RheoTimeData(sigma,epsilon,time,log)
+    return RheoTimeData(σ, ϵ, time, log)
 
 end
 
