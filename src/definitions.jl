@@ -34,6 +34,17 @@ function RheoLogItem(;kwargs...)
 end
 
 
+function Base.show(io::IO, rli::RheoLogItem)
+    println()
+    print("action = "); println(rli.action)
+    print("info   = "); println(rli.info)
+end
+#
+# function Base.show(io::IO, rl::RheoLog)
+#     for rli in rl
+#         print(rli)
+#     end
+# end
 
 
 
@@ -180,6 +191,42 @@ end
 
 
 
+#
+#   Function called when a RheoTimeData struct is returned to the REPL
+#
+function Base.show(io::IO, d::RheoTimeData)
+    b = length(d.t) > 10
+    n = b ? 10 : length(d.t)
+
+    if d.t != RheoFloat[]
+        print("t =\t")
+        for i = 1:n
+            print("$(d.t[i])\t")
+        end
+        println( b ? "..." : "")
+    end
+    if d.ϵ != RheoFloat[]
+        print("ϵ =\t")
+        for i = 1:n
+            print("$(d.ϵ[i])\t")
+        end
+        println( b ? "..." : "")
+    end
+    if d.σ != RheoFloat[]
+        print("σ =\t")
+        for i = 1:n
+            print("$(d.σ[i])\t")
+        end
+        println( b ? "..." : "")
+    end
+
+
+end
+
+#
+# function Base.show(io::IO, d::RheoFreqData)
+# end
+#
 
 
 
@@ -270,20 +317,9 @@ function +(d1::RheoTimeData, d2::RheoTimeData)
 
 end
 
-
 function +(rl1::RheoLog, rl2::RheoLog)
     return(rheologrun(rl1) + rheologrun(rl2))
 end
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -443,16 +479,6 @@ end
 
 
 
-
-
-
-# function Base.show(io::IO, m::RheoModelClass)
-#     print(io, "\nModel name: $(m.name)")
-#     ps=join([string(s) for s in m.params], ", ", " and ")
-#     print(io, "\n\nFree parameters: $ps\n")
-#     print(io, m.info)
-#     return
-# end
 
 
 # Cool replacement function inspired from
