@@ -50,7 +50,7 @@ end
 Remove the data outside a specified time interval.
 
 By specifing a time interval (time_on, time_off), a new RheoTimeData is returned without the data
-laying outside time interval.
+lying outside time interval.
 """
 function cutting(self::RheoTimeData, time_on::T1, time_off::T2) where {T1<:Number, T2<:Number}
 

@@ -70,7 +70,52 @@ function _resample_stressandstrain_multiplesections()
 end
 @test _resample_stressandstrain_multiplesections()
 
-# cutting
+function _cutting_strainonly()
+    t0 = collect(0.0:1.0:5.0)
+    ϵ0 = t0.^2
+
+    t1 = collect(1.0:1.0:5.0)
+    ϵ1 = t1.^2
+
+    data0 = RheoTimeData(t = t0, ϵ = ϵ0)
+    
+    dataout = cutting(data0, 1.0, 5.0)
+
+    dataout.t==t1 && dataout.ϵ==ϵ1 
+end
+@test _cutting_strainonly()
+
+function _cutting_stressonly()
+    t0 = collect(0.0:1.0:5.0)
+    σ0 = t0.^2
+
+    t1 = collect(1.0:1.0:5.0)
+    σ1 = t1.^2
+
+    data0 = RheoTimeData(t = t0, σ = σ0)
+    
+    dataout = cutting(data0, 1.0, 5.0)
+
+    dataout.t==t1 && dataout.σ==σ1 
+end
+@test _cutting_stressonly()
+
+function _cutting_stressandstrain()
+    t0 = collect(0.0:1.0:5.0)
+    ϵ0 = t0.^2
+    σ0 = t0.^3
+
+    t1 = collect(1.0:1.0:5.0)
+    ϵ1 = t1.^2
+    σ1 = t1.^3
+
+    data0 = RheoTimeData(t = t0, σ = σ0, ϵ = ϵ0)
+    
+    dataout = cutting(data0, 1.0, 5.0)
+
+    dataout.t==t1 && dataout.ϵ==ϵ1 && dataout.σ==σ1 
+end
+@test _cutting_stressandstrain()
 
 # smooth
 
