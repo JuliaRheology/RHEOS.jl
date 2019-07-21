@@ -269,12 +269,12 @@ function _modelfit_const_ramp_nobounds_singleparam(tol)
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
 
     modulus = quote α*exp(-t) end
-    model = RheoModelClass(name = "testmodel", p = [:α], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = [:α], G = modulus, info="none")
 
-    data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
+    data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.0,)
-    modelout = modelfit(data0, model, stress_imposed, p0=init_params)
+    modelout = modelfit(data0, model, strain_imposed, p0=init_params)
 
     found_params = modelout.params
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
