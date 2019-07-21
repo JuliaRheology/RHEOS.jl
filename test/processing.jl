@@ -117,7 +117,51 @@ function _cutting_stressandstrain()
 end
 @test _cutting_stressandstrain()
 
-# smooth
+function _smooth_stressonly()
+    f = 1.0 # Hz
+    ω = 2*π*f # rad/s
+    t0 = collect(0.0:0.01:4/f)
+    σ0 = sin.(ω*t0)
+
+    data0 = RheoTimeData(t = t0, σ = σ0)
+
+    dataout = smooth(data0, 1/f; pad="circular")
+
+    all(i -> isapprox(0.5*data0.σ[i], dataout.σ[i], atol=0.1), eachindex(data0.σ))
+end
+@test _smooth_stressonly()
+
+function _smooth_strainonly()
+    f = 1.0 # Hz
+    ω = 2*π*f # rad/s
+    t0 = collect(0.0:0.01:4/f)
+    ϵ0 = sin.(ω*t0)
+
+    data0 = RheoTimeData(t = t0, ϵ = ϵ0)
+
+    dataout = smooth(data0, 1/f; pad="circular")
+
+    all(i -> isapprox(0.5*data0.ϵ[i], dataout.ϵ[i], atol=0.1), eachindex(data0.ϵ))
+end
+@test _smooth_strainonly()
+
+function _smooth_stressandstrain()
+    f = 1.0 # Hz
+    ω = 2*π*f # rad/s
+    t0 = collect(0.0:0.01:4/f)
+    ϵ0 = sin.(ω*t0)
+    σ0 = sin.(ω*t0)
+
+    data0 = RheoTimeData(t = t0, ϵ = ϵ0, σ = σ0)
+
+    dataout = smooth(data0, 1/f; pad="circular")
+
+    test1 = all(i -> isapprox(0.5*data0.ϵ[i], dataout.ϵ[i], atol=0.1), eachindex(data0.ϵ))
+    test2 = all(i -> isapprox(0.5*data0.σ[i], dataout.σ[i], atol=0.1), eachindex(data0.σ))
+
+    test1 && test2
+end
+@test _smooth_stressandstrain()
 
 # extract
 
