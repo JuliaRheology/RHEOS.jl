@@ -451,14 +451,14 @@ invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
 # Model name and parameters should be required --> assert
 # info should have generic default value, such as "Model with $n params named $s..."
 
-function RheoModelClass(;name::String,
+function RheoModelClass(;name::String="Custom model",
                          p::Array{Symbol}=[],
                          G::Expr = quote NaN end,
                          J::Expr = quote NaN end,
                          Gp::Expr = quote NaN end,
                          Gpp::Expr = quote NaN end,
                          constraint::Expr = quote true end,
-                         info)
+                         info=name)
 
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
     unpack_expr = Meta.parse(string(join(string.(p), ","), ",=params"))
