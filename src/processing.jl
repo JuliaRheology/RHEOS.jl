@@ -217,13 +217,13 @@ function modelfit(data::RheoTimeData,
     @assert model.constraint(p0a)  "Initial guess not feasible"
 
     if isempty(lo)
-        loa = convert(Array{RheoFloat,1}, [-1])
+        loa = nothing
     else
         loa = model_parameters(lo,model.params,"low bounds")
     end
 
     if isempty(hi)
-        hia = convert(Array{RheoFloat,1}, [-1])
+        hia = nothing
     else
         hia = model_parameters(hi,model.params,"high bounds")
     end
@@ -232,7 +232,6 @@ function modelfit(data::RheoTimeData,
 
     check = RheoTimeDataType(data)
     @assert (check == strain_and_stress) "Both stress and strain are required"
-
 
     # use correct method for derivative
     if diff_method=="BD"
@@ -425,13 +424,13 @@ function modelstepfit(data::RheoTimeData,
 
 
     if isempty(lo)
-     loa = convert(Array{RheoFloat,1}, [-1])
+     loa = nothing
     else
      loa = model_parameters(lo,model.params,"low bounds")
     end
 
     if isempty(hi)
-     hia = convert(Array{RheoFloat,1}, [-1])
+     hia = nothing
     else
      hia = model_parameters(hi,model.params,"high bounds")
     end
@@ -725,31 +724,20 @@ function dynamicmodelfit(data::RheoFreqData,
        p0 = model_parameters(p0,model.params,"initial guess")
     end
 
-    if isempty(lo)
-       lo = convert(Array{RheoFloat,1}, [-1])
-    else
+    if !isempty(lo)
        lo = model_parameters(lo,model.params,"low bounds")
+       lower_bounds!(opt, lo)
     end
 
-    if isempty(hi)
-       hi = convert(Array{RheoFloat,1}, [-1])
-    else
+    if !isempty(hi)
        hi = model_parameters(hi,model.params,"high bounds")
+       upper_bounds!(opt, hi)
     end
 
     rel_tol = convert(RheoFloat,rel_tol)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(:LN_SBPLX, length(p0))
-
-    # apply parameter boundaries if prescribed
-    if !quasinull(lo)
-        lower_bounds!(opt, lo)
-    end
-
-    if !quasinull(hi)
-        upper_bounds!(opt, hi)
-    end
 
     # set relative tolerance
     xtol_rel!(opt, rel_tol)

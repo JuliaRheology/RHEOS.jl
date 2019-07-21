@@ -98,16 +98,6 @@ function derivBD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 
 end
 
-function quasinull(x::Array{RheoFloat,1})
-
-    if x == convert(Array{RheoFloat,1},[-1.0])
-        return true
-    else
-        return false
-    end
-
-end
-
 function constantcheck(t::Vector{RheoFloat})
     # get array of backward differences
     diff = t[2:end] - t[1:end-1]
@@ -493,8 +483,8 @@ Initialise then begin a least squares fitting of the supplied data.
 - `insight`: Declare whether insight info should be shown when this function is called, true or false
 - `singularity`: Presence of singularity in model
 """
-function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::Vector{RheoFloat},
-                           hi_bounds::Vector{RheoFloat}, modulus,
+function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOrNone,
+                           hi_bounds::RheovecOrNone, modulus,
                            time_series::Vector{RheoFloat}, dt::RheoFloat,
                            prescribed_dot::Vector{RheoFloat}, measured::Vector{RheoFloat};
                            insight::Bool = false, constant_sampling::Bool=true,
@@ -503,12 +493,14 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::Vector{Rh
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(:LN_SBPLX, length(params_init))
 
-    # set lower bounds and upper bounds unless they take null value of [-1.0]
-    if !quasinull(low_bounds)
+    # set lower bounds and upper bounds unless they take null value
+    if !isnothing(low_bounds)
+        low_bounds = convert(Vector{Float64},low_bounds)
         lower_bounds!(opt, low_bounds)
     end
 
-    if !quasinull(hi_bounds)
+    if !isnothing(hi_bounds)
+        hi_bounds = convert(Vector{Float64}, hi_bounds)
         upper_bounds!(opt, hi_bounds)
     end
 
@@ -517,8 +509,6 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::Vector{Rh
 
     # Convert to float64 to avoid conversion by NLOpt
     params_init = convert(Vector{Float64},params_init)
-    low_bounds = convert(Vector{Float64},low_bounds)
-    hi_bounds = convert(Vector{Float64}, hi_bounds)
     time_series = convert(Vector{Float64},time_series)
     prescribed_dot = convert(Vector{Float64},prescribed_dot)
     measured = convert(Vector{Float64},measured)
@@ -560,7 +550,7 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::Vector{Rh
     (minf, minx, ret) = NLopt.optimize(opt, params_init)
 
     # return all
-    return (convert(RheoFloat,minf), convert(Array{RheoFloat,1},minx), ret)
+    return (convert(RheoFloat,minf), convert(Vector{RheoFloat},minx), ret)
 
 
 end
@@ -592,21 +582,21 @@ function obj_step_sing(params, grad, modulus, t, prescribed, measured; _insight=
     cost = sum(0.5*(measured[2:end] - estimated).^2)
 end
 
-function leastsquares_stepinit(params_init::Array{RheoFloat,1}, low_bounds::Array{RheoFloat,1},
-                           hi_bounds::Array{RheoFloat,1}, modulus::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}},
-                           time_series::Array{RheoFloat,1}, prescribed::RheoFloat,
-                           measured::Array{RheoFloat,1}; insight::Bool = false,
+function leastsquares_stepinit(params_init::Vector{RheoFloat}, low_bounds::RheovecOrNone,
+                           hi_bounds::RheovecOrNone, modulus::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}},
+                           time_series::Vector{RheoFloat}, prescribed::RheoFloat,
+                           measured::Vector{RheoFloat}; insight::Bool = false,
                            singularity::Bool = false, _rel_tol = 1e-4)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(:LN_SBPLX, length(params_init))
 
-    # set lower bounds and upper bounds unless they take null value of [-1.0]
-    if !quasinull(low_bounds)
+    # set lower bounds and upper bounds unless they take null value
+    if !isnothing(low_bounds)
         lower_bounds!(opt, low_bounds)
     end
 
-    if !quasinull(hi_bounds)
+    if !isnothing(hi_bounds)
         upper_bounds!(opt, hi_bounds)
     end
 
@@ -639,6 +629,6 @@ function leastsquares_stepinit(params_init::Array{RheoFloat,1}, low_bounds::Arra
     (minf, minx, ret) = NLopt.optimize(opt, params_init)
 
     # return all
-    return (convert(RheoFloat,minf), convert(Array{RheoFloat,1},minx), ret)
+    return (convert(RheoFloat,minf), convert(Vector{RheoFloat},minx), ret)
 
 end
