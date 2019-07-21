@@ -163,5 +163,60 @@ function _smooth_stressandstrain()
 end
 @test _smooth_stressandstrain()
 
-# extract
+function _extract_timefromtimedata()
+    f = 1.0 # Hz
+    ω = 2*π*f # rad/s
+    t0 = collect(0.0:0.01:4/f)
+    ϵ0 = sin.(ω*t0)
+    σ0 = sin.(ω*t0)
 
+    data0 = RheoTimeData(t = t0, ϵ = ϵ0, σ = σ0)
+
+    dataout = extract(data0, time_only)
+
+    data0.t==dataout.t && dataout.σ==[] && dataout.ϵ==[]
+end
+@test _extract_timefromtimedata()
+
+function _extract_timestressfromtimedata()
+    f = 1.0 # Hz
+    ω = 2*π*f # rad/s
+    t0 = collect(0.0:0.01:4/f)
+    ϵ0 = sin.(ω*t0)
+    σ0 = sin.(ω*t0)
+
+    data0 = RheoTimeData(t = t0, ϵ = ϵ0, σ = σ0)
+
+    dataout = extract(data0, stress_only)
+
+    data0.t==dataout.t && data0.σ==dataout.σ && dataout.ϵ==[]
+end
+@test _extract_timestressfromtimedata()
+
+function _extract_timestrainfromtimedata()
+    f = 1.0 # Hz
+    ω = 2*π*f # rad/s
+    t0 = collect(0.0:0.01:4/f)
+    ϵ0 = sin.(ω*t0)
+    σ0 = sin.(ω*t0)
+
+    data0 = RheoTimeData(t = t0, ϵ = ϵ0, σ = σ0)
+
+    dataout = extract(data0, strain_only)
+
+    data0.t==dataout.t && dataout.σ==[] && data0.ϵ==dataout.ϵ
+end
+@test _extract_timestrainfromtimedata()
+
+function _extract_freqfromfreqdata()
+    ω0 = collect(0.0:0.01:10.0)
+    Gp0 = 2*ω0
+    Gpp0 = 3*ω0
+
+    data0 = RheoFreqData(ω = ω0, Gp = Gp0, Gpp = Gpp0)
+
+    dataout = extract(data0, frec_only)
+
+    data0.ω==dataout.ω && dataout.Gp==[] && dataout.Gpp==[]
+end
+@test _extract_freqfromfreqdata()

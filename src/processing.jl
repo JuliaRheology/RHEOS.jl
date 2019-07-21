@@ -145,17 +145,16 @@ function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
 
         if type == time_only
             @assert check!= invalid_time_data "Time not available"
-            return RheoTimeData([], [],self.t,log)
+            return RheoTimeData([], [], self.t,log)
         elseif type == strain_only
             @assert (check == strain_and_stress) || (check == strain_only) "Strain not available"
-            return RheoTimeData([], self.ϵ,self.t,log)
+            return RheoTimeData([], self.ϵ, self.t,log)
         elseif type == stress_only
             @assert (check == strain_and_stress) || (check == stress_only) "Stress not available"
             return RheoTimeData(self.σ, [], self.t,log)
         end
 
 end
-
 
 function extract(self::RheoFreqData, type::Union{FreqDataType,Integer})
 
@@ -165,11 +164,9 @@ function extract(self::RheoFreqData, type::Union{FreqDataType,Integer})
         check = RheoFreqDataType(self)
         @assert (check == with_modulus) "Frequency and modulii required"
 
-
-
         log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
                                             (comment="Frequency field extraction",) ) ]
-        return RheoFreqData([], [],self.ω,log)
+        return RheoFreqData([], [], self.ω,log)
 end
 
 #=
