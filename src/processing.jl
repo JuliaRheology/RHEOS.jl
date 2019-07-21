@@ -128,7 +128,7 @@ Extract can copy one or more fields from a given RheoXData variable into a new R
 are copied are identified by the specified type of data.
 If self is a RheoTimeData, the type that can be extracted is time_only (or 0), stress_only (or 1), strain_only (or 2).
 Note that strain_and_stress (or 3) is not allowed.
-If self is a RheoFreqData, the type that can be extracted is frec_only (or 0).
+If self is a RheoFreqData, the type that can be extracted is freq_only (or 0).
 """
 function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
 

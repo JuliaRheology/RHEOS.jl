@@ -215,7 +215,7 @@ function _extract_freqfromfreqdata()
 
     data0 = RheoFreqData(ω = ω0, Gp = Gp0, Gpp = Gpp0)
 
-    dataout = extract(data0, frec_only)
+    dataout = extract(data0, freq_only)
 
     data0.ω==dataout.ω && dataout.Gp==[] && dataout.Gpp==[]
 end

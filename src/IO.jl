@@ -112,7 +112,7 @@ function exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; del
             end
 
         elseif typeof(self)==RheoFreqData
-            # invalid_freq_data=-1 frec_only=0 with_modulus=1
+            # invalid_freq_data=-1 freq_only=0 with_modulus=1
             datacontained = RheoFreqDataType(self)
             colorder = (Gp = 1, Gpp = 2, ω = 3)
         end

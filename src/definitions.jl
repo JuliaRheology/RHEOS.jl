@@ -166,7 +166,7 @@ function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat
 end
 
 
-@enum FreqDataType invalid_freq_data=-1 frec_only=0 with_modulus=1
+@enum FreqDataType invalid_freq_data=-1 freq_only=0 with_modulus=1
 function check_freq_data_consistency(o,gp,gpp)
     @assert (length(o)>0)  "Freq data empty"
 
@@ -178,7 +178,7 @@ function check_freq_data_consistency(o,gp,gpp)
     end
 
     if ((!gpdef) && (!gppdef))
-        return frec_only
+        return freq_only
     end
 
     return invalid_freq_data
