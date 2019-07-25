@@ -11,14 +11,16 @@ julia:
 notifications:
   email: false
   
-addons:
- apt: 
-   packages:
-   - hdf5-tools
-   - python3
-env:
-  global:
-    - PYTHON=python3
+install:
+  - sudo apt-get update
+  # Now get set up to run jupyter notebooks:
+  - sudo apt-get install texlive-latex-recommended
+  - sudo apt-get install texlive-latex-extra
+  - sudo apt-get install texlive-fonts-recommended
+  - sudo apt-get install chktex
+  - sudo apt-get install dvipng
+  - pip install --upgrade jupyter
+  - pip install nbconvert
 
 jobs:
   include:
