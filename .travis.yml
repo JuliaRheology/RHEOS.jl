@@ -13,8 +13,6 @@ notifications:
   
 install:
   - sudo apt-get update
-  # Now get set up to run jupyter notebooks:
-  - pip install --upgrade pip
   - pip install jupyter
   - pip install nbconvert
 
