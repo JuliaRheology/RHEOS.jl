@@ -12,8 +12,6 @@ notifications:
   email: false
   
 install:
-  - sudo apt-get update
-  - pip install --upgrade setuptools
   - pip install jupyter
   - pip install nbconvert
 
