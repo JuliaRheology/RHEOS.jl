@@ -20,8 +20,8 @@ install:
     fi
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
-  - conda install -c anaconda jupyter_client
-  - conda install --user nbconvert
+  - pip install jupyter
+  - pip install nbconvert
 
 jobs:
   include:
