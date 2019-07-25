@@ -1,5 +1,6 @@
 docs/build/
 docs/site/
+docs/src-staging/
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
