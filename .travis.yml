@@ -12,7 +12,7 @@ notifications:
   email: false
   
 install:
-  - pip install -U requests[security]
+  - pip install --upgrade pip
   - pip install jupyter
   - pip install nbconvert
 
