@@ -33,6 +33,9 @@ end
 symlink("../src/index.md","docs/src-staging/index.md")
 symlink("../src/API.md","docs/src-staging/API.md")
 
+
+mkdir("docs/src-staging/assets")
+cp("docs/src/assets/logo.png", "docs/src-staging/assets/logo.png")
 ##
 
 # highlight output cells (i.e. anything withouout a language specified) white
