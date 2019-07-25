@@ -33,14 +33,15 @@ function RheoLogItem(;kwargs...)
    return(RheoLogItem(Nothing, kwargs.data))
 end
 
-
-function Base.show(io::IO, rli::RheoLogItem)
-    println()
-    print("action = "); println(rli.action)
-    print("info   = "); println(rli.info)
-end
 #
-# function Base.show(io::IO, rl::RheoLog)
+# function Base.show(io::IO, rli::RheoLogItem)
+#     println()
+#     print("action = "); println(rli.action)
+#     print("info   = "); println(rli.info)
+# end
+
+# function Base.display(io::IO, rl::RheoLog)
+#     println("Hello!")
 #     for rli in rl
 #         print(rli)
 #     end
@@ -399,10 +400,6 @@ end
 
 
 
-
-#
-#  WHAT ABOUT OPERATORS ON RheoFreqData ?
-#
 
 
 
