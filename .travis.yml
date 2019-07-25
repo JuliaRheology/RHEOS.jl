@@ -19,7 +19,7 @@ install:
   - sudo apt-get install texlive-fonts-recommended
   - sudo apt-get install chktex
   - sudo apt-get install dvipng
-  - pip install --upgrade jupyter
+  - pip install jupyter
   - pip install nbconvert
 
 jobs:
