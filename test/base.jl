@@ -462,7 +462,8 @@ function _leastsquares_init_const_ramp(tol)
     results = RHEOS.leastsquares_init(init_params, [0.90, 0.90], [1.1, 1.1], modulus, t, dt, ramp_loading_derivative, exact_response; constant_sampling = true)
 
     found_params = results[2]
-    isapprox(found_params, init_params, atol = tol)
+
+    isapprox(found_params, init_params, atol=tol)
 end
 @test _leastsquares_init_const_ramp(tol)
 

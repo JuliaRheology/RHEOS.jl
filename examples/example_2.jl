@@ -8,6 +8,8 @@ This involves:
 - Defining models based on parameter values
 =#
 
+using RHEOS
+
 # PyPlot needs to be installed to run these examples
 # and display plots of the data.
 

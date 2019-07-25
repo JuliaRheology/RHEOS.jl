@@ -117,7 +117,166 @@ function _cutting_stressandstrain()
 end
 @test _cutting_stressandstrain()
 
-# smooth
+function _smooth_stressonly()
+    f = 1.0 # Hz
+    ω = 2*π*f # rad/s
+    t0 = collect(0.0:0.01:4/f)
+    σ0 = sin.(ω*t0)
 
-# extract
+    data0 = RheoTimeData(t = t0, σ = σ0)
 
+    dataout = smooth(data0, 1/f; pad="circular")
+
+    all(i -> isapprox(0.5*data0.σ[i], dataout.σ[i], atol=0.1), eachindex(data0.σ))
+end
+@test _smooth_stressonly()
+
+function _smooth_strainonly()
+    f = 1.0 # Hz
+    ω = 2*π*f # rad/s
+    t0 = collect(0.0:0.01:4/f)
+    ϵ0 = sin.(ω*t0)
+
+    data0 = RheoTimeData(t = t0, ϵ = ϵ0)
+
+    dataout = smooth(data0, 1/f; pad="circular")
+
+    all(i -> isapprox(0.5*data0.ϵ[i], dataout.ϵ[i], atol=0.1), eachindex(data0.ϵ))
+end
+@test _smooth_strainonly()
+
+function _smooth_stressandstrain()
+    f = 1.0 # Hz
+    ω = 2*π*f # rad/s
+    t0 = collect(0.0:0.01:4/f)
+    ϵ0 = sin.(ω*t0)
+    σ0 = sin.(ω*t0)
+
+    data0 = RheoTimeData(t = t0, ϵ = ϵ0, σ = σ0)
+
+    dataout = smooth(data0, 1/f; pad="circular")
+
+    test1 = all(i -> isapprox(0.5*data0.ϵ[i], dataout.ϵ[i], atol=0.1), eachindex(data0.ϵ))
+    test2 = all(i -> isapprox(0.5*data0.σ[i], dataout.σ[i], atol=0.1), eachindex(data0.σ))
+
+    test1 && test2
+end
+@test _smooth_stressandstrain()
+
+function _extract_timefromtimedata()
+    f = 1.0 # Hz
+    ω = 2*π*f # rad/s
+    t0 = collect(0.0:0.01:4/f)
+    ϵ0 = sin.(ω*t0)
+    σ0 = sin.(ω*t0)
+
+    data0 = RheoTimeData(t = t0, ϵ = ϵ0, σ = σ0)
+
+    dataout = extract(data0, time_only)
+
+    data0.t==dataout.t && dataout.σ==[] && dataout.ϵ==[]
+end
+@test _extract_timefromtimedata()
+
+function _extract_timestressfromtimedata()
+    f = 1.0 # Hz
+    ω = 2*π*f # rad/s
+    t0 = collect(0.0:0.01:4/f)
+    ϵ0 = sin.(ω*t0)
+    σ0 = sin.(ω*t0)
+
+    data0 = RheoTimeData(t = t0, ϵ = ϵ0, σ = σ0)
+
+    dataout = extract(data0, stress_only)
+
+    data0.t==dataout.t && data0.σ==dataout.σ && dataout.ϵ==[]
+end
+@test _extract_timestressfromtimedata()
+
+function _extract_timestrainfromtimedata()
+    f = 1.0 # Hz
+    ω = 2*π*f # rad/s
+    t0 = collect(0.0:0.01:4/f)
+    ϵ0 = sin.(ω*t0)
+    σ0 = sin.(ω*t0)
+
+    data0 = RheoTimeData(t = t0, ϵ = ϵ0, σ = σ0)
+
+    dataout = extract(data0, strain_only)
+
+    data0.t==dataout.t && dataout.σ==[] && data0.ϵ==dataout.ϵ
+end
+@test _extract_timestrainfromtimedata()
+
+function _extract_freqfromfreqdata()
+    ω0 = collect(0.0:0.01:10.0)
+    Gp0 = 2*ω0
+    Gpp0 = 3*ω0
+
+    data0 = RheoFreqData(ω = ω0, Gp = Gp0, Gpp = Gpp0)
+
+    dataout = extract(data0, freq_only)
+
+    data0.ω==dataout.ω && dataout.Gp==[] && dataout.Gpp==[]
+end
+@test _extract_freqfromfreqdata()
+
+function _modelfit_const_ramp(tol)
+    dt = 0.01
+    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    exact_response = 1.0 .- exp.(-t)
+    ramp_loading = t
+    ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
+
+    modulus = quote α*exp(-t/β) end
+    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+
+    data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
+
+    init_params = (α=1.0, β=1.0)
+    modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.9, β=0.9), hi=(α=1.1, β=1.1))
+
+    found_params = modelout.params
+    isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
+end
+@test _modelfit_const_ramp(tol)
+
+function _modelfit_const_ramp_nobounds(tol)
+    dt = 0.01
+    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    exact_response = 1.0 .- exp.(-t)
+    ramp_loading = t
+    ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
+
+    modulus = quote α*exp(-t/β) end
+    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+
+    data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
+
+    init_params = (α=1.0, β=1.0)
+    modelout = modelfit(data0, model, stress_imposed, p0=init_params)
+
+    found_params = modelout.params
+    isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
+end
+@test _modelfit_const_ramp_nobounds(tol)
+
+function _modelfit_const_ramp_nobounds_singleparam(tol)
+    dt = 0.01
+    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    exact_response = 1.0 .- exp.(-t)
+    ramp_loading = t
+    ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
+
+    modulus = quote α*exp(-t) end
+    model = RheoModelClass(name = "testmodel", p = [:α], G = modulus, info="none")
+
+    data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
+
+    init_params = (α=1.0,)
+    modelout = modelfit(data0, model, strain_imposed, p0=init_params)
+
+    found_params = modelout.params
+    isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
+end
+@test _modelfit_const_ramp_nobounds_singleparam(tol)

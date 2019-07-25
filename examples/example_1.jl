@@ -5,6 +5,7 @@ Example 1
 - Fitting model
 - Comparing original data with fit
 =#
+using RHEOS
 
 # PyPlot needs to be installed to run these examples
 # and display plots of the data.

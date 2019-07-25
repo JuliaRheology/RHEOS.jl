@@ -167,7 +167,7 @@ function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat
 end
 
 
-@enum FreqDataType invalid_freq_data=-1 frec_only=0 with_modulus=1
+@enum FreqDataType invalid_freq_data=-1 freq_only=0 with_modulus=1
 function check_freq_data_consistency(o,gp,gpp)
     @assert (length(o)>0)  "Freq data empty"
 
@@ -179,7 +179,7 @@ function check_freq_data_consistency(o,gp,gpp)
     end
 
     if ((!gpdef) && (!gppdef))
-        return frec_only
+        return freq_only
     end
 
     return invalid_freq_data
@@ -448,14 +448,14 @@ invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
 # Model name and parameters should be required --> assert
 # info should have generic default value, such as "Model with $n params named $s..."
 
-function RheoModelClass(;name::String,
+function RheoModelClass(;name::String="Custom model",
                          p::Array{Symbol}=[],
                          G::Expr = quote NaN end,
                          J::Expr = quote NaN end,
                          Gp::Expr = quote NaN end,
                          Gpp::Expr = quote NaN end,
                          constraint::Expr = quote true end,
-                         info)
+                         info=name)
 
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
     unpack_expr = Meta.parse(string(join(string.(p), ","), ",=params"))

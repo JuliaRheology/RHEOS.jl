@@ -84,8 +84,11 @@ end
 
 Smooth data using a Gaussian Kernel to time scale τ (approximately half power).
 
-Smooths both σ and ϵ. Essentially a low pass filter with frequencies of 1/τ being cut to approximately
-half power. For other pad types available see ImageFiltering documentation.
+Smooths both σ and ϵ. Sampling frequency must be constant as it is based on FFT convolution. Essentially a 
+low pass filter with frequencies of 1/τ being cut to approximately half power. For other pad types available 
+see ImageFiltering documentation. As of doc writing, pad options are: "replicate" (repeat edge values to 
+infinity), "circular" (image edges "wrap around"), "symmetric" (the image reflects relative to a position 
+between pixels), "reflect" (the image reflects relative to the edge itself).
 """
 function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
 
@@ -125,7 +128,7 @@ Extract can copy one or more fields from a given RheoXData variable into a new R
 are copied are identified by the specified type of data.
 If self is a RheoTimeData, the type that can be extracted is time_only (or 0), stress_only (or 1), strain_only (or 2).
 Note that strain_and_stress (or 3) is not allowed.
-If self is a RheoFreqData, the type that can be extracted is frec_only (or 0).
+If self is a RheoFreqData, the type that can be extracted is freq_only (or 0).
 """
 function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
 
@@ -142,17 +145,16 @@ function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
 
         if type == time_only
             @assert check!= invalid_time_data "Time not available"
-            return RheoTimeData([], [],self.t,log)
+            return RheoTimeData([], [], self.t,log)
         elseif type == strain_only
             @assert (check == strain_and_stress) || (check == strain_only) "Strain not available"
-            return RheoTimeData([], self.ϵ,self.t,log)
+            return RheoTimeData([], self.ϵ, self.t,log)
         elseif type == stress_only
             @assert (check == strain_and_stress) || (check == stress_only) "Stress not available"
             return RheoTimeData(self.σ, [], self.t,log)
         end
 
 end
-
 
 function extract(self::RheoFreqData, type::Union{FreqDataType,Integer})
 
@@ -162,11 +164,9 @@ function extract(self::RheoFreqData, type::Union{FreqDataType,Integer})
         check = RheoFreqDataType(self)
         @assert (check == with_modulus) "Frequency and modulii required"
 
-
-
         log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
                                             (comment="Frequency field extraction",) ) ]
-        return RheoFreqData([], [],self.ω,log)
+        return RheoFreqData([], [], self.ω,log)
 end
 
 #=
@@ -217,13 +217,13 @@ function modelfit(data::RheoTimeData,
     @assert model.constraint(p0a)  "Initial guess not feasible"
 
     if isempty(lo)
-        loa = convert(Array{RheoFloat,1}, [-1])
+        loa = nothing
     else
         loa = model_parameters(lo,model.params,"low bounds")
     end
 
     if isempty(hi)
-        hia = convert(Array{RheoFloat,1}, [-1])
+        hia = nothing
     else
         hia = model_parameters(hi,model.params,"high bounds")
     end
@@ -232,7 +232,6 @@ function modelfit(data::RheoTimeData,
 
     check = RheoTimeDataType(data)
     @assert (check == strain_and_stress) "Both stress and strain are required"
-
 
     # use correct method for derivative
     if diff_method=="BD"
@@ -425,13 +424,13 @@ function modelstepfit(data::RheoTimeData,
 
 
     if isempty(lo)
-     loa = convert(Array{RheoFloat,1}, [-1])
+     loa = nothing
     else
      loa = model_parameters(lo,model.params,"low bounds")
     end
 
     if isempty(hi)
-     hia = convert(Array{RheoFloat,1}, [-1])
+     hia = nothing
     else
      hia = model_parameters(hi,model.params,"high bounds")
     end
@@ -725,31 +724,20 @@ function dynamicmodelfit(data::RheoFreqData,
        p0 = model_parameters(p0,model.params,"initial guess")
     end
 
-    if isempty(lo)
-       lo = convert(Array{RheoFloat,1}, [-1])
-    else
+    if !isempty(lo)
        lo = model_parameters(lo,model.params,"low bounds")
+       lower_bounds!(opt, lo)
     end
 
-    if isempty(hi)
-       hi = convert(Array{RheoFloat,1}, [-1])
-    else
+    if !isempty(hi)
        hi = model_parameters(hi,model.params,"high bounds")
+       upper_bounds!(opt, hi)
     end
 
     rel_tol = convert(RheoFloat,rel_tol)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(:LN_SBPLX, length(p0))
-
-    # apply parameter boundaries if prescribed
-    if !quasinull(lo)
-        lower_bounds!(opt, lo)
-    end
-
-    if !quasinull(hi)
-        upper_bounds!(opt, hi)
-    end
 
     # set relative tolerance
     xtol_rel!(opt, rel_tol)

@@ -25,8 +25,9 @@ using FunctionWrappers: FunctionWrapper
 # See julia docs for more info on this.
 const RheoFloat = Float64
 
-# convenience data type for int or nothing used as in many function parameters
+# convenience data types used as in many function parameters
 const IntOrNone = Union{Integer, Nothing}
+const RheovecOrNone = Union{Vector{RheoFloat}, Nothing}
 
 ######################################################################
 export RheoFloat
@@ -36,7 +37,7 @@ export RheoLogItem, RheoLog, rheologrun
 export RheoTimeData, RheoTimeDataType, RheoFreqData, RheoFreqDataType, check_time_data_consistency
 export LoadingType, strain_imposed, stress_imposed
 export TimeDataType, time_only, strain_only, stress_only, strain_and_stress
-export FreqDataType, invalid_freq_data, frec_only, with_modulus
+export FreqDataType, invalid_freq_data, freq_only, with_modulus
 export rheoconv,invLaplace
 
 # IO.jl
