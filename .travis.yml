@@ -11,14 +11,8 @@ julia:
 notifications:
   email: false
   
-addons:
- apt: 
-   packages:
-   - hdf5-tools
-   - python3
-   - python3-matplotlib
-  
 install:
+  - pip install -U requests[security]
   - pip install jupyter
   - pip install nbconvert
 
