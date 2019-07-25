@@ -13,8 +13,8 @@ notifications:
   
 install:
   - pip install --user --upgrade pip
-  - pip install jupyter
-  - pip install nbconvert
+  - pip install --user jupyter
+  - pip install --user nbconvert
 
 jobs:
   include:
