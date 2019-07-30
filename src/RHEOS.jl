@@ -10,13 +10,11 @@ using JLD2
 import DSP.conv
 # Base and stdlib imports
 using Base.Cartesian
-import Base.eltype
+using DataStructures
+using FunctionWrappers: FunctionWrapper
 import SpecialFunctions.gamma
 import Base: +, -, *
 import DelimitedFiles: readdlm, writedlm
-export constantcheck
-using DataStructures
-using FunctionWrappers: FunctionWrapper
 
 ######################################################################
 
