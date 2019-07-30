@@ -5,6 +5,13 @@ function _timeline()
 end
 @test _timeline()
 
+function _frequencyspec()
+    freq_instance = frequencyspec(ω_start=0.0, ω_end=15.0, step=0.1)
+
+    typeof(freq_instance)==RheoFreqData && freq_instance.ω==(0.0:0.1:15.0)
+end
+@test _frequencyspec()
+
 function _strainfunction()
     time_instance = timeline(t_start=0.0, t_end=15.0, step=0.1)
 
@@ -41,15 +48,15 @@ function _ramp()
 end
 @test _ramp()
 
-# function _stairs()
-#     time_instance = timeline(t_start=0.0, t_end=15.0, step=0.5)
-#     imposed = stressfunction(time_instance, stairs(offset=5.0, amp=1.0, width=5.0))
-#     plot(imposed.t, imposed.σ, "-o")
-#     grid()
-#     # all(v -> v==0.0, imposed.σ[1:51]) && all(v -> v==1.0, imposed.σ[52:101]) && all(v -> v==2.0, imposed.σ[102:151])
-#     true
-# end
-# @test _stairs()
+function _stairs()
+    time_instance = timeline(t_start=0.0, t_end=15.0, step=0.5)
+    imposed = stressfunction(time_instance, stairs(offset=5.0, amp=1.0, width=5.0))
+    plot(imposed.t, imposed.σ, "-o")
+    grid()
+    # all(v -> v==0.0, imposed.σ[1:51]) && all(v -> v==1.0, imposed.σ[52:101]) && all(v -> v==2.0, imposed.σ[102:151])
+    true
+end
+@test _stairs()
 
 function _square()
     dt = 0.1
@@ -88,10 +95,3 @@ function _triangle()
     all(v -> v==0, imposed.σ[imposed.t.<_offset]) && all(v -> v==0.0, imposed.σ[imposed.t.%1.0.==0.0]) && all(v -> v==_amp, imposed.σ[((imposed.t.%1.0).==0.5) .& (imposed.t.>_offset)])
 end
 @test _triangle()
-
-function _frequencyspec()
-    freq_instance = frequencyspec(ω_start=0.0, ω_end=15.0, step=0.1)
-
-    typeof(freq_instance)==RheoFreqData && freq_instance.ω==(0.0:0.1:15.0)
-end
-@test _frequencyspec()

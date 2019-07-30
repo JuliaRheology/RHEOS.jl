@@ -38,12 +38,9 @@ function frequencyspec(;ω_start::Real = 1.0e-2, ω_end::Real = 1.0e2, step::Rea
     RheoFreqData([], [], collect(ω_start:step:ω_end), log)
 end
 
-
-
-
 #=
 ------------------------------------------------------------------------
-strainfunction and stressfunction can be used to impose strain of stress
+strainfunction and stressfunction can be used to impose strain or stress
 respectively. The subsequent convenience functions are passed to them to
 generate the appropriate loading.
 ------------------------------------------------------------------------
@@ -126,7 +123,7 @@ arguent determines start of stairs signal. `amp` argument determines the height
 of each additional step.
 """
 function stairs(t; offset=0., amp=1., width=1.)
-    return (t<offset) ? 0 : amp * ceil((t-offset)/width)
+    return (t<offset) ? 0 : amp * floor((t - offset)/width)
 end
 
 function stairs(; kwargs...)
@@ -187,10 +184,6 @@ end
 function triangle(; kwargs...)
     return t -> triangle(t; kwargs...)
 end
-
-
-
-
 
 #=
 ---------------------------------------------------------------------------
