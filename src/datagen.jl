@@ -123,7 +123,7 @@ arguent determines start of stairs signal. `amp` argument determines the height
 of each additional step.
 """
 function stairs(t; offset=0., amp=1., width=1.)
-    return (t<offset) ? 0 : amp * floor((t - offset)/width)
+    return (t<offset) ? 0 : amp * floor((t - offset)/width + 1)
 end
 
 function stairs(; kwargs...)

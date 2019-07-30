@@ -49,12 +49,16 @@ end
 @test _ramp()
 
 function _stairs()
-    time_instance = timeline(t_start=0.0, t_end=15.0, step=0.5)
-    imposed = stressfunction(time_instance, stairs(offset=5.0, amp=1.0, width=5.0))
-    plot(imposed.t, imposed.σ, "-o")
-    grid()
-    # all(v -> v==0.0, imposed.σ[1:51]) && all(v -> v==1.0, imposed.σ[52:101]) && all(v -> v==2.0, imposed.σ[102:151])
-    true
+    time_instance = timeline(t_start=0.0, t_end=15.0, step=0.2)
+    imposed = stressfunction(time_instance, stairs(offset=3.0, amp=0.5, width=4.0))
+
+    test1 = all(v -> v==0.0, imposed.σ[imposed.t.<3])
+    test2 = all(v -> v==0.5, imposed.σ[(imposed.t.>=3) .& (imposed.t.<7)])
+    test3 = all(v -> v==1.0, imposed.σ[(imposed.t.>=7) .& (imposed.t.<11)])
+    test4 = all(v -> v==1.5, imposed.σ[(imposed.t.>=11) .& (imposed.t.<15)])
+    test5 = all(v -> v==2.0, imposed.σ[imposed.t.>=15])
+    
+    test1 && test2 && test3 && test4 && test5
 end
 @test _stairs()
 
