@@ -7,7 +7,7 @@ using Documenter, RHEOS
 # feeding into Documenter.jl
 
 function convert_to_markdown(file)
-    run(`jupyter nbconvert Notebooks/$file --to markdown --template Notebooks/documenter.tpl --output-dir docs/src-staging`)
+    run(`jupyter nbconvert examples/$file --to markdown --template examples/documenter.tpl --output-dir docs/src-staging`)
     return "docs/src-staging/$(replace(file, "ipynb"=>"md"))"
 end
 
@@ -23,11 +23,11 @@ end
 
 rm("docs/src-staging", force=true, recursive=true)
 mkdir("docs/src-staging")
-for file in readdir("Notebooks")
+for file in readdir("examples")
     if endswith(file, "ipynb")
         file |> convert_to_markdown |> convert_equations
     elseif !startswith(file, ".")
-        cp("Notebooks/$file", "docs/src-staging/$file")
+        cp("examples/$file", "docs/src-staging/$file")
     end
 end
 symlink("../src/index.md","docs/src-staging/index.md")
@@ -58,7 +58,10 @@ makedocs(modules=[RHEOS],
          authors="Louis Kaplan",
          pages = [
              "Home" => "index.md",
-	     	 "Tutorials" => "tutorials.md",
+             "Models" => ["Basic Elements" => "elements.md",
+			 "Maxwell Models" => "fractionalMaxwell.md",
+		          ],
+	        "Examples" => "examples.md",
             #  "Fitting Data" => "fittingdata.md",
             #  "Predicting Responses" => "predictingresponse.md",
             #  "Generating Data" => "generatingdata.md",
@@ -66,7 +69,7 @@ makedocs(modules=[RHEOS],
             #  "File I/O" => "fileIO.md",
             #  "Models" => "models.md",
               "API" => "API.md"
-         ],
+         ]
          )
 
 deploydocs(

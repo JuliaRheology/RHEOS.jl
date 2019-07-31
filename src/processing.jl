@@ -806,7 +806,7 @@ function dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
 
     log = data.log == nothing ? nothing : [ data.log;
             RheoLogItem( (type=:process, funct=:dynamicmodelpredict, params=(model::RheoModel,), keywords=() ),
-                         (comment="Calculated frequency spectrum - model $(model.name), parameters:$(model.params)",) ) ]
+                         (comment="Calculated frequency spectrum - parameters:$(model.params)",) ) ]
 
     return RheoFreqData(predGp, predGpp, data.ω, log)
 

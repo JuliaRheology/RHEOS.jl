@@ -42,7 +42,7 @@ export importcsv, exportcsv, savedata, loaddata, savemodel, loadmodel
 
 # models.jl
 export null_modulus
-export SpringPot, Spring, DashPot
+export Springpot, Spring, Dashpot
 export FractionalMaxwell, FractionalMaxwellSpring, FractionalMaxwellDashpot, Maxwell
 export FractionalKelvinVoigt, FractionalKVspring, FractionalKVdashpot, KelvinVoigt
 export FractionalZener, FractionalSLS, SLS, FractionalJeffreys, Jeffreys

@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 
-SpringPot =  RheoModelClass(
+Springpot =  RheoModelClass(
         # Model name
         name="springpot",
         # Model parameters,
@@ -61,7 +61,7 @@ Spring =  RheoModelClass(
                 "
         )
 
-DashPot =  RheoModelClass(
+Dashpot =  RheoModelClass(
         # Model name
         name="dashpot",
         # Model parameters,
