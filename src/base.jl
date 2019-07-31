@@ -394,7 +394,6 @@ than the integral method. However, it only works for constant sample rate.
 function boltzconvolve(modulus, time_series, dt, prescribed_dot)
 
     Modulus = modulus(time_series)
-    Modulus = convert(typeof(prescribed_dot),Modulus)
     # fast convolution
     β = conv(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
