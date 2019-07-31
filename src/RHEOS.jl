@@ -9,7 +9,6 @@ using NLopt
 using JLD2
 import DSP.conv
 # Base and stdlib imports
-using Base.Cartesian
 using DataStructures
 using FunctionWrappers: FunctionWrapper
 import SpecialFunctions.gamma
@@ -66,8 +65,6 @@ export dynamicmodelfit, dynamicmodelpredict
 # bundled dependencies from rheos-cambridge forked repos
 MittLeffLiteDir = joinpath(@__DIR__, "..", "deps", "MittLeffLite", "MittLeffLite.jl")
 include(MittLeffLiteDir)
-FastConvDir = joinpath(@__DIR__, "..", "deps", "FastConv", "FastConv.jl")
-include(FastConvDir)
 
 include("base.jl")
 include("definitions.jl")

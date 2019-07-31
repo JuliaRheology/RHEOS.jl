@@ -396,7 +396,7 @@ function boltzconvolve(modulus, time_series, dt, prescribed_dot)
     Modulus = modulus(time_series)
     Modulus = convert(typeof(prescribed_dot),Modulus)
     # fast convolution
-    β = convn(Modulus, prescribed_dot)
+    β = conv(Modulus, prescribed_dot)
     # pick out relevant elements (1st half) and multiply by dt
     β = β[1:length(time_series)]*dt
 
