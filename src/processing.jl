@@ -255,7 +255,10 @@ function modelfit(data::RheoTimeData,
         modused ="G"
     end
 
-    @assert ~isnan(modsing(5.0)) "Modulus to use not defined"
+    # 5.0 is not meaningful, just an input to check that the function does not return NaN
+    # at a non-zero value, which is the default function output for moduli that have
+    # not been defined.
+    @assert !isnan(modsing(5.0)) "Modulus to use not defined"
     # get singularity presence
     sing = singularitytest(modsing)
     # get time step (only needed for convolution, which requires constant dt so t[2]-t[1] is sufficient)
