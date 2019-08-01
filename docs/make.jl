@@ -7,7 +7,7 @@ using Documenter, RHEOS
 # feeding into Documenter.jl
 
 function convert_to_markdown(file)
-    run(`jupyter nbconvert examples/$file --to markdown --template examples/documenter.tpl --output-dir docs/src-staging`)
+    run(`jupyter nbconvert examples/$file --to markdown --template docs/documenter.tpl --output-dir docs/src-staging`)
     return "docs/src-staging/$(replace(file, "ipynb"=>"md"))"
 end
 
