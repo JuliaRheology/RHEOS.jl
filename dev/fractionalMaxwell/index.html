@@ -6,7 +6,7 @@ Free parameters: cₐ, a, cᵦ and β
 
              ___╱╲__________╱╲____
                 ╲╱          ╲╱
-                  cₐ,a         cᵦ, β</code></pre><h3><a class="nav-anchor" id="Consitutive-equation-1" href="#Consitutive-equation-1">Consitutive equation</a></h3><div>\[\sigma(t) + \frac{c_\alpha}{c_\beta} \frac{d^{\alpha-\beta} \sigma(t)}{dt^{\alpha-\beta}}= c_{\alpha} \frac{d^\alpha \epsilon(t)}{dt^\alpha}\]</div><h3><a class="nav-anchor" id="Relaxation-modulus-1" href="#Relaxation-modulus-1">Relaxation modulus</a></h3><div>\[G(t) = c_\beta t^{-\beta} E_{\alpha-\beta,1-\beta}\left(-\frac{c_\beta}{c_\alpha} t^{\alpha-\beta}\right)\]</div><h3><a class="nav-anchor" id="Creep-modulus-1" href="#Creep-modulus-1">Creep modulus</a></h3><div>\[J(t) = \frac{1}{c_\alpha \Gamma(1+\alpha)}t^\alpha+\frac{1}{c_\beta \Gamma(1+\beta)}t^\beta\]</div><h3><a class="nav-anchor" id="Storage-modulus-1" href="#Storage-modulus-1">Storage modulus</a></h3><p>$ G^{\prime}(\omega) = \frac{\left(c<em>\beta \omega^\beta\right)^2 \cdot c</em>\alpha \omega^\alpha \cos(\alpha \frac{\pi}{2}) + \left(c<em>\alpha \omega^\alpha\right)^2 \cdot c</em>\beta \omega^\beta \cos(\beta \frac{\pi}{2})}{\left(c<em>\alpha \omega^\alpha\right)^2+\left(c</em>\beta \omega^\beta\right)^2+2c<em>\alpha \omega^\alpha \cdot c</em>\beta \omega^\beta \cos((\alpha-\beta)\frac{\pi}{2})}$</p><h3><a class="nav-anchor" id="Loss-modulus-1" href="#Loss-modulus-1">Loss modulus</a></h3><div>\[G^{\prime\prime}(\omega) = \frac{\left(c_\beta \omega^\beta\right)^2 \cdot c_\alpha \omega^\alpha \sin(\alpha \frac{\pi}{2}) + \left(c_\alpha \omega^\alpha\right)^2 \cdot c_\beta \omega^\beta \sin(\beta \frac{\pi}{2})}{\left(c_\alpha \omega^\alpha\right)^2+\left(c_\beta \omega^\beta\right)^2+2c_\alpha \omega^\alpha \cdot c_\beta \omega^\beta \cos((\alpha-\beta)\frac{\pi}{2})}\]</div><h2><a class="nav-anchor" id="Fractional-(Spring)-Maxwell-1" href="#Fractional-(Spring)-Maxwell-1">Fractional (Spring) Maxwell</a></h2><pre class="language-julia"><code class="language-julia">FractionalMaxwellSpring</code></pre><pre class="language-output"><code class="language-output">Model name: fractmaxwell_spring
+                  cₐ,a         cᵦ, β</code></pre><h3><a class="nav-anchor" id="Consitutive-equation-1" href="#Consitutive-equation-1">Consitutive equation</a></h3><div>\[\sigma(t) + \frac{c_\alpha}{c_\beta} \frac{d^{\alpha-\beta} \sigma(t)}{dt^{\alpha-\beta}}= c_{\alpha} \frac{d^\alpha \epsilon(t)}{dt^\alpha}\]</div><h3><a class="nav-anchor" id="Relaxation-modulus-1" href="#Relaxation-modulus-1">Relaxation modulus</a></h3><div>\[G(t) = c_\beta t^{-\beta} E_{\alpha-\beta,1-\beta}\left(-\frac{c_\beta}{c_\alpha} t^{\alpha-\beta}\right)\]</div><h3><a class="nav-anchor" id="Creep-modulus-1" href="#Creep-modulus-1">Creep modulus</a></h3><div>\[J(t) = \frac{1}{c_\alpha \Gamma(1+\alpha)}t^\alpha+\frac{1}{c_\beta \Gamma(1+\beta)}t^\beta\]</div><h3><a class="nav-anchor" id="Storage-modulus-1" href="#Storage-modulus-1">Storage modulus</a></h3><div>\[G^{\prime}(\omega) = \frac{\left(c_\beta \omega^\beta\right)^2 \cdot c_\alpha \omega^\alpha \cos(\alpha \frac{\pi}{2}) + \left(c_\alpha \omega^\alpha\right)^2 \cdot c_\beta \omega^\beta \cos(\beta \frac{\pi}{2})}{\left(c_\alpha \omega^\alpha\right)^2+\left(c_\beta \omega^\beta\right)^2+2c_\alpha \omega^\alpha \cdot c_\beta \omega^\beta \cos((\alpha-\beta)\frac{\pi}{2})}\]</div><h3><a class="nav-anchor" id="Loss-modulus-1" href="#Loss-modulus-1">Loss modulus</a></h3><div>\[G^{\prime\prime}(\omega) = \frac{\left(c_\beta \omega^\beta\right)^2 \cdot c_\alpha \omega^\alpha \sin(\alpha \frac{\pi}{2}) + \left(c_\alpha \omega^\alpha\right)^2 \cdot c_\beta \omega^\beta \sin(\beta \frac{\pi}{2})}{\left(c_\alpha \omega^\alpha\right)^2+\left(c_\beta \omega^\beta\right)^2+2c_\alpha \omega^\alpha \cdot c_\beta \omega^\beta \cos((\alpha-\beta)\frac{\pi}{2})}\]</div><h2><a class="nav-anchor" id="Fractional-(Spring)-Maxwell-1" href="#Fractional-(Spring)-Maxwell-1">Fractional (Spring) Maxwell</a></h2><pre class="language-julia"><code class="language-julia">FractionalMaxwellSpring</code></pre><pre class="language-output"><code class="language-output">Model name: fractmaxwell_spring
 
 Free parameters: cₐ, a and k
 
@@ -82,7 +82,7 @@ colplot = [&quot;red&quot;, &quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4a
 fig, ax = subplots(1,2, figsize=(15,7))
 
 
-# plot moduli for varying α
+# plot moduli for varying β
 for (i,beta) in enumerate([0.1, 0.3, 0.5, 0.7, 0.9])
     
     fmaxwelldashpot_model = RheoModel(FractionalMaxwellDashpot,(η = 10, cᵦ= 1.0, β = beta))
@@ -107,7 +107,7 @@ ax[2].tick_params(&quot;both&quot;, labelsize=12);</code></pre><p><img src="../f
 
 colplot = [&quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4ac0d&quot;, &quot;blue&quot;]
 
-# plot moduli for varying α
+# plot moduli for varying β
 for (i,beta) in enumerate([0.3, 0.5, 0.7])
     
     fmaxwelldashpot_model = RheoModel(FractionalMaxwellDashpot,(η = 10, cᵦ= 1.0, β = beta))
@@ -126,4 +126,52 @@ Free parameters: η and k
                 ___
             _____| |________╱╲  ╱╲  ╱╲  ___
                 _|_|          ╲╱  ╲╱  ╲╱
-                  η                  k</code></pre><pre class="language-julia"><code class="language-julia"></code></pre><footer><hr/><a class="previous" href="../elements/"><span class="direction">Previous</span><span class="title">Basic Elements</span></a><a class="next" href="../examples/"><span class="direction">Next</span><span class="title">Examples</span></a></footer></article></body></html>
+                  η                  k</code></pre><pre class="language-julia"><code class="language-julia"># Create a time only dataset
+dϵ = timeline()
+dσ = timeline()
+
+# calculate a strain/stress data by appling a function of time (by defalut a unit step otherwise substitute hstep(amp = 2.))
+dϵ = strainfunction(dϵ, hstep())
+dσ = stressfunction(dσ, hstep()) - stressfunction(dσ, hstep(offset = 5.0))
+
+fig, ax = subplots(1,2, figsize=(15,7))
+colplot = [&quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4ac0d&quot;]
+
+# plot moduli for varying k
+for (i,k) in enumerate([5.0, 10.0, 20.0])
+    
+    maxwell_model = RheoModel(Maxwell,(η = 10, k = k))
+    
+    #Relaxation modulus
+    dG_maxwell = modelpredict(dϵ, maxwell_model)
+    ax[1].plot(dG_maxwell.t, dG_maxwell.σ./maximum(dG_maxwell.σ), color=colplot[i])
+    
+    # Creep modulus
+    dJ_maxwell = modelpredict(dσ, maxwell_model)
+    ax[2].plot(dJ_maxwell.t, dJ_maxwell.ϵ./maximum(dJ_maxwell.ϵ), color=colplot[i])
+ 
+end
+
+ax[1].set_xlabel(&quot;Time&quot;, fontsize = 14);
+ax[1].set_ylabel(&quot;Stress&quot;, fontsize = 14);
+ax[1].tick_params(&quot;both&quot;, labelsize=12);
+
+ax[2].set_xlabel(&quot;Time&quot;, fontsize = 14);
+ax[2].set_ylabel(&quot;Strain&quot;, fontsize = 14);
+ax[2].tick_params(&quot;both&quot;, labelsize=12);</code></pre><p><img src="../fractionalMaxwell_files/fractionalMaxwell_14_0.png" alt="png"/></p><pre class="language-julia"><code class="language-julia">dω = frequencyspec()
+
+colplot = [&quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4ac0d&quot;]
+
+# plot moduli for varying k
+for (i,k) in enumerate([5.0, 10.0, 20.0])
+    
+    maxwell_model = RheoModel(Maxwell,(η = 10, k = k))
+    
+    # Storage and Loss moduli
+    d_maxwell = dynamicmodelpredict(dω, maxwell_model)
+    loglog(d_maxwell.ω, d_maxwell.Gp, color=colplot[i], &quot;-&quot;)
+    loglog(d_maxwell.ω, d_maxwell.Gpp, color=colplot[i], &quot;--&quot;)
+end
+
+xlabel(&quot;Frequency&quot;);
+ylabel(&quot;Storange (—) and Loss (- -) moduli&quot;);</code></pre><p><img src="../fractionalMaxwell_files/fractionalMaxwell_15_0.png" alt="png"/></p><pre class="language-julia"><code class="language-julia"></code></pre><footer><hr/><a class="previous" href="../elements/"><span class="direction">Previous</span><span class="title">Basic Elements</span></a><a class="next" href="../examples/"><span class="direction">Next</span><span class="title">Examples</span></a></footer></article></body></html>
