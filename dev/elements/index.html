@@ -45,7 +45,7 @@ for (i,beta) in enumerate([0.3, 0.5, 0.7])
  
 end
 
-# Spring
+# SPRING
 spring_model = RheoModel(Spring, (k = 1.0,))
 
 #Relaxation modulus
@@ -56,18 +56,22 @@ ax[1].plot(dG_spring.t, dG_spring.σ./maximum(dG_spring.σ), color = &quot;red&q
 dJ_spring = modelpredict(dσ, spring_model)
 ax[2].plot(dJ_spring.t, dJ_spring.ϵ./maximum(dJ_spring.ϵ), color = &quot;red&quot;);
 
-# Dashpot 
+# DASHPOT
 dashpot_model = RheoModel(Dashpot, (η = 1.0,))
 
 # Creep modulus
 dJ_dashpot = modelpredict(dσ, dashpot_model)
 ax[2].plot(dJ_dashpot.t, dJ_dashpot.ϵ./maximum(dJ_dashpot.ϵ), color = &quot;blue&quot;);
 
-ax[1].set_xlabel(&quot;Time&quot;);
-ax[1].set_ylabel(&quot;Stress&quot;);
+ax[1].set_xlabel(&quot;Time&quot;, fontsize = 14);
+ax[1].set_ylabel(&quot;Stress&quot;, fontsize = 14);
+ax[1].tick_params(&quot;both&quot;, labelsize=12);
 
-ax[2].set_xlabel(&quot;Time&quot;);
-ax[2].set_ylabel(&quot;Strain&quot;);</code></pre><p><img src="../elements_files/elements_9_0.png" alt="png"/></p><pre class="language-julia"><code class="language-julia">dω = frequencyspec()
+ax[2].set_xlabel(&quot;Time&quot;, fontsize = 14);
+ax[2].set_ylabel(&quot;Strain&quot;, fontsize = 14);
+ax[2].tick_params(&quot;both&quot;, labelsize=12);</code></pre><p><img src="../elements_files/elements_9_0.png" alt="png"/></p><pre class="language-julia"><code class="language-julia">dω = frequencyspec()
+
+colplot = [&quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4ac0d&quot;]
 
 # plot moduli for varying β
 for (i,beta) in enumerate([0.3, 0.5, 0.7])
@@ -78,4 +82,17 @@ for (i,beta) in enumerate([0.3, 0.5, 0.7])
     d_springpot = dynamicmodelpredict(dω, springpot_model)
     loglog(d_springpot.ω, d_springpot.Gp, color=colplot[i], &quot;-&quot;)
     loglog(d_springpot.ω, d_springpot.Gpp, color=colplot[i], &quot;--&quot;)
-end</code></pre><p><img src="../elements_files/elements_10_0.png" alt="png"/></p><pre class="language-julia"><code class="language-julia"></code></pre><footer><hr/><a class="previous" href="../"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../fractionalMaxwell/"><span class="direction">Next</span><span class="title">Maxwell Models</span></a></footer></article></body></html>
+end
+
+# SPRING
+spring_model = RheoModel(Spring, (k = 1.0,))
+d_spring = dynamicmodelpredict(dω, spring_model)
+loglog(d_spring.ω, d_spring.Gp, &quot;-&quot;, color = &quot;red&quot;)
+
+# DASHPOT
+dashpot_model = RheoModel(Dashpot, (η = 1.0,))
+d_dashpot = dynamicmodelpredict(dω, dashpot_model)
+loglog(d_dashpot.ω, d_dashpot.Gpp, &quot;--&quot;, color = &quot;blue&quot;)
+
+xlabel(&quot;Frequency&quot;);
+ylabel(&quot;Storange (—) and Loss (- -) moduli&quot;);</code></pre><p><img src="../elements_files/elements_10_0.png" alt="png"/></p><pre class="language-julia"><code class="language-julia"></code></pre><footer><hr/><a class="previous" href="../"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../fractionalMaxwell/"><span class="direction">Next</span><span class="title">Maxwell Models</span></a></footer></article></body></html>
