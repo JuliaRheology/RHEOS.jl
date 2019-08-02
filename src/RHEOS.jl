@@ -49,6 +49,7 @@ export FractionalZener, FractionalSLS, SLS, FractionalJeffreys, Jeffreys
 export FractionalSpecial
 export JeffreysPT
 export SLS2, PowerLawPlateau
+export BurgersLiquid
 
 # datagen.jl
 export timeline
