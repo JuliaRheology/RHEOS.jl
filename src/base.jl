@@ -582,7 +582,7 @@ function obj_step_sing(params, grad, modulus, t, prescribed::Float64, measured::
 end
 
 function leastsquares_stepinit(params_init::Vector{RheoFloat}, low_bounds::RheovecOrNone,
-                           hi_bounds::RheovecOrNone, modulus::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}},
+                           hi_bounds::RheovecOrNone, modulus,
                            time_series::Vector{RheoFloat}, prescribed::RheoFloat,
                            measured::Vector{RheoFloat}; insight::Bool = false,
                            singularity::Bool = false, _rel_tol = 1e-4)
