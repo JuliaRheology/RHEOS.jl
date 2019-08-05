@@ -107,6 +107,18 @@ function _boltzintegral_nonsing_ramp(tol)
 end
 @test _boltzintegral_nonsing_ramp(tol)
 
+function _boltzintegral_nonsing_ramp_2sections(tol)
+    dt = 0.01
+    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:dt:20.0)]
+    exact_response = 1 .- exp.(-t)
+    ramp_loading = t
+    ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
+    ramp_response = RHEOS.boltzintegral_nonsing(x->exp.(-x), t, ramp_loading_derivative)
+
+    all(i -> isapprox(exact_response[i], ramp_response[i], atol=tol), eachindex(exact_response))
+end
+@test _boltzintegral_nonsing_ramp_2sections(tol)
+
 function _boltzintegral_step(tol)
     dt = 0.01
     t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
@@ -170,6 +182,21 @@ function _boltzintegral_sing_linear(tol)
     all(i -> isapprox(exact_response[i], integration_response[i], atol=4*tol), eachindex(exact_response))
 end
 @test _boltzintegral_sing_linear(tol)
+
+function _boltzintegral_sing_linear_2sections(tol)
+    dt = 0.01
+    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:dt:20.0)]
+    β = 0.5
+    exact_response = t.^(1.0 - 0.5) / (1.0 - 0.5)
+
+    loading = t
+    loading_derivative = RHEOS.derivBD(loading, t)
+
+    integration_response = RHEOS.boltzintegral_sing(x->x.^(-β), t, loading_derivative)
+
+    all(i -> isapprox(exact_response[i], integration_response[i], atol=4*tol), eachindex(exact_response))
+end
+@test _boltzintegral_sing_linear_2sections(tol)
 
 function _boltzintegral_sing_step(tol)
     # response of a power-law model
