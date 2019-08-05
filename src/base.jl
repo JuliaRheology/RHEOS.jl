@@ -428,7 +428,7 @@ function obj_const_nonsing(params, grad, modulus, time_series, dt, prescribed_do
     convolved = boltzconvolve(mod, time_series, dt, prescribed_dot)
 
     cost = sum((measured - convolved).^2)
-    return convert(RheoFloat,cost)
+    return cost
 
 end
 
@@ -559,7 +559,7 @@ end
 Step fitting and predicting base functionality
 ----------------------------------------------
 =#
-function obj_step_nonsing(params, grad, modulus, t, prescribed, measured; _insight=false)
+function obj_step_nonsing(params, grad, modulus, t, prescribed::Float64, measured::Vector{Float64}; _insight=false)
     if _insight
         println("Current Parameters: ", params)
     end
@@ -567,10 +567,10 @@ function obj_step_nonsing(params, grad, modulus, t, prescribed, measured; _insig
     mod = (t->modulus(t,params))
     estimated = prescribed*mod(t)
 
-    cost = sum(0.5*(measured - estimated).^2)
+    cost = sum((measured - estimated).^2)
 end
 
-function obj_step_sing(params, grad, modulus, t, prescribed, measured; _insight=false)
+function obj_step_sing(params, grad, modulus, t, prescribed::Float64, measured::Vector{Float64}; _insight=false)
     if _insight
         println("Current Parameters: ", params)
     end
@@ -578,7 +578,7 @@ function obj_step_sing(params, grad, modulus, t, prescribed, measured; _insight=
     mod = (t->modulus(t,params))
     estimated = prescribed*mod(t)[2:end]
 
-    cost = sum(0.5*(measured[2:end] - estimated).^2)
+    cost = sum((measured[2:end] - estimated).^2)
 end
 
 function leastsquares_stepinit(params_init::Vector{RheoFloat}, low_bounds::RheovecOrNone,

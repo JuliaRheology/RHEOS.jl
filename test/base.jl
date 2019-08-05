@@ -527,7 +527,45 @@ function _leastsquares_init_var_sing_ramp(tol)
 end
 @test _leastsquares_init_var_sing_ramp(tol)
 
-# obj_step_nonsing
-# obj_step_sing
+function _obj_step_nonsing()
+    t = Vector{RHEOS.RheoFloat}(0.0:0.001:20.0)
+    params = [2.0, 0.5]
+    modulus = (x, p)->p[1]*exp.(-x/p[2])
+    loading = 1.0
+    expected_response = params[1]*exp.(-t/params[2])
+    cost = RHEOS.obj_step_nonsing(params, nothing, modulus, t, loading, expected_response) 
+    
+    cost < tol
+end
+@test _obj_step_nonsing()
+
+function _obj_step_sing()
+    t = Vector{RHEOS.RheoFloat}(0.0:0.5:20.0)
+    params = [2.0, 0.5]
+    modulus = (x, p)->p[1]*x.^(-p[2])
+    loading = 1.0
+    expected_response = loading*params[1]*t.^(-params[2])
+    cost = RHEOS.obj_step_sing(params, nothing, modulus, t, loading, expected_response) 
+    
+    cost < tol
+end
+@test _obj_step_sing()
+
+# function _obj_var_sing_linear(tol)
+#     # response of a power-law model
+#     # to a linear loading: t
+#     t = Vector{RHEOS.RheoFloat}(0.0:0.01:20.0)
+#     β = 0.5
+#     exact_response = t.^(1.0 - 0.5) / (1.0 - 0.5)
+
+#     loading = t
+#     loading_derivative = RHEOS.derivBD(loading, t)
+
+#     cost = RHEOS.obj_var_sing(nothing, nothing, (x, params)->x.^(-β), t, loading_derivative, exact_response) 
+    
+#     cost < 3*length(t)*tol 
+# end
+# @test _obj_var_sing_linear(tol)
+
 # leastsquares_stepinit for nonsing
 # leastsquares_stepinit for sing
