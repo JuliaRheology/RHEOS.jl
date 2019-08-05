@@ -318,7 +318,6 @@ than the convolution method. However, it works for variable sample rate.
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
 function boltzintegral_sing(modulus, time_series::Vector{Float64}, prescribed_dot::Vector{Float64})
-
     # init time diff, used to cope with singularity
     init_offset = (time_series[2] - time_series[1])/10.0;
 
