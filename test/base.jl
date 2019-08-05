@@ -109,7 +109,7 @@ end
 
 function _boltzintegral_nonsing_ramp_2sections(tol)
     dt = 0.01
-    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:dt:20.0)]
+    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:10*dt:20.0)]
     exact_response = 1 .- exp.(-t)
     ramp_loading = t
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
@@ -185,7 +185,7 @@ end
 
 function _boltzintegral_sing_linear_2sections(tol)
     dt = 0.01
-    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:dt:20.0)]
+    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:10*dt:20.0)]
     β = 0.5
     exact_response = t.^(1.0 - 0.5) / (1.0 - 0.5)
 
@@ -193,6 +193,9 @@ function _boltzintegral_sing_linear_2sections(tol)
     loading_derivative = RHEOS.derivBD(loading, t)
 
     integration_response = RHEOS.boltzintegral_sing(x->x.^(-β), t, loading_derivative)
+
+    plot(t, exact_response)
+    plot(t, integration_response,"--")
 
     all(i -> isapprox(exact_response[i], integration_response[i], atol=4*tol), eachindex(exact_response))
 end
