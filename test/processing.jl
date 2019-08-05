@@ -300,3 +300,66 @@ function _modelfit_const_ramp_nobounds(tol)
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
 end
 @test _modelfit_const_ramp_nobounds(tol)
+
+function _modelfit_var_ramp_nonsing(tol)
+    dt = 0.01
+    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:10*dt:20.0)]
+    exact_response = 1.0 .- exp.(-t)
+    ramp_loading = t
+
+    modulus = quote α*exp.(-t/β) end
+    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+
+    data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
+
+    init_params = (α=1.3, β=0.7)
+    modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.5), hi=(α=1.5, β=1.5))
+
+    found_params = modelout.params
+    actual_params = (α=1.0, β=1.0)
+
+    isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
+end
+@test _modelfit_var_ramp_nonsing(tol)
+
+function _modelfit_const_ramp_sing(tol)
+    dt = 0.01
+    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    actual_params = (α=1.0, β=0.5)
+    exact_response = actual_params.α*t.^(1.0 - actual_params.β) / (1.0 - actual_params.β)
+    ramp_loading = t
+
+    modulus = quote α*t.^(-β) end
+    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+
+    data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
+
+    init_params = (α=1.3, β=0.7)
+    modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
+
+    found_params = modelout.params
+
+    isapprox(collect(values(found_params)), collect(values(actual_params)), atol = 5*tol)
+end
+@test _modelfit_const_ramp_sing(tol)
+
+function _modelfit_var_ramp_sing(tol)
+    dt = 0.01
+    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:10*dt:20.0)]
+    actual_params = (α=1.0, β=0.5)
+    exact_response = actual_params.α*t.^(1.0 - actual_params.β) / (1.0 - actual_params.β)
+    ramp_loading = t
+
+    modulus = quote α*t.^(-β) end
+    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+
+    data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
+
+    init_params = (α=1.3, β=0.7)
+    modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
+
+    found_params = modelout.params
+
+    isapprox(collect(values(found_params)), collect(values(actual_params)), atol = 5*tol)
+end
+@test _modelfit_var_ramp_sing(tol)
