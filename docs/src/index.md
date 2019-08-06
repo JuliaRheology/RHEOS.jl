@@ -26,8 +26,6 @@ The sections in this documentation each aim to provide tutorials in different el
 4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
 
 ## Included Dependencies
-#### [FastConv.jl](https://github.com/aamini/FastConv.jl)
-
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
 
 ## Citation
