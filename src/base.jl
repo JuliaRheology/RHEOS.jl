@@ -318,9 +318,8 @@ than the convolution method. However, it works for variable sample rate.
 - `prescribed_dot`: Derivative of (usually prescribed) variable inside the integration kernel
 """
 function boltzintegral_sing(modulus, time_series::Vector{Float64}, prescribed_dot::Vector{Float64})
-    # init time diff, used to cope with singularity
-    init_offset = (time_series[2] - time_series[1])/10.0;
 
+    init_offset = (time_series[2] - time_series[1])/10.0;
     # need to add an additional 'previous' time point to capture any instantaneous loading
     time_previous = time_series[1] - (time_series[2] - time_series[1])
     time_mod = vcat([time_previous], time_series)
@@ -328,11 +327,16 @@ function boltzintegral_sing(modulus, time_series::Vector{Float64}, prescribed_do
     prescribed_dot_mod = vcat([0.0], prescribed_dot)
 
     I = zeros(length(time_mod))
-    @inbounds for (i,v) in enumerate(time_mod)
-        # generate integral for each time step
+    for (i,v) in enumerate(time_mod)
+        if i>1
+            offset = (time_mod[i] - time_mod[i - 1])/10.0
+        else
+            offset = init_offset
+        end
+        println(offset)
         τ = time_mod[1:i]
         Modulus_arg = v .- τ
-        Modulus_arg[end] = init_offset
+        Modulus_arg[end] = offset
         Modulusᵢ = modulus(Modulus_arg)
         df_dtᵢ = prescribed_dot_mod[1:i]
 
