@@ -32,8 +32,6 @@ RHEOS is currently undergoing a major update. The documentation is being updated
 4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
 
 ## Included Dependencies
-#### [FastConv.jl](https://github.com/aamini/FastConv.jl)
-
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
 
 ## Citation
