@@ -194,9 +194,6 @@ function _boltzintegral_sing_linear_2sections(tol)
 
     integration_response = RHEOS.boltzintegral_sing(x->x.^(-β), t, loading_derivative)
 
-    plot(t, exact_response)
-    plot(t, integration_response,"--")
-
     all(i -> isapprox(exact_response[i], integration_response[i], atol=4*tol), eachindex(exact_response))
 end
 @test _boltzintegral_sing_linear_2sections(tol)

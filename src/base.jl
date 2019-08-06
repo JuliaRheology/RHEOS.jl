@@ -333,7 +333,6 @@ function boltzintegral_sing(modulus, time_series::Vector{Float64}, prescribed_do
         else
             offset = init_offset
         end
-        println(offset)
         τ = time_mod[1:i]
         Modulus_arg = v .- τ
         Modulus_arg[end] = offset
