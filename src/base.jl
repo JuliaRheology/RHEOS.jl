@@ -319,19 +319,18 @@ than the convolution method. However, it works for variable sample rate.
 """
 function boltzintegral_sing(modulus, time_series::Vector{Float64}, prescribed_dot::Vector{Float64})
 
-    init_offset = (time_series[2] - time_series[1])/10.0;
+    offset_t0 = (time_series[2] - time_series[1])/10.0
     # need to add an additional 'previous' time point to capture any instantaneous loading
     time_previous = time_series[1] - (time_series[2] - time_series[1])
     time_mod = vcat([time_previous], time_series)
     # material is assumed at rest at this 'previous' time
     prescribed_dot_mod = vcat([0.0], prescribed_dot)
 
+    offset = offset_t0
     I = zeros(length(time_mod))
     for (i,v) in enumerate(time_mod)
         if i>1
-            offset = (time_mod[i] - time_mod[i - 1])/10.0
-        else
-            offset = init_offset
+            offset = (time_mod[i] - time_mod[i-1])/10.0
         end
         τ = time_mod[1:i]
         Modulus_arg = v .- τ
@@ -344,10 +343,40 @@ function boltzintegral_sing(modulus, time_series::Vector{Float64}, prescribed_do
         I[i] = trapz(intergrand, τ)
     end
     # fix initial point
-    I[2] = (prescribed_dot[1]*modulus([init_offset])*(time_series[2] - time_series[1]))[1]
+    I[2] = (prescribed_dot[1]*modulus([offset_t0])*(time_series[2] - time_series[1]))[1]
     I[2:end]
 
 end
+
+# function boltzintegral_sing(modulus, time_series::Vector{Float64}, prescribed_dot::Vector{Float64})
+
+#     offset_t0 = (time_series[2] - time_series[1])/10.0
+#     # need to add an additional 'previous' time point to capture any instantaneous loading
+#     offset = offset_t0
+#     I = zeros(length(time_series))
+#     for (i,v) in enumerate(time_series)
+#         if i>1
+#             offset_old = offset
+#             offset_new = (time_series[i] - time_series[i-1])/10.0
+#             # offset = (offset_new + offset_old)/2
+#             offset = maximum((offset_new, offset_old))
+#             # offset = (time_series[i] - time_series[i-1])/10.0
+#         end
+#         τ = time_series[1:i]
+#         Modulus_arg = v .- τ
+#         Modulus_arg[end] = offset
+#         Modulusᵢ = modulus(Modulus_arg)
+#         df_dtᵢ = prescribed_dot[1:i]
+
+#         intergrand = Modulusᵢ.*df_dtᵢ
+
+#         I[i] = trapz(intergrand, τ)
+#     end
+#     # fix initial point
+#     I[1] = (prescribed_dot[1]*modulus([offset_t0])*(time_series[2] - time_series[1]))[1]
+#     I[1:end]
+
+# end
 
 """
     obj_var_sing(params, grad, modulus, time_series, prescribed_dot, measured; _insight::Bool = false)
