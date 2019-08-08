@@ -410,8 +410,7 @@ function modelstepfit(data::RheoTimeData,
                   lo::Union{NamedTuple, Tuple, Nothing} = nothing,
                   hi::Union{NamedTuple, Tuple, Nothing} = nothing,
                   verbose::Bool = false,
-                  rel_tol = 1e-4,
-                  diff_method="BD") where {T1<:Real, T2<:Real, T3<:Real}
+                  rel_tol = 1e-4) where {T1<:Real, T2<:Real, T3<:Real}
 
     if isnothing(p0)
         p0a = ones(RheoFloat, length(model.params))./2
@@ -505,7 +504,7 @@ function modelstepfit(data::RheoTimeData,
         # Preparation of data for log item
         info=(comment="Fiting rheological model to data (step input assumed)", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
         params = (model = model, modloading = modloading)
-        keywords = (step = step, p0 = p0, lo = lo, hi = hi, rel_tol = rel_tol, diff_method = diff_method)
+        keywords = (step = step, p0 = p0, lo = lo, hi = hi, rel_tol = rel_tol)
         # Add data to the log
         push!(data.log, RheoLogItem( (type=:analysis, funct=:modelstepfit, params=params, keywords=keywords), info))
     end
@@ -516,20 +515,14 @@ function modelstepfit(data::RheoTimeData,
 end
 
 """
-    modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 0.0, diff_method = "BD")
+    modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 0.0)
 
 Same as modelpredict but assumes a step loading with step starting at 'step_on'. Singularities are bypassed
 by adding 1 to the index of the singular element.
 """
-function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 0.0, diff_method = "BD")
+function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 0.0)
 
     step_on = convert(RheoFloat,step_on)
-
-    if diff_method=="BD"
-        deriv = derivBD
-    elseif diff_method=="CD"
-        deriv = derivCD
-    end
 
     check = RheoTimeDataType(data)
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
@@ -537,17 +530,17 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
     if (check == strain_only)
         modulus = model.Ga
         modsing = model.G
-        controlled = data.ϵ[convert(Integer,round(length(data.ϵ)/2))]
+        controlled = data.ϵ[round(Integer, length(data.ϵ)/2)]
     elseif (check == stress_only)
         modulus = model.Ja
         modsing = model.J
-        print(round(length(data.σ)))
-        controlled = data.σ[convert(Integer,round(length(data.σ)/2))]
+        controlled = data.σ[round(Integer, length(data.σ)/2)]
     end
 
-    # check singularity presence at time closest to step
+    # get closest index to desired step-on time point
     stepon_el = closestindex(data.t, step_on)
 
+    # check singularity presence at time closest to step
     sing = singularitytest(modsing)
 
     # get predicted
@@ -581,18 +574,13 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
     end
     time = data.t
 
-
     log = data.log == nothing ? nothing : [ data.log;
-            RheoLogItem( (type=:process, funct=:modelsteppredict, params=(model::RheoModel,), keywords=(step_on = step_on, diff_method = diff_method,)),
+            RheoLogItem( (type=:process, funct=:modelsteppredict, params=(model::RheoModel,), keywords=(step_on = step_on,)),
                          (comment="Predicted step response - modulus: $pred_mod, parameters:$(model.params)",) ) ]
 
 
     return RheoTimeData(sigma,epsilon,time, log)
 end
-
-
-
-
 
 function obj_dynamic(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _insight::Bool = false)
 
