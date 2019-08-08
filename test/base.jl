@@ -213,6 +213,8 @@ end
 @test _boltzintegral_sing_linear_2sections(tol)
 
 # function _boltzintegral_sing_linear_3sections(tol)
+#     # note this test identified that going from higher sample period to lower sample period
+      # could cause innacuracies due to singularity approximation
 #     t1 = Vector{RHEOS.RheoFloat}(0.0:0.1:4.9)
 #     t2 = Vector{RHEOS.RheoFloat}(5.0:0.1:9.9)
 #     t3 = Vector{RHEOS.RheoFloat}(10.0:0.01:15.0)
