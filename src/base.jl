@@ -597,10 +597,12 @@ function leastsquares_stepinit(params_init::Vector{RheoFloat}, low_bounds::Rheov
 
     # set lower bounds and upper bounds unless they take null value
     if !isnothing(low_bounds)
+        low_bounds = convert(Vector{Float64}, low_bounds)
         lower_bounds!(opt, low_bounds)
     end
 
     if !isnothing(hi_bounds)
+        hi_bounds = convert(Vector{Float64}, hi_bounds)
         upper_bounds!(opt, hi_bounds)
     end
 
@@ -611,8 +613,6 @@ function leastsquares_stepinit(params_init::Vector{RheoFloat}, low_bounds::Rheov
     # arguments sent to object objectivefunc
 
     params_init = convert(Vector{Float64},params_init)
-    low_bounds = convert(Vector{Float64},low_bounds)
-    hi_bounds = convert(Vector{Float64}, hi_bounds)
     time_series = convert(Vector{Float64},time_series)
     prescribed = convert(Float64,prescribed)
     measured = convert(Vector{Float64},measured)

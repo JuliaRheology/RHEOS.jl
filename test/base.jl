@@ -97,7 +97,7 @@ end
 
 function _boltzintegral_nonsing_ramp(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1 .- exp.(-t)
     ramp_loading = t
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
@@ -109,7 +109,7 @@ end
 
 function _boltzintegral_nonsing_ramp_2sections(tol)
     dt = 0.01
-    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:10*dt:20.0)]
+    t = [Vector{RheoFloat}(0.0:dt:(15.0-dt)); Vector{RheoFloat}(15.0:10*dt:20.0)]
     exact_response = 1 .- exp.(-t)
     ramp_loading = t
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
@@ -120,9 +120,9 @@ end
 @test _boltzintegral_nonsing_ramp_2sections(tol)
 
 function _boltzintegral_nonsing_linear_3sections(tol)
-    t1 = Vector{RHEOS.RheoFloat}(0.0:0.01:9.99)
-    t2 = Vector{RHEOS.RheoFloat}(10.0:0.1:16.9)
-    t3 = Vector{RHEOS.RheoFloat}(17.0:0.001:20.0)
+    t1 = Vector{RheoFloat}(0.0:0.01:9.99)
+    t2 = Vector{RheoFloat}(10.0:0.1:16.9)
+    t3 = Vector{RheoFloat}(17.0:0.001:20.0)
     t = [t1;t2;t3]
     exact_response = 1 .- exp.(-t)
     ramp_loading = t
@@ -135,7 +135,7 @@ end
 
 function _boltzintegral_step(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = exp.(-t)
     step_loading = ones(length(t))
     step_loading_deriv = RHEOS.derivBD(step_loading,t)
@@ -147,7 +147,7 @@ end
 
 function _boltzintegral_linearcombo(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     step_loading = ones(length(t))
     step_loading_deriv = RHEOS.derivBD(step_loading,t)
     step_response = RHEOS.boltzintegral_nonsing(x->exp.(-x), t, step_loading_deriv)
@@ -167,7 +167,7 @@ end
 function _boltzintegral_nonsing_parabolic(tol)
     # response of Maxwell model to
     # a parabola: 2500 - (t-50)^2
-    t = Vector{RHEOS.RheoFloat}(0.0:0.001:20.0)
+    t = Vector{RheoFloat}(0.0:0.001:20.0)
     exact_response = 102 .- 102*exp.(-t) .- 2t
     
     loading = 2500.0 .- (t .- 50).^2
@@ -184,7 +184,7 @@ end
 function _boltzintegral_sing_linear(tol)
     # response of a power-law model
     # to a linear loading: t
-    t = Vector{RHEOS.RheoFloat}(0.0:0.01:20.0)
+    t = Vector{RheoFloat}(0.0:0.01:20.0)
     β = 0.5
     exact_response = t.^(1.0 - 0.5) / (1.0 - 0.5)
 
@@ -199,7 +199,7 @@ end
 
 function _boltzintegral_sing_linear_2sections(tol)
     dt = 0.01
-    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:10*dt:20.0)]
+    t = [Vector{RheoFloat}(0.0:dt:(15.0-dt)); Vector{RheoFloat}(15.0:10*dt:20.0)]
     β = 0.5
     exact_response = t.^(1.0 - 0.5) / (1.0 - 0.5)
 
@@ -215,9 +215,9 @@ end
 # function _boltzintegral_sing_linear_3sections(tol)
 #     # note this test identified that going from higher sample period to lower sample period
       # could cause innacuracies due to singularity approximation
-#     t1 = Vector{RHEOS.RheoFloat}(0.0:0.1:4.9)
-#     t2 = Vector{RHEOS.RheoFloat}(5.0:0.1:9.9)
-#     t3 = Vector{RHEOS.RheoFloat}(10.0:0.01:15.0)
+#     t1 = Vector{RheoFloat}(0.0:0.1:4.9)
+#     t2 = Vector{RheoFloat}(5.0:0.1:9.9)
+#     t3 = Vector{RheoFloat}(10.0:0.01:15.0)
 #     t = [t1; t2; t3]
 #     β = 0.5
 #     exact_response = t.^(1.0 - 0.5) / (1.0 - 0.5)
@@ -237,7 +237,7 @@ end
 function _boltzintegral_sing_step(tol)
     # response of a power-law model
     # to a step loading
-    t = Vector{RHEOS.RheoFloat}(0.0:0.01:20.0)
+    t = Vector{RheoFloat}(0.0:0.01:20.0)
     β = 0.5
     exact_response = t.^(-0.5)
 
@@ -254,7 +254,7 @@ end
 function _boltzintegral_sing_parabolic(tol)
     # response of power-law model to
     # a parabola: 2500 - (t-50)^2
-    t = Vector{RHEOS.RheoFloat}(0.0:0.001:20.0)
+    t = Vector{RheoFloat}(0.0:0.001:20.0)
     β = 0.5
     exact_response = (100/(1-β))*t.^(1-β) .- (2/((1-β)*(2-β)))*t.^(2-β)
     
@@ -273,7 +273,7 @@ end
 
 function _obj_var_nonsing_ramp(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1 .- exp.(-t)
     ramp_loading = t
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
@@ -286,7 +286,7 @@ end
 
 function _obj_var_nonsing_step(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = exp.(-t)
     step_loading = ones(length(t))
     step_loading_deriv = RHEOS.derivBD(step_loading,t)
@@ -300,7 +300,7 @@ end
 function _obj_var_nonsing_parabolic()
     # response of Maxwell model to
     # a parabola: 2500 - (t-50)^2
-    t = Vector{RHEOS.RheoFloat}(0.0:0.001:20.0)
+    t = Vector{RheoFloat}(0.0:0.001:20.0)
     exact_response = 102 .- 102*exp.(-t) .- 2t
     
     loading = 2500.0 .- (t .- 50).^2
@@ -317,7 +317,7 @@ end
 function _obj_var_sing_linear(tol)
     # response of a power-law model
     # to a linear loading: t
-    t = Vector{RHEOS.RheoFloat}(0.0:0.01:20.0)
+    t = Vector{RheoFloat}(0.0:0.01:20.0)
     β = 0.5
     exact_response = t.^(1.0 - 0.5) / (1.0 - 0.5)
 
@@ -332,7 +332,7 @@ end
 
 function _boltzconvolve_nonsing_ramp(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1 .- exp.(-t)
     ramp_loading = t
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
@@ -344,7 +344,7 @@ end
 
 function _boltzconvolve_step(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = exp.(-t)
     step_loading = ones(length(t))
     step_loading_deriv = RHEOS.derivBD(step_loading,t)
@@ -356,7 +356,7 @@ end
 
 function _boltzconvolve_linearcombo(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     step_loading = ones(length(t))
     step_loading_deriv = RHEOS.derivBD(step_loading,t)
     step_response = RHEOS.boltzconvolve(x->exp.(-x), t, dt, step_loading_deriv)
@@ -377,7 +377,7 @@ function _boltzconvolve_nonsing_parabolic(tol)
     # response of Maxwell model to
     # a parabola: 2500 - (t-50)^2
     dt = 0.001
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 102 .- 102*exp.(-t) .- 2t
     
     loading = 2500.0 .- (t .- 50).^2
@@ -395,7 +395,7 @@ function _boltzconvolve_sing_linear(tol)
     # response of a power-law model
     # to a linear loading: 
     dt = 0.001
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     β = 0.5
     exact_response = t.^(1.0 - 0.5) / (1.0 - 0.5)
 
@@ -413,7 +413,7 @@ function _boltzconvolve_sing_step(tol)
     # response of a power-law model
     # to a step loading
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     β = 0.5
     exact_response = t.^(-0.5)
 
@@ -432,7 +432,7 @@ function _boltzconvolve_sing_parabolic(tol)
     # response of power-law model to
     # a parabola: 2500 - (t-50)^2
     dt = 0.001
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     β = 0.5
     exact_response = (100/(1-β))*t.^(1-β) .- (2/((1-β)*(2-β)))*t.^(2-β)
     
@@ -452,7 +452,7 @@ end
 
 function _obj_const_nonsing_ramp(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1 .- exp.(-t)
     ramp_loading = t
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
@@ -465,7 +465,7 @@ end
 
 function _obj_const_nonsing_step(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = exp.(-t)
     step_loading = ones(length(t))
     step_loading_deriv = RHEOS.derivBD(step_loading,t)
@@ -480,7 +480,7 @@ function _obj_const_nonsing_parabolic()
     # response of Maxwell model to
     # a parabola: 2500 - (t-50)^2
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 102 .- 102*exp.(-t) .- 2t
     
     loading = 2500.0 .- (t .- 50).^2
@@ -498,7 +498,7 @@ function _obj_const_sing_linear(tol)
     # response of a power-law model
     # to a linear loading: t
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     β = 0.5
     exact_response = t.^(1.0 - 0.5) / (1.0 - 0.5)
 
@@ -514,7 +514,7 @@ end
 
 function _leastsquares_init_const_nonsing_ramp(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
@@ -532,7 +532,7 @@ end
 
 function _leastsquares_init_var_nonsing_ramp(tol)
     dt = 0.01
-    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:10*dt:20.0)]
+    t = [Vector{RheoFloat}(0.0:dt:(15.0-dt)); Vector{RheoFloat}(15.0:10*dt:20.0)]
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
@@ -552,7 +552,7 @@ function _leastsquares_init_const_sing_ramp(tol)
     # response of a power-law model
     # to a linear loading: 
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     β = 0.5
     exact_response = t.^(1.0 - β) / (1.0 - β)
 
@@ -573,7 +573,7 @@ function _leastsquares_init_var_sing_ramp(tol)
     # response of a power-law model
     # to a linear loading: 
     dt = 0.01
-    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:10*dt:20.0)]
+    t = [Vector{RheoFloat}(0.0:dt:(15.0-dt)); Vector{RheoFloat}(15.0:10*dt:20.0)]
     β = 0.5
     exact_response = t.^(1.0 - β) / (1.0 - β)
 
@@ -591,7 +591,7 @@ end
 @test _leastsquares_init_var_sing_ramp(tol)
 
 function _obj_step_nonsing()
-    t = Vector{RHEOS.RheoFloat}(0.0:0.001:20.0)
+    t = Vector{RheoFloat}(0.0:0.001:20.0)
     params = [2.0, 0.5]
     modulus = (x, p)->p[1]*exp.(-x/p[2])
     loading = 1.0
@@ -603,7 +603,7 @@ end
 @test _obj_step_nonsing()
 
 function _obj_step_sing()
-    t = Vector{RHEOS.RheoFloat}(0.0:0.5:20.0)
+    t = Vector{RheoFloat}(0.0:0.5:20.0)
     params = [2.0, 0.5]
     modulus = (x, p)->p[1]*x.^(-p[2])
     loading = 1.0
@@ -616,7 +616,7 @@ end
 
 function _leastsquares_stepinit_nonsing_ramp(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     params = [2.0, 0.5]
     loading = 1.0
     expected_response = loading*params[1]*exp.(-t/params[2])
@@ -633,7 +633,7 @@ end
 
 function _leastsquares_stepinit_sing_ramp(tol)
     dt = 0.1
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     params = [2.0, 0.5]
     loading = 1.0
     expected_response = loading*params[1]*t.^(-params[2])

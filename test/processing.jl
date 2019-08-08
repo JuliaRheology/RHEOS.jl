@@ -223,7 +223,7 @@ end
 
 function _modelfit_const_ramp(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
@@ -243,7 +243,7 @@ end
 
 function _modelfit_const_ramp_nobounds(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
@@ -263,7 +263,7 @@ end
 
 function _modelfit_const_ramp_nobounds_singleparam(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
@@ -283,7 +283,7 @@ end
 
 function _modelfit_const_ramp_nobounds(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
@@ -303,7 +303,7 @@ end
 
 function _modelfit_var_ramp_nonsing(tol)
     dt = 0.01
-    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:10*dt:20.0)]
+    t = [Vector{RheoFloat}(0.0:dt:(15.0-dt)); Vector{RheoFloat}(15.0:10*dt:20.0)]
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
 
@@ -324,7 +324,7 @@ end
 
 function _modelfit_const_ramp_sing(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     actual_params = (α=1.0, β=0.5)
     exact_response = actual_params.α*t.^(1.0 - actual_params.β) / (1.0 - actual_params.β)
     ramp_loading = t
@@ -345,7 +345,7 @@ end
 
 function _modelfit_var_ramp_sing(tol)
     dt = 0.01
-    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:10*dt:20.0)]
+    t = [Vector{RheoFloat}(0.0:dt:(15.0-dt)); Vector{RheoFloat}(15.0:10*dt:20.0)]
     actual_params = (α=1.0, β=0.5)
     exact_response = actual_params.α*t.^(1.0 - actual_params.β) / (1.0 - actual_params.β)
     ramp_loading = t
@@ -366,7 +366,7 @@ end
 
 function _modelpredict_nonsing_const(tol)
     dt = 0.01
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1 .- exp.(-t)
     loading = t
     
@@ -383,7 +383,7 @@ end
 
 function _modelpredict_nonsing_var(tol)
     dt = 0.01
-    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:10*dt:20.0)]
+    t = [Vector{RheoFloat}(0.0:dt:(15.0-dt)); Vector{RheoFloat}(15.0:10*dt:20.0)]
     exact_response = 1 .- exp.(-t)
     loading = t
     
@@ -400,7 +400,7 @@ end
 
 function _modelpredict_sing_const(tol)
     dt = 0.001
-    t = Vector{RHEOS.RheoFloat}(0.0:dt:20.0)
+    t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = t.^(1.0 - 0.5) / (1.0 - 0.5)
     loading = t
 
@@ -417,7 +417,7 @@ end
 
 function _modelpredict_sing_var(tol)
     dt = 0.01
-    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:10*dt:20.0)]
+    t = [Vector{RheoFloat}(0.0:dt:(15.0-dt)); Vector{RheoFloat}(15.0:10*dt:20.0)]
     exact_response = t.^(1.0 - 0.5) / (1.0 - 0.5)
     loading = t
 
@@ -427,9 +427,90 @@ function _modelpredict_sing_var(tol)
     data0 = RheoTimeData(t = t, ϵ = loading)
     
     computed_response = modelpredict(data0, model)
-    plot(t, computed_response.σ)
-    plot(t, exact_response)
-    println(maximum(abs.(computed_response.σ - exact_response)))
+
     all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=5*tol), eachindex(exact_response))
 end
 @test _modelpredict_sing_var(tol)
+
+function _modelstepfit_nonsing(tol)
+    dt = 0.01
+    t = Vector{RheoFloat}(0.0:dt:20.0)
+    actual_params = (α=2.0, β=0.5)
+    loading = ones(length(t))
+    exact_response = loading[1]*actual_params[1]*exp.(-t/actual_params[2])
+
+    modulus = quote α*exp.(-t/β) end
+    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+
+    data0 = RheoTimeData(t = t, ϵ = exact_response, σ = loading)
+
+    init_params = (α=1.3, β=0.7)
+    modelout = modelstepfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
+
+    found_params = modelout.params
+    
+    isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
+end
+@test _modelstepfit_nonsing(tol)
+
+function _modelstepfit_nonsing_noinitparams(tol)
+    dt = 0.01
+    t = Vector{RheoFloat}(0.0:dt:20.0)
+    actual_params = (α=2.0, β=0.5)
+    loading = ones(length(t))
+    exact_response = loading[1]*actual_params[1]*exp.(-t/actual_params[2])
+
+    modulus = quote α*exp.(-t/β) end
+    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+
+    data0 = RheoTimeData(t = t, ϵ = exact_response, σ = loading)
+
+    modelout = modelstepfit(data0, model, stress_imposed, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
+
+    found_params = modelout.params
+    
+    isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
+end
+@test _modelstepfit_nonsing_noinitparams(tol)
+
+function _modelstepfit_nonsing_nobounds(tol)
+    dt = 0.01
+    t = Vector{RheoFloat}(0.0:dt:20.0)
+    actual_params = (α=2.0, β=0.5)
+    loading = ones(length(t))
+    exact_response = loading[1]*actual_params[1]*exp.(-t/actual_params[2])
+
+    modulus = quote α*exp.(-t/β) end
+    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+
+    data0 = RheoTimeData(t = t, ϵ = exact_response, σ = loading)
+
+    init_params = (α=1.3, β=0.7)
+    modelout = modelstepfit(data0, model, stress_imposed, p0=init_params)
+
+    found_params = modelout.params
+    
+    isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
+end
+@test _modelstepfit_nonsing_nobounds(tol)
+
+function _modelstepfit_sing(tol)
+    dt = 0.01
+    t = Vector{RheoFloat}(0.0:dt:20.0)
+    actual_params = (α=2.0, β=0.5)
+    loading = ones(length(t))
+    exact_response = loading[1]*actual_params[1]*t.^(-actual_params[2])
+
+    modulus = quote α*t.^(-β) end
+    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+
+    data0 = RheoTimeData(t = t, ϵ = exact_response, σ = loading)
+
+    init_params = (α=1.3, β=0.7)
+    modelout = modelstepfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
+
+    found_params = modelout.params
+    
+    isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
+end
+@test _modelstepfit_sing(tol)

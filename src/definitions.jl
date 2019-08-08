@@ -505,21 +505,15 @@ function expr_replace(ex, nt)
     return e
 end
 
-
-
 function model_parameters(nt::NamedTuple, params::Vector{Symbol}, err_string::String)
     # check that every parameter in m exists in the named tuple nt
-    @assert all( i-> i in keys(nt),params) "Missing parameter(s) in " * err_string
-    # check that variableno extra parameters have been provided
+    @assert all(i->i in keys(nt),params) "Missing parameter(s) in " * err_string
+    # check that no extra parameters have been provided
     @assert length(params) == length(nt) "Mismatch number of model parameters and parameters provided in " * err_string
 
-    p=map(i->RheoFloat(nt[i]),params)
-    p = convert(Array{RheoFloat,1},p)
+    p = map(i->RheoFloat(nt[i]), params)
+    p = convert(Vector{RheoFloat}, p)
 end
-
-
-
-
 
 export freeze_params
 
