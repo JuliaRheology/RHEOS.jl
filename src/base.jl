@@ -538,6 +538,10 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOr
                                                         measured; _insight = insight))
 
     elseif singularity && !constant_sampling
+        @warn "Note that large changes in sample rate, particularly from low sample rate to 
+        much higher sample rate can introduce significant innacuracies due to the singularity 
+        approximation method being used. To avoid this, please resample your data to a constant
+        sample rate before fitting."
 
         min_objective!(opt, (params, grad) -> obj_var_sing(params, grad, modulus,
                                                         time_series, prescribed_dot,
