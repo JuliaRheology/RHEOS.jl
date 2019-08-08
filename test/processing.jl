@@ -415,21 +415,21 @@ function _modelpredict_sing_const(tol)
 end
 @test _modelpredict_sing_const(tol)
 
-# function _modelpredict_sing_var(tol)
-#     dt = 0.01
-#     t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:10*dt:20.0)]
-#     exact_response = t.^(1.0 - 0.5) / (1.0 - 0.5)
-#     loading = t
+function _modelpredict_sing_var(tol)
+    dt = 0.01
+    t = [Vector{RHEOS.RheoFloat}(0.0:dt:(15.0-dt)); Vector{RHEOS.RheoFloat}(15.0:10*dt:20.0)]
+    exact_response = t.^(1.0 - 0.5) / (1.0 - 0.5)
+    loading = t
 
-#     modulus = quote α*t.^(-β) end
-#     modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
-#     model = RheoModel(modelclass, α=1.0, β=0.5)
-#     data0 = RheoTimeData(t = t, ϵ = loading)
+    modulus = quote α*t.^(-β) end
+    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModel(modelclass, α=1.0, β=0.5)
+    data0 = RheoTimeData(t = t, ϵ = loading)
     
-#     computed_response = modelpredict(data0, model)
-#     plot(t, computed_response.σ)
-#     plot(t, exact_response)
-#     println(maximum(abs.(computed_response.σ - exact_response)))
-#     all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=5*tol), eachindex(exact_response))
-# end
-# @test _modelpredict_sing_var(tol)
+    computed_response = modelpredict(data0, model)
+    plot(t, computed_response.σ)
+    plot(t, exact_response)
+    println(maximum(abs.(computed_response.σ - exact_response)))
+    all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=5*tol), eachindex(exact_response))
+end
+@test _modelpredict_sing_var(tol)
