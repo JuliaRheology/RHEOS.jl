@@ -226,7 +226,6 @@ function _modelfit_const_ramp_relax(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
-    ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
 
     modulus = quote α*exp(-t/β) end
     model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
@@ -246,7 +245,6 @@ function _modelfit_const_ramp_creep(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
-    ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
 
     modulus = quote α*exp(-t/β) end
     model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
@@ -266,7 +264,6 @@ function _modelfit_const_ramp_nobounds_relax(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
-    ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
 
     modulus = quote α*exp(-t/β) end
     model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
@@ -286,7 +283,6 @@ function _modelfit_const_ramp_nobounds_creep(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
-    ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
 
     modulus = quote α*exp(-t/β) end
     model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
@@ -306,7 +302,6 @@ function _modelfit_const_ramp_nobounds_singleparam_relax(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
-    ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
 
     modulus = quote α*exp(-t) end
     model = RheoModelClass(name = "testmodel", p = [:α], G = modulus, info="none")
@@ -326,7 +321,6 @@ function _modelfit_const_ramp_nobounds_singleparam_creep(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
-    ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
 
     modulus = quote α*exp(-t) end
     model = RheoModelClass(name = "testmodel", p = [:α], J = modulus, info="none")
@@ -346,7 +340,6 @@ function _modelfit_const_ramp_nobounds_relax(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
-    ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
 
     modulus = quote α*exp(-t/β) end
     model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
@@ -366,7 +359,6 @@ function _modelfit_const_ramp_nobounds_creep(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0 .- exp.(-t)
     ramp_loading = t
-    ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
 
     modulus = quote α*exp(-t/β) end
     model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
@@ -1056,3 +1048,22 @@ function _obj_dynamic_manual(tol)
     isapprox(cost, (costGp*weights[1] + costGpp*weights[2]))
 end
 @test _obj_dynamic_manual(tol)
+
+function _dynamicmodelfit(tol)
+    ω = Vector{RheoFloat}(0.0:0.01:20.0)
+    exact_Gp = 2*ω .+ 0.1
+    exact_Gpp = 3*ω .+ 0.1
+
+    modulus = quote α*exp(-t/β) end
+    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+
+    data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
+
+    init_params = (α=1.0, β=1.0)
+    modelout = modelfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.9, β=0.9), hi=(α=1.1, β=1.1))
+
+    found_params = modelout.params
+    isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
+    true
+end
+@test _dynamicmodelfit(tol)
