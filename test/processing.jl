@@ -958,6 +958,7 @@
 # @test _modelsteppredict_sing_shifted_creep(tol)
 
 function _obj_dynamic(tol)
-    params = [0.2, 0.4]
+    params = [1.0, 2.0]
+    
     true
 end

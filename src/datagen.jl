@@ -186,9 +186,9 @@ function triangle(; kwargs...)
 end
 
 #=
----------------------------------------------------------------------------
-Functionality not yet integrated with new data generation format, see TODO:
----------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+Functionality not yet integrated with new data generation format, see GitHub issues:
+-----------------------------------------------------------------------------------
 """
     stepgen(t_total::Real, t_on::Real; t_trans::Real = 0.0, stepsize::Real = 1.0)
 
