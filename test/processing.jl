@@ -959,6 +959,9 @@
 
 function _obj_dynamic(tol)
     params = [1.0, 2.0]
-    
+    ω = Vector{RheoFloat}(0.0:0.1:100.0)
+
+
     true
 end
+@test _obj_dynamic(tol)
