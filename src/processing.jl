@@ -615,7 +615,7 @@ function obj_dynamic_log(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _
 
 end
 
-function obj_dynamic_global(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _insight::Bool = false)
+function obj_dynamic_local(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -660,7 +660,7 @@ RHEOS offers a number of data transforms which can be used by changing "weights"
 - `hi`: Upper bounds for parameters
 - `verbose`: If true, prints parameters on each optimisation iteration
 - `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
-- `weights`: Weighting mode for storage and loss modulus (linear, log, global)
+- `weights`: Weighting mode for storage and loss modulus ("none", "mean", "log", "local" or manually specified)
 """
 function dynamicmodelfit(data::RheoFreqData,
                 model::RheoModelClass;
@@ -669,7 +669,7 @@ function dynamicmodelfit(data::RheoFreqData,
                 hi::Union{NamedTuple,Tuple} = (),
                 verbose::Bool = false,
                 rel_tol::T = 1e-4,
-                weights::Union{String, Vector{T}}="log") where T<:Real
+                weights::Union{String, Vector{T}}="local") where T<:Real
 
     if isempty(p0)
         p0 = ones(RheoFloat, length(model.params))./2
@@ -710,10 +710,12 @@ function dynamicmodelfit(data::RheoFreqData,
         min_objective!(opt, (params, grad) -> obj_dynamic_mean(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, meanGp, meanGpp; _insight = verbose))
 
     elseif weights=="log"
+        @warn "Note that a logarithmic rescaling will fail if Gp or Gpp data contain 0.0 values as it will result in -Inf cost."
         min_objective!(opt, (params, grad) -> obj_dynamic_log(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
 
-    elseif weights=="global"
-        min_objective!(opt, (params, grad) -> obj_dynamic_global(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
+    elseif weights=="local"
+        @warn "Note that a local rescaling will fail if Gp or Gpp data contain 0.0 values as it will result in division by 0.0."
+        min_objective!(opt, (params, grad) -> obj_dynamic_local(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
 
     elseif typeof(weights)==Vector{T} && length(weights)==2
         min_objective!(opt, (params, grad) -> obj_dynamic_manual(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, weights; _insight = verbose))
