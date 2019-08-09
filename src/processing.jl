@@ -582,8 +582,8 @@ function obj_dynamic(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _insi
         println("Current Parameters: ", params)
     end
 
-    costGp = sum(0.5*(dataGp - modelGp(ω,params)).^2)
-    costGpp = sum(0.5*(dataGpp - modelGpp(ω,params)).^2)
+    costGp = sum(0.5*(dataGp - modelGp(ω, params)).^2)
+    costGpp = sum(0.5*(dataGpp - modelGpp(ω, params)).^2)
 
     cost = costGp + costGpp
 
@@ -595,8 +595,8 @@ function obj_dynamic_linear(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp
         println("Current Parameters: ", params)
     end
 
-    costGp = sum(0.5*(dataGp/meanGp - modelGp(ω)/meanGp).^2)
-    costGpp = sum(0.5*(dataGpp/meanGpp - modelGpp(ω)/meanGpp).^2)
+    costGp = sum(0.5*(dataGp/meanGp - modelGp(ω, params)/meanGp).^2)
+    costGpp = sum(0.5*(dataGpp/meanGpp - modelGpp(ω, params)/meanGpp).^2)
 
     cost = costGp + costGpp
 
@@ -608,8 +608,8 @@ function obj_dynamic_log(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _
         println("Current Parameters: ", params)
     end
 
-    costGp = sum(0.5*(log.(dataGp) - log.(modelGp(ω))).^2)
-    costGpp = sum(0.5*(log.(dataGpp) - log.(modelGpp(ω))).^2)
+    costGp = sum(0.5*(log.(dataGp) - log.(modelGp(ω, params))).^2)
+    costGpp = sum(0.5*(log.(dataGpp) - log.(modelGpp(ω, params))).^2)
 
     cost = costGp + costGpp
 
@@ -621,8 +621,8 @@ function obj_dynamic_global(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp
         println("Current Parameters: ", params)
     end
 
-    costGp = sum(0.5*(((dataGp - modelGp(ω))./dataGp).^2))
-    costGpp = sum(0.5*(((dataGpp - modelGpp(ω))./dataGpp).^2))
+    costGp = sum(0.5*(((dataGp - modelGp(ω, params))./dataGp).^2))
+    costGpp = sum(0.5*(((dataGpp - modelGpp(ω, params))./dataGpp).^2))
 
     cost = costGp + costGpp
 
@@ -634,8 +634,8 @@ function obj_dynamic_manual(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp
         println("Current Parameters: ", params)
     end
 
-    costGp = sum(0.5*(dataGp - modelGp(ω)).^2)
-    costGpp = sum(0.5*(dataGpp - modelGpp(ω)).^2)
+    costGp = sum(0.5*(dataGp - modelGp(ω, params)).^2)
+    costGpp = sum(0.5*(dataGpp - modelGpp(ω, params)).^2)
 
     cost = weights[1]*costGp + weights[2]*costGpp
 end
