@@ -339,21 +339,15 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
     # get time step (only needed for convolution, which requires constant so t[2]-t[1] is sufficient)
     dt = data.t[2] - data.t[1]
 
-    # TEMP - CHECK WITH ALE AND ALEXANDRE BUT IS DEFINITELY NECESSARY
-    # time must start at 0 for convolution to work properly!
+    # time must start at 0 for convolution to work properly
     t_zeroed = data.t .- minimum(data.t)
 
     # get convolution
     if !sing && constantcheck(data.t)
-        #
-        #   /!\ This function is missing
-        #
         convolved = boltzconvolve(modulus, t_zeroed, dt, dcontrolled)
 
     elseif sing && constantcheck(data.t)
-        # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, dcontrolled)
         t_zeroed[1] = 0.0 + (t_zeroed[2] - t_zeroed[1])/10.0
-        # convolved = boltzconvolve_sing(modulus, t_zeroed, dt, dcontrolled)
         convolved = boltzconvolve(modulus, t_zeroed, dt, dcontrolled)
 
     elseif !sing && !constantcheck(data.t)
@@ -406,13 +400,13 @@ function modelstepfit(data::RheoTimeData,
                   model::RheoModelClass,
                   modloading::Union{LoadingType,Integer};
                   step = nothing,
-                  p0::Union{NamedTuple, Tuple, Nothing} = nothing,
-                  lo::Union{NamedTuple, Tuple, Nothing} = nothing,
-                  hi::Union{NamedTuple, Tuple, Nothing} = nothing,
+                  p0::Union{NamedTuple, Tuple} = (),
+                  lo::Union{NamedTuple, Tuple} = (),
+                  hi::Union{NamedTuple, Tuple} = (),
                   verbose::Bool = false,
                   rel_tol = 1e-4) where {T1<:Real, T2<:Real, T3<:Real}
 
-    if isnothing(p0)
+    if isempty(p0)
         p0a = ones(RheoFloat, length(model.params))./2
         if length(findall(x->(x==:β)||(x==:a), model.params))==2
             index = findall(x->x==:a, model.params)
@@ -423,13 +417,13 @@ function modelstepfit(data::RheoTimeData,
         p0a = model_parameters(p0, model.params,"initial guess")
     end
 
-    if isnothing(lo)
+    if isempty(lo)
        loa = nothing
     else
        loa = model_parameters(lo, model.params,"low bounds")
     end
 
-    if isnothing(hi)
+    if isempty(hi)
        hia = nothing
     else
        hia = model_parameters(hi, model.params,"high bounds")
@@ -588,10 +582,8 @@ function obj_dynamic(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _insi
         println("Current Parameters: ", params)
     end
 
-    modGp(ω) = modelGp(ω,params)
-    modGpp(ω) = modelGpp(ω,params)
-    costGp = sum(0.5*(dataGp - modGp(ω)).^2)
-    costGpp = sum(0.5*(dataGpp - modGpp(ω)).^2)
+    costGp = sum(0.5*(dataGp - modelGp(ω,params)).^2)
+    costGpp = sum(0.5*(dataGpp - modelGpp(ω,params)).^2)
 
     cost = costGp + costGpp
 
@@ -603,10 +595,8 @@ function obj_dynamic_linear(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp
         println("Current Parameters: ", params)
     end
 
-    modGp(ω) = modelGp(ω,params)
-    modGpp(ω) = modelGpp(ω,params)
-    costGp = sum(0.5*(dataGp/meanGp - modGp(ω)/meanGp).^2)
-    costGpp = sum(0.5*(dataGpp/meanGpp - modGpp(ω)/meanGpp).^2)
+    costGp = sum(0.5*(dataGp/meanGp - modelGp(ω)/meanGp).^2)
+    costGpp = sum(0.5*(dataGpp/meanGpp - modelGpp(ω)/meanGpp).^2)
 
     cost = costGp + costGpp
 
@@ -617,10 +607,9 @@ function obj_dynamic_log(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _
     if _insight
         println("Current Parameters: ", params)
     end
-    modGp(ωa) = modelGp(ωa,params)
-    modGpp(ωa) = modelGpp(ωa,params)
-    costGp = sum(0.5*(log.(dataGp) - log.(modGp(ω))).^2)
-    costGpp = sum(0.5*(log.(dataGpp) - log.(modGpp(ω))).^2)
+
+    costGp = sum(0.5*(log.(dataGp) - log.(modelGp(ω))).^2)
+    costGpp = sum(0.5*(log.(dataGpp) - log.(modelGpp(ω))).^2)
 
     cost = costGp + costGpp
 
@@ -631,10 +620,9 @@ function obj_dynamic_global(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp
     if _insight
         println("Current Parameters: ", params)
     end
-    modGp(ωa) = modelGp(ωa,params)
-    modGpp(ωa) = modelGpp(ωa,params)
-    costGp = sum(0.5*(((dataGp - modGp(ω))./dataGp).^2))
-    costGpp = sum(0.5*(((dataGpp - modGpp(ω))./dataGpp).^2))
+
+    costGp = sum(0.5*(((dataGp - modelGp(ω))./dataGp).^2))
+    costGpp = sum(0.5*(((dataGpp - modelGpp(ω))./dataGpp).^2))
 
     cost = costGp + costGpp
 
@@ -645,10 +633,9 @@ function obj_dynamic_manual(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp
     if _insight
         println("Current Parameters: ", params)
     end
-    modGp(ωa) = modelGp(ωa,params)
-    modGpp(ωa) = modelGpp(ωa,params)
-    costGp = sum(0.5*(dataGp - modGp(ω)).^2)
-    costGpp = sum(0.5*(dataGpp - modGpp(ω)).^2)
+
+    costGp = sum(0.5*(dataGp - modelGp(ω)).^2)
+    costGpp = sum(0.5*(dataGpp - modelGpp(ω)).^2)
 
     cost = weights[1]*costGp + weights[2]*costGpp
 end
@@ -684,25 +671,28 @@ function dynamicmodelfit(data::RheoFreqData,
                 rel_tol::T = 1e-4,
                 weights::Union{String, Vector{T}}="log") where T<:Real
 
-
     if isempty(p0)
-       p0 = convert(Array{RheoFloat,1}, fill(0.5,length(model.params)))
-       @warn "Initial values for model parameters is set to 0.5 by default"
+        p0 = ones(RheoFloat, length(model.params))./2
+        if length(findall(x->(x==:β)||(x==:a), model.params))==2
+            index = findall(x->x==:a, model.params)
+            p0[index[1]] = 0.8;
+        end
+        @warn "Initial model parameter value(s) is/are set to $p0 by default"
     else
-       p0 = model_parameters(p0,model.params,"initial guess")
+        p0 = model_parameters(p0, model.params,"initial guess")
     end
 
     if !isempty(lo)
-       lo = model_parameters(lo,model.params,"low bounds")
+       lo = model_parameters(lo,model.params, "low bounds")
        lower_bounds!(opt, lo)
     end
 
     if !isempty(hi)
-       hi = model_parameters(hi,model.params,"high bounds")
+       hi = model_parameters(hi,model.params, "high bounds")
        upper_bounds!(opt, hi)
     end
 
-    rel_tol = convert(RheoFloat,rel_tol)
+    rel_tol = convert(RheoFloat, rel_tol)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(:LN_SBPLX, length(p0))
@@ -731,15 +721,9 @@ function dynamicmodelfit(data::RheoFreqData,
     end
 
     # timed fitting
-    # (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed NLopt.optimize(opt, p0)
-    (minf, minx, ret) = NLopt.optimize(opt, p0)
-    timetaken = -1.0
-
-    println(ret)
-
+    (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed NLopt.optimize(opt, p0)
 
     nt = NamedTuple{Tuple(model.params)}(minx)
-
 
     if data.log != nothing
         # Preparation of data for log item
@@ -752,9 +736,7 @@ function dynamicmodelfit(data::RheoFreqData,
 
     print("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
 
-
-    return RheoModel(model,nt; log_add = log);
-
+    return RheoModel(model, nt)
 end
 
 """

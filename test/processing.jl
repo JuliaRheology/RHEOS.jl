@@ -956,3 +956,7 @@ function _modelsteppredict_sing_shifted_creep(tol)
     test1 && test2    
 end
 @test _modelsteppredict_sing_shifted_creep(tol)
+
+function _obj_dynamic(tol)
+    true
+end
