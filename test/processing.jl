@@ -1051,19 +1051,19 @@ end
 
 # function _dynamicmodelfit(tol)
 #     ω = Vector{RheoFloat}(0.0:0.01:20.0)
-#     exact_Gp = 2*ω .+ 0.1
-#     exact_Gpp = 3*ω .+ 0.1
+#     actual_model = RheoModel(SLS, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
-#     modulus = quote α*exp(-t/β) end
-#     model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+#     dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
+#     dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
+#     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
-#     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
-
-#     init_params = (α=1.0, β=1.0)
-#     modelout = modelfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.9, β=0.9), hi=(α=1.1, β=1.1))
+#     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
+#     modelout = dynamicmodelfit(data0, SLS, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0))
 
 #     found_params = modelout.params
-#     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
-#     true
+#     actual_params = actual_model.params
+#     println("\n\n$found_params")
+#     println("\n\n$actual_params")
+#     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
 # end
 # @test _dynamicmodelfit(tol)

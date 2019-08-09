@@ -682,6 +682,9 @@ function dynamicmodelfit(data::RheoFreqData,
         p0 = model_parameters(p0, model.params,"initial guess")
     end
 
+    # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
+    opt = Opt(:LN_SBPLX, length(p0))
+
     if !isempty(lo)
        lo = model_parameters(lo,model.params, "low bounds")
        lower_bounds!(opt, lo)
@@ -692,12 +695,8 @@ function dynamicmodelfit(data::RheoFreqData,
        upper_bounds!(opt, hi)
     end
 
-    rel_tol = convert(RheoFloat, rel_tol)
-
-    # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
-    opt = Opt(:LN_SBPLX, length(p0))
-
     # set relative tolerance
+    rel_tol = convert(RheoFloat, rel_tol)
     xtol_rel!(opt, rel_tol)
 
     # set objective/cost function
