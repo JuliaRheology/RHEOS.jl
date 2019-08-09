@@ -957,11 +957,40 @@
 # end
 # @test _modelsteppredict_sing_shifted_creep(tol)
 
-function _obj_dynamic(tol)
-    params = [1.0, 2.0]
+# function _obj_dynamic(tol)
+#     params = [1.0, 0.1]
+#     ω = Vector{RheoFloat}(0.0:0.1:100.0)
+
+#     dataGp = 2*ω
+#     dataGpp = 3*ω
+
+#     moduliGp(ω, params) = params[1]*2*ω .+ params[2]
+#     moduliGpp(ω, params) = params[1]*3*ω .+ params[2]
+
+#     cost = RHEOS.obj_dynamic(params, nothing, ω, dataGp, dataGpp, moduliGp, moduliGpp)
+
+#     costGp = sum((dataGp - moduliGp(ω, params)).^2)
+#     costGpp = sum((dataGpp - moduliGpp(ω, params)).^2)
+    
+#     isapprox(cost, (costGp + costGpp))
+# end
+# @test _obj_dynamic(tol)
+
+function _obj_dynamic_mean(tol)
+    params = [1.0, 0.1]
     ω = Vector{RheoFloat}(0.0:0.1:100.0)
 
+    dataGp = 2*ω
+    dataGpp = 3*ω
 
-    true
+    moduliGp(ω, params) = params[1]*2*ω .+ params[2]
+    moduliGpp(ω, params) = params[1]*3*ω .+ params[2]
+
+    cost = RHEOS.obj_dynamic(params, nothing, ω, dataGp, dataGpp, moduliGp, moduliGpp)
+
+    costGp = sum((dataGp - moduliGp(ω, params)).^2)
+    costGpp = sum((dataGpp - moduliGpp(ω, params)).^2)
+    
+    isapprox(cost, (costGp + costGpp))
 end
-@test _obj_dynamic(tol)
+@test _obj_dynamic_mean(tol)

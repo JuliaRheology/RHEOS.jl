@@ -589,7 +589,7 @@ function obj_dynamic(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _insi
 
 end
 
-function obj_dynamic_linear(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp, meanGp, meanGpp; _insight::Bool = false)
+function obj_dynamic_mean(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp, meanGp, meanGpp; _insight::Bool = false)
 
     if _insight
         println("Current Parameters: ", params)
@@ -600,7 +600,7 @@ function obj_dynamic_linear(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp
 
     cost = costGp + costGpp
 
-end
+end 
 
 function obj_dynamic_log(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _insight::Bool = false)
 
@@ -621,8 +621,8 @@ function obj_dynamic_global(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp
         println("Current Parameters: ", params)
     end
 
-    costGp = sum((((dataGp - modelGp(ω, params))./dataGp).^2))
-    costGpp = sum((((dataGpp - modelGpp(ω, params))./dataGpp).^2))
+    costGp = sum(((dataGp - modelGp(ω, params))./dataGp).^2)
+    costGpp = sum(((dataGpp - modelGpp(ω, params))./dataGpp).^2)
 
     cost = costGp + costGpp
 
@@ -704,10 +704,10 @@ function dynamicmodelfit(data::RheoFreqData,
     if weights=="none"
         min_objective!(opt, (params, grad) -> obj_dynamic(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
 
-    elseif weights=="linear"
+    elseif weights=="mean"
         meanGp = sum(data.Gp)/length(data.Gp)
         meanGpp = sum(data.Gp)/length(data.Gp)
-        min_objective!(opt, (params, grad) -> obj_dynamic_linear(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, meanGp, meanGpp; _insight = verbose))
+        min_objective!(opt, (params, grad) -> obj_dynamic_mean(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, meanGp, meanGpp; _insight = verbose))
 
     elseif weights=="log"
         min_objective!(opt, (params, grad) -> obj_dynamic_log(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
