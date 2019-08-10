@@ -481,16 +481,17 @@ function modelstepfit(data::RheoTimeData,
     t_zeroed = data.t .- minimum(data.t)
 
     # start fit
-    (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed leastsquares_stepinit(p0a,
-                                                                                        loa,
-                                                                                        hia,
-                                                                                        modulus,
-                                                                                        t_zeroed,
-                                                                                        controlled,
-                                                                                        measured;
-                                                                                        insight = verbose,
-                                                                                        singularity = sing,
-                                                                                        _rel_tol = rel_tol)
+    (minf, minx, ret), timetaken, bytes, gctime, memalloc = 
+                        @timed leastsquares_stepinit(p0a,
+                                                    loa,
+                                                    hia,
+                                                    modulus,
+                                                    t_zeroed,
+                                                    controlled,
+                                                    measured;
+                                                    insight = verbose,
+                                                    singularity = sing,
+                                                    _rel_tol = rel_tol)
 
     nt = NamedTuple{Tuple(model.params)}(minx)
 
@@ -708,11 +709,11 @@ function dynamicmodelfit(data::RheoFreqData,
         min_objective!(opt, (params, grad) -> obj_dynamic_mean(params, grad, data.ω, data.Gp, data.Gpp, model.Gpa, model.Gppa, meanGp, meanGpp; _insight = verbose))
 
     elseif weights=="log"
-        @warn "Note that a logarithmic rescaling will fail if Gp or Gpp data contain 0.0 values as it will result in -Inf cost."
+        @warn "Note that a logarithmic rescaling will fail if Gp or Gpp data contain 0.0 values as it will result in -Inf cost. Trying a different rescaling scheme, or not fitting around ω≈0.0 may alleviate the issue."
         min_objective!(opt, (params, grad) -> obj_dynamic_log(params, grad, data.ω, data.Gp, data.Gpp, model.Gpa, model.Gppa; _insight = verbose))
 
     elseif weights=="local"
-        @warn "Note that a local rescaling will fail if Gp or Gpp data contain 0.0 values as it will result in division by 0.0."
+        @warn "Note that a local rescaling will fail if Gp or Gpp data contain 0.0 values as it will result in division by 0.0. Trying a different rescaling scheme, or not fitting around ω≈0.0 may alleviate the issue."
         min_objective!(opt, (params, grad) -> obj_dynamic_local(params, grad, data.ω, data.Gp, data.Gpp, model.Gpa, model.Gppa; _insight = verbose))
 
     elseif typeof(weights)==Vector{T} && length(weights)==2
@@ -721,7 +722,9 @@ function dynamicmodelfit(data::RheoFreqData,
     end
 
     # timed fitting
-    (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed NLopt.optimize(opt, p0)
+    (minf, minx, ret), timetaken, bytes, gctime, memalloc = 
+                        @timed NLopt.optimize(opt, 
+                                            p0)
 
     nt = NamedTuple{Tuple(model.params)}(minx)
 
