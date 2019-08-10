@@ -7,11 +7,11 @@ module RHEOS
 using InverseLaplace
 using NLopt
 using JLD2
-import DSP.conv
-# Base and stdlib imports
 using DataStructures
 using FunctionWrappers: FunctionWrapper
+import DSP.conv
 import SpecialFunctions.gamma
+# Base and stdlib imports
 import Base: +, -, *
 import DelimitedFiles: readdlm, writedlm
 
