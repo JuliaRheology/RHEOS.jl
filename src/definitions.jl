@@ -1,7 +1,10 @@
 #!/usr/bin/env julia
 
-
-
+#=
+-------------------------
+Log related functionality
+-------------------------
+=#
 struct RheoLogItem
    action      # Nothing, or NamedTuple with fields:
                #     type::Symbol, funct::Symbol, params::NamedTuple, keywords::NamedTuple
@@ -47,11 +50,11 @@ end
 #     end
 # end
 
-
-
-
-
-
+#=
+-------------------------------
+Time data related functionality
+-------------------------------
+=#
 """
     RheoTimeData(;σ::Vector{T1}, ϵ::Vector{T2}, t::Vector{T3}) where {T1<:Real, T2<:Real, T3<:Real}
 
@@ -77,45 +80,11 @@ struct RheoTimeData
 
 end
 
-
-"""
-    RheoFreqData(Gp::Vector{T1}, Gpp::Vector{T2}, ω::Vector{T3}, log::OrderedDict{Any,Any}) where {T1<:Real, T2<:Real, T3<:Real}
-
-RheoFreqData contains storage modulus, loss modulus and frequency data.
-
-If preferred, an instance can be generated manually by just providing the three data
-vectors in the right order.
-
-# Fields
-
-- Gp: storage modulus
-- Gpp: loss modulus
-- ω: frequency
-- log: a log of struct's events, e.g. preprocessing
-"""
-struct RheoFreqData
-
-    # Complex modulus data
-    Gp::Vector{RheoFloat}
-    Gpp::Vector{RheoFloat}
-    ω::Vector{RheoFloat}
-
-    log::Union{RheoLog,Nothing}
-end
-
-
-
-
-
-
-
 function RheoTimeData(;ϵ::Vector{T1} = RheoFloat[], σ::Vector{T2} = RheoFloat[], t::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_time_data_consistency(t,ϵ,σ)
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
     log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
 end
-
-
 
 @enum TimeDataType invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
 
@@ -151,50 +120,8 @@ function RheoTimeDataType(d::RheoTimeData)
     return check_time_data_consistency(d.t,d.ϵ,d.σ)
 end
 
-
-
-
 @enum LoadingType strain_imposed=1 stress_imposed=2
 
-
-
-
-
-function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat[], ω::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
-    typecheck = check_freq_data_consistency(ω,Gp,Gpp)
-    RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω),
-    log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
-end
-
-
-@enum FreqDataType invalid_freq_data=-1 freq_only=0 with_modulus=1
-function check_freq_data_consistency(o,gp,gpp)
-    @assert (length(o)>0)  "Freq data empty"
-
-    gpdef=(gp != RheoFloat[])
-    gppdef=(gpp != RheoFloat[])
-    if (gpdef && gppdef)
-        @assert (length(gp)==length(o)) && (length(gpp)==length(o)) "Data length inconsistent"
-        return with_modulus
-    end
-
-    if ((!gpdef) && (!gppdef))
-        return freq_only
-    end
-
-    return invalid_freq_data
-
-end
-
-function RheoFreqDataType(d::RheoFreqData)
-    return check_freq_data_consistency(d.ω,d.Gp,d.Gpp)
-end
-
-
-
-#
-#   Function called when a RheoTimeData struct is returned to the REPL
-#
 function Base.show(io::IO, d::RheoTimeData)
     b = length(d.t) > 10
     n = b ? 10 : length(d.t)
@@ -220,73 +147,7 @@ function Base.show(io::IO, d::RheoTimeData)
         end
         println( b ? "..." : "")
     end
-
-
 end
-
-#
-# function Base.show(io::IO, d::RheoFreqData)
-# end
-#
-
-
-
-
-
-#
-#  Internal functions to regenerate data from a log
-#
-
-
-function rheologrun(rli::RheoLogItem, d=nothing)
-
-      if typeof(rli.action) <: NamedTuple && :type in keys(rli.action)
-         type=rli.action.type
-         if type==:source && d==nothing
-            return(eval(rli.action.funct)(rli.action.params...;rli.action.keywords...))
-         elseif type==:process && d!=nothing
-            return(eval(rli.action.funct)(d,rli.action.params...;rli.action.keywords...))
-         elseif type==:analysis && d!=nothing
-            return(eval(rli.action.funct)(d,rli.action.params...;rli.action.keywords...))
-         end
-      end
-   println(rli.info)
-end
-
-
-function rheologrun(arli::RheoLog, d::Union{RheoTimeData,RheoFreqData,Nothing} = nothing)
-
-  # check first item is a source item
-  if d == nothing
-        @assert typeof(arli[1].action) <: NamedTuple && :type in keys(arli[1].action) && arli[1].action.type == :source
-                "Source missing in RheoLog"
-        end
-
-
-  for rli in arli
-      if typeof(rli.action) <: NamedTuple && :type in keys(rli.action)
-          type=rli.action.type
-          if type==:analysis && d!=nothing
-              rheologrun(rli, d)
-          else  d=rheologrun(rli, d)
-          end
-      else
-          println(rli.info)
-      end
-  end
-  return(d)
-end
-
-
-
-
-
-
-
-
-
-
-
 
 function +(d1::RheoTimeData, d2::RheoTimeData)
 
@@ -322,8 +183,6 @@ function +(rl1::RheoLog, rl2::RheoLog)
     return(rheologrun(rl1) + rheologrun(rl2))
 end
 
-
-
 function -(d1::RheoTimeData, d2::RheoTimeData)
 
     type1 = RheoTimeDataType(d1)
@@ -358,11 +217,6 @@ function -(rl1::RheoLog, rl2::RheoLog)
     return(rheologrun(rl1) - rheologrun(rl2))
 end
 
-
-
-
-
-
 function -(d::RheoTimeData)
 
     type = RheoTimeDataType(d)
@@ -374,7 +228,6 @@ function -(d::RheoTimeData)
     return RheoTimeData(-d.σ, -d.ϵ, d.t, log)
 
 end
-
 
 function *(operand::Real, d::RheoTimeData)
 
@@ -391,23 +244,125 @@ function *(d::RheoTimeData, operand::Real)
     return(operand * d)
 end
 
-
 #  Time shift operator >>
 #  shift time by a certain amount, trash the end and pad at the start with 0
 
 #  Union operator |
 #  Combine stress_only data and strain_only data into stress_strain
 
+#=
+------------------------------------
+Frequency data related functionality
+------------------------------------
+=#
+"""
+    RheoFreqData(Gp::Vector{T1}, Gpp::Vector{T2}, ω::Vector{T3}, log::OrderedDict{Any,Any}) where {T1<:Real, T2<:Real, T3<:Real}
+
+RheoFreqData contains storage modulus, loss modulus and frequency data.
+
+If preferred, an instance can be generated manually by just providing the three data
+vectors in the right order.
+
+# Fields
+
+- Gp: storage modulus
+- Gpp: loss modulus
+- ω: frequency
+- log: a log of struct's events, e.g. preprocessing
+"""
+struct RheoFreqData
+
+    # Complex modulus data
+    Gp::Vector{RheoFloat}
+    Gpp::Vector{RheoFloat}
+    ω::Vector{RheoFloat}
+
+    log::Union{RheoLog,Nothing}
+end
+
+function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat[], ω::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
+    typecheck = check_freq_data_consistency(ω,Gp,Gpp)
+    RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω),
+    log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
+end
+
+@enum FreqDataType invalid_freq_data=-1 freq_only=0 with_modulus=1
+
+function check_freq_data_consistency(o,gp,gpp)
+    @assert (length(o)>0)  "Freq data empty"
+
+    gpdef=(gp != RheoFloat[])
+    gppdef=(gpp != RheoFloat[])
+    if (gpdef && gppdef)
+        @assert (length(gp)==length(o)) && (length(gpp)==length(o)) "Data length inconsistent"
+        return with_modulus
+    end
+
+    if ((!gpdef) && (!gppdef))
+        return freq_only
+    end
+
+    return invalid_freq_data
+
+end
+
+function RheoFreqDataType(d::RheoFreqData)
+    return check_freq_data_consistency(d.ω,d.Gp,d.Gpp)
+end
+
+#
+# function Base.show(io::IO, d::RheoFreqData)
+# end
+#
+
+#=
+---------------------------------------
+Log-based data generation functionality
+---------------------------------------
+=#
+function rheologrun(rli::RheoLogItem, d=nothing)
+
+      if typeof(rli.action) <: NamedTuple && :type in keys(rli.action)
+         type=rli.action.type
+         if type==:source && d==nothing
+            return(eval(rli.action.funct)(rli.action.params...;rli.action.keywords...))
+         elseif type==:process && d!=nothing
+            return(eval(rli.action.funct)(d,rli.action.params...;rli.action.keywords...))
+         elseif type==:analysis && d!=nothing
+            return(eval(rli.action.funct)(d,rli.action.params...;rli.action.keywords...))
+         end
+      end
+   println(rli.info)
+end
+
+function rheologrun(arli::RheoLog, d::Union{RheoTimeData,RheoFreqData,Nothing} = nothing)
+
+  # check first item is a source item
+  if d == nothing
+        @assert typeof(arli[1].action) <: NamedTuple && :type in keys(arli[1].action) && arli[1].action.type == :source
+                "Source missing in RheoLog"
+        end
 
 
+  for rli in arli
+      if typeof(rli.action) <: NamedTuple && :type in keys(rli.action)
+          type=rli.action.type
+          if type==:analysis && d!=nothing
+              rheologrun(rli, d)
+          else  d=rheologrun(rli, d)
+          end
+      else
+          println(rli.info)
+      end
+  end
+  return(d)
+end
 
-
-
-
-
-
-
-
+#=
+---------------------------
+Model related functionality
+---------------------------
+=#
 struct RheoModelClass
 
     name::String
@@ -428,7 +383,6 @@ struct RheoModelClass
     expressions::NamedTuple
 
 end
-
 
 function Base.show(io::IO, m::RheoModelClass)
     print(io, "\nModel name: $(m.name)")
@@ -474,15 +428,9 @@ function RheoModelClass(;name::String="Custom model",
         $info, $expressions) )
 end
 
-
-
-
-
 # Cool replacement function inspired from
 # https://stackoverflow.com/questions/29778698/julia-lang-metaprogramming-turn-expression-into-function-with-expression-depend
 # This probably could go in its own module as this is very useful.
-#
-
 expr_replace!(ex, s, v) = ex
 expr_replace!(ex::Symbol, s, v) = s == ex ? v : ex
 
@@ -514,8 +462,6 @@ function model_parameters(nt::NamedTuple, params::Vector{Symbol}, err_string::St
     p = map(i->RheoFloat(nt[i]), params)
     p = convert(Vector{RheoFloat}, p)
 end
-
-
 
 """
     freeze_params(m::RheoModelClass, name::String, nt0::NamedTuple)
@@ -581,13 +527,6 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
         $info, $expressions)   )
 end
 
-
-
-
-
-
-
-
 struct RheoModel
 
     G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
@@ -606,8 +545,6 @@ struct RheoModel
     # log::OrderedDict{Any,Any}
 
 end
-
-
 
 function RheoModel(m::RheoModelClass; kwargs...)
     return(RheoModel(m,kwargs.data))
@@ -641,12 +578,6 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple)
     (ωa -> begin [$Gpp for ω in ωa]; end) |> FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}},
     $expressions, $nt, $info) )
 end
-
-
-
-
-
-
 
 function Base.show(io::IO, m::RheoModel)
     print(io,m.info)
