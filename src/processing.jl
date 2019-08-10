@@ -586,7 +586,6 @@ function obj_dynamic(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp; _insi
     costGpp = sum((dataGpp - modelGpp(ω, params)).^2)
 
     cost = costGp + costGpp
-
 end
 
 function obj_dynamic_mean(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp, meanGp, meanGpp; _insight::Bool = false)
@@ -701,23 +700,23 @@ function dynamicmodelfit(data::RheoFreqData,
 
     # set objective/cost function
     if weights=="none"
-        min_objective!(opt, (params, grad) -> obj_dynamic(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
+        min_objective!(opt, (params, grad) -> obj_dynamic(params, grad, data.ω, data.Gp, data.Gpp, model.Gpa, model.Gppa; _insight = verbose))
 
     elseif weights=="mean"
         meanGp = sum(data.Gp)/length(data.Gp)
         meanGpp = sum(data.Gp)/length(data.Gp)
-        min_objective!(opt, (params, grad) -> obj_dynamic_mean(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, meanGp, meanGpp; _insight = verbose))
+        min_objective!(opt, (params, grad) -> obj_dynamic_mean(params, grad, data.ω, data.Gp, data.Gpp, model.Gpa, model.Gppa, meanGp, meanGpp; _insight = verbose))
 
     elseif weights=="log"
         @warn "Note that a logarithmic rescaling will fail if Gp or Gpp data contain 0.0 values as it will result in -Inf cost."
-        min_objective!(opt, (params, grad) -> obj_dynamic_log(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
+        min_objective!(opt, (params, grad) -> obj_dynamic_log(params, grad, data.ω, data.Gp, data.Gpp, model.Gpa, model.Gppa; _insight = verbose))
 
     elseif weights=="local"
         @warn "Note that a local rescaling will fail if Gp or Gpp data contain 0.0 values as it will result in division by 0.0."
-        min_objective!(opt, (params, grad) -> obj_dynamic_local(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp; _insight = verbose))
+        min_objective!(opt, (params, grad) -> obj_dynamic_local(params, grad, data.ω, data.Gp, data.Gpp, model.Gpa, model.Gppa; _insight = verbose))
 
     elseif typeof(weights)==Vector{T} && length(weights)==2
-        min_objective!(opt, (params, grad) -> obj_dynamic_manual(params, grad, data.ω, data.Gp, data.Gpp, model.Gp, model.Gpp, weights; _insight = verbose))
+        min_objective!(opt, (params, grad) -> obj_dynamic_manual(params, grad, data.ω, data.Gp, data.Gpp, model.Gpa, model.Gppa, weights; _insight = verbose))
 
     end
 
