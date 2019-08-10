@@ -515,7 +515,7 @@ function model_parameters(nt::NamedTuple, params::Vector{Symbol}, err_string::St
     p = convert(Vector{RheoFloat}, p)
 end
 
-export freeze_params
+
 
 """
     freeze_params(m::RheoModelClass, name::String, nt0::NamedTuple)
@@ -651,7 +651,3 @@ end
 function Base.show(io::IO, m::RheoModel)
     print(io,m.info)
 end
-
-
-
-export RheoModelClass, RheoModel, model_parameters
