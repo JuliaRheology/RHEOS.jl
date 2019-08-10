@@ -13,10 +13,15 @@ function _operators_logs()
     d2=strainfunction(timeline(),t->1-exp(-t))
     d=2*d1 - (-d2) + d2
 
-    println(d)
-
     d3=rheologrun(d.log)
 
     (d3.ϵ == d.ϵ) && all([ abs(e-2.)<=eps(RheoFloat) for e in d.ϵ ])
 end
 @test _operators_logs()
+
+function _freeze_params()
+    SLS2_mod = freeze_params( SLS2, (G₀=2,η₂=3.5))
+
+    SLS2.G(1,[2,1,2,3,3.5])≈SLS2_mod.G(1,[1,2,3])
+end
+@test _freeze_params()
