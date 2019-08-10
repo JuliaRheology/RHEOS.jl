@@ -1173,3 +1173,21 @@ function _dynamicmodelfit_manualweights(tol)
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
 end
 @test _dynamicmodelfit_manualweights(tol)
+
+function _dynamicmodelpredict(tol)
+    ω = Vector{RheoFloat}(0.0:0.01:20.0)
+    actual_model = RheoModel(SLS, η=5.0, kᵦ=2.5, kᵧ=7.5)
+
+    dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
+    dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
+    data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
+
+    datapredicted = dynamicmodelpredict(data0, actual_model)
+
+    test1 = isapprox(dataGp, datapredicted.Gp)
+    test2 = isapprox(dataGpp, datapredicted.Gpp)
+    test3 = isapprox(ω, datapredicted.ω)
+    
+    test1 && test2 && test3
+end
+@test _dynamicmodelpredict(tol)
