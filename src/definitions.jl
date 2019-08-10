@@ -310,10 +310,32 @@ function RheoFreqDataType(d::RheoFreqData)
     return check_freq_data_consistency(d.ω,d.Gp,d.Gpp)
 end
 
-#
-# function Base.show(io::IO, d::RheoFreqData)
-# end
-#
+function Base.show(io::IO, d::RheoFreqData)
+    b = length(d.ω) > 10
+    n = b ? 10 : length(d.ω)
+
+    if d.ω != RheoFloat[]
+        print("ω =\t")
+        for i = 1:n
+            print("$(d.ω[i])\t")
+        end
+        println( b ? "..." : "")
+    end
+    if d.Gp != RheoFloat[]
+        print("Gp =\t")
+        for i = 1:n
+            print("$(d.Gp[i])\t")
+        end
+        println( b ? "..." : "")
+    end
+    if d.Gpp != RheoFloat[]
+        print("Gpp =\t")
+        for i = 1:n
+            print("$(d.Gpp[i])\t")
+        end
+        println( b ? "..." : "")
+    end
+end
 
 #=
 ---------------------------------------
