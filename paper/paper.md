@@ -19,7 +19,7 @@ affiliations:
   - name: Engineering Department, Cambridge University, UK
     index: 1
 date: 12 August 2019
-bibliography: main.bib
+bibliography: paper.bib
 ---
 # Summary
 Rheology is generally understood to refer to the science of deformation and flow. It encompasses a broad range of experimental methodologies (such as macro-scale metal tensile testing and micro-scale indentation tests of biological samples) and a correspondingly broad range of theoretical tools. 
