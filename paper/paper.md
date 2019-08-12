@@ -1,14 +1,15 @@
 ---
-title: 'RHEOS -- A Julia package for Rheology data analysis.'
+title: 'RHEOS.jl -- A Julia package for Rheology data analysis.'
 tags:
-  - Julia
   - Rheology
   - Fractional Rheology
   - Viscoelasticity
   - Fractional Viscoelasticity
   - Biomechanics
+  - Julia
 authors:
   - name: Jonathan Louis Kaplan
+    orcid: 0000-0002-2700-5229
     affiliation: 1
   - name: Alessandra Bonfanti
     affiliation: 1
@@ -39,8 +40,11 @@ RHEOS reduces the two biggest complexities presented above, arbitrary loading hi
 
 
 # Implementation and Demonstration
+In this section, the architecture of RHEOS is briefly discussed, accompanied by a demonstrative example. It should be noted that RHEOS is not, at its heart, an optimisation package. It builds on a another optimisation package, NLopt [@johnsonNLoptNonlinearoptimizationPackage], by adding a large number of abstractions specific to the exploration of viscoelastic data. Some of these abstractions are featured in the example below in which experimental viscoelastic data is fitted to a fractional viscoelastic model (spring-pot) and then this model is used to make a prediction of the behaviour so that its qualitative accuracy can be assessed.
 
-# 
+
+
+Note that although the above example dealt with time data, RHEOS handles frequency viscoelastic data equally well and models fitted on one type of viscoelastic moduli can easily be used to predict behaviour with a different moduli. (For instance, fitting against relaxation data and predicting the frequency response spectrum.)
 
 # Acknowledgements
 JLK Would like thank the George and Lillian Schiff Foundation for the PhD funding which facilitated this project.
