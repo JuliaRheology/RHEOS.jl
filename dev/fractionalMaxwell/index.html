@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Maxwell Models ·  </title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="../"><img class="logo" src="../assets/logo.png" alt="  logo"/></a><h1> </h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Home</a></li><li><span class="toctext">Models</span><ul><li><a class="toctext" href="../elements/">Basic Elements</a></li><li class="current"><a class="toctext" href>Maxwell Models</a><ul class="internal"><li><a class="toctext" href="#Fractional-Maxwell-1">Fractional Maxwell</a></li><li><a class="toctext" href="#Fractional-(Spring)-Maxwell-1">Fractional (Spring) Maxwell</a></li><li><a class="toctext" href="#Fractional-(Dashpot)-Maxwell-1">Fractional (Dashpot) Maxwell</a></li><li><a class="toctext" href="#Maxwell-model-1">Maxwell model</a></li></ul></li><li><a class="toctext" href="../burgers/">Burgers Models</a></li></ul></li><li><a class="toctext" href="../examples/">Examples</a></li><li><a class="toctext" href="../API/">API</a></li></ul></nav><article id="docs"><header><nav><ul><li>Models</li><li><a href>Maxwell Models</a></li></ul><a class="edit-page" href="https://github.com/JuliaRheology/RHEOS.jl/blob/master/docs/src-staging/fractionalMaxwell.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Maxwell Models</span><a class="fa fa-bars" href="#"></a></div></header><h2><a class="nav-anchor" id="Fractional-Maxwell-1" href="#Fractional-Maxwell-1">Fractional Maxwell</a></h2><pre class="language-julia"><code class="language-julia">using RHEOS
-using PyPlot</code></pre><pre class="language-julia"><code class="language-julia">FractionalMaxwell</code></pre><pre class="language-output"><code class="language-output">Model name: fractmaxwell
+include(&quot;plotmodel.jl&quot;)</code></pre><pre class="language-output"><code class="language-output">plotmodel (generic function with 1 method)</code></pre><pre class="language-julia"><code class="language-julia">FractionalMaxwell</code></pre><pre class="language-output"><code class="language-output">Model name: fractmaxwell
 
 Free parameters: cₐ, a, cᵦ and β
 
@@ -12,166 +12,46 @@ Free parameters: cₐ, a and k
 
            ___╱╲_________╱╲  ╱╲  ╱╲  ________
               ╲╱           ╲╱  ╲╱  ╲╱
-                cₐ,a               k</code></pre><pre class="language-julia"><code class="language-julia"># Create a time only dataset
-dϵ = timeline()
-dσ = timeline()
-
-# calculate a strain/stress data by appling a function of time (by defalut a unit step otherwise substitute hstep(amp = 2.))
-dϵ = strainfunction(dϵ, hstep())
-dσ = stressfunction(dσ, hstep()) - stressfunction(dσ, hstep(offset = 5.0))
-
-colplot = [&quot;red&quot;, &quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4ac0d&quot;, &quot;blue&quot;]
-
-fig, ax = subplots(1,2, figsize=(15,7))
-
+                cₐ,a               k</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
 
 # plot moduli for varying α
 for (i,alpha) in enumerate([0.1, 0.3, 0.5, 0.7, 0.9])
     
-    fmaxwellspring_model = RheoModel(FractionalMaxwellSpring,(cₐ = 1.0, a = alpha, k = 1.0))
-    
-    #Relaxation modulus
-    dG_fmaxwellspring = modelpredict(dϵ, fmaxwellspring_model)
-    ax[1].plot(dG_fmaxwellspring.t, dG_fmaxwellspring.σ./maximum(dG_fmaxwellspring.σ), color=colplot[i])
-    
-    # Creep modulus
-    dJ_fmaxwellspring = modelpredict(dσ, fmaxwellspring_model)
-    ax[2].plot(dJ_fmaxwellspring.t, dJ_fmaxwellspring.ϵ./maximum(dJ_fmaxwellspring.ϵ), color=colplot[i])
+    models = vcat(models,RheoModel(FractionalMaxwellSpring,(cₐ = 1.0, a = alpha, k = 1.0)))
  
 end
 
-ax[1].set_xlabel(&quot;Time&quot;, fontsize = 14);
-ax[1].set_ylabel(&quot;Stress&quot;, fontsize = 14);
-ax[1].tick_params(&quot;both&quot;, labelsize=12);
-
-ax[2].set_xlabel(&quot;Time&quot;, fontsize = 14);
-ax[2].set_ylabel(&quot;Strain&quot;, fontsize = 14);
-ax[2].tick_params(&quot;both&quot;, labelsize=12);</code></pre><p><img src="../fractionalMaxwell_files/fractionalMaxwell_6_0.png" alt="png"/></p><pre class="language-julia"><code class="language-julia">dω = frequencyspec()
-
-colplot = [&quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4ac0d&quot;, &quot;blue&quot;]
-
-# plot moduli for varying α
-for (i,alpha) in enumerate([0.3, 0.5, 0.7])
-    
-    fmaxwellspring_model = RheoModel(FractionalMaxwellSpring,(cₐ = 1.0, a = alpha, k = 1.0))
-    
-    # Storage and Loss moduli
-    d_fmaxwellspring = dynamicmodelpredict(dω, fmaxwellspring_model)
-    loglog(d_fmaxwellspring.ω, d_fmaxwellspring.Gp, color=colplot[i], &quot;-&quot;)
-    loglog(d_fmaxwellspring.ω, d_fmaxwellspring.Gpp, color=colplot[i], &quot;--&quot;)
-end
-
-xlabel(&quot;Frequency&quot;);
-ylabel(&quot;Storage (—) and Loss (- -) moduli&quot;);</code></pre><p><img src="../fractionalMaxwell_files/fractionalMaxwell_7_0.png" alt="png"/></p><h2><a class="nav-anchor" id="Fractional-(Dashpot)-Maxwell-1" href="#Fractional-(Dashpot)-Maxwell-1">Fractional (Dashpot) Maxwell</a></h2><pre class="language-julia"><code class="language-julia">FractionalMaxwellDashpot</code></pre><pre class="language-output"><code class="language-output">Model name: fractmaxwell_dashpot
+plotmodel(models);</code></pre><p><img src="../fractionalMaxwell_files/fractionalMaxwell_6_0.png" alt="png"/></p><p><img src="../fractionalMaxwell_files/fractionalMaxwell_6_1.png" alt="png"/></p><h2><a class="nav-anchor" id="Fractional-(Dashpot)-Maxwell-1" href="#Fractional-(Dashpot)-Maxwell-1">Fractional (Dashpot) Maxwell</a></h2><pre class="language-julia"><code class="language-julia">FractionalMaxwellDashpot</code></pre><pre class="language-output"><code class="language-output">Model name: fractmaxwell_dashpot
 
 Free parameters: η, cᵦ and β
 
                   ___
               _____| |_________╱╲____
                   _|_|         ╲╱
-                    η            cᵦ, β</code></pre><pre class="language-julia"><code class="language-julia"># Create a time only dataset
-dϵ = timeline()
-dσ = timeline()
-
-# calculate a strain/stress data by appling a function of time (by defalut a unit step otherwise substitute hstep(amp = 2.))
-dϵ = strainfunction(dϵ, hstep())
-dσ = stressfunction(dσ, hstep()) - stressfunction(dσ, hstep(offset = 5.0))
-
-colplot = [&quot;red&quot;, &quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4ac0d&quot;, &quot;blue&quot;]
-
-fig, ax = subplots(1,2, figsize=(15,7))
-
+                    η            cᵦ, β</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
 
 # plot moduli for varying β
 for (i,beta) in enumerate([0.1, 0.3, 0.5, 0.7, 0.9])
     
-    fmaxwelldashpot_model = RheoModel(FractionalMaxwellDashpot,(η = 10, cᵦ= 1.0, β = beta))
-    
-    #Relaxation modulus
-    dG_fmaxwelldashpot = modelpredict(dϵ, fmaxwelldashpot_model)
-    ax[1].plot(dG_fmaxwelldashpot.t, dG_fmaxwelldashpot.σ./maximum(dG_fmaxwelldashpot.σ), color=colplot[i])
-    
-    # Creep modulus
-    dJ_fmaxwelldashpot = modelpredict(dσ, fmaxwelldashpot_model)
-    ax[2].plot(dJ_fmaxwelldashpot.t, dJ_fmaxwelldashpot.ϵ./maximum(dJ_fmaxwelldashpot.ϵ), color=colplot[i])
+    models = vcat(models,RheoModel(FractionalMaxwellDashpot,(η = 10, cᵦ= 1.0, β = beta)))
  
 end
 
-ax[1].set_xlabel(&quot;Time&quot;, fontsize = 14);
-ax[1].set_ylabel(&quot;Stress&quot;, fontsize = 14);
-ax[1].tick_params(&quot;both&quot;, labelsize=12);
-
-ax[2].set_xlabel(&quot;Time&quot;, fontsize = 14);
-ax[2].set_ylabel(&quot;Strain&quot;, fontsize = 14);
-ax[2].tick_params(&quot;both&quot;, labelsize=12);</code></pre><p><img src="../fractionalMaxwell_files/fractionalMaxwell_10_0.png" alt="png"/></p><pre class="language-julia"><code class="language-julia">dω = frequencyspec()
-
-colplot = [&quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4ac0d&quot;, &quot;blue&quot;]
-
-# plot moduli for varying β
-for (i,beta) in enumerate([0.3, 0.5, 0.7])
-    
-    fmaxwelldashpot_model = RheoModel(FractionalMaxwellDashpot,(η = 10, cᵦ= 1.0, β = beta))
-    
-    # Storage and Loss moduli
-    d_fmaxwelldashpot = dynamicmodelpredict(dω, fmaxwelldashpot_model)
-    loglog(d_fmaxwelldashpot.ω, d_fmaxwelldashpot.Gp, color=colplot[i], &quot;-&quot;)
-    loglog(d_fmaxwelldashpot.ω, d_fmaxwelldashpot.Gpp, color=colplot[i], &quot;--&quot;)
-end
-
-xlabel(&quot;Frequency&quot;);
-ylabel(&quot;Storage (—) and Loss (- -) moduli&quot;);</code></pre><p><img src="../fractionalMaxwell_files/fractionalMaxwell_11_0.png" alt="png"/></p><h2><a class="nav-anchor" id="Maxwell-model-1" href="#Maxwell-model-1">Maxwell model</a></h2><pre class="language-julia"><code class="language-julia">Maxwell</code></pre><pre class="language-output"><code class="language-output">Model name: maxwell
+plotmodel(models, ymaxG = 2.0);
+</code></pre><p><img src="../fractionalMaxwell_files/fractionalMaxwell_9_0.png" alt="png"/></p><p><img src="../fractionalMaxwell_files/fractionalMaxwell_9_1.png" alt="png"/></p><h2><a class="nav-anchor" id="Maxwell-model-1" href="#Maxwell-model-1">Maxwell model</a></h2><pre class="language-julia"><code class="language-julia">Maxwell</code></pre><pre class="language-output"><code class="language-output">Model name: maxwell
 
 Free parameters: η and k
 
                 ___
             _____| |________╱╲  ╱╲  ╱╲  ___
                 _|_|          ╲╱  ╲╱  ╲╱
-                  η                  k</code></pre><pre class="language-julia"><code class="language-julia"># Create a time only dataset
-dϵ = timeline()
-dσ = timeline()
-
-# calculate a strain/stress data by appling a function of time (by defalut a unit step otherwise substitute hstep(amp = 2.))
-dϵ = strainfunction(dϵ, hstep())
-dσ = stressfunction(dσ, hstep()) - stressfunction(dσ, hstep(offset = 5.0))
-
-fig, ax = subplots(1,2, figsize=(15,7))
-colplot = [&quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4ac0d&quot;]
+                  η                  k</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
 
 # plot moduli for varying k
 for (i,k) in enumerate([5.0, 10.0, 20.0])
     
-    maxwell_model = RheoModel(Maxwell,(η = 10, k = k))
-    
-    #Relaxation modulus
-    dG_maxwell = modelpredict(dϵ, maxwell_model)
-    ax[1].plot(dG_maxwell.t, dG_maxwell.σ./maximum(dG_maxwell.σ), color=colplot[i])
-    
-    # Creep modulus
-    dJ_maxwell = modelpredict(dσ, maxwell_model)
-    ax[2].plot(dJ_maxwell.t, dJ_maxwell.ϵ./maximum(dJ_maxwell.ϵ), color=colplot[i])
+    models = vcat(models,RheoModel(Maxwell,(η = 10, k = k)))
  
 end
 
-ax[1].set_xlabel(&quot;Time&quot;, fontsize = 14);
-ax[1].set_ylabel(&quot;Stress&quot;, fontsize = 14);
-ax[1].tick_params(&quot;both&quot;, labelsize=12);
-
-ax[2].set_xlabel(&quot;Time&quot;, fontsize = 14);
-ax[2].set_ylabel(&quot;Strain&quot;, fontsize = 14);
-ax[2].tick_params(&quot;both&quot;, labelsize=12);</code></pre><p><img src="../fractionalMaxwell_files/fractionalMaxwell_14_0.png" alt="png"/></p><pre class="language-julia"><code class="language-julia">dω = frequencyspec()
-
-colplot = [&quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4ac0d&quot;]
-
-# plot moduli for varying k
-for (i,k) in enumerate([5.0, 10.0, 20.0])
-    
-    maxwell_model = RheoModel(Maxwell,(η = 10, k = k))
-    
-    # Storage and Loss moduli
-    d_maxwell = dynamicmodelpredict(dω, maxwell_model)
-    loglog(d_maxwell.ω, d_maxwell.Gp, color=colplot[i], &quot;-&quot;)
-    loglog(d_maxwell.ω, d_maxwell.Gpp, color=colplot[i], &quot;--&quot;)
-end
-
-xlabel(&quot;Frequency&quot;);
-ylabel(&quot;Storage (—) and Loss (- -) moduli&quot;);</code></pre><p><img src="../fractionalMaxwell_files/fractionalMaxwell_15_0.png" alt="png"/></p><footer><hr/><a class="previous" href="../elements/"><span class="direction">Previous</span><span class="title">Basic Elements</span></a><a class="next" href="../burgers/"><span class="direction">Next</span><span class="title">Burgers Models</span></a></footer></article></body></html>
+plotmodel(models);</code></pre><p><img src="../fractionalMaxwell_files/fractionalMaxwell_12_0.png" alt="png"/></p><p><img src="../fractionalMaxwell_files/fractionalMaxwell_12_1.png" alt="png"/></p><footer><hr/><a class="previous" href="../elements/"><span class="direction">Previous</span><span class="title">Basic Elements</span></a><a class="next" href="../burgers/"><span class="direction">Next</span><span class="title">Burgers Models</span></a></footer></article></body></html>
