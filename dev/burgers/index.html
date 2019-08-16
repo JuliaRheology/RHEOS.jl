@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Burgers Models ·  </title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="../"><img class="logo" src="../assets/logo.png" alt="  logo"/></a><h1> </h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Home</a></li><li><span class="toctext">Models</span><ul><li><a class="toctext" href="../elements/">Basic Elements</a></li><li><a class="toctext" href="../fractionalMaxwell/">Maxwell Models</a></li><li class="current"><a class="toctext" href>Burgers Models</a><ul class="internal"><li><a class="toctext" href="#Burgers-(Liquid)-1">Burgers (Liquid)</a></li></ul></li></ul></li><li><a class="toctext" href="../examples/">Examples</a></li><li><a class="toctext" href="../API/">API</a></li></ul></nav><article id="docs"><header><nav><ul><li>Models</li><li><a href>Burgers Models</a></li></ul><a class="edit-page" href="https://github.com/JuliaRheology/RHEOS.jl/blob/master/docs/src-staging/burgers.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Burgers Models</span><a class="fa fa-bars" href="#"></a></div></header><h2><a class="nav-anchor" id="Burgers-(Liquid)-1" href="#Burgers-(Liquid)-1">Burgers (Liquid)</a></h2><pre class="language-julia"><code class="language-julia">using RHEOS
-using PyPlot</code></pre><pre class="language-julia"><code class="language-julia">BurgersLiquid</code></pre><pre class="language-output"><code class="language-output">Model name: burgerliquid
+include(&quot;plotmodel.jl&quot;);</code></pre><pre class="language-julia"><code class="language-julia">BurgersLiquid</code></pre><pre class="language-output"><code class="language-output">Model name: burgerliquid
 
 Free parameters: η₁, k₁, η₂ and k₂
 
@@ -12,52 +12,13 @@ Free parameters: η₁, k₁, η₂ and k₂
                  _|_|          ╲╱  ╲╱  ╲╱       |                    |
                     η₁                  k₁      |____╱╲  ╱╲  ╱╲  ____|
                                                        ╲╱  ╲╱  ╲╱
-                                                                 k₂</code></pre><h3><a class="nav-anchor" id="Constitutive-equation-1" href="#Constitutive-equation-1">Constitutive equation</a></h3><div>\[\sigma(t) + p_1 \frac{d \sigma(t)}{dt} + p_2  \frac{d^2 \sigma(t)}{dt^2} = q_1  \frac{d \epsilon(t)}{dt} + q_2  \frac{d^2 \epsilon(t)}{dt^2}\]</div><p>where <span>$p_1 = \frac{\eta_1}{k_1}+\frac{\eta_1}{k_2}+\frac{\eta_1}{k_2}$</span>, <span>$p_2 = \frac{\eta_1 \eta_2}{k_1 k_2}$</span>, <span>$q_1 =  \eta_1$</span> and <span>$q_2 = \frac{\eta_1 \eta_2}{k_2}$</span>.</p><h3><a class="nav-anchor" id="Relaxation-modulus-1" href="#Relaxation-modulus-1">Relaxation modulus</a></h3><div>\[G(t) = \left[ \left(q_1 - q_2 r_1\right) e^{-r_1 t}  - \left(q_1 - q_2 r_2\right) e^{-r_2 t} \right]/A\]</div><p>where <span>$r_1 = (p_1-A)/2p_2$</span>, <span>$r_2 = (p_1 +A) /2p_2$</span>, and <span>$A = \sqrt{p_1^2 - 4p_2}$</span></p><h3><a class="nav-anchor" id="Creep-modulus-1" href="#Creep-modulus-1">Creep modulus</a></h3><div>\[J(t) = \frac{1}{k_1} + \frac{t}{\eta_1} + \frac{1}{k_2} \left(1-e^{-k_2 t/\eta_2}\right)\]</div><h3><a class="nav-anchor" id="Storage-modulus-1" href="#Storage-modulus-1">Storage modulus</a></h3><div>\[G^{\prime}(\omega) = \frac{p_1 q_1 \omega^2 - q_2 \omega^2 (1-p_2 \omega^2)}{p_1^2 \omega^2 + (1-p_2 \omega^2)^2}\]</div><h3><a class="nav-anchor" id="Loss-modulus-1" href="#Loss-modulus-1">Loss modulus</a></h3><div>\[G^{\prime \prime}(\omega) = \frac{p_1 q_2 \omega^3 + q_1 \omega (1-p_2 \omega^2)}{p_1^2 \omega^2 + (1-p_2 \omega^2)^2}\]</div><pre class="language-julia"><code class="language-julia"># Create a time only dataset
-dϵ = timeline()
-dσ = timeline()
-
-# calculate a strain/stress data by appling a function of time (by defalut a unit step otherwise substitute hstep(amp = 2.))
-dϵ = strainfunction(dϵ, hstep())
-dσ = stressfunction(dσ, hstep()) - stressfunction(dσ, hstep(offset = 5.0))
-
-fig, ax = subplots(1,2, figsize=(15,7))
-colplot = [&quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4ac0d&quot;]
+                                                                 k₂</code></pre><h3><a class="nav-anchor" id="Constitutive-equation-1" href="#Constitutive-equation-1">Constitutive equation</a></h3><div>\[\sigma(t) + p_1 \frac{d \sigma(t)}{dt} + p_2  \frac{d^2 \sigma(t)}{dt^2} = q_1  \frac{d \epsilon(t)}{dt} + q_2  \frac{d^2 \epsilon(t)}{dt^2}\]</div><p>where <span>$p_1 = \frac{\eta_1}{k_1}+\frac{\eta_1}{k_2}+\frac{\eta_1}{k_2}$</span>, <span>$p_2 = \frac{\eta_1 \eta_2}{k_1 k_2}$</span>, <span>$q_1 =  \eta_1$</span> and <span>$q_2 = \frac{\eta_1 \eta_2}{k_2}$</span>.</p><h3><a class="nav-anchor" id="Relaxation-modulus-1" href="#Relaxation-modulus-1">Relaxation modulus</a></h3><div>\[G(t) = \left[ \left(q_1 - q_2 r_1\right) e^{-r_1 t}  - \left(q_1 - q_2 r_2\right) e^{-r_2 t} \right]/A\]</div><p>where <span>$r_1 = (p_1-A)/2p_2$</span>, <span>$r_2 = (p_1 +A) /2p_2$</span>, and <span>$A = \sqrt{p_1^2 - 4p_2}$</span></p><h3><a class="nav-anchor" id="Creep-modulus-1" href="#Creep-modulus-1">Creep modulus</a></h3><div>\[J(t) = \frac{1}{k_1} + \frac{t}{\eta_1} + \frac{1}{k_2} \left(1-e^{-k_2 t/\eta_2}\right)\]</div><h3><a class="nav-anchor" id="Storage-modulus-1" href="#Storage-modulus-1">Storage modulus</a></h3><div>\[G^{\prime}(\omega) = \frac{p_1 q_1 \omega^2 - q_2 \omega^2 (1-p_2 \omega^2)}{p_1^2 \omega^2 + (1-p_2 \omega^2)^2}\]</div><h3><a class="nav-anchor" id="Loss-modulus-1" href="#Loss-modulus-1">Loss modulus</a></h3><div>\[G^{\prime \prime}(\omega) = \frac{p_1 q_2 \omega^3 + q_1 \omega (1-p_2 \omega^2)}{p_1^2 \omega^2 + (1-p_2 \omega^2)^2}\]</div><h3><a class="nav-anchor" id="Qualitative-behaviours-of-the-moduli-1" href="#Qualitative-behaviours-of-the-moduli-1">Qualitative behaviours of the moduli</a></h3><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
 
 # plot moduli for varying k₁
-for (i,k) in enumerate([0.1, 1.0, 100.0])
+for (i,k) in enumerate([0.5, 1.0, 2.0])
     
-    burgers_model = RheoModel(BurgersLiquid,(η₁ = 1, k₁ = k, η₂ = 1, k₂ = 1))
-    
-    #Relaxation modulus
-    dG_burgers = modelpredict(dϵ, burgers_model)
-    ax[1].plot(dG_burgers.t, dG_burgers.σ./maximum(dG_burgers.σ), color=colplot[i])
-    
-    # Creep modulus
-    dJ_burgers = modelpredict(dσ, burgers_model)
-    ax[2].plot(dJ_burgers.t, dJ_burgers.ϵ./maximum(dJ_burgers.ϵ), color=colplot[i])
+    models = vcat(models,RheoModel(BurgersLiquid,(η₁ = 1, k₁ = k, η₂ = 1, k₂ = 1)))
  
 end
 
-ax[1].set_xlabel(&quot;Time&quot;, fontsize = 14);
-ax[1].set_ylabel(&quot;Stress&quot;, fontsize = 14);
-ax[1].tick_params(&quot;both&quot;, labelsize=12);
-
-ax[2].set_xlabel(&quot;Time&quot;, fontsize = 14);
-ax[2].set_ylabel(&quot;Strain&quot;, fontsize = 14);
-ax[2].tick_params(&quot;both&quot;, labelsize=12);</code></pre><p><img src="../burgers_files/burgers_4_0.png" alt="png"/></p><pre class="language-julia"><code class="language-julia">dω = frequencyspec()
-
-colplot = [&quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4ac0d&quot;]
-
-# plot moduli for varying k₁
-for (i,k) in enumerate([0.1, 1.0, 100.0])
-    
-    burgers_model = RheoModel(BurgersLiquid,(η₁ = 1, k₁ = k, η₂ = 1, k₂ = 1))
-    
-    # Storage and Loss moduli
-    d_burgers = dynamicmodelpredict(dω, burgers_model)
-    loglog(d_burgers.ω, d_burgers.Gp, color=colplot[i], &quot;-&quot;)
-    loglog(d_burgers.ω, d_burgers.Gpp, color=colplot[i], &quot;--&quot;)
-end
-
-xlabel(&quot;Frequency&quot;);
-ylabel(&quot;Storage (—) and Loss (- -) moduli&quot;);</code></pre><p><img src="../burgers_files/burgers_5_0.png" alt="png"/></p><p><strong>Reference</strong> </p><p>Findley, William N., and Francis A. Davis. Creep and relaxation of nonlinear viscoelastic materials. Courier Corporation, 2013.</p><footer><hr/><a class="previous" href="../fractionalMaxwell/"><span class="direction">Previous</span><span class="title">Maxwell Models</span></a><a class="next" href="../examples/"><span class="direction">Next</span><span class="title">Examples</span></a></footer></article></body></html>
+plotmodel(models);</code></pre><p><img src="../burgers_files/burgers_5_0.png" alt="png"/></p><p><img src="../burgers_files/burgers_5_1.png" alt="png"/></p><p><strong>Reference</strong> </p><p>Findley, William N., and Francis A. Davis. Creep and relaxation of nonlinear viscoelastic materials. Courier Corporation, 2013.</p><footer><hr/><a class="previous" href="../fractionalMaxwell/"><span class="direction">Previous</span><span class="title">Maxwell Models</span></a><a class="next" href="../examples/"><span class="direction">Next</span><span class="title">Examples</span></a></footer></article></body></html>

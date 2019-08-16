@@ -16,7 +16,7 @@ maxwell_model = modelfit(data, Maxwell, strain_imposed)
 </code></pre><pre class="language-output"><code class="language-output">┌ Warning: Please note that NaN data rows are not included in resultant data struct.
 └ @ RHEOS /home/ab2425/.julia/dev/RHEOS/src/IO.jl:11
 ┌ Warning: Initial values for model parameters is set to [0.5, 0.5] by default
-└ @ RHEOS /home/ab2425/.julia/dev/RHEOS/src/processing.jl:210</code></pre><p><img src="../examples_files/examples_5_1.png" alt="png"/></p><pre class="language-output"><code class="language-output">Time: 2.079403156 s, Why: XTOL_REACHED, Parameters: [4.0054, 2.003], Error: 0.022310985023644047</code></pre><pre class="language-output"><code class="language-output">Model: maxwell
+└ @ RHEOS /home/ab2425/.julia/dev/RHEOS/src/processing.jl:210</code></pre><p><img src="../examples_files/examples_5_1.png" alt="png"/></p><pre class="language-output"><code class="language-output">Time: 3.706965346 s, Why: XTOL_REACHED, Parameters: [4.0054, 2.003], Error: 0.022310985023644047</code></pre><pre class="language-output"><code class="language-output">Model: maxwell
 
 Parameter values: (η = 4.0054017305374146, k = 2.003000020980835) 
 
@@ -34,7 +34,7 @@ plot(data.t,data.ϵ,&quot;-&quot;)
 plot(data.t,data.σ,&quot;.&quot;)
 plot(maxwell_predict.t,maxwell_predict.σ)
 </code></pre><p><img src="../examples_files/examples_7_0.png" alt="png"/></p><pre class="language-output"><code class="language-output">1-element Array{PyCall.PyObject,1}:
- PyObject &lt;matplotlib.lines.Line2D object at 0x7fdab9667d30&gt;</code></pre><h1><a class="nav-anchor" id="Example-2-1" href="#Example-2-1">Example 2</a></h1><p>This script shows how to use RHEOS to explore the behaviour of various modeks This involves:</p><ul><li>Creating a strain function</li><li>Defining models based on parameter values</li></ul><p>PyPlot needs to be installed to run these examples and display plots of the data.</p><pre class="language-julia"><code class="language-julia">
+ PyObject &lt;matplotlib.lines.Line2D object at 0x7f7b11d8bc88&gt;</code></pre><h1><a class="nav-anchor" id="Example-2-1" href="#Example-2-1">Example 2</a></h1><p>This script shows how to use RHEOS to explore the behaviour of various modeks This involves:</p><ul><li>Creating a strain function</li><li>Defining models based on parameter values</li></ul><p>PyPlot needs to be installed to run these examples and display plots of the data.</p><pre class="language-julia"><code class="language-julia">
 # Creates a time only dataset
 dϵ=timeline()
 # calculates strain data by applying a function of time
@@ -54,4 +54,4 @@ end
 xlabel(&quot;Time&quot;)
 ylabel(L&quot;\rm{Stress, }\sigma&quot;)
 grid(&quot;on&quot;)
-</code></pre><p><img src="../examples_files/examples_9_0.png" alt="png"/></p><pre class="language-julia"><code class="language-julia"></code></pre><footer><hr/><a class="previous" href="../burgers/"><span class="direction">Previous</span><span class="title">Burgers Models</span></a><a class="next" href="../API/"><span class="direction">Next</span><span class="title">API</span></a></footer></article></body></html>
+</code></pre><p><img src="../examples_files/examples_9_0.png" alt="png"/></p><footer><hr/><a class="previous" href="../burgers/"><span class="direction">Previous</span><span class="title">Burgers Models</span></a><a class="next" href="../API/"><span class="direction">Next</span><span class="title">API</span></a></footer></article></body></html>

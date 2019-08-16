@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Basic Elements ·  </title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="../"><img class="logo" src="../assets/logo.png" alt="  logo"/></a><h1> </h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Home</a></li><li><span class="toctext">Models</span><ul><li class="current"><a class="toctext" href>Basic Elements</a><ul class="internal"><li><a class="toctext" href="#Springpot-1">Springpot</a></li><li><a class="toctext" href="#Spring-1">Spring</a></li><li><a class="toctext" href="#Dashpot-1">Dashpot</a></li></ul></li><li><a class="toctext" href="../fractionalMaxwell/">Maxwell Models</a></li><li><a class="toctext" href="../burgers/">Burgers Models</a></li></ul></li><li><a class="toctext" href="../examples/">Examples</a></li><li><a class="toctext" href="../API/">API</a></li></ul></nav><article id="docs"><header><nav><ul><li>Models</li><li><a href>Basic Elements</a></li></ul><a class="edit-page" href="https://github.com/JuliaRheology/RHEOS.jl/blob/master/docs/src-staging/elements.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Basic Elements</span><a class="fa fa-bars" href="#"></a></div></header><h2><a class="nav-anchor" id="Springpot-1" href="#Springpot-1">Springpot</a></h2><pre class="language-julia"><code class="language-julia">using RHEOS
-using PyPlot</code></pre><pre class="language-output"><code class="language-output">┌ Info: Recompiling stale cache file /home/ab2425/.julia/compiled/v1.1/RHEOS/8Ut5K.ji for RHEOS [728860ae-c896-11e8-0b91-0f38ecad5046]
-└ @ Base loading.jl:1184
-┌ Info: Recompiling stale cache file /home/ab2425/.julia/compiled/v1.1/PyPlot/oatAj.ji for PyPlot [d330b81b-6aea-500a-939a-2ce795aea3ee]
-└ @ Base loading.jl:1184</code></pre><p>By typing the name of the model, it is possible to visualise its graphical representation and its parameters. </p><pre class="language-julia"><code class="language-julia">Springpot</code></pre><pre class="language-output"><code class="language-output">Model name: springpot
+include(&quot;plotmodel.jl&quot;);</code></pre><p>By typing the name of the model, it is possible to visualise its graphical representation and its parameters. </p><pre class="language-julia"><code class="language-julia">Springpot</code></pre><pre class="language-output"><code class="language-output">Model name: springpot
 
 Free parameters: cᵦ and β
 
                 ____ ╱╲ ____
-                     ╲╱  cᵦ, β</code></pre><h3><a class="nav-anchor" id="Consitutive-equation-1" href="#Consitutive-equation-1">Consitutive equation</a></h3><div>\[\sigma(t) = c_{\beta} \frac{d^\beta \epsilon(t)}{dt^\beta}\]</div><p>for <span>$0 \leq \beta \leq 1$</span></p><h3><a class="nav-anchor" id="Relaxation-modulus-1" href="#Relaxation-modulus-1">Relaxation modulus</a></h3><div>\[G(t) = \frac{c_{\beta} }{\Gamma(1-\beta)} t^{-\beta}\]</div><h3><a class="nav-anchor" id="Creep-modulus-1" href="#Creep-modulus-1">Creep modulus</a></h3><div>\[J(t) = \frac{1}{c_\beta \Gamma(1+\beta)}t^\beta\]</div><h3><a class="nav-anchor" id="Storage-modulus-1" href="#Storage-modulus-1">Storage modulus</a></h3><div>\[G^{\prime}(\omega) = c_\beta \omega^\beta \cos(\frac{\pi}{2}\beta)\]</div><h3><a class="nav-anchor" id="Loss-modulus-1" href="#Loss-modulus-1">Loss modulus</a></h3><div>\[G^{\prime\prime}(\omega) = c_\beta \omega^\beta \sin(\frac{\pi}{2}\beta)\]</div><h2><a class="nav-anchor" id="Spring-1" href="#Spring-1">Spring</a></h2><p>When <span>$\beta = 0$</span> the springpot specialises to a spring</p><pre class="language-julia"><code class="language-julia">Spring</code></pre><pre class="language-output"><code class="language-output">Model name: spring
+                     ╲╱  cᵦ, β</code></pre><h3><a class="nav-anchor" id="Constitutive-equation-1" href="#Constitutive-equation-1">Constitutive equation</a></h3><div>\[\sigma(t) = c_{\beta} \frac{d^\beta \epsilon(t)}{dt^\beta}\]</div><p>for <span>$0 \leq \beta \leq 1$</span></p><h3><a class="nav-anchor" id="Relaxation-modulus-1" href="#Relaxation-modulus-1">Relaxation modulus</a></h3><div>\[G(t) = \frac{c_{\beta} }{\Gamma(1-\beta)} t^{-\beta}\]</div><h3><a class="nav-anchor" id="Creep-modulus-1" href="#Creep-modulus-1">Creep modulus</a></h3><div>\[J(t) = \frac{1}{c_\beta \Gamma(1+\beta)}t^\beta\]</div><h3><a class="nav-anchor" id="Storage-modulus-1" href="#Storage-modulus-1">Storage modulus</a></h3><div>\[G^{\prime}(\omega) = c_\beta \omega^\beta \cos(\frac{\pi}{2}\beta)\]</div><h3><a class="nav-anchor" id="Loss-modulus-1" href="#Loss-modulus-1">Loss modulus</a></h3><div>\[G^{\prime\prime}(\omega) = c_\beta \omega^\beta \sin(\frac{\pi}{2}\beta)\]</div><h2><a class="nav-anchor" id="Spring-1" href="#Spring-1">Spring</a></h2><p>When <span>$\beta = 0$</span> the springpot specialises to a spring</p><pre class="language-julia"><code class="language-julia">Spring</code></pre><pre class="language-output"><code class="language-output">Model name: spring
 
 Free parameters: k
 
@@ -20,83 +17,19 @@ Free parameters: η
                  ___
              _____| |_____
                  _|_|
-                     η</code></pre><pre class="language-julia"><code class="language-julia"># Create a time only dataset
-dϵ = timeline()
-dσ = timeline()
+                     η</code></pre><h3><a class="nav-anchor" id="Qualitative-behaviours-of-the-moduli-1" href="#Qualitative-behaviours-of-the-moduli-1">Qualitative behaviours of the moduli</a></h3><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
 
-# calculate a strain/stress data by appling a function of time (by defalut a unit step otherwise substitute hstep(amp = 2.))
-dϵ = strainfunction(dϵ, hstep())
-dσ = stressfunction(dσ, hstep()) - stressfunction(dσ, hstep(offset = 5.0))
-
-colplot = [&quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4ac0d&quot;]
-
-fig, ax = subplots(1,2, figsize=(15,7))
-
+# Spring
+models = vcat(models, RheoModel(Spring, (k = 1.0,)))
 
 # plot moduli for varying β
 for (i,beta) in enumerate([0.2, 0.5, 0.8])
     
-    springpot_model = RheoModel(Springpot,(cᵦ = 1.0, β = beta))
-    
-    #Relaxation modulus
-    dG_springpot = modelpredict(dϵ, springpot_model)
-    ax[1].loglog(dG_springpot.t, dG_springpot.σ, color=colplot[i])
-    
-    # Creep modulus
-    dJ_springpot = modelpredict(dσ, springpot_model)
-    ax[2].loglog(dJ_springpot.t, dJ_springpot.ϵ, color=colplot[i])
+    models = vcat(models, RheoModel(Springpot,(cᵦ = 1.0, β = beta)))
  
 end
 
-# SPRING
-spring_model = RheoModel(Spring, (k = 1.0,))
+# Dashpot
+models = vcat(models, RheoModel(Dashpot, (η = 1.0,)))
 
-#Relaxation modulus
-dG_spring = modelpredict(dϵ, spring_model)
-ax[1].plot(dG_spring.t, dG_spring.σ, color = &quot;red&quot;);
-
-# Creep modulus
-dJ_spring = modelpredict(dσ, spring_model)
-ax[2].plot(dJ_spring.t, dJ_spring.ϵ, color = &quot;red&quot;);
-
-# DASHPOT
-dashpot_model = RheoModel(Dashpot, (η = 1.0,))
-
-# Creep modulus
-dJ_dashpot = modelpredict(dσ, dashpot_model)
-ax[2].plot(dJ_dashpot.t, dJ_dashpot.ϵ, color = &quot;blue&quot;);
-
-ax[1].set_xlabel(&quot;Time&quot;, fontsize = 14);
-ax[1].set_ylabel(&quot;Stress&quot;, fontsize = 14);
-ax[1].tick_params(&quot;both&quot;, labelsize=12);
-#ax[1].set_ylim(bottom=0.0, top= 2.0);
-
-ax[2].set_xlabel(&quot;Time&quot;, fontsize = 14);
-ax[2].set_ylabel(&quot;Strain&quot;, fontsize = 14);
-ax[2].tick_params(&quot;both&quot;, labelsize=12);</code></pre><p><img src="../elements_files/elements_8_0.png" alt="png"/></p><pre class="language-julia"><code class="language-julia">dω = frequencyspec()
-
-colplot = [&quot;#dc7633&quot;, &quot;#229954&quot;, &quot;#d4ac0d&quot;]
-
-# plot moduli for varying β
-for (i,beta) in enumerate([0.3, 0.5, 0.7])
-    
-    springpot_model = RheoModel(Springpot,(cᵦ = 1.0, β = beta))
-    
-    # Storage and Loss moduli
-    d_springpot = dynamicmodelpredict(dω, springpot_model)
-    loglog(d_springpot.ω, d_springpot.Gp, color=colplot[i], &quot;-&quot;)
-    loglog(d_springpot.ω, d_springpot.Gpp, color=colplot[i], &quot;--&quot;)
-end
-
-# SPRING
-spring_model = RheoModel(Spring, (k = 1.0,))
-d_spring = dynamicmodelpredict(dω, spring_model)
-loglog(d_spring.ω, d_spring.Gp, &quot;-&quot;, color = &quot;red&quot;)
-
-# DASHPOT
-dashpot_model = RheoModel(Dashpot, (η = 1.0,))
-d_dashpot = dynamicmodelpredict(dω, dashpot_model)
-loglog(d_dashpot.ω, d_dashpot.Gpp, &quot;--&quot;, color = &quot;blue&quot;)
-
-xlabel(&quot;Frequency&quot;);
-ylabel(&quot;Storage (—) and Loss (- -) moduli&quot;);</code></pre><p><img src="../elements_files/elements_9_0.png" alt="png"/></p><footer><hr/><a class="previous" href="../"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../fractionalMaxwell/"><span class="direction">Next</span><span class="title">Maxwell Models</span></a></footer></article></body></html>
+plotmodel(models, ymaxG = 2.0);</code></pre><p><img src="../elements_files/elements_9_0.png" alt="png"/></p><p><img src="../elements_files/elements_9_1.png" alt="png"/></p><footer><hr/><a class="previous" href="../"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../fractionalMaxwell/"><span class="direction">Next</span><span class="title">Maxwell Models</span></a></footer></article></body></html>
