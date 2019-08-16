@@ -44,13 +44,21 @@ Obtaining intuition for fractional viscoelastic theory can be difficult, and lea
 
 Lastly, although research groups may have closed-source code for their specific rheology fitting application, and limited open-source options are avilable [@Bobrheology; @seifertPythonToolsAnalysis2019], there presently does not exist any open-source rheology software which addresses the entire gamut of linear rheology data analysis needs. This state of affairs reduces scientific reproducibility and results in many researchers spending significant amounts of time writing their own software.
 
-# Features and Demonstration.
-RHEOS addresses the issues outlined in the Statement of Need in several ways. 
+# Implementation
+## Features
+RHEOS addresses the issues outlined in the Statement of Need in several ways.
 
-RHEOS reduces the two biggest complexities presented above, arbitrary loading history and fractional model kernels, to a simple, approachable syntax. It includes all of the most common traditional and fractional viscoelastic models and additional models can easily be added by users.
+As well as being able to fit and predict assuming step loading of stress or strain, RHEOS can handle arbitrary loading for non-singular and singular models, and for constant or variable sample rates.
 
-Given the above, RHEOS also includes signal generation features so that common loading patterns (e.g. step, ramp, stairs) can be applied to unfamiliar models to gain great qualitative intuition of their behaviour.
+RHEOS includes an extensive library of both traditional and fractional viscoelastic models. Although they are all users are ever likely to need, it is also straightforward for users to add their own models to RHEOS. 
 
+For intuition-building and model exporation, RHEOS includes signal generation features so that common loading patterns (e.g. step, ramp, stairs) that can be applied to unfamiliar models.
+
+As a convenience to the user, RHEOS also includes easy-to-use CSV importing and exporting functions, as well as a number of preprocessing functions for resampling and smoothing.
+
+All of the above features are linked together in a seamless interface intended to be very approachable for less experienced programmers. The different testing paradigms of creep, relaxation and oscillatory testing are all accounted for and models fitted against one type of data can be used to predict against a different type of data.
+
+## Demonstration
 In this section, the architecture of RHEOS is briefly discussed, accompanied by a demonstrative example. It should be noted that RHEOS is not, at its heart, an optimisation package. It builds on a another optimisation package, NLopt [@johnsonNLoptNonlinearoptimizationPackage] by adding a large number of abstractions specific to the exploration of viscoelastic data. Some of these abstractions are featured in the example below in which experimental viscoelastic data is fitted to a fractional viscoelastic model (spring-pot) and then this model is used to make a prediction of the behaviour so that its qualitative accuracy can be assessed.
 
  The RHEOS-specific commands used to load in the data, fit a model and predict using that model are the following:
