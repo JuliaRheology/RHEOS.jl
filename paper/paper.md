@@ -32,20 +32,24 @@ To our knowledge there is no other software package that offers RHEOS' broad sel
 RHEOS has already been used in one study [@bonfantiUnifiedRheologicalModel2019] and is currently being used in at least one other study and review that are in progress.
 
 # Statement of Need
+A large majority of scientists and engineers who undertanke rheological experiments intend to computationally fit the data with one or several viscoelastic models.
+
 When fitting regular linear viscoelastic models to data under the assumption of step loading, the process is straightforward as it reduces to a direct optimisation of a function which consists of a small number of exponential terms. Indeed, possibly due to the computational convenience of the above, many studies do assume that their loading is accurately described by a step function and a traditional viscoelastic model. However the validity of this approach is not always tenable. With regard to the step assumption, a number of studies have noted the importance of small time-scale behaviour when fitting viscoelastic models [@bonfantiUnifiedRheologicalModel2019; @dipaolaInfluenceInitialRamp2014; @oyenSphericalIndentationCreep2005]. Taking into account a complete arbitrary loading history requires computing the viscoelastic hereditary integral:
 
 $$ \sigma(t) = \int_{0}^t G(t - \tau) \frac{d \epsilon(\tau)}{d \tau} d \tau $$
 
 Depending on the model kernel *G* and the sample rate(s) of the data, computation is not always straightforward and there are several approaches that can be used. With regard to the choice of model, the utility of fractional viscoelastic models has been well documented [@bonfantiUnifiedRheologicalModel2019]. Furthermore, these fractional viscoelastic models are often valuable in modelling biological materials, which may be studied by highly interdisciplinary research groups where there is neither the time or expertise required to utilise fractional viscoelastic modelling.
 
-Obtaining intuition for fractional viscoelastic theory can be difficult, and learning material is sparse: of popular rheology textbooks published in 1989 [@barnesIntroductionRheology1989; @findleyCreepRelaxationNonlinear1989], 2008 [@brinsonPolymerEngineeringScience2008], 2009 [@lakesViscoelasticMaterials2009] and 2013 [@wardMechanicalPropertiesSolid2013], fractional viscoelasticity is only mentioned briefly in one of them [@lakesViscoelasticMaterials2009]. Given the above, RHEOS also includes signal generation features so that common loading patterns (e.g. step, ramp, stairs) can be applied to unfamiliar models to gain great qualitative intuition of their behaviour.
+Obtaining intuition for fractional viscoelastic theory can be difficult, and learning material is sparse: of popular rheology textbooks published in 1989 [@barnesIntroductionRheology1989; @findleyCreepRelaxationNonlinear1989], 2008 [@brinsonPolymerEngineeringScience2008], 2009 [@lakesViscoelasticMaterials2009] and 2013 [@wardMechanicalPropertiesSolid2013], fractional viscoelasticity is only mentioned briefly in one of them [@lakesViscoelasticMaterials2009]. 
 
-Lastly, 
+Lastly, although research groups may have closed-source code for their specific rheology fitting application, and limited open-source options are avilable [@Bobrheology; @seifertPythonToolsAnalysis2019], there presently does not exist any open-source rheology software which addresses the entire gamut of linear rheology data analysis needs. This state of affairs reduces scientific reproducibility and results in many researchers spending significant amounts of time writing their own software.
 
 # Features and Demonstration.
 RHEOS addresses the issues outlined in the Statement of Need in several ways. 
 
 RHEOS reduces the two biggest complexities presented above, arbitrary loading history and fractional model kernels, to a simple, approachable syntax. It includes all of the most common traditional and fractional viscoelastic models and additional models can easily be added by users.
+
+Given the above, RHEOS also includes signal generation features so that common loading patterns (e.g. step, ramp, stairs) can be applied to unfamiliar models to gain great qualitative intuition of their behaviour.
 
 In this section, the architecture of RHEOS is briefly discussed, accompanied by a demonstrative example. It should be noted that RHEOS is not, at its heart, an optimisation package. It builds on a another optimisation package, NLopt [@johnsonNLoptNonlinearoptimizationPackage] by adding a large number of abstractions specific to the exploration of viscoelastic data. Some of these abstractions are featured in the example below in which experimental viscoelastic data is fitted to a fractional viscoelastic model (spring-pot) and then this model is used to make a prediction of the behaviour so that its qualitative accuracy can be assessed.
 
