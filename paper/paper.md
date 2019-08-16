@@ -25,7 +25,7 @@ bibliography: paper.bib
 # Summary
 Rheology is generally understood to refer to the science of deformation and flow. It encompasses a broad range of experimental methodologies (such as macro-scale metal tensile testing and micro-scale indentation tests of biological samples) and a correspondingly broad range of theoretical tools.
 
-RHEOS (Rheology, Open-Source) is a software package that is designed to make the analysis of linear rheological data simpler, faster and more reproducible. RHEOS has a particular emphasis on rheological models containing fractional derivatives which have demonstrable utility for the modelling of biological materials [@bonfantiUnifiedRheologicalModel2019; @kaplanPectinMethylesterificationImplications2019] but have hitherto remained in relative obscurity -- possibly due to their mathematical and computational complexity. RHEOS is written in Julia [@bezansonJuliaFreshApproach2017], which greatly assists achievement of our aims as it provides excellent computational efficiency and approachable syntax. RHEOS is fully documented and has extensive testing coverage.
+RHEOS (Rheology, Open-Source) is a software package that is designed to make the analysis of linear rheological data simpler, faster and more reproducible. RHEOS has a particular emphasis on rheological models containing fractional derivatives which have demonstrable utility for the modelling of biological materials [@bonfantiUnifiedRheologicalModel2019; @kaplanPectinMethylesterificationImplications2019] but have hitherto remained in relative obscurity -- possibly due to their mathematical and computational complexity. RHEOS is written in Julia [@bezansonJuliaFreshApproach2017], which greatly assists achievement of our aims as it provides excellent computational efficiency and approachable syntax. RHEOS is fully documented and has extensive testing coverage. It should be noted that RHEOS is not an optimisation package. It builds on another optimisation package, NLopt [@johnsonNLoptNonlinearoptimizationPackage] by adding a large number of abstractions and functionality specific to the exploration of viscoelastic data.
 
 To our knowledge there is no other software package that offers RHEOS' broad selection of rheology analysis tools and extensive library of both traditional and fractional models.
 
@@ -42,7 +42,7 @@ Depending on the model kernel *G* and the sample rate(s) of the data, computatio
 
 Obtaining intuition for fractional viscoelastic theory can be difficult, and learning material is sparse: of popular rheology textbooks published in 1989 [@barnesIntroductionRheology1989; @findleyCreepRelaxationNonlinear1989], 2008 [@brinsonPolymerEngineeringScience2008], 2009 [@lakesViscoelasticMaterials2009] and 2013 [@wardMechanicalPropertiesSolid2013], fractional viscoelasticity is only mentioned briefly in one of them [@lakesViscoelasticMaterials2009]. 
 
-Lastly, although research groups may have closed-source code for their specific rheology fitting application, and limited open-source options are avilable [@Bobrheology; @seifertPythonToolsAnalysis2019], there presently does not exist any open-source rheology software which addresses the entire gamut of linear rheology data analysis needs. This state of affairs reduces scientific reproducibility and results in many researchers spending significant amounts of time writing their own software.
+Lastly, although research groups may have closed-source code for their specific rheology fitting application, and limited open-source options are avilable [@Bobrheology; @seifertPythonToolsAnalysis2019], there presently does not exist any open-source rheology software which addresses the entire gamut of linear rheology data analysis needs. This state of affairs reduces scientific reproducibility and results in many researchers spending significant amounts of time writing their own software unnecessarily.
 
 # Implementation
 ## Features
@@ -56,23 +56,16 @@ For intuition-building and model exporation, RHEOS includes signal generation fe
 
 As a convenience to the user, RHEOS also includes easy-to-use CSV importing and exporting functions, as well as a number of preprocessing functions for resampling and smoothing.
 
-All of the above features are linked together in a seamless interface intended to be very approachable for less experienced programmers. The different testing paradigms of creep, relaxation and oscillatory testing are all accounted for and models fitted against one type of data can be used to predict against a different type of data.
+All of the above features are linked together in a seamless interface intended to be very approachable for less experienced programmers. The different testing paradigms of creep, relaxation and oscillatory testing are all accounted for and models fitted against one type of data can be used to predict against a different type of data. (For instance, fitting against relaxation data and predicting the frequency response spectrum.)
 
 ## Demonstration
-In this section, the architecture of RHEOS is briefly discussed, accompanied by a demonstrative example. It should be noted that RHEOS is not, at its heart, an optimisation package. It builds on a another optimisation package, NLopt [@johnsonNLoptNonlinearoptimizationPackage] by adding a large number of abstractions specific to the exploration of viscoelastic data. Some of these abstractions are featured in the example below in which experimental viscoelastic data is fitted to a fractional viscoelastic model (spring-pot) and then this model is used to make a prediction of the behaviour so that its qualitative accuracy can be assessed.
+A common RHEOS workflow is illustrated by the following example in which experimental time-domain viscoelastic data is fitted to a Maxwell model. This model is then used to make a prediction of the behaviour so that its qualitative accuracy can be assessed. This common workflow is shown schematically in Figure 1, and the prediction of the fitted model is plotted against the original data is shown in Figure 2.
 
- The RHEOS-specific commands used to load in the data, fit a model and predict using that model are the following:
-- `data = importcsv("example1_data.csv", t_col=1, ϵ_col=2, σ_col=3)`
-- `maxwell_model = modelfit(data, Maxwell, strain_imposed)`
-- `maxwell_predict = modelpredict(extract(data, strain_only), maxwell_model)`
+A brief description of this workflow is the following. A CSV is imported into a RHEOS `RheoTimeData` using its convenience function. This is then fitted to a `RheoModelClass`, which is the model struct used when the model's parameters are not fixed. This results in a fitted `RheoModel`, which is the same as a `RheoModelClass` except it has fixed parameters. In the prediction step, the fitted `RheoModel` is combined partial data (as only stres or strain is required, not both) and this results in a complete data set. 
 
-In brief: the `importcsv` command is a convenience function for loading in CSV data into a `RheoTimeData` struct; `modelfit` takes the data and a `RheoModelClass` which it should be fitted to; `modelpredict` takes the fitted model, and a partial form of the data and uses these arguments to predict the response according to the fitted `maxwell_model`. For a more detailed discussion of the syntax used, see the RHEOS documentation. This common workflow is shown schematically in Figure 1, along with the plotted data in Figure 2.
+![High level schematic of a fitting and prediction workflow from experimental data.](diagram_v3.png)
 
-![RHEOS Workflow Diagram](diagram_v3.png)
-
-![Resultant Figure](predictfigure.png)
-
-Note that although the above example dealt with time data, RHEOS handles frequency-based viscoelastic data equally well and models fitted on one type of viscoelastic moduli can easily be used to predict behaviour with a different moduli. (For instance, fitting against relaxation data and predicting the frequency response spectrum.)
+![Qualitative assessment of the fitted model.](predictfigure.png)
 
 # Acknowledgements
 JLK Would like thank the George and Lillian Schiff Foundation for the PhD funding which facilitated this project.
