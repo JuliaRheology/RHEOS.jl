@@ -1,5 +1,53 @@
 #!/usr/bin/env julia
 
+FractionalPT = RheoModelClass(
+          # Model name
+          name="fPT",
+          # Model parameters,
+          p = [:cₐ, :a, :cᵦ, :β, :cᵧ, :γ],
+          # Relaxation modulus
+          G = quote
+                  G(s) = (1/s)*(cᵧ*s^γ *(cₐ * s^a + cᵦ * s^β))/(cᵧ*s^γ* + cₐ*s^a + cᵦ*s^β)
+                  InverseLaplace.talbot(s -> G(s), t)
+              end,
+          # Creep modulus
+          J = quote
+                  t^a/cₐ* mittleff(a - β, 1 + a, -cᵦ*t^(a-β)/cₐ) + t^γ / (cᵧ * gamma(1 + γ))
+              end,
+          # Storage modulus
+          Gp = quote
+                  denominator = (cₐ * ω^a)^2 + (cᵦ * ω^β)^2 + (cᵧ * ω^γ)^2 + 2* (cₐ * ω^a) * (cᵦ * ω^β) * cos((a-β)*π/2) + 2* (cₐ * ω^a) * (cᵧ * ω^γ) * cos((a-γ)*π/2) + 2* (cᵦ * ω^β) * (cᵧ * ω^γ)* cos((β-γ)*π/2)
+                  numerator = (cᵧ * ω^γ) * cos(γ*π/2) * ((cₐ * ω^a)^2 + (cᵦ * ω^β)^2) + (cᵧ * ω^γ)^2 * ((cₐ * ω^a)*cos(a*π/2)+(cᵦ * ω^β)*cos(β*π/2)) + (cₐ * ω^a) * (cᵦ * ω^β) * (cᵧ * ω^γ) * (cos((a-β-γ)*π/2)+cos((β-a-γ)*π/2))
+                  numerator/denominator
+               end,
+         # Loss modulus
+          Gpp = quote
+                  denominator = (cₐ * ω^a)^2 + (cᵦ * ω^β)^2 + (cᵧ * ω^γ)^2 + 2* (cₐ * ω^a) * (cᵦ * ω^β) * cos((a-β)*π/2) + 2* (cₐ * ω^a) * (cᵧ * ω^γ) * cos((a-γ)*π/2) + 2* (cᵦ * ω^β) * (cᵧ * ω^γ)* cos((β-γ)*π/2)
+                  numerator = (cᵧ * ω^γ) * sin(γ*π/2) * ((cₐ * ω^a)^2 + (cᵦ * ω^β)^2) + (cᵧ * ω^γ)^2 * ((cₐ * ω^a)*sin(a*π/2)+(cᵦ * ω^β)*sin(β*π/2)) + (cₐ * ω^a) * (cᵦ * ω^β) * (cᵧ * ω^γ) * (sin((a-β-γ)*π/2)+sin((β-a-γ)*π/2))
+                  numerator/denominator
+                end,
+        # Constraints
+        constraint = quote
+                 all([   (a<1) & (a>0)
+                         (β<1) & (β>0)
+                          -a+β < 0] )
+                end,
+          # Network
+          info= "
+                     _________╱╲_________
+                    |         ╲╱ cₐ, a   |
+                ____|                    |______╱╲____
+                    |                    |      ╲╱
+                    |_________╱╲_________|        cᵧ, γ
+                              ╲╱
+                                 cᵦ, β
+                                 "
+          )
+
+
+
+
+
 fSLS_PT = RheoModelClass(
           # Model name
           name="fSLS_PT",
@@ -115,7 +163,7 @@ FractionalJeffreys_PT = RheoModelClass(
                   end,
               # Creep modulus
               J = quote
-                     t/ηₐ * mittleff(1-β, 2, -cᵦ*t^(1-β)/ηₐ) + t/ηᵧ 
+                     t/ηₐ * mittleff(1-β, 2, -cᵦ*t^(1-β)/ηₐ) + t/ηᵧ
                   end,
               # Storage modulus
               Gp = quote
