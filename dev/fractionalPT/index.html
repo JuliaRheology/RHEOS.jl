@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Poynting-Thomson ·  </title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="../"><img class="logo" src="../assets/logo.png" alt="  logo"/></a><h1> </h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Home</a></li><li><span class="toctext">Models</span><ul><li><a class="toctext" href="../elements/">Basic Elements</a></li><li><a class="toctext" href="../fractionalMaxwell/">Maxwell</a></li><li><a class="toctext" href="../fractionalKelvinVoigt/">Kelvin-Voigt</a></li><li><a class="toctext" href="../fractionalZener/">Zener</a></li><li class="current"><a class="toctext" href>Poynting-Thomson</a><ul class="internal"><li><a class="toctext" href="#Fractional-Poynting-Thomson-1">Fractional Poynting-Thomson</a></li><li><a class="toctext" href="#Fractional-SLS-(PT)-1">Fractional SLS (PT)</a></li><li><a class="toctext" href="#Fractional-Jeffreys-(PT)-1">Fractional Jeffreys (PT)</a></li><li><a class="toctext" href="#Standard-Linear-Solid-(PT)-1">Standard Linear Solid (PT)</a></li><li><a class="toctext" href="#Jeffreys-(PT)-1">Jeffreys (PT)</a></li></ul></li><li><a class="toctext" href="../burgers/">Burgers</a></li></ul></li><li><a class="toctext" href="../examples/">Examples</a></li><li><a class="toctext" href="../API/">API</a></li></ul></nav><article id="docs"><header><nav><ul><li>Models</li><li><a href>Poynting-Thomson</a></li></ul><a class="edit-page" href="https://github.com/JuliaRheology/RHEOS.jl/blob/master/docs/src-staging/fractionalPT.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Poynting-Thomson</span><a class="fa fa-bars" href="#"></a></div></header><h2><a class="nav-anchor" id="Fractional-Poynting-Thomson-1" href="#Fractional-Poynting-Thomson-1">Fractional Poynting-Thomson</a></h2><pre class="language-julia"><code class="language-julia">using RHEOS
+include(&quot;plotmodel.jl&quot;);</code></pre><pre class="language-julia"><code class="language-julia">FractionalPT</code></pre><h3><a class="nav-anchor" id="Constitutive-equation-1" href="#Constitutive-equation-1">Constitutive equation</a></h3><div>\[\sigma(t) + \frac{c_\alpha}{c_\gamma} \frac{d^{\alpha-\gamma} \sigma(t)}{dt^{\alpha-\gamma}}+ \frac{c_\beta}{c_\gamma} \frac{d^{\beta-\gamma} \sigma(t)}{dt^{\beta-\gamma}}= c_{\alpha} \frac{d^\alpha \epsilon(t)}{dt^\alpha} + c_\beta \frac{d^\beta \epsilon(t)}{dt^\beta}\]</div><p>Assuming <span>$0 \leq \beta \leq \alpha \leq 1$</span></p><h3><a class="nav-anchor" id="Relaxation-modulus-1" href="#Relaxation-modulus-1">Relaxation modulus</a></h3><div>\[\tilde{G}(s) = \frac{1}{s}\frac{c_\gamma s^\gamma \cdot \left[c_\alpha s^\alpha + c_\beta s^{\beta}\right]}{c_\gamma s^\gamma+c_\alpha s^{\alpha}+c_\beta s^{\beta}}\]</div><h3><a class="nav-anchor" id="Creep-modulus-1" href="#Creep-modulus-1">Creep modulus</a></h3><div>\[J(t)= \frac{t^{\alpha}}{c_\alpha} E_{\alpha-\beta,1+\alpha}\left(-\frac{c_\beta}{c_\alpha} t^{\alpha-\beta}\right) + \frac{1}{c_\gamma \Gamma(1+\gamma)}t^\gamma\]</div><h3><a class="nav-anchor" id="Storage-modulus-1" href="#Storage-modulus-1">Storage modulus</a></h3><div>\[G^{\prime}(\omega) = \frac{c_\gamma \omega^\gamma \cos\left(\gamma \frac{\pi}{2}\right) \left[\left(c_\alpha \omega^\alpha\right)^2+\left(c_\beta \omega^\beta\right)^2 \right]+\left(c_\gamma \omega^\gamma\right)^2 \left[c_\alpha \omega^\alpha \cos\left(\alpha \frac{\pi}{2}\right)+c_\beta \omega^\beta \cos\left(\beta \frac{\pi}{2}\right) \right] + c_\alpha \omega^\alpha \cdot c_\beta\omega^\beta \cdot c_\gamma \omega^\gamma \left[\cos\left((\alpha-\beta-\gamma) \frac{\pi}{2}\right)+\cos\left((\beta-\alpha-\gamma) \frac{\pi}{2}\right) \right]}{\left(c_\alpha \omega^\alpha\right)^2+\left(c_\beta \omega^\beta\right)^2+\left(c_\gamma \omega^\gamma\right)^2+2c_\alpha \omega^\alpha \cdot c_\beta \omega^\beta \cos((\alpha-\beta)\frac{\pi}{2})+2c_\alpha \omega^\alpha \cdot c_\gamma \omega^\gamma \cos((\alpha-\gamma)\frac{\pi}{2})+2c_\beta \omega^\beta \cdot c_\gamma \omega^\gamma \cos((\beta-\gamma)\frac{\pi}{2})}\]</div><h3><a class="nav-anchor" id="Loss-modulus-1" href="#Loss-modulus-1">Loss modulus</a></h3><div>\[G^{\prime\prime}(\omega) = \frac{c_\gamma \omega^\gamma \sin\left(\gamma \frac{\pi}{2}\right) \left[\left(c_\alpha \omega^\alpha\right)^2+\left(c_\beta \omega^\beta\right)^2 \right]+\left(c_\gamma \omega^\gamma\right)^2 \left[c_\alpha \omega^\alpha \sin\left(\alpha \frac{\pi}{2}\right)+c_\beta \omega^\beta \sin\left(\beta \frac{\pi}{2}\right) \right] + c_\alpha \omega^\alpha \cdot c_\beta\omega^\beta \cdot c_\gamma \omega^\gamma \left[\sin\left((\alpha-\beta-\gamma) \frac{\pi}{2}\right)+\sin\left((\beta-\alpha-\gamma) \frac{\pi}{2}\right) \right]}{\left(c_\alpha \omega^\alpha\right)^2+\left(c_\beta \omega^\beta\right)^2+\left(c_\gamma \omega^\gamma\right)^2+2c_\alpha \omega^\alpha \cdot c_\beta \omega^\beta \cos((\alpha-\beta)\frac{\pi}{2})+2c_\alpha \omega^\alpha \cdot c_\gamma \omega^\gamma \cos((\alpha-\gamma)\frac{\pi}{2})+2c_\beta \omega^\beta \cdot c_\gamma \omega^\gamma \cos((\beta-\gamma)\frac{\pi}{2})}\]</div><h2><a class="nav-anchor" id="Fractional-SLS-(PT)-1" href="#Fractional-SLS-(PT)-1">Fractional SLS (PT)</a></h2><pre class="language-julia"><code class="language-julia">FractionalSLS_PT</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
+
+# plot moduli for varying α
+for (i,α) in enumerate([0.1, 0.25, 0.5, 0.74, 0.9])
+    
+    models = vcat(models,RheoModel(FractionalSLS_PT,(cₐ = 1, a = α, kᵦ = 1, kᵧ = 1)))
+ 
+end
+
+plotmodel(models);</code></pre><h2><a class="nav-anchor" id="Fractional-Jeffreys-(PT)-1" href="#Fractional-Jeffreys-(PT)-1">Fractional Jeffreys (PT)</a></h2><pre class="language-julia"><code class="language-julia">FractionalJeffreys_PT</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
+
+# plot moduli for varying β
+for (i,β) in enumerate([0.1, 0.25, 0.5, 0.74, 0.9])
+    
+    models = vcat(models,RheoModel(FractionalJeffreys,(ηₐ = 1, cᵦ = 1, β = β, ηᵧ = 1)))
+ 
+end
+
+plotmodel(models, ymaxG = 2.0);</code></pre><h2><a class="nav-anchor" id="Standard-Linear-Solid-(PT)-1" href="#Standard-Linear-Solid-(PT)-1">Standard Linear Solid (PT)</a></h2><pre class="language-julia"><code class="language-julia">SLS_PT</code></pre><pre class="language-output"><code class="language-output">Model name: SLS_PT
+
+Free parameters: η, kᵦ and kᵧ
+
+                             ___
+                     _________| |________
+                    |        _|_| η      |
+                ____|                    |______╱╲  ╱╲  ╱╲  ____
+                    |                    |        ╲╱  ╲╱  ╲╱
+                    |____╱╲  ╱╲  ╱╲  ____|                   kᵧ
+                           ╲╱  ╲╱  ╲╱
+                                     kᵦ</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
+
+# plot moduli for varying kᵦ
+for (i,k) in enumerate([1.0, 3.0, 5.0])
+    
+    models = vcat(models,RheoModel(SLS_PT,(η = 1, kᵦ = k, kᵧ = 1)))
+ 
+end
+
+plotmodel(models);</code></pre><p><img src="../fractionalPT_files/fractionalPT_12_0.png" alt="png"/></p><p><img src="../fractionalPT_files/fractionalPT_12_1.png" alt="png"/></p><h2><a class="nav-anchor" id="Jeffreys-(PT)-1" href="#Jeffreys-(PT)-1">Jeffreys (PT)</a></h2><pre class="language-julia"><code class="language-julia">Jeffreys_PT</code></pre><pre class="language-output"><code class="language-output">Model name: jeffreys_PT
+
+Free parameters: ηₐ, k and ηᵧ
+
+                             ___
+                     _________| |________
+                    |        _|_| ηₐ     |        ___
+                ____|                    |_________| |_____
+                    |                    |        _|_| ηᵧ
+                    |____╱╲  ╱╲  ╱╲  ____|
+                           ╲╱  ╲╱  ╲╱
+                                     k</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
+
+# plot moduli for varying ηₐ
+for (i,η) in enumerate([1.0, 5.0, 8.0])
+    
+    models = vcat(models,RheoModel(Jeffreys_PT,(ηₐ = η, k = 3, ηᵧ = 1)))
+ 
+end
+
+plotmodel(models);</code></pre><p><img src="../fractionalPT_files/fractionalPT_15_0.png" alt="png"/></p><p><img src="../fractionalPT_files/fractionalPT_15_1.png" alt="png"/></p><footer><hr/><a class="previous" href="../fractionalZener/"><span class="direction">Previous</span><span class="title">Zener</span></a><a class="next" href="../burgers/"><span class="direction">Next</span><span class="title">Burgers</span></a></footer></article></body></html>
