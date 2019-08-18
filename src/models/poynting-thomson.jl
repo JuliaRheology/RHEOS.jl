@@ -1,49 +1,97 @@
 #!/usr/bin/env julia
-
-
-JeffreysPT = RheoModelClass(
+SLS_PT = RheoModelClass(
           # Model name
-          name="jeffreys_PT",
+          name="SLS_PT",
           # Model parameters,
-          p = [:η₁, :k, :η₂],
+          p = [:η, :kᵦ, :kᵧ],
+          # Relaxation modulus
+          G = quote
+                Zkᵦ = (kᵧ)^2/(kᵦ + kᵧ)
+                Zη = η * (kᵧ)^2 / (kᵦ + kᵧ)^2
+                Zkᵧ = kᵦ * kᵧ / (kᵦ + kᵧ)
+                Zkᵧ + Zkᵦ*exp(-t*Zkᵦ/Zη)
+              end,
           # Creep modulus
           J = quote
-                (- exp(-k*t/η₁) + 1 )/k + t/η₂
+                  1/kᵧ + (1 - exp(-kᵦ*t/η))/kᵦ
               end,
+          # Storage modulus
+          Gp = quote
+                  Zkᵦ = (kᵧ)^2/(kᵦ + kᵧ)
+                  Zη = η * (kᵧ)^2 / (kᵦ + kᵧ)^2
+                  Zkᵧ = kᵦ * kᵧ / (kᵦ + kᵧ)
+                  τ = Zη/Zkᵦ
+                  denominator = 1 + τ^2*ω^2
+                  numerator = ω^2*τ^2*Zkᵦ
+                  numerator/denominator + Zkᵧ
+               end,
+         # Loss modulus
+          Gpp = quote
+                  Zkᵦ = (kᵧ)^2/(kᵦ + kᵧ)
+                  Zη = η * (kᵧ)^2 / (kᵦ + kᵧ)^2
+                  Zkᵧ = kᵦ * kᵧ / (kᵦ + kᵧ)
+                  τ = Zη/Zkᵦ
+                  denominator = 1 + τ^2*ω^2
+                  numerator = ω*τ*Zkᵦ
+                  numerator/denominator
+                end,
           # Network
           info= "
-             ___
-     _________| |________
-    |        _|_| η₁     |        ___
-____|                    |_________| |_____
-    |                    |        _|_| η₂
-    |____╱╲  ╱╲  ╱╲  ____|
-           ╲╱  ╲╱  ╲╱
-                     k
-                 "
+                             ___
+                     _________| |________
+                    |        _|_| η      |
+                ____|                    |______╱╲  ╱╲  ╱╲  ____
+                    |                    |        ╲╱  ╲╱  ╲╱
+                    |____╱╲  ╱╲  ╱╲  ____|                   kᵧ
+                           ╲╱  ╲╱  ╲╱
+                                     kᵦ
+                                 "
           )
 
 
-
-# # Fractional Zener Model
-# function G_jeffreys_PT(t::Array{T,1}, params::Array{T,1}) where T<:Real
-#
-# end
-#
-# function J_jeffreys_PT(t::Array{T,1}, params::Array{T,1}) where T<:Real
-#     η₁, k, η₂ = params
-#
-#     J = (- exp.(-k*t/η₁) .+ 1 )/k + t/η₂
-# end
-#
-# function Gp_jeffreys_PT(ω::Array{T,1}, params::Array{T,1}) where T<:Real
-#
-# end
-#
-# function Gpp_jeffreys_PT(ω::Array{T,1}, params::Array{T,1}) where T<:Real
-#
-# end
-#
-# JeffreysPT() = RheologyModel(G_jeffreys_PT, J_jeffreys_PT, Gp_jeffreys_PT, Gpp_jeffreys_PT, [1.0, 1.0, 1.0], ["model created with default parameters"])
-# JeffreysPT(params::Array{T, 1}) where T<:Real = RheologyModel(G_jeffreys_PT, J_jeffreys_PT, Gp_jeffreys_PT, Gpp_jeffreys_PT, params, ["model created by user with parameters $params"])
-#
+Jeffreys_PT = RheoModelClass(
+          # Model name
+          name="jeffreys_PT",
+          # Model parameters,
+          p = [:ηₐ, :k, :ηᵧ],
+          # Relaxation modulus
+          G = quote
+              Zηₐ = (ηᵧ)^2/(ηₐ + ηᵧ)
+              Zk = k * (ηᵧ)^2 / (ηₐ + ηᵧ)^2
+              Zηᵧ = ηₐ * ηᵧ / (ηₐ + ηᵧ)
+              diracterm = t!=0.0 ? 0.0 : Inf
+              Zk*exp(-Zk*t/Zηₐ) + Zηᵧ*diracterm
+          end,
+          # Creep modulus
+          J = quote
+                (- exp(-k*t/ηₐ) + 1 )/k + t/ηᵧ
+              end,
+          Gp = quote
+                  Zηₐ = (ηᵧ)^2/(ηₐ + ηᵧ)
+                  Zk = k * (ηᵧ)^2 / (ηₐ + ηᵧ)^2
+                  Zηᵧ = ηₐ * ηᵧ / (ηₐ + ηᵧ)
+                  denominator = (Zηₐ*ω)^2 + Zk^2
+                  numerator = ((Zηₐ*ω)^2)*Zk
+                  numerator/denominator
+               end,
+         # Loss modulus
+          Gpp = quote
+                  Zηₐ = (ηᵧ)^2/(ηₐ + ηᵧ)
+                  Zk = k * (ηᵧ)^2 / (ηₐ + ηᵧ)^2
+                  Zηᵧ = ηₐ * ηᵧ / (ηₐ + ηᵧ)
+                  denominator = (Zηₐ*ω)^2 + Zk^2
+                  numerator = (Zk^2)*(Zηₐ*ω)
+                  numerator/denominator + Zηᵧ*ω
+                end,
+          # Network
+          info= "
+                             ___
+                     _________| |________
+                    |        _|_| ηₐ     |        ___
+                ____|                    |_________| |_____
+                    |                    |        _|_| ηᵧ
+                    |____╱╲  ╱╲  ╱╲  ____|
+                           ╲╱  ╲╱  ╲╱
+                                     k
+                                 "
+          )

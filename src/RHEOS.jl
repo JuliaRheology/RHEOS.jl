@@ -49,7 +49,7 @@ export FractionalMaxwell, FractionalMaxwellSpring, FractionalMaxwellDashpot, Max
 export FractionalKelvinVoigt, FractionalKVspring, FractionalKVdashpot, KelvinVoigt
 export FractionalZener, FractionalSLS, SLS, FractionalJeffreys, Jeffreys
 export FractionalSpecial
-export JeffreysPT
+export Jeffreys_PT, SLS_PT
 export SLS2, PowerLawPlateau
 export BurgersLiquid
 
