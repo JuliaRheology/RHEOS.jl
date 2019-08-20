@@ -66,14 +66,11 @@ makedocs(modules=[RHEOS],
 			 "Kelvin-Voigt" => "fractionalKelvinVoigt.md",
 			 "Zener" => "fractionalZener.md",
 			 "Poynting-Thomson" => "fractionalPT.md",
-		         "Burgers" => "burgers.md"   ],
-	        "Examples" => "examples.md",
+		         "Burgers" => "burgers.md",
+			 "Create your model" => "createmodel.md"],
+	     "Examples" => "examples.md",
             #  "Fitting Data" => "fittingdata.md",
             #  "Predicting Responses" => "predictingresponse.md",
-            #  "Generating Data" => "generatingdata.md",
-            #  "Sampling and Filtering" => "samplingandfiltering.md",
-            #  "File I/O" => "fileIO.md",
-            #  "Models" => "models.md",
               "API" => "API.md"
          ]
          )
