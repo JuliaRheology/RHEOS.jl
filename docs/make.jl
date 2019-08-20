@@ -59,6 +59,7 @@ makedocs(modules=[RHEOS],
          pages = [
              "Home" => "index.md",
 	     "File I/O" => "fileIO.md",
+	     "Preprocessing" => "preprocessing.md",
              "Models" => ["Basic Elements" => "elements.md",
 			 "Maxwell" => "fractionalMaxwell.md",
 			 "Kelvin-Voigt" => "fractionalKelvinVoigt.md",
