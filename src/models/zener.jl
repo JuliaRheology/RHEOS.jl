@@ -1,8 +1,8 @@
 #!/usr/bin/env julia
 
-FractionalZener = RheoModelClass(
+Fract_Zener = RheoModelClass(
           # Model name
-          name="fraczener",
+          name="frac_zener",
           # Model parameters,
           p = [ :cₐ, :a, :cᵦ, :β, :cᵧ, :γ],
           # Relaxation modulus
@@ -46,9 +46,9 @@ FractionalZener = RheoModelClass(
           )
 
 
-FractionalSLS = RheoModelClass(
+FractSLS_Zener = RheoModelClass(
         # Model name
-        name="fracsls",
+        name="fracsls_Zener",
         # Model parameters,
         p = [ :cₐ, :a, :kᵦ, :kᵧ],
         # Relaxation modulus
@@ -90,9 +90,9 @@ FractionalSLS = RheoModelClass(
         )
 
 
-SLS = RheoModelClass(
+SLS_Zener = RheoModelClass(
           # Model name
-          name="SLS",
+          name="SLS_Zener",
           # Model parameters,
           p = [ :η, :kᵦ, :kᵧ],
           # Relaxation modulus
@@ -133,9 +133,9 @@ SLS = RheoModelClass(
                      "
           )
 
-FractionalJeffreys = RheoModelClass(
+FractJeffreys_Zener = RheoModelClass(
                     # Model name
-                    name="fjeff",
+                    name="fjeff_Zener",
                     # Model parameters,
                     p = [ :ηₐ, :cᵦ, :β, :ηᵧ],
                     # Relaxation modulus
@@ -184,9 +184,9 @@ FractionalJeffreys = RheoModelClass(
                     )
 
 
-Jeffreys = RheoModelClass(
+Jeffreys_Zener = RheoModelClass(
                 # Model name
-                name="jeffreys",
+                name="jeffreys_Zener",
                 # Model parameters,
                 p = [ :ηₐ, :k, :ηᵧ],
                 # Relaxation modulus
@@ -224,3 +224,48 @@ Jeffreys = RheoModelClass(
                                          ηᵧ
                            "
                 )
+
+FractSolid = RheoModelClass(
+        # Model name
+        name="fractsolid",
+        # Model parameters,
+        p = [:η, :cᵦ, :β, :k],
+        # Relaxation modulus
+        G = quote
+              k + cᵦ*t^(-β)*mittleff(1 - β, 1 - β, -cᵦ*(t^(1 - β))/η)
+            end,
+        # Creep modulus
+        J = quote
+              a = η/cᵦ
+              b = k*η/cᵦ
+              Ĵ(s) = (1/s^2)*(1+a*s^(1-β))/(η+k/s+b*s^(-β))
+              InverseLaplace.talbot(s -> Ĵ(s), t)
+            end,
+        # Storage modulus
+        Gp = quote
+               denominator = (η*ω)^2 + (cᵦ*ω^β)^2
+               numerator = ((η*ω)^2)*(cᵦ*ω^β)*cos(β*π/2)
+               numerator/denominator + k
+             end,
+       # Loss modulus
+        Gpp = quote
+                denominator = (η*ω)^2 + (cᵦ*ω^β)^2
+                numerator = ((cᵦ*ω^β)^2)*(η*ω) + ((η*ω)^2)*(cᵦ*ω^β)*sin(β*π/2)
+                numerator/denominator
+              end,
+        # Constraints
+        constraint = quote
+                 (β<1) & (β>0)
+                end,
+        # Network
+        info= "
+                      ___
+                  _____| |__________╱╲__________
+                 |    _|_|          ╲╱          |
+             ___ |      η              cᵦ, β    |___
+                 |                              |
+                 |__________╱╲  ╱╲  ╱╲  ________|
+                              ╲╱  ╲╱  ╲╱
+                                k
+               "
+        )

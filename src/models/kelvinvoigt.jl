@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
 
-FractionalKelvinVoigt =  RheoModelClass(
+Fract_KelvinVoigt =  RheoModelClass(
         # Model name
         name="fractKV",
         # Model parameters,
@@ -46,9 +46,9 @@ FractionalKelvinVoigt =  RheoModelClass(
         )
 
 
-FractionalKVspring =  RheoModelClass(
+FractS_KelvinVoigt =  RheoModelClass(
         # Model name
-        name="fractKVspring",
+        name="fractSpringKV",
         # Model parameters,
         p = [:cₐ, :a, :k],
         # Relaxation modulus
@@ -87,9 +87,9 @@ FractionalKVspring =  RheoModelClass(
                 "
         )
 
-FractionalKVdashpot =  RheoModelClass(
+FractD_KelvinVoigt =  RheoModelClass(
         # Model name
-        name="fractKVdashpot",
+        name="fractDashpotKV",
         # Model parameters,
         p = [:η, :cᵦ, :β],
         # Relaxation modulus

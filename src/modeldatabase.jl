@@ -14,9 +14,6 @@ include(joinpath(models_directory, "kelvinvoigt.jl"))
 # fractional Zener model and specialized forms (equivalent to Standard Linear Solid in Maxwell form)
 include(joinpath(models_directory, "zener.jl"))
 
-# fractional Special model
-include(joinpath(models_directory, "special.jl"))
-
 # poynting-thomson model and specialized forms (equivalent to Standard Linear Solid in Kelvin form)
 include(joinpath(models_directory, "poynting-thomson.jl"))
 

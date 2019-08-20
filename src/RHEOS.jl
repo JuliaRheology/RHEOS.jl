@@ -45,13 +45,12 @@ export importcsv, exportcsv#, savedata, loaddata, savemodel, loadmodel
 # models.jl
 export null_modulus
 export Springpot, Spring, Dashpot
-export FractionalMaxwell, FractionalMaxwellSpring, FractionalMaxwellDashpot, Maxwell
-export FractionalKelvinVoigt, FractionalKVspring, FractionalKVdashpot, KelvinVoigt
-export FractionalZener, FractionalSLS, SLS, FractionalJeffreys, Jeffreys
-export FractionalSpecial
-export FractionalPT, fSLS_PT, SLS_PT, Jeffreys_PT, FractionalJeffreys_PT
-export SLS2, PowerLawPlateau
+export Fract_Maxwell, FractS_Maxwell, FractD_Maxwell, Maxwell
+export Fract_KelvinVoigt, FractS_KelvinVoigt, FractD_KelvinVoigt, KelvinVoigt
+export Fract_Zener, FractSLS_Zener, SLS_Zener, FractJeffreys_Zener, Jeffreys_Zener, FractSolid
+export Fract_PT, FractSLS_PT, SLS_PT, Jeffreys_PT, FractJeffreys_PT
 export BurgersLiquid
+export SLS2, PowerLawPlateau
 
 # datagen.jl
 export timeline
