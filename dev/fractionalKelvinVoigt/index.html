@@ -1,6 +1,24 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Kelvin-Voigt ·  </title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="../"><img class="logo" src="../assets/logo.png" alt="  logo"/></a><h1> </h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Home</a></li><li><span class="toctext">Models</span><ul><li><a class="toctext" href="../elements/">Basic Elements</a></li><li><a class="toctext" href="../fractionalMaxwell/">Maxwell</a></li><li class="current"><a class="toctext" href>Kelvin-Voigt</a><ul class="internal"><li><a class="toctext" href="#Fractional-Kelvin-Voigt-1">Fractional Kelvin-Voigt</a></li><li><a class="toctext" href="#Fractional-(Spring)-Kelvin-Voigt-1">Fractional (Spring) Kelvin-Voigt</a></li><li><a class="toctext" href="#Fractional-(Dashpot)-Kelvin-Voigt-1">Fractional (Dashpot) Kelvin-Voigt</a></li><li><a class="toctext" href="#Kelvin-Voigt-model-1">Kelvin-Voigt model</a></li></ul></li><li><a class="toctext" href="../fractionalZener/">Zener</a></li><li><a class="toctext" href="../fractionalPT/">Poynting-Thomson</a></li><li><a class="toctext" href="../burgers/">Burgers</a></li></ul></li><li><a class="toctext" href="../examples/">Examples</a></li><li><a class="toctext" href="../API/">API</a></li></ul></nav><article id="docs"><header><nav><ul><li>Models</li><li><a href>Kelvin-Voigt</a></li></ul><a class="edit-page" href="https://github.com/JuliaRheology/RHEOS.jl/blob/master/docs/src-staging/fractionalKelvinVoigt.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Kelvin-Voigt</span><a class="fa fa-bars" href="#"></a></div></header><h2><a class="nav-anchor" id="Fractional-Kelvin-Voigt-1" href="#Fractional-Kelvin-Voigt-1">Fractional Kelvin-Voigt</a></h2><pre class="language-julia"><code class="language-julia">using RHEOS
-include(&quot;plotmodel.jl&quot;);</code></pre><pre class="language-julia"><code class="language-julia">FractionalKelvinVoigt</code></pre><pre class="language-output"><code class="language-output">Model name: fractKV
+include(&quot;plotmodel.jl&quot;);</code></pre><pre class="language-output"><code class="language-output">┌ Info: Recompiling stale cache file /home/alessandra/.julia/compiled/v1.1/RHEOS/8Ut5K.ji for RHEOS [728860ae-c896-11e8-0b91-0f38ecad5046]
+└ @ Base loading.jl:1184
+┌ Warning: Package DSP does not have Statistics in its dependencies:
+│ - If you have DSP checked out for development and have
+│   added Statistics as a dependency but haven&#39;t updated your primary
+│   environment&#39;s manifest file, try `Pkg.resolve()`.
+│ - Otherwise you may need to report an issue with DSP
+└ Loading Statistics into DSP from project dependency, future warnings for DSP are suppressed.
+┌ Warning: The call to compilecache failed to create a usable precompiled cache file for RHEOS [728860ae-c896-11e8-0b91-0f38ecad5046]
+│   exception = ErrorException(&quot;Required dependency DSP [717857b8-e6f2-59f4-9121-6e50c889abd2] failed to load from a cache file.&quot;)
+└ @ Base loading.jl:969
+┌ Info: Recompiling stale cache file /home/alessandra/.julia/compiled/v1.1/DSP/OtML7.ji for DSP [717857b8-e6f2-59f4-9121-6e50c889abd2]
+└ @ Base loading.jl:1184
+┌ Warning: Package DSP does not have Statistics in its dependencies:
+│ - If you have DSP checked out for development and have
+│   added Statistics as a dependency but haven&#39;t updated your primary
+│   environment&#39;s manifest file, try `Pkg.resolve()`.
+│ - Otherwise you may need to report an issue with DSP
+└ Loading Statistics into DSP from project dependency, future warnings for DSP are suppressed.</code></pre><pre class="language-julia"><code class="language-julia">Fract_KelvinVoigt</code></pre><pre class="language-output"><code class="language-output">Model name: fractKV
 
 Free parameters: cₐ, a, cᵦ and β
 
@@ -9,7 +27,7 @@ Free parameters: cₐ, a, cᵦ and β
            ____|                    |____
                |                    |
                |________ ╱╲ ________|
-                         ╲╱  cᵦ, β</code></pre><h3><a class="nav-anchor" id="Constitutive-equation-1" href="#Constitutive-equation-1">Constitutive equation</a></h3><div>\[\sigma(t) = c_\alpha \frac{d^{\alpha} \epsilon(t)}{dt^{\alpha}}+ c_{\beta} \frac{d^\beta \epsilon(t)}{dt^\beta}\]</div><p>Assuming <span>$0 \leq \beta \leq \alpha \leq 1$</span></p><h3><a class="nav-anchor" id="Relaxation-modulus-1" href="#Relaxation-modulus-1">Relaxation modulus</a></h3><div>\[G(t) =\frac{c_{\alpha} }{\Gamma(1-\alpha)} t^{-\alpha}+\frac{c_{\beta} }{\Gamma(1-\beta)} t^{-\beta}\]</div><h3><a class="nav-anchor" id="Creep-modulus-1" href="#Creep-modulus-1">Creep modulus</a></h3><div>\[J(t) = \frac{t^{\alpha}}{c_\alpha} E_{\alpha-\beta,1+\alpha}\left(-\frac{c_\beta}{c_\alpha} t^{\alpha-\beta}\right)\]</div><h3><a class="nav-anchor" id="Storage-modulus-1" href="#Storage-modulus-1">Storage modulus</a></h3><p>$ G^{\prime}(\omega) = c<em>\alpha \omega^\alpha \cos\left(\alpha \frac{\pi}{2}\right) + c</em>\beta \omega^\beta \cos \left( \beta \frac{\pi}{2}\right)$</p><h3><a class="nav-anchor" id="Loss-modulus-1" href="#Loss-modulus-1">Loss modulus</a></h3><div>\[G^{\prime\prime}(\omega) = c_\alpha \omega^\alpha \sin\left(\alpha \frac{\pi}{2}\right) + c_\beta \omega^\beta \sin \left( \beta \frac{\pi}{2}\right)\]</div><h2><a class="nav-anchor" id="Fractional-(Spring)-Kelvin-Voigt-1" href="#Fractional-(Spring)-Kelvin-Voigt-1">Fractional (Spring) Kelvin-Voigt</a></h2><pre class="language-julia"><code class="language-julia">FractionalKVspring</code></pre><pre class="language-output"><code class="language-output">Model name: fractKVspring
+                         ╲╱  cᵦ, β</code></pre><h3><a class="nav-anchor" id="Constitutive-equation-1" href="#Constitutive-equation-1">Constitutive equation</a></h3><div>\[\sigma(t) = c_\alpha \frac{d^{\alpha} \epsilon(t)}{dt^{\alpha}}+ c_{\beta} \frac{d^\beta \epsilon(t)}{dt^\beta}\]</div><p>Assuming <span>$0 \leq \beta \leq \alpha \leq 1$</span></p><h3><a class="nav-anchor" id="Relaxation-modulus-1" href="#Relaxation-modulus-1">Relaxation modulus</a></h3><div>\[G(t) =\frac{c_{\alpha} }{\Gamma(1-\alpha)} t^{-\alpha}+\frac{c_{\beta} }{\Gamma(1-\beta)} t^{-\beta}\]</div><h3><a class="nav-anchor" id="Creep-modulus-1" href="#Creep-modulus-1">Creep modulus</a></h3><div>\[J(t) = \frac{t^{\alpha}}{c_\alpha} E_{\alpha-\beta,1+\alpha}\left(-\frac{c_\beta}{c_\alpha} t^{\alpha-\beta}\right)\]</div><h3><a class="nav-anchor" id="Storage-modulus-1" href="#Storage-modulus-1">Storage modulus</a></h3><p>$ G^{\prime}(\omega) = c<em>\alpha \omega^\alpha \cos\left(\alpha \frac{\pi}{2}\right) + c</em>\beta \omega^\beta \cos \left( \beta \frac{\pi}{2}\right)$</p><h3><a class="nav-anchor" id="Loss-modulus-1" href="#Loss-modulus-1">Loss modulus</a></h3><div>\[G^{\prime\prime}(\omega) = c_\alpha \omega^\alpha \sin\left(\alpha \frac{\pi}{2}\right) + c_\beta \omega^\beta \sin \left( \beta \frac{\pi}{2}\right)\]</div><h2><a class="nav-anchor" id="Fractional-(Spring)-Kelvin-Voigt-1" href="#Fractional-(Spring)-Kelvin-Voigt-1">Fractional (Spring) Kelvin-Voigt</a></h2><pre class="language-julia"><code class="language-julia">FractS_KelvinVoigt</code></pre><pre class="language-output"><code class="language-output">Model name: fractSpringKV
 
 Free parameters: cₐ, a and k
 
@@ -24,11 +42,11 @@ Free parameters: cₐ, a and k
 # plot moduli for varying α
 for (i,alpha) in enumerate([0.1, 0.3, 0.5, 0.7, 0.9])
     
-    models = vcat(models,RheoModel(FractionalKVspring,(cₐ = 1.0, a = alpha, k = 1.0)))
+    models = vcat(models,RheoModel(FractS_KelvinVoigt,(cₐ = 1.0, a = alpha, k = 1.0)))
  
 end
 
-plotmodel(models, ymaxG = 5.0);</code></pre><p><img src="../fractionalKelvinVoigt_files/fractionalKelvinVoigt_6_0.png" alt="png"/></p><p><img src="../fractionalKelvinVoigt_files/fractionalKelvinVoigt_6_1.png" alt="png"/></p><h2><a class="nav-anchor" id="Fractional-(Dashpot)-Kelvin-Voigt-1" href="#Fractional-(Dashpot)-Kelvin-Voigt-1">Fractional (Dashpot) Kelvin-Voigt</a></h2><pre class="language-julia"><code class="language-julia">FractionalKVdashpot</code></pre><pre class="language-output"><code class="language-output">Model name: fractKVdashpot
+plotmodel(models, ymaxG = 5.0);</code></pre><p><img src="../fractionalKelvinVoigt_files/fractionalKelvinVoigt_6_0.png" alt="png"/></p><p><img src="../fractionalKelvinVoigt_files/fractionalKelvinVoigt_6_1.png" alt="png"/></p><h2><a class="nav-anchor" id="Fractional-(Dashpot)-Kelvin-Voigt-1" href="#Fractional-(Dashpot)-Kelvin-Voigt-1">Fractional (Dashpot) Kelvin-Voigt</a></h2><pre class="language-julia"><code class="language-julia">FractD_KelvinVoigt</code></pre><pre class="language-output"><code class="language-output">Model name: fractDashpotKV
 
 Free parameters: η, cᵦ and β
 
@@ -43,7 +61,7 @@ Free parameters: η, cᵦ and β
 # plot moduli for varying β
 for (i,beta) in enumerate([0.1, 0.3, 0.5, 0.7, 0.9])
     
-    models = vcat(models,RheoModel(FractionalKVdashpot,(η = 10, cᵦ= 1.0, β = beta)))
+    models = vcat(models,RheoModel(FractD_KelvinVoigt,(η = 10, cᵦ= 1.0, β = beta)))
  
 end
 
@@ -68,4 +86,4 @@ for (i,η) in enumerate([0.1, 1.0, 5.0])
  
 end
 
-plotmodel(models);</code></pre><p><img src="../fractionalKelvinVoigt_files/fractionalKelvinVoigt_12_0.png" alt="png"/></p><p><img src="../fractionalKelvinVoigt_files/fractionalKelvinVoigt_12_1.png" alt="png"/></p><pre class="language-julia"><code class="language-julia"></code></pre><footer><hr/><a class="previous" href="../fractionalMaxwell/"><span class="direction">Previous</span><span class="title">Maxwell</span></a><a class="next" href="../fractionalZener/"><span class="direction">Next</span><span class="title">Zener</span></a></footer></article></body></html>
+plotmodel(models);</code></pre><p><img src="../fractionalKelvinVoigt_files/fractionalKelvinVoigt_12_0.png" alt="png"/></p><p><img src="../fractionalKelvinVoigt_files/fractionalKelvinVoigt_12_1.png" alt="png"/></p><footer><hr/><a class="previous" href="../fractionalMaxwell/"><span class="direction">Previous</span><span class="title">Maxwell</span></a><a class="next" href="../fractionalZener/"><span class="direction">Next</span><span class="title">Zener</span></a></footer></article></body></html>
