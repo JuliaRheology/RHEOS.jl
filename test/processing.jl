@@ -6,10 +6,10 @@ function _resample_strainonly()
     ϵ1 = t1.^2
 
     data0 = RheoTimeData(t = t0, ϵ = ϵ0)
-    
+
     dataout = resample(data0, -10)
 
-    dataout.t==t1 && dataout.ϵ==ϵ1 
+    dataout.t==t1 && dataout.ϵ==ϵ1
 end
 @test _resample_strainonly()
 
@@ -21,10 +21,10 @@ function _resample_stressonly()
     σ1 = t1.^2
 
     data0 = RheoTimeData(t = t0, σ = σ0)
-    
+
     dataout = resample(data0, -10)
 
-    dataout.t==t1 && dataout.σ==σ1 
+    dataout.t==t1 && dataout.σ==σ1
 end
 @test _resample_stressonly()
 
@@ -38,10 +38,10 @@ function _resample_stressandstrain()
     σ1 = t1.^3
 
     data0 = RheoTimeData(t = t0, σ = σ0, ϵ = ϵ0)
-    
+
     dataout = resample(data0, -10)
 
-    dataout.t==t1 && dataout.ϵ==ϵ1 && dataout.σ==σ1 
+    dataout.t==t1 && dataout.ϵ==ϵ1 && dataout.σ==σ1
 end
 @test _resample_stressandstrain()
 
@@ -63,10 +63,10 @@ function _resample_stressandstrain_multiplesections()
     σ1 = 2*t1
 
     data0 = RheoTimeData(t = t0, σ = σ0, ϵ = ϵ0)
-    
+
     dataout = resample(data0, [5, -2, 10, -4]; time_boundaries = [-10.0, -5.0, 0.0, 5.0, 10.0])
 
-    dataout.t==t1 && dataout.ϵ==ϵ1 && dataout.σ==σ1 
+    dataout.t==t1 && dataout.ϵ==ϵ1 && dataout.σ==σ1
 end
 @test _resample_stressandstrain_multiplesections()
 
@@ -78,10 +78,10 @@ function _cutting_strainonly()
     ϵ1 = t1.^2
 
     data0 = RheoTimeData(t = t0, ϵ = ϵ0)
-    
+
     dataout = cutting(data0, 1.0, 5.0)
 
-    dataout.t==t1 && dataout.ϵ==ϵ1 
+    dataout.t==t1 && dataout.ϵ==ϵ1
 end
 @test _cutting_strainonly()
 
@@ -93,10 +93,10 @@ function _cutting_stressonly()
     σ1 = t1.^2
 
     data0 = RheoTimeData(t = t0, σ = σ0)
-    
+
     dataout = cutting(data0, 1.0, 5.0)
 
-    dataout.t==t1 && dataout.σ==σ1 
+    dataout.t==t1 && dataout.σ==σ1
 end
 @test _cutting_stressonly()
 
@@ -110,10 +110,10 @@ function _cutting_stressandstrain()
     σ1 = t1.^3
 
     data0 = RheoTimeData(t = t0, σ = σ0, ϵ = ϵ0)
-    
+
     dataout = cutting(data0, 1.0, 5.0)
 
-    dataout.t==t1 && dataout.ϵ==ϵ1 && dataout.σ==σ1 
+    dataout.t==t1 && dataout.ϵ==ϵ1 && dataout.σ==σ1
 end
 @test _cutting_stressandstrain()
 
@@ -504,7 +504,7 @@ function _modelpredict_nonsing_const_relax(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1 .- exp.(-t)
     loading = t
-    
+
     modulus = quote α*exp.(-t/β) end
     modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
@@ -521,7 +521,7 @@ function _modelpredict_nonsing_const_creep(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1 .- exp.(-t)
     loading = t
-    
+
     modulus = quote α*exp.(-t/β) end
     modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
@@ -538,7 +538,7 @@ function _modelpredict_nonsing_var_relax(tol)
     t = [Vector{RheoFloat}(0.0:dt:(15.0-dt)); Vector{RheoFloat}(15.0:10*dt:20.0)]
     exact_response = 1 .- exp.(-t)
     loading = t
-    
+
     modulus = quote α*exp.(-t/β) end
     modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
@@ -555,7 +555,7 @@ function _modelpredict_nonsing_var_creep(tol)
     t = [Vector{RheoFloat}(0.0:dt:(15.0-dt)); Vector{RheoFloat}(15.0:10*dt:20.0)]
     exact_response = 1 .- exp.(-t)
     loading = t
-    
+
     modulus = quote α*exp.(-t/β) end
     modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
@@ -579,7 +579,7 @@ function _modelpredict_sing_const_relax(tol)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
     computed_response = modelpredict(data0, model)
-    
+
     all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=5*tol), eachindex(exact_response))
 end
 @test _modelpredict_sing_const_relax(tol)
@@ -596,7 +596,7 @@ function _modelpredict_sing_const_creep(tol)
     data0 = RheoTimeData(t = t, σ = loading)
 
     computed_response = modelpredict(data0, model)
-    
+
     all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=5*tol), eachindex(exact_response))
 end
 @test _modelpredict_sing_const_creep(tol)
@@ -611,7 +611,7 @@ function _modelpredict_sing_var_relax(tol)
     modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, ϵ = loading)
-    
+
     computed_response = modelpredict(data0, model)
 
     all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=5*tol), eachindex(exact_response))
@@ -628,7 +628,7 @@ function _modelpredict_sing_var_creep(tol)
     modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, σ = loading)
-    
+
     computed_response = modelpredict(data0, model)
 
     all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=5*tol), eachindex(exact_response))
@@ -651,7 +651,7 @@ function _modelstepfit_nonsing_relax(tol)
     modelout = modelstepfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
     found_params = modelout.params
-    
+
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
 @test _modelstepfit_nonsing_relax(tol)
@@ -672,7 +672,7 @@ function _modelstepfit_nonsing_creep(tol)
     modelout = modelstepfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
     found_params = modelout.params
-    
+
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
 @test _modelstepfit_nonsing_creep(tol)
@@ -692,7 +692,7 @@ function _modelstepfit_nonsing_noinitparams_relax(tol)
     modelout = modelstepfit(data0, model, strain_imposed, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
     found_params = modelout.params
-    
+
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
 @test _modelstepfit_nonsing_noinitparams_relax(tol)
@@ -712,7 +712,7 @@ function _modelstepfit_nonsing_noinitparams_creep(tol)
     modelout = modelstepfit(data0, model, stress_imposed, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
     found_params = modelout.params
-    
+
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
 @test _modelstepfit_nonsing_noinitparams_creep(tol)
@@ -733,7 +733,7 @@ function _modelstepfit_nonsing_nobounds_relax(tol)
     modelout = modelstepfit(data0, model, strain_imposed, p0=init_params)
 
     found_params = modelout.params
-    
+
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
 @test _modelstepfit_nonsing_nobounds_relax(tol)
@@ -754,7 +754,7 @@ function _modelstepfit_nonsing_nobounds_creep(tol)
     modelout = modelstepfit(data0, model, stress_imposed, p0=init_params)
 
     found_params = modelout.params
-    
+
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
 @test _modelstepfit_nonsing_nobounds_creep(tol)
@@ -775,7 +775,7 @@ function _modelstepfit_sing_relax(tol)
     modelout = modelstepfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
     found_params = modelout.params
-    
+
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
 @test _modelstepfit_sing_relax(tol)
@@ -796,7 +796,7 @@ function _modelstepfit_sing_creep(tol)
     modelout = modelstepfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
     found_params = modelout.params
-    
+
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
 @test _modelstepfit_sing_creep(tol)
@@ -806,7 +806,7 @@ function _modelsteppredict_nonsing_relax(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0*exp.(-t/1.0)
     loading = ones(RheoFloat, length(t))
-    
+
     modulus = quote α*exp.(-t/β) end
     modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
@@ -824,7 +824,7 @@ function _modelsteppredict_nonsing_creep(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 1.0*exp.(-t/1.0)
     loading = ones(RheoFloat, length(t))
-    
+
     modulus = quote α*exp.(-t/β) end
     modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
@@ -842,7 +842,7 @@ function _modelsteppredict_nonsing_shifted_relax(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = [i>=5.0 ? 1.0*exp(-(i-5.0)) : 0.0 for i in t]
     loading = ones(RheoFloat, length(t))
-    
+
     modulus = quote α*exp.(-t/β) end
     modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
@@ -860,7 +860,7 @@ function _modelsteppredict_nonsing_shifted_creep(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = [i>=5.0 ? 1.0*exp(-(i-5.0)) : 0.0 for i in t]
     loading = ones(RheoFloat, length(t))
-    
+
     modulus = quote α*exp.(-t/β) end
     modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
@@ -888,7 +888,7 @@ function _modelsteppredict_sing_relax(tol)
 
     test1 = computed_response.σ[1]==0.0
     test2 = all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), 2:length(t))
-    test1 && test2    
+    test1 && test2
 end
 @test _modelsteppredict_sing_relax(tol)
 
@@ -907,7 +907,7 @@ function _modelsteppredict_sing_creep(tol)
 
     test1 = computed_response.ϵ[1]==0.0
     test2 = all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), 2:length(t))
-    test1 && test2    
+    test1 && test2
 end
 @test _modelsteppredict_sing_creep(tol)
 
@@ -926,7 +926,7 @@ function _modelsteppredict_sing_shifted_relax(tol)
 
     test1 = computed_response.σ[1]==0.0
     test2 = all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), 2:length(t))
-    test1 && test2    
+    test1 && test2
 end
 @test _modelsteppredict_sing_shifted_relax(tol)
 
@@ -945,7 +945,7 @@ function _modelsteppredict_sing_shifted_creep(tol)
 
     test1 = computed_response.ϵ[1]==0.0
     test2 = all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), 2:length(t))
-    test1 && test2    
+    test1 && test2
 end
 @test _modelsteppredict_sing_shifted_creep(tol)
 
@@ -963,7 +963,7 @@ function _obj_dynamic(tol)
 
     costGp = sum((dataGp - moduliGp(ω, params)).^2)
     costGpp = sum((dataGpp - moduliGpp(ω, params)).^2)
-    
+
     isapprox(cost, (costGp + costGpp))
 end
 @test _obj_dynamic(tol)
@@ -985,7 +985,7 @@ function _obj_dynamic_mean(tol)
 
     costGp = sum(((dataGp - moduliGp(ω, params))./meanGp).^2)
     costGpp = sum(((dataGpp - moduliGpp(ω, params))./meanGpp).^2)
-    
+
     isapprox(cost, (costGp + costGpp))
 end
 @test _obj_dynamic_mean(tol)
@@ -1004,7 +1004,7 @@ function _obj_dynamic_log(tol)
 
     costGp = sum(log.(dataGp./moduliGp(ω, params)).^2)
     costGpp = sum(log.(dataGpp./moduliGpp(ω, params)).^2)
-    
+
     isapprox(cost, (costGp + costGpp))
 end
 @test _obj_dynamic_log(tol)
@@ -1051,14 +1051,14 @@ end
 
 function _dynamicmodelfit(tol)
     ω = Vector{RheoFloat}(0.0:0.01:20.0)
-    actual_model = RheoModel(SLS, η=5.0, kᵦ=2.5, kᵧ=7.5)
+    actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
     dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
     dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
-    modelout = dynamicmodelfit(data0, SLS, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="none", rel_tol=1e-6)
+    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="none", rel_tol=1e-6)
 
     found_params = modelout.params
     actual_params = actual_model.params
@@ -1069,49 +1069,49 @@ end
 
 function _dynamicmodelfit_noinit(tol)
     ω = Vector{RheoFloat}(0.0:0.01:20.0)
-    actual_model = RheoModel(SLS, η=5.0, kᵦ=2.5, kᵧ=7.5)
+    actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
     dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
     dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
-    modelout = dynamicmodelfit(data0, SLS, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="none", rel_tol=1e-6)
+    modelout = dynamicmodelfit(data0, SLS_Zener, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="none", rel_tol=1e-6)
 
     found_params = modelout.params
     actual_params = actual_model.params
-    
+
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
 end
 @test _dynamicmodelfit_noinit(tol)
 
 function _dynamicmodelfit_nobounds(tol)
     ω = Vector{RheoFloat}(0.0:0.01:20.0)
-    actual_model = RheoModel(SLS, η=5.0, kᵦ=2.5, kᵧ=7.5)
+    actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
     dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
     dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
-    modelout = dynamicmodelfit(data0, SLS, p0=init_params, weights="none", rel_tol=1e-6)
+    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, weights="none", rel_tol=1e-6)
 
     found_params = modelout.params
     actual_params = actual_model.params
-    
+
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
 end
 @test _dynamicmodelfit_nobounds(tol)
 
 function _dynamicmodelfit_mean(tol)
     ω = Vector{RheoFloat}(0.0:0.01:20.0)
-    actual_model = RheoModel(SLS, η=5.0, kᵦ=2.5, kᵧ=7.5)
+    actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
     dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
     dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
-    modelout = dynamicmodelfit(data0, SLS, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="mean", rel_tol=1e-6)
+    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="mean", rel_tol=1e-6)
 
     found_params = modelout.params
     actual_params = actual_model.params
@@ -1122,14 +1122,14 @@ end
 
 function _dynamicmodelfit_log(tol)
     ω = Vector{RheoFloat}(0.01:0.01:20.0)
-    actual_model = RheoModel(SLS, η=5.0, kᵦ=2.5, kᵧ=7.5)
+    actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
     dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
     dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
-    modelout = dynamicmodelfit(data0, SLS, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="log", rel_tol=1e-6)
+    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="log", rel_tol=1e-6)
 
     found_params = modelout.params
     actual_params = actual_model.params
@@ -1140,14 +1140,14 @@ end
 
 function _dynamicmodelfit_local(tol)
     ω = Vector{RheoFloat}(0.01:0.01:20.0)
-    actual_model = RheoModel(SLS, η=5.0, kᵦ=2.5, kᵧ=7.5)
+    actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
     dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
     dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
-    modelout = dynamicmodelfit(data0, SLS, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="local", rel_tol=1e-6)
+    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="local", rel_tol=1e-6)
 
     found_params = modelout.params
     actual_params = actual_model.params
@@ -1158,14 +1158,14 @@ end
 
 function _dynamicmodelfit_manualweights(tol)
     ω = Vector{RheoFloat}(0.01:0.01:20.0)
-    actual_model = RheoModel(SLS, η=5.0, kᵦ=2.5, kᵧ=7.5)
+    actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
     dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
     dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
-    modelout = dynamicmodelfit(data0, SLS, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights=[0.5, 1.5], rel_tol=1e-6)
+    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights=[0.5, 1.5], rel_tol=1e-6)
 
     found_params = modelout.params
     actual_params = actual_model.params
@@ -1176,7 +1176,7 @@ end
 
 function _dynamicmodelpredict(tol)
     ω = Vector{RheoFloat}(0.0:0.01:20.0)
-    actual_model = RheoModel(SLS, η=5.0, kᵦ=2.5, kᵧ=7.5)
+    actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
     dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
     dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
@@ -1187,7 +1187,7 @@ function _dynamicmodelpredict(tol)
     test1 = isapprox(dataGp, datapredicted.Gp)
     test2 = isapprox(dataGpp, datapredicted.Gpp)
     test3 = isapprox(ω, datapredicted.ω)
-    
+
     test1 && test2 && test3
 end
 @test _dynamicmodelpredict(tol)
