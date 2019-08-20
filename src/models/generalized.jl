@@ -32,7 +32,6 @@ SLS2 = RheoModelClass(
                "
         )
 
-
 #
 #  Generate array of parameter symbols and expression of the relaxation modulus
 #  for the generalised maxwell model

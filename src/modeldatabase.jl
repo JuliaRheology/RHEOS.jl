@@ -17,9 +17,6 @@ include(joinpath(models_directory, "zener.jl"))
 # poynting-thomson model and specialized forms (equivalent to Standard Linear Solid in Kelvin form)
 include(joinpath(models_directory, "poynting-thomson.jl"))
 
-# Standard Linear Solid model 2 time-scales
-include(joinpath(models_directory, "sls2.jl"))
-
 # Four-parameters model
 include(joinpath(models_directory, "burgers.jl"))
 

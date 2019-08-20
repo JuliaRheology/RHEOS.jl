@@ -58,6 +58,7 @@ makedocs(modules=[RHEOS],
          authors="Louis Kaplan",
          pages = [
              "Home" => "index.md",
+	     "File I/O" => "fileIO.md",
              "Models" => ["Basic Elements" => "elements.md",
 			 "Maxwell" => "fractionalMaxwell.md",
 			 "Kelvin-Voigt" => "fractionalKelvinVoigt.md",
