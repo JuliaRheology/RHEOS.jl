@@ -23,7 +23,7 @@ date: 12 August 2019
 bibliography: paper.bib
 ---
 # Summary
-Rheology is the science of deformation and flow, with a focus on materials that do not exhibit simple linear elastic or viscous Newtonian behaviours. Rheology play an important role in the empirical characterisation of soft viscoelastic materials commonly found in the food and cosmetics industry, as well as in biology and bioengineering. A broad range of theoretical tools exhist to extract material parameters and interpret them thanks to data analysis and/or physical modelling. 
+Rheology is the science of deformation and flow, with a focus on materials that do not exhibit simple linear elastic or viscous Newtonian behaviours. Rheology play an important role in the empirical characterisation of soft viscoelastic materials commonly found in the food and cosmetics industry, as well as in biology and bioengineering. A broad range of theoretical tools exhist to extract material parameters and interpret them thanks to data analysis and/or physical modelling.
 
 RHEOS (RHEology, Open-Source) is a software package designed to make the analysis of rheological data simpler, faster and more reproducible. RHEOS has a particular emphasis on linear rheological models containing fractional derivatives which have demonstrable utility for the modelling of biological materials [@bonfantiUnifiedRheologicalModel2019; @kaplanPectinMethylesterificationImplications2019] but have hitherto remained in relative obscurity -- possibly due to their mathematical and computational complexity. RHEOS is written in Julia [@bezansonJuliaFreshApproach2017], which greatly assists achievement of our aims as it provides excellent computational efficiency and approachable syntax. RHEOS is fully documented and has extensive testing coverage.
 
@@ -54,7 +54,7 @@ Obtaining intuition for fractional viscoelastic theory can be difficult, and lea
 
 ## Extracting parameters and comparing models and systems require standardised tools
 
-Because capturing and understanding materials behaviours is often based on summarising their behaviour with a model, one must be able to test and compare a broad range of models to inform model selection and reliably identify material parameters. There are currently very limited options available in the public domain [@Bobrheology; @seifertPythonToolsAnalysis2019], and most research groups have to invest significant effort developing custom software. An open-source standardised library of models and fitting algorithms would support the relevant research community and make analysis more systematic, transparent and reproducible. 
+Because capturing and understanding materials behaviours is often based on summarising their behaviour with a model, one must be able to test and compare a broad range of models to inform model selection and reliably identify material parameters. There are currently very limited options available in the public domain [@Bobrheology; @seifertPythonToolsAnalysis2019], and most research groups have to invest significant effort developing custom software. An open-source standardised library of models and fitting algorithms would support the relevant research community and make analysis more systematic, transparent and reproducible.
 
 
 
@@ -86,6 +86,6 @@ A brief description of this workflow is the following. A CSV is imported into a 
 
 # Acknowledgements
 
-JLK Would like thank the George and Lillian Schiff Foundation for the PhD funding which facilitated this project.  BBSRC grants to include.
+JLK Would like thank the George and Lillian Schiff Foundation for the PhD funding which facilitated this project. AB and AK aknowledge the BBSRC grants BB/M002578/1, BB/K018175/1 and BB/P003184/1 awarded to A.K.
 
 # References

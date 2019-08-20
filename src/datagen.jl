@@ -103,7 +103,7 @@ end
     ramp(t; offset=0., gradient=1.)
 
 Ramp signal generation function for use with `stressfunction` or `strainfunction`.
-`offset` keyword arguent determines start of ramp. `gradient` argument determines
+`offset` keyword argument determines start of ramp. `gradient` argument determines
 the linear gradient of the ramp.
 """
 function ramp(t; offset=0., gradient=1.)
@@ -119,7 +119,7 @@ end
 
 Stairs signal generation function for use with `stressfunction` or `strainfunction`.
 Equivalent to additional steps being added every `width` seconds. `offset` keyword
-arguent determines start of stairs signal. `amp` argument determines the height
+argument determines start of stairs signal. `amp` argument determines the height
 of each additional step.
 """
 function stairs(t; offset=0., amp=1., width=1.)
@@ -134,7 +134,7 @@ end
     square(t; offset=0., amp=1., period=1., width=0.5*period)
 
 Square signal generation function for use with `stressfunction` or `strainfunction`.
-`offset` keyword arguent determines start of square signal. `amp` argument determines
+`offset` keyword argument determines start of square signal. `amp` argument determines
 the height of each square pulse. `period` determines the period of one off/on section
 of the square wave signal. `width` determines the width of each square pulse.
 """
@@ -150,7 +150,7 @@ end
     sawtooth(t; offset=0., amp=1., period=1.)
 
 Sawtooth signal generation function for use with `stressfunction` or `strainfunction`.
-`offset` keyword arguent determines start of sawtooth signal. `amp` argument determines
+`offset` keyword argument determines start of sawtooth signal. `amp` argument determines
 the height of each sawtooth pulse. `period` determines the period of the sawtooth wave signal.
 """
 function sawtooth(t; offset=0., amp=1., period=1.)
@@ -165,7 +165,7 @@ end
     triangle(t; offset=0., amp=1., period=1.)
 
 Triangle signal generation function for use with `stressfunction` or `strainfunction`.
-`offset` keyword arguent determines start of triangle signal. `amp` argument determines
+`offset` keyword argument determines start of triangle signal. `amp` argument determines
 the height of each triangle pulse. `period` determines the period of the triangle wave signal.
 `width` determines the width of the triangles.
 """
