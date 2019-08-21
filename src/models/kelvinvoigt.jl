@@ -15,14 +15,7 @@ Fract_KelvinVoigt =  RheoModelClass(
             end,
         # Storage modulus
         Gp = quote
-                # cosine floating point error work-around
-                if a!=1.0 && β!=1.0
-                    cₐ*ω^a*cos(a*π/2) + cᵦ*ω^β*cos(β*π/2)
-                elseif a==1.0 && β!=1.0
-                    cᵦ*ω^β*cos(β*π/2)
-                elseif a==1.0 && β==1.0
-                    0.0
-                end
+                cₐ*ω^a*cos(a*π/2) + cᵦ*ω^β*cos(β*π/2)
              end,
         # Loss modulus
         Gpp = quote
