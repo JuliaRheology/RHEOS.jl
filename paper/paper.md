@@ -86,6 +86,6 @@ A brief description of this workflow is the following. A CSV is imported into a 
 
 # Acknowledgements
 
-JLK Would like thank the George and Lillian Schiff Foundation for the PhD funding which facilitated this project. AB and AK aknowledge the BBSRC grants BB/M002578/1, BB/K018175/1 and BB/P003184/1 awarded to A.K.
+JLK Would like thank the George and Lillian Schiff Foundation for the PhD funding which facilitated this project. AB and AK acknowledge the BBSRC grants BB/M002578/1, BB/K018175/1 and BB/P003184/1 awarded to A.K.
 
 # References
