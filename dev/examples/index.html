@@ -6,23 +6,25 @@
 data = importcsv(&quot;example1_data.csv&quot;, t_col=1, ϵ_col=2, σ_col=3)
 
 # Plot data
-plot(data.t,data.ϵ,&quot;-&quot;)
-plot(data.t,data.σ,&quot;.&quot;)
+plot(data.t,data.σ,&quot;.&quot;, color = &quot;green&quot;)
+plot(data.t,data.ϵ,&quot;-&quot;, color = &quot;blue&quot;)
+ylabel(&quot;Strain (blue), Stress (green)&quot;);
+xlabel(&quot;Time&quot;);
 
 # We now fit a Maxwell model
-maxwell_model = modelfit(data, Maxwell, strain_imposed);
-</code></pre><pre class="language-output"><code class="language-output">┌ Warning: Please note that NaN data rows are not included in resultant data struct.
+maxwell_model = modelfit(data, Maxwell, strain_imposed);</code></pre><p><img src="../examples_files/examples_5_0.png" alt="png"/></p><pre class="language-output"><code class="language-output">Time: 0.009137382 s, Why: XTOL_REACHED, Parameters: [4.0054, 2.003], Error: 0.022310985023644148</code></pre><pre class="language-output"><code class="language-output">┌ Warning: Please note that NaN data rows are not included in resultant data struct.
 └ @ RHEOS /home/alessandra/.julia/dev/RHEOS/src/IO.jl:11
 ┌ Warning: Initial values for model parameters is set to [0.5, 0.5] by default
-└ @ RHEOS /home/alessandra/.julia/dev/RHEOS/src/processing.jl:212</code></pre><p><img src="../examples_files/examples_5_1.png" alt="png"/></p><pre class="language-output"><code class="language-output">Time: 2.250041494 s, Why: XTOL_REACHED, Parameters: [4.0054, 2.003], Error: 0.022310985023644148</code></pre><p>Note that the fitting function requires guidance regarding the type of testing used. It helps optimise the fitting process.</p><p>The data in this example is the stress response to a strain ramp followed by plateau. It therefore corresponds to a strain imposed process.</p><p>We now want to calculate the stress values predicted by the model given the experimental strain data. Lets create a new data set with the strain profile</p><pre class="language-julia"><code class="language-julia">maxwell_predict = extract(data, strain_only)
+└ @ RHEOS /home/alessandra/.julia/dev/RHEOS/src/processing.jl:212</code></pre><p>Note that the fitting function requires guidance regarding the type of testing used. It helps optimise the fitting process.</p><p>The data in this example is the stress response to a strain ramp followed by plateau. It therefore corresponds to a strain imposed process.</p><p>We now want to calculate the stress values predicted by the model given the experimental strain data. Lets create a new data set with the strain profile</p><pre class="language-julia"><code class="language-julia">maxwell_predict = extract(data, strain_only)
 # and calculate the stress based on the model
 maxwell_predict = modelpredict(maxwell_predict, maxwell_model)
 # Now we can plot data and model together for comparison
 
 # Plot data
-plot(data.t,data.ϵ,&quot;-&quot;)
-plot(data.t,data.σ,&quot;.&quot;)
-plot(maxwell_predict.t,maxwell_predict.σ);</code></pre><p><img src="../examples_files/examples_7_0.png" alt="png"/></p><h1><a class="nav-anchor" id="Example-2-1" href="#Example-2-1">Example 2</a></h1><p>This script is a slight modification of Example 1 to present to the user the possibility of creating new RheoModelClass from an existing one with some of the parameters frozen to specific values. As an example, we fix the spring constant of the model above (k) to 2 and we let RHEOS fitting the viscosity <span>$\eta$</span>.</p><pre class="language-julia"><code class="language-julia">Maxwell_springFix = freeze_params(Maxwell, (k=2,))</code></pre><pre class="language-output"><code class="language-output">Model name: maxwell with set parameters: (k = 2.0,)
+plot(data.t,data.σ,&quot;.&quot;, color = &quot;green&quot;)
+plot(maxwell_predict.t,maxwell_predict.σ, color = &quot;red&quot;);
+xlabel(&quot;Time&quot;);
+ylabel(&quot;Stress&quot;);</code></pre><p><img src="../examples_files/examples_7_0.png" alt="png"/></p><h1><a class="nav-anchor" id="Example-2-1" href="#Example-2-1">Example 2</a></h1><p>This script is a slight modification of Example 1 to present to the user the possibility of creating new RheoModelClass from an existing one with some of the parameters frozen to specific values. As an example, we fix the spring constant of the model above (k) to 2 and we let RHEOS fitting the viscosity <span>$\eta$</span>.</p><pre class="language-julia"><code class="language-julia">Maxwell_springFix = freeze_params(Maxwell, (k=2,))</code></pre><pre class="language-output"><code class="language-output">Model name: maxwell with set parameters: (k = 2.0,)
 
 Free parameters: η
 
@@ -36,9 +38,10 @@ maxwellD_predict = modelpredict(maxwellD_predict, maxwellD_model)
 # Now we can plot data and model together for comparison
 
 # Plot data
-plot(data.t,data.ϵ,&quot;-&quot;)
-plot(data.t,data.σ,&quot;.&quot;)
-plot(maxwell_predict.t,maxwell_predict.σ);</code></pre><p><img src="../examples_files/examples_10_0.png" alt="png"/></p><pre class="language-output"><code class="language-output">Time: 0.017260606 s, Why: XTOL_REACHED, Parameters: [4.00555], Error: 0.022412669261910323</code></pre><pre class="language-output"><code class="language-output">┌ Warning: Initial values for model parameters is set to [0.5] by default
+plot(data.t,data.σ,&quot;.&quot;, color = &quot;green&quot;)
+plot(maxwell_predict.t,maxwell_predict.σ, color = &quot;red&quot;);
+xlabel(&quot;Time&quot;);
+ylabel(&quot;Stress&quot;);</code></pre><p><img src="../examples_files/examples_10_0.png" alt="png"/></p><pre class="language-output"><code class="language-output">Time: 0.003743736 s, Why: XTOL_REACHED, Parameters: [4.00555], Error: 0.022412669261910323</code></pre><pre class="language-output"><code class="language-output">┌ Warning: Initial values for model parameters is set to [0.5] by default
 └ @ RHEOS /home/alessandra/.julia/dev/RHEOS/src/processing.jl:212</code></pre><h1><a class="nav-anchor" id="Example-3-1" href="#Example-3-1">Example 3</a></h1><p>This script shows how to use RHEOS to explore the behaviour of various models This involves:</p><ul><li>Creating a strain function</li><li>Defining models based on parameter values</li></ul><p>PyPlot needs to be installed to run these examples and display plots of the data.</p><pre class="language-julia"><code class="language-julia"># Creates a time only dataset
 dϵ=timeline()
 # calculates strain data by applying a function of time
