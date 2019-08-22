@@ -486,14 +486,13 @@ function model_parameters(nt::NamedTuple, params::Vector{Symbol}, err_string::St
 end
 
 """
-    freeze_params(m::RheoModelClass, name::String, nt0::NamedTuple)
+    freeze_params(m::RheoModelClass, nt0::NamedTuple)
 
 Return a new RheoModelClass with some of the parameters frozen to specific values
 
 # Fields
 
 - m: original RheoModelClass
-- name: name of the modified model
 - nt0: named tuple with values for each parameter to freeze
 
 # Example

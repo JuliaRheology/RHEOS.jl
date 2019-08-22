@@ -178,6 +178,8 @@ Fitting and predicting functions
     modelfit(data::RheoTimeData, model::RheoModelClass, modloading::Symbol; p0::Union{NamedTuple,Tuple} = (), lo::Union{NamedTuple,Tuple} = (), hi::Union{NamedTuple,Tuple} = (), verbose::Bool = false, rel_tol = 1e-4, diff_method="BD")
 
 Fit RheologyData struct to model and return a fitted model as a RheologyModel object.
+For the fitting process RHEOS relies on the optimistion package NLopt.jl (https://nlopt.readthedocs.io/en/latest/).
+RHEOS makes use of a local derivative free algorithm, specifically the Tom Rowan's "Subplex"
 
 # Arguments
 

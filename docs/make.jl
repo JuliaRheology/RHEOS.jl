@@ -32,10 +32,13 @@ for file in readdir("examples")
 end
 symlink("../src/index.md","docs/src-staging/index.md")
 symlink("../src/API.md","docs/src-staging/API.md")
+symlink("../src/architecture.md","docs/src-staging/architecture.md")
+
 
 
 mkdir("docs/src-staging/assets")
 cp("docs/src/assets/logo.png", "docs/src-staging/assets/logo.png")
+cp("docs/src/assets/diagram_v3.png", "docs/src-staging/assets/diagram_v3.png")
 ##
 
 # highlight output cells (i.e. anything withouout a language specified) white
@@ -58,19 +61,22 @@ makedocs(modules=[RHEOS],
          authors="Louis Kaplan",
          pages = [
              "Home" => "index.md",
+	     "Architecture" => "architecture.md",
+	     "File I/O" => "fileIO.md",
+	     "Preprocessing" => "preprocessing.md",
+	     "Generating data" => "generatingdata.md",
+	     "Fit and predict" => ["Time data" => "fitpredictTime.md",
+				   "Frequency data" => "fitpredictFreq.md"],
              "Models" => ["Basic Elements" => "elements.md",
 			 "Maxwell" => "fractionalMaxwell.md",
 			 "Kelvin-Voigt" => "fractionalKelvinVoigt.md",
 			 "Zener" => "fractionalZener.md",
 			 "Poynting-Thomson" => "fractionalPT.md",
-		         "Burgers" => "burgers.md"   ],
-	        "Examples" => "examples.md",
+		         "Burgers" => "burgers.md",
+			 "Create your model" => "createmodel.md"],
+	     "Examples" => "examples.md",
             #  "Fitting Data" => "fittingdata.md",
             #  "Predicting Responses" => "predictingresponse.md",
-            #  "Generating Data" => "generatingdata.md",
-            #  "Sampling and Filtering" => "samplingandfiltering.md",
-            #  "File I/O" => "fileIO.md",
-            #  "Models" => "models.md",
               "API" => "API.md"
          ]
          )

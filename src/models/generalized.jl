@@ -1,4 +1,3 @@
-# 2 time scale Generalized Maxwell-Wiechert type models
 
 SLS2 = RheoModelClass(
         # Model name
@@ -34,39 +33,30 @@ SLS2 = RheoModelClass(
         )
 
 #
-
-
-# """
-# SLS2(params::Vector{T}) where T<:Real
-#
-# A spring in parallel to two Maxwell branches (G' and G'' temporary missing).
-# """
-# SLS2 = RheoModelClass(G_SLS2, J_SLS2, Gp_SLS2, Gpp_SLS2, params_SLS2, info_SLS2)
+#  Generate array of parameter symbols and expression of the relaxation modulus
+#  for the generalised maxwell model
 #
 
-# function G_SLS2(t::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1})
-#
-#    G₀, G₁, η₁, G₂, η₂ = params
-#
-#    return G₀ .+ G₁*exp.(-t*G₁/η₁) .+ G₂*exp.(-t*G₂/η₂)
-#
-# end
+function G_GSLS(n)
+
+    params=[:k0]
+    G_terms=[:(k0)]
+
+    for i=1:n
+        k=Symbol("k_"*string(i))
+        η=Symbol("η_"*string(i))
+        e=:($k * exp.( (- $k/$η) * t))
+
+        params=vcat(params, [k,η])
+        G_terms=vcat(G_terms,e)
+    end
+    G_Expr=Expr(:call,:+,G_terms...)
+
+    return (params, G_Expr)
+end
 
 
-
-# function J_SLS2(t::Union{Array{RheoFloat,1},RheoFloat}, params::Array{RheoFloat,1})
-#     G₀, G₁, η₁, G₂, η₂ = params
-#
-#     tau1 = G₁/η₁
-#     tau2 = G₂/η₂
-#
-#     Jbar(s) = (1/s^2)*(G₀/s+G₁*1/(s+tau1)+G₂*1/(s+tau2))
-#
-#     return invLaplace(s -> Jbar(s), t)
-# end
+# (p,e)=G_GSLS(3)
 
 
-#
-# Gp_SLS2 = null_modulus
-#
-# Gpp_SLS2 = null_modulus
+# cd("/home/alexandre/.julia/dev/RHEOS/src/"); include("RHEOS.jl"); using Main.RHEOS; m=RheoModel(SLS2,(G₀=1., G₁=2., η₁=3., G₂=4., η₂=5.))

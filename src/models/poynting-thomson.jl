@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
 
-FractionalPT = RheoModelClass(
+Fract_PT = RheoModelClass(
           # Model name
           name="fPT",
           # Model parameters,
@@ -48,7 +48,7 @@ FractionalPT = RheoModelClass(
 
 
 
-fSLS_PT = RheoModelClass(
+FractSLS_PT = RheoModelClass(
           # Model name
           name="fSLS_PT",
           # Model parameters,
@@ -148,7 +148,7 @@ SLS_PT = RheoModelClass(
           )
 
 
-FractionalJeffreys_PT = RheoModelClass(
+FractJeffreys_PT = RheoModelClass(
               # Model name
               name="fjeff_PT",
               # Model parameters,

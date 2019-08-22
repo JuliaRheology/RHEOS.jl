@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
 
-FractionalMaxwell = RheoModelClass(
+Fract_Maxwell = RheoModelClass(
           # Model name
           name="fractmaxwell",
           # Model parameters,
@@ -39,7 +39,7 @@ FractionalMaxwell = RheoModelClass(
                  "
           )
 
-FractionalMaxwellSpring = RheoModelClass(
+FractS_Maxwell = RheoModelClass(
         # Model name
         name="fractmaxwell_spring",
         # Model parameters,
@@ -78,7 +78,7 @@ FractionalMaxwellSpring = RheoModelClass(
         )
 
 
-FractionalMaxwellDashpot = RheoModelClass(
+FractD_Maxwell = RheoModelClass(
           # Model name
           name="fractmaxwell_dashpot",
           # Model parameters,
@@ -150,6 +150,3 @@ Maxwell = RheoModelClass(
                   η                  k
                "
         )
-
-
-

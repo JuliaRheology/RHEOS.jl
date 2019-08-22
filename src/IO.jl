@@ -90,10 +90,10 @@ end
     exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; delimiter=',', colorder=nothing)
 
 Export RheoTimeData or RheoFreqData type to csv format. May be useful for plotting/analysis in other software.
-By default, full time data will be exported with columns ordered as (σ, ϵ, t). Partial time data will be ordered
-as either (σ, t) or (ϵ, t). Full frequency data will be ordered as (Gp, Gpp, ω). The order of columns can be customised
-by passing a NamedTuple to the `colorder` arguments. For example (σ = 2, t = 1, ϵ = 3) would export the columns in the
-order (t, σ, ϵ). As with `importcsv`, the delimiter can be set by keyword argument.
+By default, full time data will be exported with columns ordered as (t, σ, ϵ). Partial time data will be ordered
+as either (t, σ) or (t, ϵ). Full frequency data will be ordered as (ω, Gp, Gpp). The order of columns can be customised
+by passing a NamedTuple to the `colorder` arguments. For example (σ = 1, t = 3, ϵ = 2) would export the columns in the
+order (σ, ϵ, t). As with `importcsv`, the delimiter can be set by keyword argument.
 """
 function exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; delimiter=',', colorder=nothing)
 
@@ -104,17 +104,17 @@ function exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; del
         if typeof(self)==RheoTimeData
             datacontained = RheoTimeDataType(self)
             if datacontained == stress_only
-                colorder = (σ=1, t=2)
+                colorder = (t=1, σ=2)
             elseif datacontained == strain_only
-                colorder = (ϵ=1, t=2)
+                colorder = (t=1, ϵ=2)
             elseif datacontained == strain_and_stress
-                colorder = (σ=1, ϵ=2, t=3)
+                colorder = (t=1, σ=2, ϵ=3)
             end
 
         elseif typeof(self)==RheoFreqData
             # invalid_freq_data=-1 freq_only=0 with_modulus=1
             datacontained = RheoFreqDataType(self)
-            colorder = (Gp = 1, Gpp = 2, ω = 3)
+            colorder = (ω = 1, Gp = 2, Gpp = 3)
         end
     end
 

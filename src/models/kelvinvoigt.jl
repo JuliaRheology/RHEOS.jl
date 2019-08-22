@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
 
-FractionalKelvinVoigt =  RheoModelClass(
+Fract_KelvinVoigt =  RheoModelClass(
         # Model name
         name="fractKV",
         # Model parameters,
@@ -15,14 +15,7 @@ FractionalKelvinVoigt =  RheoModelClass(
             end,
         # Storage modulus
         Gp = quote
-                # cosine floating point error work-around
-                if a!=1.0 && β!=1.0
-                    cₐ*ω^a*cos(a*π/2) + cᵦ*ω^β*cos(β*π/2)
-                elseif a==1.0 && β!=1.0
-                    cᵦ*ω^β*cos(β*π/2)
-                elseif a==1.0 && β==1.0
-                    0.0
-                end
+                cₐ*ω^a*cos(a*π/2) + cᵦ*ω^β*cos(β*π/2)
              end,
         # Loss modulus
         Gpp = quote
@@ -46,9 +39,9 @@ FractionalKelvinVoigt =  RheoModelClass(
         )
 
 
-FractionalKVspring =  RheoModelClass(
+FractS_KelvinVoigt =  RheoModelClass(
         # Model name
-        name="fractKVspring",
+        name="fractSpringKV",
         # Model parameters,
         p = [:cₐ, :a, :k],
         # Relaxation modulus
@@ -87,9 +80,9 @@ FractionalKVspring =  RheoModelClass(
                 "
         )
 
-FractionalKVdashpot =  RheoModelClass(
+FractD_KelvinVoigt =  RheoModelClass(
         # Model name
-        name="fractKVdashpot",
+        name="fractDashpotKV",
         # Model parameters,
         p = [:η, :cᵦ, :β],
         # Relaxation modulus
