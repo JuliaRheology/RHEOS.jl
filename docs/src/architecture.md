@@ -1,11 +1,10 @@
 # Architecture
 
 RHEOS is build around four main data types:
-+ RheoTimeData: it contains time (t), stress (σ), strain (ϵ) data;
-+ RheoFreqData: it contains frequency (ω), storage (Gp) and loss (Gpp) moduli;
-+ RheoModelClass: it contains the model's name, parameters, relaxation (G), creep (J), storage (Gp) and loss (Gpp) moduli functions and a skematic graphical representation of the model;
-+ RheoModel: it contains the functions for relaxation, creep, storage and loss moduli in which the parameters have been substituted with values;
-
++ [`RheoTimeData`](@ref): it contains time (t), stress (σ), strain (ϵ) data;
++ [`RheoFreqData`](@ref): it contains frequency (ω), storage (Gp) and loss (Gpp) moduli;
++ [`RheoModelClass`](@ref): it contains the model's name, parameters, and the expression of relaxation (G), creep (J), storage (Gp) and loss (Gpp) moduli as function of the model parameters;
++ [`RheoModel`](@ref): it is generated when values for the model parameters are substituted into the functions for relaxation, creep, storage and loss moduli.
 
 A common RHEOS workflow is illustrated in the figure below. Experimental time-domain viscoelastic data is fitted to a viscoelastic model. This model (with the fitted parameters) is then used to make a prediction of the behaviour under the fitted loading conditions so that its accuracy can be qualitatively assessed. Similarly, the fitted model can be used to simulate the behaviour of the same material under any loading conditions (different from the fitted ones).
 
