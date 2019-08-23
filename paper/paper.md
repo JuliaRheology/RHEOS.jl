@@ -54,8 +54,6 @@ Obtaining intuition for fractional viscoelastic theory can be difficult and lear
 
 Because understanding of materials is often dependent on summarising their behaviour with a model, one must be able to test and compare a broad range of models to inform model selection and reliably identify material parameters. There are currently very limited options available in the public domain [@Bobrheology; @seifertPythonToolsAnalysis2019], and most research groups have to invest significant effort developing custom software. An open-source standardised library of models and fitting algorithms would support the rheology research community and make analysis more systematic, transparent and reproducible.
 
-
-
 # Implementation
 
 ## Features

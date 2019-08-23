@@ -22,21 +22,21 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 
 - Artificial loading conditions can be generated within RHEOS to better understand a model's response
 
-## Please Note
-RHEOS is currently undergoing a major update. The documentation is being updated accordingly. The API section will be the first page to be updated. The tutorials from the previous documentation will be updated after this.
-
 ## Installation
 1. Install Julia, version 1.1.1
 2. From Julia REPL, enter pkg mode by pressing ```]```
 3. (Optional) Enable desired Project.toml environment
 4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
 
-## Included Dependencies
-#### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
-
 ## Citation
 If you use RHEOS in your work, please consider citing the following paper:
 **TBA**
+
+## Embedded Dependencies
+#### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
+
+## Contributing to RHEOS
+If you believe you have found any bugs or invalid behaviour in RHEOS, please feel free to file an issue on this repository. You can also raise an issue if you feel that any part of the documentation needs clarification, or for any feature requests. Even better than just raising an issue, you could both raise an issue and issue a pull request which fixes that issue. Please be aware that RHEOS is released with a [Contributor Code of Conduct](CONDUCT.md) and by participating in this project you agree to abide by its terms.
 
 ## References
 
