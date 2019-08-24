@@ -82,6 +82,8 @@ A brief description of this workflow is the following. A CSV is imported into a 
 
 ![Qualitative assessment of the fitted model.](predictfigure.png)
 
+This example and others are available as Julia Jupyther notebooks alongside the library.
+
 # Acknowledgements
 
 JLK Would like thank the George and Lillian Schiff Foundation for the PhD funding which facilitated this project. AB, JLK and AJK acknowledge the BBSRC grants BB/M002578/1, BB/K018175/1 and BB/P003184/1.
