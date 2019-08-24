@@ -502,7 +502,7 @@ end
 
 Return a new RheoModelClass with some of the parameters frozen to specific values
 
-# Fields
+# Arguments
 
 - m: original RheoModelClass
 - nt0: named tuple with values for each parameter to freeze
