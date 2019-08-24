@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Zener ·  </title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><a href="../"><img class="logo" src="../assets/logo.png" alt="  logo"/></a><h1> </h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Home</a></li><li><a class="toctext" href="../architecture/">Architecture</a></li><li><a class="toctext" href="../fileIO/">File I/O</a></li><li><a class="toctext" href="../preprocessing/">Preprocessing</a></li><li><a class="toctext" href="../generatingdata/">Generating Data</a></li><li><span class="toctext">Fit and Predict</span><ul><li><a class="toctext" href="../fitpredictTime/">Time data</a></li><li><a class="toctext" href="../fitpredictFreq/">Frequency data</a></li></ul></li><li><span class="toctext">Models</span><ul><li><a class="toctext" href="../elements/">Basic Elements</a></li><li><a class="toctext" href="../fractionalMaxwell/">Maxwell</a></li><li><a class="toctext" href="../fractionalKelvinVoigt/">Kelvin-Voigt</a></li><li class="current"><a class="toctext" href>Zener</a><ul class="internal"><li><a class="toctext" href="#Fractional-Zener-1">Fractional Zener</a></li><li><a class="toctext" href="#Fractional-SLS-(Zener)-1">Fractional SLS (Zener)</a></li><li><a class="toctext" href="#Fractional-Jeffreys-(Zener)-1">Fractional Jeffreys (Zener)</a></li><li><a class="toctext" href="#Standard-Linear-Solid-(Zener)-1">Standard Linear Solid (Zener)</a></li><li><a class="toctext" href="#Jeffreys-(Zener)-1">Jeffreys (Zener)</a></li><li><a class="toctext" href="#Fractional-Solid-1">Fractional Solid</a></li></ul></li><li><a class="toctext" href="../fractionalPT/">Poynting-Thomson</a></li><li><a class="toctext" href="../burgers/">Burgers</a></li><li><a class="toctext" href="../createmodel/">Create Your Model</a></li></ul></li><li><a class="toctext" href="../examples/">Examples</a></li><li><a class="toctext" href="../API/">API</a></li></ul></nav><article id="docs"><header><nav><ul><li>Models</li><li><a href>Zener</a></li></ul><a class="edit-page" href="https://github.com/JuliaRheology/RHEOS.jl/blob/master/docs/src-staging/fractionalZener.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Zener</span><a class="fa fa-bars" href="#"></a></div></header><h2><a class="nav-anchor" id="Fractional-Zener-1" href="#Fractional-Zener-1">Fractional Zener</a></h2><pre class="language-julia"><code class="language-julia">using RHEOS
+include(&quot;plotmodel.jl&quot;);</code></pre><pre class="language-julia"><code class="language-julia">Fract_Zener</code></pre><pre class="language-output"><code class="language-output">Model name: frac_zener
+
+Free parameters: cₐ, a, cᵦ, β, cᵧ and γ
+
+
+                  ______╱╲__________╱╲______
+                 |      ╲╱          ╲╱      |
+          _______|      cₐ,a         cᵦ, β  |_______
+                 |                          |
+                 |____________╱╲____________|
+                              ╲╱
+                              cᵧ, γ</code></pre><h3><a class="nav-anchor" id="Constitutive-equation-1" href="#Constitutive-equation-1">Constitutive equation</a></h3><div>\[\sigma(t) + \frac{c_\alpha}{c_\beta} \frac{d^{\alpha-\beta} \sigma(t)}{dt^{\alpha-\beta}}= c_{\alpha} \frac{d^\alpha \epsilon(t)}{dt^\alpha} + c_\gamma \frac{d^\gamma \epsilon(t)}{dt^\gamma}+ \frac{c_\alpha c_\gamma}{c_\beta}\frac{d^{\alpha+\gamma-\beta} \epsilon(t)}{dt^{\alpha+\gamma-\beta}}\]</div><p>Assuming <span>$0 \leq \beta \leq \alpha \leq 1$</span></p><h3><a class="nav-anchor" id="Relaxation-modulus-1" href="#Relaxation-modulus-1">Relaxation modulus</a></h3><div>\[G(t) = c_\beta t^{-\beta} E_{\alpha-\beta,1-\beta}\left(-\frac{c_\beta}{c_\alpha} t^{\alpha-\beta}\right) + \frac{c_{\gamma} }{\Gamma(1-\gamma)} t^{-\gamma}\]</div><h3><a class="nav-anchor" id="Creep-modulus-1" href="#Creep-modulus-1">Creep modulus</a></h3><div>\[\tilde{J}(s)= \frac{1}{s}\frac{c_\alpha s^{\alpha}+c_\beta s^{\beta}}{c_\alpha s^\alpha c_\beta s^{\beta} + c_\gamma s^\gamma (c_\alpha s^\alpha+c_\beta s^\beta)}\]</div><h3><a class="nav-anchor" id="Storage-modulus-1" href="#Storage-modulus-1">Storage modulus</a></h3><div>\[G^{\prime}(\omega) = \frac{\left(c_\beta \omega^\beta\right)^2 \cdot c_\alpha \omega^\alpha \cos(\alpha \frac{\pi}{2}) + \left(c_\alpha \omega^\alpha\right)^2 \cdot c_\beta \omega^\beta \cos(\beta \frac{\pi}{2})}{\left(c_\alpha \omega^\alpha\right)^2+\left(c_\beta \omega^\beta\right)^2+2c_\alpha \omega^\alpha \cdot c_\beta \omega^\beta \cos((\alpha-\beta)\frac{\pi}{2})} + c_\gamma \omega^\gamma \cos\left(\gamma \frac{\pi}{2}\right)\]</div><h3><a class="nav-anchor" id="Loss-modulus-1" href="#Loss-modulus-1">Loss modulus</a></h3><div>\[G^{\prime\prime}(\omega) = \frac{\left(c_\beta \omega^\beta\right)^2 \cdot c_\alpha \omega^\alpha \sin(\alpha \frac{\pi}{2}) + \left(c_\alpha \omega^\alpha\right)^2 \cdot c_\beta \omega^\beta \sin(\beta \frac{\pi}{2})}{\left(c_\alpha \omega^\alpha\right)^2+\left(c_\beta \omega^\beta\right)^2+2c_\alpha \omega^\alpha \cdot c_\beta \omega^\beta \cos((\alpha-\beta)\frac{\pi}{2})}+ c_\gamma \omega^\gamma \sin\left(\gamma \frac{\pi}{2}\right)\]</div><h2><a class="nav-anchor" id="Fractional-SLS-(Zener)-1" href="#Fractional-SLS-(Zener)-1">Fractional SLS (Zener)</a></h2><pre class="language-julia"><code class="language-julia">FractSLS_Zener</code></pre><pre class="language-output"><code class="language-output">Model name: fracsls_Zener
+
+Free parameters: cₐ, a, kᵦ and kᵧ
+
+
+                _____╱╲_______╱╲  ╱╲  ╱╲  _____
+               |     ╲╱         ╲╱  ╲╱  ╲╱     |
+        _______|       cₐ,a              kᵦ    |_______
+               |                               |
+               |__________╱╲  ╱╲  ╱╲  _________|
+                            ╲╱  ╲╱  ╲╱
+                                 kᵧ</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
+
+# plot moduli for varying α
+for (i,α) in enumerate([0.1, 0.25, 0.5, 0.74, 0.9])
+    
+    models = vcat(models,RheoModel(FractSLS_Zener,(cₐ = 1, a = α, kᵦ = 1, kᵧ = 1)))
+ 
+end
+
+plotmodel(models);</code></pre><p><img src="../fractionalZener_files/fractionalZener_6_0.png" alt="png"/></p><p><img src="../fractionalZener_files/fractionalZener_6_1.png" alt="png"/></p><h2><a class="nav-anchor" id="Fractional-Jeffreys-(Zener)-1" href="#Fractional-Jeffreys-(Zener)-1">Fractional Jeffreys (Zener)</a></h2><pre class="language-julia"><code class="language-julia">FractJeffreys_Zener</code></pre><pre class="language-output"><code class="language-output">Model name: fjeff_Zener
+
+Free parameters: ηₐ, cᵦ, β and ηᵧ
+
+
+                                    ___
+                            _________| |_________╱╲________
+                           |        _|_|         ╲╱        |
+                    _______|          ηₐ            cᵦ, β  |_______
+                           |              ___              |
+                           |_______________| |_____________|
+                                          _|_|
+                                             ηᵧ</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
+
+# plot moduli for varying β
+for (i,β) in enumerate([0.1, 0.25, 0.5, 0.74, 0.9])
+    
+    models = vcat(models,RheoModel(FractJeffreys_Zener,(ηₐ = 1, cᵦ = 1, β = β, ηᵧ = 1)))
+ 
+end
+
+plotmodel(models, ymaxG = 2.0);</code></pre><p><img src="../fractionalZener_files/fractionalZener_9_0.png" alt="png"/></p><p><img src="../fractionalZener_files/fractionalZener_9_1.png" alt="png"/></p><h2><a class="nav-anchor" id="Standard-Linear-Solid-(Zener)-1" href="#Standard-Linear-Solid-(Zener)-1">Standard Linear Solid (Zener)</a></h2><pre class="language-julia"><code class="language-julia">SLS_Zener</code></pre><pre class="language-output"><code class="language-output">Model name: SLS_Zener
+
+Free parameters: η, kᵦ and kᵧ
+
+                      ___
+                  _____| |________╱╲  ╱╲  ╱╲  ___
+                 |    _|_|          ╲╱  ╲╱  ╲╱   |
+          _______|      η                  kᵦ    |_______
+                 |                               |
+                 |__________╱╲  ╱╲  ╱╲  _________|
+                              ╲╱  ╲╱  ╲╱
+                                   kᵧ</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
+
+# plot moduli for varying kᵦ
+for (i,k) in enumerate([1.0, 3.0, 5.0])
+    
+    models = vcat(models,RheoModel(SLS_Zener,(η = 1, kᵦ = k, kᵧ = 1)))
+ 
+end
+
+plotmodel(models);</code></pre><p><img src="../fractionalZener_files/fractionalZener_12_0.png" alt="png"/></p><p><img src="../fractionalZener_files/fractionalZener_12_1.png" alt="png"/></p><h2><a class="nav-anchor" id="Jeffreys-(Zener)-1" href="#Jeffreys-(Zener)-1">Jeffreys (Zener)</a></h2><pre class="language-julia"><code class="language-julia">Jeffreys_Zener</code></pre><pre class="language-output"><code class="language-output">Model name: jeffreys_Zener
+
+Free parameters: ηₐ, k and ηᵧ
+
+
+                              ___
+                        _______| |_______╱╲  ╱╲  ╱╲  ___
+                       |      _|_|         ╲╱  ╲╱  ╲╱  |
+                _______|          ηₐ            k      |_______
+                       |              ___              |
+                       |_______________| |_____________|
+                                      _|_|
+                                         ηᵧ</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
+
+# plot moduli for varying ηₐ
+for (i,η) in enumerate([1.0, 5.0, 8.0])
+    
+    models = vcat(models,RheoModel(Jeffreys_Zener,(ηₐ = η, k = 3, ηᵧ = 1)))
+ 
+end
+
+plotmodel(models);</code></pre><p><img src="../fractionalZener_files/fractionalZener_15_0.png" alt="png"/></p><p><img src="../fractionalZener_files/fractionalZener_15_1.png" alt="png"/></p><h2><a class="nav-anchor" id="Fractional-Solid-1" href="#Fractional-Solid-1">Fractional Solid</a></h2><p><strong>Reference:</strong> Bonfanti, A., Fouchard, J., Khalilgharibi, N., Charras, G., &amp; Kabla, A. (2019). A unified rheological model for cells and cellularised materials. BioRxiv</p><pre class="language-julia"><code class="language-julia">FractSolid</code></pre><pre class="language-output"><code class="language-output">Model name: fractsolid
+
+Free parameters: η, cᵦ, β and k
+
+                      ___
+                  _____| |__________╱╲__________
+                 |    _|_|          ╲╱          |
+             ___ |      η              cᵦ, β    |___
+                 |                              |
+                 |__________╱╲  ╱╲  ╱╲  ________|
+                              ╲╱  ╲╱  ╲╱
+                                k</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
+
+# plot moduli for varying β
+for (i,β) in enumerate([0.1, 0.25, 0.5, 0.74, 0.9])
+    
+    models = vcat(models,RheoModel(FractSolid,(η = 1, cᵦ = 1, β = β, k = 0.5)))
+ 
+end
+
+plotmodel(models, ymaxG = 2);</code></pre><p><img src="../fractionalZener_files/fractionalZener_18_0.png" alt="png"/></p><p><img src="../fractionalZener_files/fractionalZener_18_1.png" alt="png"/></p><footer><hr/><a class="previous" href="../fractionalKelvinVoigt/"><span class="direction">Previous</span><span class="title">Kelvin-Voigt</span></a><a class="next" href="../fractionalPT/"><span class="direction">Next</span><span class="title">Poynting-Thomson</span></a></footer></article></body></html>
