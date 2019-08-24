@@ -109,7 +109,7 @@ function getsampleperiod(t::Vector{RheoFloat})
     # check sample rate is constant, otherwise sample period varies
     @assert constantcheck(t) "Sample-rate must be constant"
     # return sample period
-    rate = t[2] - t[1]
+    sampleperiod = t[2] - t[1]
 end
 
 """
