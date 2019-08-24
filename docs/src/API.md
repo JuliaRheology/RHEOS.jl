@@ -1,5 +1,13 @@
 # API
 
+## Main RHEOS Structs
+```@docs
+RheoTimeData
+RheoFreqData
+RheoModelClass
+RheoModel
+```
+
 ## Sampling and Filtering Functions
 ```@docs
 resample
@@ -16,6 +24,7 @@ modelstepfit
 modelsteppredict
 dynamicmodelfit
 dynamicmodelpredict
+freeze_params
 ```
 
 ## Data Generation Functions

@@ -385,6 +385,18 @@ end
 Model related functionality
 ---------------------------
 =#
+"""
+    RheoModelClass(name::String, params::Vector{Symbol}, G::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}}, Ga::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}}, J::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}}, Ja::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}}, Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}}, Gpa::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}}, Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Array{RheoFloat,1}}}, Gppa::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1},Array{RheoFloat,1}}}, constraint::FunctionWrapper{Bool,Tuple{Array{RheoFloat,1}}}, info::String, expressions::NamedTuple)
+
+`RheoModelClass` contains a model name, it's symbolic parameters and all its moduli (both single-input and array-input versions).
+
+It also contains information about any constraints that must be observed (e.g. the sprigpot coefficient being inbetween 0 and 1).
+
+Lastly, it also contains additional info about the model which may include a text-art schematic.
+
+Generally, users will want to use the `RheoModelClass` constructor function as shown in the 'Create Your Model' section of the documentation
+rather than the default constructor.
+"""
 struct RheoModelClass
 
     name::String
@@ -548,6 +560,16 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
         $info, $expressions)   )
 end
 
+
+"""
+    RheoModel(G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Ga::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}, J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Ja::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}, Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Gpa::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}, Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Gppa::FunctionWrapper{Array{RheoFloat,1},Tuple{Array{RheoFloat,1}}}, expressions::NamedTuple)
+    
+`RheoModel` contains all known moduli of a particular model, as for a `RheoModelClass` model name. However, a `RheoModel`
+has all it's parameters fixed to known values.
+
+Generally, users will begin with a defined `RheoModelClass` (e.g. SLS) and then specialise the parameters,
+rather than calling the default constructor explicitly.
+"""
 struct RheoModel
 
     G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
