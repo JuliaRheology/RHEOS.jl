@@ -38,7 +38,7 @@ symlink("../src/architecture.md","docs/src-staging/architecture.md")
 
 mkdir("docs/src-staging/assets")
 cp("docs/src/assets/logo.png", "docs/src-staging/assets/logo.png")
-cp("docs/src/assets/diagram_v3.png", "docs/src-staging/assets/diagram_v3.png")
+cp("docs/src/assets/diagram.svg", "docs/src-staging/assets/diagram.svg")
 ##
 
 # highlight output cells (i.e. anything withouout a language specified) white
