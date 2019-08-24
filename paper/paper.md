@@ -1,5 +1,5 @@
 ---
-title: 'RHEOS.jl -- A Julia package for Rheology data analysis.'
+title: 'RHEOS.jl -- A Julia package for Rheology Data Analysis.'
 tags:
   - Rheology
   - Fractional Rheology
@@ -24,7 +24,7 @@ bibliography: paper.bib
 ---
 # Summary
 
-Rheology is the science of deformation and flow, with a focus on materials that do not exhibit simple linear elastic or viscous Newtonian behaviours. Rheology plays an important role in the characterisation of soft viscoelastic materials commonly found in the food and cosmetics industry, as well as in biology and bioengineering. Empirical and theoretical approaches are commonly used to identify and quantify materials behaviours based on experimental data.
+Rheology is the science of deformation and flow, with a focus on materials that do not exhibit simple linear elastic or viscous Newtonian behaviours. Rheology plays an important role in the characterisation of soft viscoelastic materials commonly found in the food and cosmetics industry, as well as in biology and bioengineering. Empirical and theoretical approaches are commonly used to identify and quantify material behaviours based on experimental data.
 
 RHEOS (RHEology, Open-Source) is a software package designed to make the analysis of rheological data simpler, faster and more reproducible. RHEOS has a particular emphasis on linear rheological models containing fractional derivatives which have demonstrable utility for the modelling of biological materials [@bonfantiUnifiedRheologicalModel2019; @kaplanPectinMethylesterificationImplications2019] but have hitherto remained in relative obscurity -- possibly due to their mathematical and computational complexity. RHEOS is written in Julia [@bezansonJuliaFreshApproach2017], which provides excellent computational efficiency and approachable syntax. RHEOS is fully documented and has extensive testing coverage.
 
@@ -38,7 +38,7 @@ It should be noted that RHEOS is not an optimisation package. It builds on anoth
 
 Many scientists and engineers who undertake rheological experiments would fit their data with one or several viscoelastic models in order to classify materials, quantify their behaviour and predict their response to external perturbations.
 
-Standard linear viscoelastic models take the form of an ordinary differential equation between stress $\sigma$ and strain $\epsilon$. Under simple perturbations (step or ramp in stress or strain, or frequency sweep), it is relatively straight-forward to extract time-scales and identify asymptotic behaviours required to identify parameter values. However, data often involves complex stress and strain signals, and materials whose behaviour involve a broad distribution of time-scales, including power law behaviours. Fitting models and predicting their response in the time domain then requires computing viscoelastic hereditary integrals such as:
+Standard linear viscoelastic models take the form of an ordinary differential equation between stress $\sigma$ and strain $\epsilon$. Under simple perturbations (step or ramp in stress or strain, or frequency sweep), it is relatively straight-forward to extract time-scales and identify asymptotic behaviours required to identify parameter values. However, data often involves complex stress and strain signals, and materials whose behaviour involves a broad distribution of time-scales, including power law behaviours. Fitting models and predicting their response in the time domain then requires computing viscoelastic hereditary integrals such as:
 
 $$ \sigma(t) = \int_{0}^t G(t - \tau) \frac{d \epsilon(\tau)}{d \tau} d \tau $$
 
@@ -52,7 +52,7 @@ Obtaining intuition for fractional viscoelastic theory can be difficult and lear
 
 ## Extracting parameters, selecting models and comparing materials require standardised tools
 
-Because understanding of materials is often dependent on summarising their behaviour with a model, one must be able to test and compare a broad range of models to inform model selection and reliably identify material parameters. There are currently very limited options available in the public domain [@Bobrheology; @seifertPythonToolsAnalysis2019], and most research groups have to invest significant effort developing custom software. An open-source standardised library of models and fitting algorithms would support the rheology research community and make analysis more systematic, transparent and reproducible.
+Because understanding of materials is often dependent on summarising their behaviour with a model, one must be able to test and compare a broad range of models to inform model selection and reliably identify material parameters. There are currently very limited options available in the public domain [@Bobrheology; @seifertPythonToolsAnalysis2019], and most research groups have to invest significant effort into developing custom software. An open-source standardised library of models and fitting algorithms would support the rheology research community and make analysis more systematic, transparent and reproducible.
 
 
 
@@ -82,7 +82,7 @@ A brief description of this workflow is the following. A CSV is imported into a 
 
 ![Qualitative assessment of the fitted model.](predictfigure.png)
 
-This example and others are available as Julia Jupyther notebooks alongside the library.
+This example and others are available as Julia JuPyter notebooks, accessible from both the RHEOS GitHub repository, and viewable from the RHEOS documentation.
 
 # Acknowledgements
 
