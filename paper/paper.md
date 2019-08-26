@@ -18,7 +18,7 @@ authors:
     orcid: 0000-0002-0280-3531
     affiliation: 1
 affiliations:
-  - name: Engineering Department, Cambridge University, UK
+  - name: Engineering Department, University of Cambridge, United Kingdom
     index: 1
 date: 12 August 2019
 bibliography: paper.bib
