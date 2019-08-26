@@ -1,5 +1,5 @@
 ---
-title: 'RHEOS.jl -- A Julia package for Rheology Data Analysis.'
+title: 'RHEOS.jl -- A Julia package for Rheology Data Analysis'
 tags:
   - Rheology
   - Fractional Rheology
