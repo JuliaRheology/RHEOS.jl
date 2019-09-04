@@ -25,7 +25,7 @@ bibliography: paper.bib
 ---
 # Summary
 
-Rheology is the science of deformation and flow, with a focus on materials that do not exhibit simple linear elastic or viscous Newtonian behaviours. Rheology plays an important role in the characterisation of soft viscoelastic materials commonly found in the food and cosmetics industry, as well as in biology and bioengineering. Empirical and theoretical approaches are commonly used to identify and quantify material behaviours based on experimental data.
+Rheology is the science of deformation and flow, with a focus on materials that do not exhibit simple linear elastic or viscous Newtonian behaviours. Rheology plays an important role in the characterisation of soft viscoelastic materials commonly found in the food and cosmetics industries, as well as in biology and bioengineering. Empirical and theoretical approaches are commonly used to identify and quantify material behaviours based on experimental data.
 
 RHEOS (RHEology, Open-Source) is a software package designed to make the analysis of rheological data simpler, faster and more reproducible. RHEOS has a particular emphasis on linear rheological models containing fractional derivatives which have demonstrable utility for the modelling of biological materials [@aime2018power;@bouzid2018computing;@bonfantiUnifiedRheologicalModel2019; @kaplanPectinMethylesterificationImplications2019] but have hitherto remained in relative obscurity -- possibly due to their mathematical and computational complexity. RHEOS is written in Julia [@bezansonJuliaFreshApproach2017], which provides excellent computational efficiency and approachable syntax. RHEOS is fully documented and has extensive testing coverage.
 
