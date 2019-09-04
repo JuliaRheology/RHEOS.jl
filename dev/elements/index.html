@@ -20,16 +20,16 @@ Free parameters: η
                      η</code></pre><h3><a class="nav-anchor" id="Qualitative-behaviours-of-the-moduli-1" href="#Qualitative-behaviours-of-the-moduli-1">Qualitative behaviours of the moduli</a></h3><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
 
 # Spring
-models = vcat(models, RheoModel(Spring, (k = 1.0,)))
+push!(models, RheoModel(Spring, (k = 1.0,)))
 
 # plot moduli for varying β
-for (i,beta) in enumerate([0.2, 0.5, 0.8])
+for beta in [0.2, 0.5, 0.8]
     
-    models = vcat(models, RheoModel(Springpot,(cᵦ = 1.0, β = beta)))
+    push!(models, RheoModel(Springpot,(cᵦ = 1.0, β = beta)))
  
 end
 
 # Dashpot
-models = vcat(models, RheoModel(Dashpot, (η = 1.0,)))
+push!(models, RheoModel(Dashpot, (η = 1.0,)))
 
 plotmodel(models, ymaxG = 2.0);</code></pre><p><img src="../elements_files/elements_9_0.png" alt="png"/></p><p><img src="../elements_files/elements_9_1.png" alt="png"/></p><footer><hr/><a class="previous" href="../fitpredictFreq/"><span class="direction">Previous</span><span class="title">Frequency data</span></a><a class="next" href="../fractionalMaxwell/"><span class="direction">Next</span><span class="title">Maxwell</span></a></footer></article></body></html>

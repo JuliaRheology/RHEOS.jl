@@ -23,9 +23,9 @@ Free parameters: cₐ, a, kᵦ and kᵧ
                                      kᵦ</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
 
 # plot moduli for varying α
-for (i,α) in enumerate([0.1, 0.25, 0.5, 0.74, 0.9])
+for alpha in [0.1, 0.25, 0.5, 0.74, 0.9]
     
-    models = vcat(models,RheoModel(FractSLS_PT,(cₐ = 1, a = α, kᵦ = 1, kᵧ = 1)))
+    push!(models,RheoModel(FractSLS_PT,(cₐ = 1, a = alpha, kᵦ = 1, kᵧ = 1)))
  
 end
 
@@ -43,9 +43,9 @@ Free parameters: ηₐ, cᵦ, β and ηᵧ
                                           cᵦ, β</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
 
 # plot moduli for varying β
-for (i,β) in enumerate([0.1, 0.25, 0.5, 0.74, 0.9])
+for beta in [0.1, 0.25, 0.5, 0.74, 0.9]
     
-    models = vcat(models,RheoModel(FractJeffreys_PT,(ηₐ = 1, cᵦ = 1, β = β, ηᵧ = 1)))
+    push!(models,RheoModel(FractJeffreys_PT,(ηₐ = 1, cᵦ = 1, β = beta, ηᵧ = 1)))
  
 end
 
@@ -63,9 +63,9 @@ Free parameters: η, kᵦ and kᵧ
                                      kᵦ</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
 
 # plot moduli for varying kᵦ
-for (i,k) in enumerate([1.0, 3.0, 5.0])
+for k in [1.0, 3.0, 5.0]
     
-    models = vcat(models,RheoModel(SLS_PT,(η = 1, kᵦ = k, kᵧ = 1)))
+    push!(models,RheoModel(SLS_PT,(η = 1, kᵦ = k, kᵧ = 1)))
  
 end
 
@@ -83,9 +83,9 @@ Free parameters: ηₐ, k and ηᵧ
                                      k</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
 
 # plot moduli for varying ηₐ
-for (i,η) in enumerate([1.0, 5.0, 8.0])
+for eta in [1.0, 5.0, 8.0]
     
-    models = vcat(models,RheoModel(Jeffreys_PT,(ηₐ = η, k = 3, ηᵧ = 1)))
+    push!(models,RheoModel(Jeffreys_PT,(ηₐ = eta, k = 3, ηᵧ = 1)))
  
 end
 

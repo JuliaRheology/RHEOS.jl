@@ -15,9 +15,9 @@ Free parameters: cₐ, a and k
                 cₐ,a               k</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
 
 # plot moduli for varying α
-for (i,alpha) in enumerate([0.1, 0.3, 0.5, 0.7, 0.9])
+for alpha in [0.1, 0.3, 0.5, 0.7, 0.9]
     
-    models = vcat(models,RheoModel(FractS_Maxwell,(cₐ = 1.0, a = alpha, k = 1.0)))
+    push!(models,RheoModel(FractS_Maxwell,(cₐ = 1.0, a = alpha, k = 1.0)))
  
 end
 
@@ -31,9 +31,9 @@ Free parameters: η, cᵦ and β
                     η            cᵦ, β</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
 
 # plot moduli for varying β
-for (i,beta) in enumerate([0.1, 0.3, 0.5, 0.7, 0.9])
+for beta in [0.1, 0.3, 0.5, 0.7, 0.9]
     
-    models = vcat(models,RheoModel(FractD_Maxwell,(η = 10, cᵦ= 1.0, β = beta)))
+    push!(models,RheoModel(FractD_Maxwell,(η = 10, cᵦ= 1.0, β = beta)))
  
 end
 
@@ -48,9 +48,9 @@ Free parameters: η and k
                   η                  k</code></pre><pre class="language-julia"><code class="language-julia">models = Vector{RheoModel}()
 
 # plot moduli for varying k
-for (i,k) in enumerate([5.0, 10.0, 20.0])
+for k in [5.0, 10.0, 20.0]
     
-    models = vcat(models,RheoModel(Maxwell,(η = 10, k = k)))
+    push!(models,RheoModel(Maxwell,(η = 10, k = k)))
  
 end
 
