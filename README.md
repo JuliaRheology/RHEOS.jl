@@ -7,7 +7,7 @@
 Linux: [![Build Status](https://travis-ci.org/JuliaRheology/RHEOS.jl.svg?branch=master)](https://travis-ci.org/JuliaRheology/RHEOS.jl) &nbsp;
 Windows: [![Build Status](https://ci.appveyor.com/api/projects/status/github/JuliaRheology/RHEOS.jl?branch=master&svg=true)](https://ci.appveyor.com/project/JuliaRheology/RHEOS-jl) &nbsp;
 [![Latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaRheology.github.io/RHEOS.jl/latest) &nbsp;
-[![License](https://img.shields.io/badge/License-MIT-ff69b2.svg?style=flat)](LICENSE.md)
+[![License](https://img.shields.io/badge/License-MIT-ff69b2.svg?style=flat)](LICENSE.md) &nbsp;
 [![status](https://joss.theoj.org/papers/553250d815e1990db1b89c742854c71a/status.svg)](https://joss.theoj.org/papers/553250d815e1990db1b89c742854c71a)
 
 # RHEOS - RHEology, Open-Source
