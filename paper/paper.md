@@ -81,7 +81,7 @@ The following schematic illustrates one of the common RHEOS workflows in which e
 
 A brief description of this workflow is the following. A CSV is imported into a RHEOS `RheoTimeData` struct using a convenient loading function. This is then fitted to a `RheoModelClass`, which embeds expressions for key characteristics of the model (relaxation function, creep response, complex modulus) involving symbolic parameters. This results in a fitted `RheoModel` where parameters are now substituted with fixed values derived from the fitting procedure. In the prediction step, the fitted `RheoModel` is combined with partial data (here only time and strain) to simulate the stress values expected from the model. The original data and model can then be compared graphically and numerically.
 
-![Qualitative assessment of the fitted model.](predict.pdf){ width=70% }
+![Qualitative assessment of the fitted model.](predict.pdf){ width=80% }
 
 This example and others are available as Julia Jupyter notebooks, accessible from both the RHEOS GitHub repository, and viewable from the RHEOS documentation.
 
