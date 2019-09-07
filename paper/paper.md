@@ -77,11 +77,11 @@ All of the above features are linked together in a seamless interface intended t
 
 The following schematic illustrates one of the common RHEOS workflows in which experimental time-domain viscoelastic data is fitted to a model. This model is then used to make a prediction of the behaviour so that its accuracy can be qualitatively assessed. This workflow is shown schematically in Figure 1, and the prediction of the fitted model is plotted against the original data in Figure 2.
 
-![High level schematic of a fitting and prediction workflow from experimental data.](diagram.pdf)
+![High level schematic of a fitting and prediction workflow from experimental data.](diagram.pdf){ width=70% }
 
 A brief description of this workflow is the following. A CSV is imported into a RHEOS `RheoTimeData` struct using a convenient loading function. This is then fitted to a `RheoModelClass`, which embeds expressions for key characteristics of the model (relaxation function, creep response, complex modulus) involving symbolic parameters. This results in a fitted `RheoModel` where parameters are now substituted with fixed values derived from the fitting procedure. In the prediction step, the fitted `RheoModel` is combined with partial data (here only time and strain) to simulate the stress values expected from the model. The original data and model can then be compared graphically and numerically.
 
-![Qualitative assessment of the fitted model.](predict.pdf)
+![Qualitative assessment of the fitted model.](predict.pdf){ width=70% }
 
 This example and others are available as Julia Jupyter notebooks, accessible from both the RHEOS GitHub repository, and viewable from the RHEOS documentation.
 
