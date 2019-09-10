@@ -52,7 +52,7 @@ The sections in this documentation each aim to provide tutorials in different el
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
 
 ## Contributing to RHEOS
-If you believe you have found any bugs or invalid behaviour in RHEOS, please feel free to file an issue on this repository. You can also raise an issue if you feel that any part of the documentation needs clarification, or for any feature requests. Even better than just raising an issue, you could both raise an issue and issue a pull request which fixes that issue. Please be aware that RHEOS is released with a [Contributor Code of Conduct](https://github.com/JuliaRheology/RHEOS.jl/blob/master/CONDUCT.md) and by participating in this project you agree to abide by its terms.
+If you believe you have found any bugs or invalid behaviour in RHEOS, please feel free to file an issue on this repository. You can also raise an issue if you feel that any part of the documentation needs clarification, or for any feature requests. Even better than just raising an issue, you could both raise an issue and issue a pull request which fixes that issue. Note that meta-documentation on running tests and building documentation locally is available at the [JuliaRheology/RheoHelpDocs](https://github.com/JuliaRheology/RheoHelpDocs) repository. Please be aware that RHEOS is released with a [Contributor Code of Conduct](CONDUCT.md) and by participating in this project you agree to abide by its terms.
 
 ## Citation
 If you use RHEOS in your work, please consider citing the following paper
