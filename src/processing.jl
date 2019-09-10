@@ -10,10 +10,10 @@ Preprocessing functions
 
 Resample data with new sample rate(s).
 
-Resample can downsample or upsample data. If the number of elperiods is negative it is going to reduce the number of samples,
-viceversa if it is positive. If time boundaries are not specified, resampling is applied to the whole set of data.
-If number of elements per period (elperiods) is 1 or -1 it returns the original RheoTimeData, whilst 0 is not accepted as a valid
-argument for elperiods.
+Resample can downsample or upsample data. If the number of `elperiods` is negative it is going to reduce the number of samples,
+vice versa if it is positive. If `time_boundaries` are not specified, resampling is applied to the whole set of data.
+If number of elements per period (`elperiods`) is `1` or `-1` it returns the original `RheoTimeData`, whilst `0` is not accepted as a valid
+argument for `elperiods`.
 """
 function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing) where {K<:Integer,T<:Real}
 
@@ -49,7 +49,7 @@ end
 
 Remove the data outside a specified time interval.
 
-By specifing a time interval (time_on, time_off), a new RheoTimeData is returned without the data
+By specifing a time interval (`time_on`, `time_off`), a new `RheoTimeData` is returned without the data
 lying outside time interval.
 """
 function cutting(self::RheoTimeData, time_on::T1, time_off::T2) where {T1<:Number, T2<:Number}
@@ -82,13 +82,13 @@ end
 """
     smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
 
-Smooth data using a Gaussian Kernel to time scale τ (approximately half power).
+Smooth data using a Gaussian Kernel to time scale `τ` (approximately half power).
 
-Smooths both σ and ϵ. Sampling frequency must be constant as it is based on FFT convolution. Essentially a
+Smooths both `σ` and `ϵ`. Sampling frequency must be constant as it is based on FFT convolution. Essentially a
 low pass filter with frequencies of 1/τ being cut to approximately half power. For other pad types available
-see ImageFiltering documentation. As of doc writing, pad options are: "replicate" (repeat edge values to
-infinity), "circular" (image edges "wrap around"), "symmetric" (the image reflects relative to a position
-between pixels), "reflect" (the image reflects relative to the edge itself).
+see ImageFiltering documentation. As of doc writing, pad options are: `"replicate"` (repeat edge values to
+infinity), `"circular"` (image edges "wrap around"), `"symmetric"` (the image reflects relative to a position
+between pixels), `"reflect"` (the image reflects relative to the edge itself).
 """
 function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
 
@@ -177,21 +177,21 @@ Fitting and predicting functions
 """
     modelfit(data::RheoTimeData, model::RheoModelClass, modloading::Symbol; p0::Union{NamedTuple,Tuple} = (), lo::Union{NamedTuple,Tuple} = (), hi::Union{NamedTuple,Tuple} = (), verbose::Bool = false, rel_tol = 1e-4, diff_method="BD")
 
-Fit RheologyData struct to model and return a fitted model as a RheologyModel object.
+Fit `RheologyData` struct to model and return a fitted model as a `RheologyModel` object.
 For the fitting process RHEOS relies on the optimistion package NLopt.jl (https://nlopt.readthedocs.io/en/latest/).
 RHEOS makes use of a local derivative free algorithm, specifically the Tom Rowan's "Subplex"
 
 # Arguments
 
-- `data`: RheoTimeData struct containing all data
-- `model`: RheoModelClass containing moduli functions and named tuple parameters
-- `modloading`: strain_imposed or 1, stress_imposed or 2
+- `data`: `RheoTimeData` struct containing all data
+- `model`: `RheoModelClass` containing moduli functions and named tuple parameters
+- `modloading`: `strain_imposed` or `1`, `stress_imposed` or `2`
 - `p0`: Initial parameters to use in fit (uses 0.5 for all parameters if not defined)
 - `lo`: Lower bounds for parameters
 - `hi`: Upper bounds for parameters
 - `verbose`: If true, prints parameters on each optimisation iteration
 - `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
-- `diff_method`: Set finite difference formula to use for derivative, currently "BD" or "CD"
+- `diff_method`: Set finite difference formula to use for derivative, currently `"BD"` or `"CD"`
 """
 function modelfit(data::RheoTimeData,
                   model::RheoModelClass,
