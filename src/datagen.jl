@@ -8,7 +8,7 @@ timeline generation function forms the basis of any load-generation workflow
 """
     timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end - t_start)/250.)
 
-Generate RheoTimeData struct with only the time data.
+Generate `RheoTimeData` struct with only the time data.
 
 # Arguments
 
@@ -25,7 +25,7 @@ end
 """
     frequencyspec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(ω_end-ω_start)/1.0e5)
 
-Generate RheoFreqData struct with only the frequency data.
+Generate `RheoFreqData` struct with only the frequency data.
 
 # Arguments
 
@@ -48,7 +48,7 @@ generate the appropriate loading.
 """
     strainfunction(data::RheoTimeData, f::T) where T<:Function
 
-Accepts a RheoTimeData and outputs a new RheoTimeData with a strain imposed.
+Accepts a `RheoTimeData` and outputs a new `RheoTimeData` with a strain imposed.
 The strain signal is determined by the function provided, which should take
 time as its only argument. The original data's time signal is used.
 
@@ -64,11 +64,11 @@ end
 """
     stressfunction(data::RheoTimeData, f::T) where T<:Function
 
-Accepts a RheoTimeData and outputs a new RheoTimeData with a stress imposed.
+Accepts a `RheoTimeData` and outputs a new `RheoTimeData` with a stress imposed.
 The stress signal is determined by the function provided, which should take
 time as its only argument. The original data's time signal is used.
 
-Normally used with a RheoTimeData generated using the `timeline` function.
+Normally used with a `RheoTimeData` generated using the `timeline` function.
 """
 function stressfunction(data::RheoTimeData, f::T) where T<:Function
     log = data.log == nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
