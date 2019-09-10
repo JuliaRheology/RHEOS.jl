@@ -43,6 +43,6 @@ If you believe you have found any bugs or invalid behaviour in RHEOS, please fee
 
 + W. N. Findley, J. S. Lai, K. Onaran — *Creep and Relaxation of Nonlinear Viscoelastic Materials (with an Introduction to Linear Viscoelasticity)*, Dover Publications, New York. (1976)
 
-+ S. G. Johnson — *The NLopt nonlinear-optimization package*, http://ab-initio.mit.edu/nlopt
++ S. G. Johnson — *The NLopt nonlinear-optimization package*, https://github.com/stevengj/nlopt
 
 + J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah — *Julia: A Fresh Approach to Numerical Computing*, SIAM Review, doi: 10.1137/141000671. (2017)
