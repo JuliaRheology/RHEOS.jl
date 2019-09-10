@@ -58,17 +58,17 @@ Time data related functionality
 """
     RheoTimeData(;σ::Vector{T1}, ϵ::Vector{T2}, t::Vector{T3}) where {T1<:Real, T2<:Real, T3<:Real}
 
-RheoTimeData struct contains stress, strain and time data.
+`RheoTimeData` struct contains stress, strain and time data.
 
 If preferred, an instance can be generated manually by just providing the three data
 vectors in the right order, sampling type will be checked automatically.
 
 # Fields
 
-- σ: stress
-- ϵ: strain
-- t: time
-- log: a log of struct's events, e.g. preprocessing
+- `σ`: stress
+- `ϵ`: strain
+- `t`: time
+- `log`: a log of struct's events, e.g. preprocessing
 """
 struct RheoTimeData
 
@@ -258,17 +258,17 @@ Frequency data related functionality
 """
     RheoFreqData(Gp::Vector{T1}, Gpp::Vector{T2}, ω::Vector{T3}, log::OrderedDict{Any,Any}) where {T1<:Real, T2<:Real, T3<:Real}
 
-RheoFreqData contains storage modulus, loss modulus and frequency data.
+`RheoFreqData` contains storage modulus, loss modulus and frequency data.
 
 If preferred, an instance can be generated manually by just providing the three data
 vectors in the right order.
 
 # Fields
 
-- Gp: storage modulus
-- Gpp: loss modulus
-- ω: frequency
-- log: a log of struct's events, e.g. preprocessing
+- `Gp`: storage modulus
+- `Gpp`: loss modulus
+- `ω`: frequency
+- `log`: a log of struct's events, e.g. preprocessing
 """
 struct RheoFreqData
 
@@ -390,7 +390,7 @@ Model related functionality
 
 `RheoModelClass` contains a model name, it's symbolic parameters and all its moduli (both single-input and array-input versions).
 
-It also contains information about any constraints that must be observed (e.g. the sprigpot coefficient being inbetween 0 and 1).
+It also contains information about any constraints that must be observed (e.g. the springpot coefficient being inbetween 0 and 1).
 
 Lastly, it also contains additional info about the model which may include a text-art schematic.
 
@@ -500,12 +500,12 @@ end
 """
     freeze_params(m::RheoModelClass, nt0::NamedTuple)
 
-Return a new RheoModelClass with some of the parameters frozen to specific values
+Return a new `RheoModelClass` with some of the parameters frozen to specific values
 
 # Arguments
 
-- m: original RheoModelClass
-- nt0: named tuple with values for each parameter to freeze
+- `m`: original `RheoModelClass`
+- `nt0`: named tuple with values for each parameter to freeze
 
 # Example
 ```@example

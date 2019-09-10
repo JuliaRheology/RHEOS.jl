@@ -25,7 +25,7 @@ delimiter can be specified in the `delimiter` keyword argument). Arguments must 
 identified by providing the number of the column in which they are contained.
 
 Can be used to construct either a RheoTimeData instance or a RheoFreqData
-instance. Function detects whether "time" or "frequency" has been included
+instance. Function detects whether time or frequency has been included
 and proceeds accordingly. For oscillatory data, all three columns (Gp, Gpp, Frequency)
 must be provided. For regular viscoelastic data only time, or time-stress, or time-strain or
 time-stress-strain data can be provided.
@@ -89,7 +89,7 @@ end
 """
     exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; delimiter=',', colorder=nothing)
 
-Export RheoTimeData or RheoFreqData type to csv format. May be useful for plotting/analysis in other software.
+Export `RheoTimeData` or `R`heoFreqData` type to csv format. May be useful for plotting/analysis in other software.
 By default, full time data will be exported with columns ordered as (t, σ, ϵ). Partial time data will be ordered
 as either (t, σ) or (t, ϵ). Full frequency data will be ordered as (ω, Gp, Gpp). The order of columns can be customised
 by passing a NamedTuple to the `colorder` arguments. For example (σ = 1, t = 3, ϵ = 2) would export the columns in the

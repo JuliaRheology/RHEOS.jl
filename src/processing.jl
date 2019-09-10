@@ -381,17 +381,17 @@ end
 """
     modelstepfit(data::RheoTimeData, model::RheoModelClass, modloading::Union{LoadingType,Integer}; step=nothing, p0::Union{NamedTuple,Tuple} = (), lo::Union{NamedTuple,Tuple} = (), hi::Union{NamedTuple,Tuple} = (), verbose::Bool = false, rel_tol = 1e-4) where T<:Real
 
-Same as 'modelfit' except assumes a step loading. If this assumption is appropriate for the data
-then fitting can be sped up greatly by use of this function. If modloading is strain_imposed, relaxation modulus is used,
-then the element in the middle of the strain is assumed to be the amplitude of the step. If modloading is stress_imposed,
+Same as `modelfit` except assumes a step loading. If this assumption is appropriate for the data
+then fitting can be sped up greatly by use of this function. If modloading is `strain_imposed`, relaxation modulus is used,
+then the element in the middle of the strain is assumed to be the amplitude of the step. If modloading is `stress_imposed`,
 the creep modulus is used, then the middle element of the stress is assumed to be the amplitude of the step.
-Alternatively, it is possible to define the value of the step by defining the optional "step" parameter.
+Alternatively, it is possible to define the value of the step by defining the optional `step` parameter.
 
 # Arguments
 
-- `data`: RheoTimeData struct containing all data
-- `model`: RheoModelClass containing moduli and parameters tuples
-- `modloading`: strain_imposed for relaxation modulus, stress_imposed for creep modulus
+- `data`: `RheoTimeData` struct containing all data
+- `model`: `RheoModelClass` containing moduli and parameters tuples
+- `modloading`: `strain_imposed` for relaxation modulus, `stress_imposed` for creep modulus
 - `p0`: Named tuple of initial parameters to use in fit (uses 0.5 for all parameters if none given)
 - `lo`: Named tuple of lower bounds for parameters
 - `hi`: Named tuple of upper bounds for parameters
@@ -514,7 +514,7 @@ end
 """
     modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 0.0)
 
-Same as modelpredict but assumes a step loading with step starting at 'step_on'. Singularities are bypassed
+Same as `modelpredict` but assumes a step loading with step starting at `step_on`. Singularities are bypassed
 by adding 1 to the index of the singular element.
 """
 function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 0.0)
@@ -651,18 +651,18 @@ All arguments are as described below.
 As this fitting procedure is fitting two functions simultaneously (the storage
 and loss moduli), if left untransformed the fit would tend to favour the
 modulus which is larger in magnitude and not fit the other modulus well. To avoid this,
-RHEOS offers a number of data transforms which can be used by changing "weights" argument.
+RHEOS offers a number of data transforms which can be used by changing `weights` argument.
 
 # Arguments
 
-- `data`: RheoFreqData struct containing all data
-- `model`: RheoModelClass containing moduli and symbols of parameters
+- `data`: `RheoFreqData` struct containing all data
+- `model`: `RheoModelClass` containing moduli and symbols of parameters
 - `p0`: Initial parameters to use in fit (uses 0.5 for all parameters if none given)
 - `lo`: Lower bounds for parameters
 - `hi`: Upper bounds for parameters
 - `verbose`: If true, prints parameters on each optimisation iteration
 - `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
-- `weights`: Weighting mode for storage and loss modulus ("none", "mean", "log", "local" or manually specified)
+- `weights`: Weighting mode for storage and loss modulus (`"none"`, `"mean"`, `"log"`, `"local"` or manually specified)
 """
 function dynamicmodelfit(data::RheoFreqData,
                 model::RheoModelClass;
@@ -748,7 +748,7 @@ end
     dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
 
 Given dynamic rheology data with only frequency and model where parameters have been substituted.
-Returns another RheoFreqData instance with the predicted Gp and Gpp based on the
+Returns another `RheoFreqData` instance with the predicted `Gp` and `Gpp` based on the
 frequencies and model given as arguments.
 """
 function dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
