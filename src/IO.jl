@@ -13,7 +13,7 @@ function nanremove(arr::Array{T,2}) where T<:Real
     # get list of NaNs / not NaNs (true for not NaN, false for NaN)
     notnanlist = vec(.!isnan.(rowsums))
 
-    if any(i -> !i, notnanlist)
+    if false in notnanlist
         # raise warning
         @warn "Please note that NaN data rows are not included in resultant data struct."
     end
