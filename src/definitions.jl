@@ -494,7 +494,6 @@ function model_parameters(nt::NamedTuple, params::Vector{Symbol}, err_string::St
     @assert length(params) == length(nt) "Mismatch number of model parameters and parameters provided in " * err_string
 
     p = map(i->RheoFloat(nt[i]), params)
-    p = convert(Vector{RheoFloat}, p)
 end
 
 """

@@ -174,8 +174,86 @@ end
 Fitting and predicting functions
 --------------------------------
 =#
+function fill_init_params(model::RheoModelClass, p0::Union{NamedTuple,Nothing})
+
+    springpotnumber = length(findall(x->(x==:a)||(x==:β), model.params))
+
+    if isnothing(p0)
+        # fill all initial guesses as 0.5, if two springpots then
+        # make sure dissipation coefficients conform to constraints
+        p0a = ones(RheoFloat, length(model.params))/2
+        if springpotnumber==2
+            index = findfirst(model.params.==:a)
+            p0a[index] = RheoFloat(0.8)
+        end
+        @warn "Initial values for model parameters are set to $p0a by default"
+
+    elseif length(p0)<length(model.params)
+        # check all provided symbols are part of the model, fill all parameters not provided
+        for i in keys(p0)
+            @assert (i in model.params) "Incorrect parameter name provided for model initial conditions:" * i
+        end
+        # propagate list
+        p0a = Vector{RheoFloat}(undef, length(model.params))
+        for (i,p) in enumerate(model.params)
+            p0a[i] = (p in keys(p0)) ? p0[p] : RheoFloat(1/2)
+        end
+        # check for second springpot specification
+        indexa = findfirst(model.params.==:a)
+        indexβ = findfirst(model.params.==:β)
+        if !(:a in keys(p0)) && !(:β in keys(p0))
+            p0a[indexa] = RheoFloat(0.8)
+        elseif !(:β in keys(p0))
+            p0a[indexβ] = p0[:a]/2
+        elseif !(:a in keys(p0))
+            p0a[indexa] = minimum((p0[:β]*2, RheoFloat(0.999)))
+        end
+
+        @warn "Unspecified initial guesses filled by default values: $p0a"
+
+    else
+        p0a = model_parameters(p0, model.params, "initial guess")
+    end
+
+    return p0a
+end
+
+function fill_lower_bounds(model::RheoModelClass, lo::Union{NamedTuple,Nothing})
+    if isnothing(lo)
+        loa = nothing
+
+    elseif length(lo)<length(model.params)
+        loa = Vector{RheoFloat}(undef, length(model.params))
+        for (i,p) in enumerate(model.params)
+            loa[i] = (p in keys(lo)) ? lo[p] : zero(RheoFloat)
+        end
+
+    else
+        loa = model_parameters(lo, model.params, "low bounds")
+    end
+
+    return loa
+end
+
+function fill_upper_bounds(model::RheoModelClass, hi::Union{NamedTuple,Nothing})
+    if isnothing(hi)
+        hia = nothing
+    
+    elseif length(hi)<length(model.params)
+        hia = Vector{RheoFloat}(undef, length(model.params))
+        for (i,p) in enumerate(model.params)
+            hia[i] = (p in keys(hi)) ? hi[p] : RheoFloat(Inf)
+        end
+
+    else
+        hia = model_parameters(hi, model.params, "high bounds")
+    end
+
+    return hia
+end
+
 """
-    modelfit(data::RheoTimeData, model::RheoModelClass, modloading::Symbol; p0::Union{NamedTuple,Tuple} = (), lo::Union{NamedTuple,Tuple} = (), hi::Union{NamedTuple,Tuple} = (), verbose::Bool = false, rel_tol = 1e-4, diff_method="BD")
+    modelfit(data::RheoTimeData, model::RheoModelClass, modloading::Symbol; p0::Union{NamedTuple,Nothing} = nothing, lo::Union{NamedTuple,Nothing} = nothing, hi::Union{NamedTuple,Nothing} = nothing, verbose::Bool = false, rel_tol = 1e-4, diff_method="BD")
 
 Fit `RheologyData` struct to model and return a fitted model as a `RheologyModel` object.
 For the fitting process RHEOS relies on the optimistion package NLopt.jl (https://nlopt.readthedocs.io/en/latest/).
@@ -196,39 +274,18 @@ RHEOS makes use of a local derivative free algorithm, specifically the Tom Rowan
 function modelfit(data::RheoTimeData,
                   model::RheoModelClass,
                   modloading::LoadingType;
-                  p0::Union{NamedTuple,Tuple} = (),
-                  lo::Union{NamedTuple,Tuple} = (),
-                  hi::Union{NamedTuple,Tuple} = (),
+                  p0::Union{NamedTuple,Nothing} = nothing,
+                  lo::Union{NamedTuple,Nothing} = nothing,
+                  hi::Union{NamedTuple,Nothing} = nothing,
                   verbose::Bool = false,
                   rel_tol = 1e-4,
                   diff_method="BD")
 
-    if isempty(p0)
-        p0a = convert(Array{RheoFloat,1}, fill(0.5,length(model.params)))
-        if length(findall(x->(x==:β)||(x==:a),model.params))==2
-            index = findall(x->x==:a,model.params)
-            p0a[index[1]] = 0.8;
-        end
-        @warn "Initial values for model parameters is set to $p0a by default"
-    else
-        p0a = model_parameters(p0,model.params,"initial guess")
-    end
-
-    #check_ineq = model.ineq(p0)
-    #@assert (all(check_ineq)==true)  "Initial guess not feasible"
+    p0a = fill_init_params(model, p0)
     @assert model.constraint(p0a)  "Initial guess not feasible"
 
-    if isempty(lo)
-        loa = nothing
-    else
-        loa = model_parameters(lo,model.params,"low bounds")
-    end
-
-    if isempty(hi)
-        hia = nothing
-    else
-        hia = model_parameters(hi,model.params,"high bounds")
-    end
+    loa = fill_lower_bounds(model, lo)
+    hia = fill_upper_bounds(model, hi)
 
     rel_tol = convert(RheoFloat,rel_tol)
 
@@ -379,7 +436,7 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
 end
 
 """
-    modelstepfit(data::RheoTimeData, model::RheoModelClass, modloading::Union{LoadingType,Integer}; step=nothing, p0::Union{NamedTuple,Tuple} = (), lo::Union{NamedTuple,Tuple} = (), hi::Union{NamedTuple,Tuple} = (), verbose::Bool = false, rel_tol = 1e-4) where T<:Real
+    modelstepfit(data::RheoTimeData, model::RheoModelClass, modloading::Union{LoadingType,Integer}; step=nothing, p0::Union{NamedTuple,Nothing} = nothing, lo::Union{NamedTuple,Nothing} = nothing, hi::Union{NamedTuple,Nothing} = nothing, verbose::Bool = false, rel_tol = 1e-4) where T<:Real
 
 Same as `modelfit` except assumes a step loading. If this assumption is appropriate for the data
 then fitting can be sped up greatly by use of this function. If modloading is `strain_imposed`, relaxation modulus is used,
@@ -402,34 +459,17 @@ function modelstepfit(data::RheoTimeData,
                   model::RheoModelClass,
                   modloading::Union{LoadingType,Integer};
                   step = nothing,
-                  p0::Union{NamedTuple, Tuple} = (),
-                  lo::Union{NamedTuple, Tuple} = (),
-                  hi::Union{NamedTuple, Tuple} = (),
+                  p0::Union{NamedTuple,Nothing} = nothing,
+                  lo::Union{NamedTuple,Nothing} = nothing,
+                  hi::Union{NamedTuple,Nothing} = nothing,
                   verbose::Bool = false,
                   rel_tol = 1e-4) where {T1<:Real, T2<:Real, T3<:Real}
 
-    if isempty(p0)
-        p0a = ones(RheoFloat, length(model.params))./2
-        if length(findall(x->(x==:β)||(x==:a), model.params))==2
-            index = findall(x->x==:a, model.params)
-            p0a[index[1]] = 0.8;
-        end
-        @warn "Initial model parameter value(s) is/are set to $p0a by default"
-    else
-        p0a = model_parameters(p0, model.params,"initial guess")
-    end
+    p0a = fill_init_params(model, p0)
+    @assert model.constraint(p0a)  "Initial guess not feasible"
 
-    if isempty(lo)
-       loa = nothing
-    else
-       loa = model_parameters(lo, model.params,"low bounds")
-    end
-
-    if isempty(hi)
-       hia = nothing
-    else
-       hia = model_parameters(hi, model.params,"high bounds")
-    end
+    loa = fill_lower_bounds(model, lo)
+    hia = fill_upper_bounds(model, hi)
 
     rel_tol = convert(RheoFloat, rel_tol)
 
@@ -643,7 +683,7 @@ function obj_dynamic_manual(params, grad, ω, dataGp, dataGpp, modelGp, modelGpp
 end
 
 """
-    dynamicmodelfit(data::RheoFreqData, model::RheoModelClass; p0::Union{NamedTuple,Tuple} = (), lo::Union{NamedTuple,Tuple} = (), hi::Union{NamedTuple,Tuple} = (), verbose::Bool = false, rel_tol = 1e-4) where T<:Real
+    dynamicmodelfit(data::RheoFreqData, model::RheoModelClass; p0::Union{NamedTuple,Nothing} = nothing, lo::Union{NamedTuple,Nothing} = nothing, hi::Union{NamedTuple,Nothing} = nothing, verbose::Bool = false, rel_tol = 1e-4) where T<:Real
 
 Fits model to the frequency/loss+storage moduli data.
 
@@ -666,35 +706,28 @@ RHEOS offers a number of data transforms which can be used by changing `weights`
 """
 function dynamicmodelfit(data::RheoFreqData,
                 model::RheoModelClass;
-                p0::Union{NamedTuple,Tuple} = (),
-                lo::Union{NamedTuple,Tuple} = (),
-                hi::Union{NamedTuple,Tuple} = (),
+                p0::Union{NamedTuple,Nothing} = nothing,
+                lo::Union{NamedTuple,Nothing} = nothing,
+                hi::Union{NamedTuple,Nothing} = nothing,
                 verbose::Bool = false,
                 rel_tol::T = 1e-4,
                 weights::Union{String, Vector{T}}="local") where T<:Real
 
-    if isempty(p0)
-        p0 = ones(RheoFloat, length(model.params))./2
-        if length(findall(x->(x==:β)||(x==:a), model.params))==2
-            index = findall(x->x==:a, model.params)
-            p0[index[1]] = 0.8;
-        end
-        @warn "Initial model parameter value(s) is/are set to $p0 by default"
-    else
-        p0 = model_parameters(p0, model.params,"initial guess")
-    end
+    p0a = fill_init_params(model, p0)
+    @assert model.constraint(p0a)  "Initial guess not feasible"
+
+    loa = fill_lower_bounds(model, lo)
+    hia = fill_upper_bounds(model, hi)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
-    opt = Opt(:LN_SBPLX, length(p0))
+    opt = Opt(:LN_SBPLX, length(p0a))
 
-    if !isempty(lo)
-       lo = model_parameters(lo,model.params, "low bounds")
-       lower_bounds!(opt, lo)
+    if !isnothing(loa)
+       lower_bounds!(opt, loa)
     end
 
-    if !isempty(hi)
-       hi = model_parameters(hi,model.params, "high bounds")
-       upper_bounds!(opt, hi)
+    if !isnothing(hia)
+       upper_bounds!(opt, hia)
     end
 
     # set relative tolerance
@@ -724,9 +757,7 @@ function dynamicmodelfit(data::RheoFreqData,
     end
 
     # timed fitting
-    (minf, minx, ret), timetaken, bytes, gctime, memalloc =
-                        @timed NLopt.optimize(opt,
-                                            p0)
+    (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed NLopt.optimize(opt, p0a)
 
     nt = NamedTuple{Tuple(model.params)}(minx)
 

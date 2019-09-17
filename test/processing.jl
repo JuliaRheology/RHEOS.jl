@@ -221,6 +221,71 @@ function _extract_freqfromfreqdata()
 end
 @test _extract_freqfromfreqdata()
 
+function _fill_init_params_nothing()
+    RHEOS.fill_init_params(Fract_Zener, nothing)==[0.5, 0.8, 0.5, 0.5, 0.5, 0.5]
+end
+@test _fill_init_params_nothing()
+
+function _fill_init_params_fullyspecified()
+    RHEOS.fill_init_params(Fract_Zener, (cₐ=1.0, a=0.4, cᵦ=1.5, β=0.51, cᵧ=2.0, γ=0.7))==[1.0, 0.4, 1.5, 0.51, 2.0, 0.7]
+end
+@test _fill_init_params_fullyspecified()
+
+function _fill_init_params_semispecified1()
+    RHEOS.fill_init_params(Fract_Zener, (a=0.4, cᵦ=1.5, β=0.51, cᵧ=2.0, γ=0.7))==[0.5, 0.4, 1.5, 0.51, 2.0, 0.7]
+end
+@test _fill_init_params_semispecified1()
+
+function _fill_init_params_semispecified2()
+    RHEOS.fill_init_params(Fract_Zener, (cᵦ=1.5, β=0.51, cᵧ=2.0, γ=0.7))==[0.5, 0.999, 1.5, 0.51, 2.0, 0.7]
+end
+@test _fill_init_params_semispecified2()
+
+function _fill_init_params_semispecified3()
+    RHEOS.fill_init_params(Fract_Zener, (cᵦ=1.5, β=0.4, cᵧ=2.0, γ=0.7))==[0.5, 0.8, 1.5, 0.4, 2.0, 0.7]
+end
+@test _fill_init_params_semispecified3()
+
+function _fill_init_params_semispecified4()
+    RHEOS.fill_init_params(Fract_Zener, (cₐ=1.0, a=0.4, cᵦ=1.5, cᵧ=2.0, γ=0.7))==[1.0, 0.4, 1.5, 0.2, 2.0, 0.7]
+end
+@test _fill_init_params_semispecified4()
+
+function _fill_init_params_semispecified5()
+    RHEOS.fill_init_params(Fract_Zener, (cₐ=1.0, cᵦ=1.5, cᵧ=2.0, γ=0.7))==[1.0, 0.8, 1.5, 0.5, 2.0, 0.7]
+end
+@test _fill_init_params_semispecified5()
+
+function _fill_lower_bounds_nothing()
+    isnothing(RHEOS.fill_lower_bounds(Fract_Zener, nothing))
+end
+@test _fill_lower_bounds_nothing()
+
+function _fill_lower_bounds_fullyspecified()
+    RHEOS.fill_lower_bounds(Fract_Zener, (cₐ=1.0, a=0.4, cᵦ=1.5, β=0.51, cᵧ=2.0, γ=0.7))==[1.0, 0.4, 1.5, 0.51, 2.0, 0.7]
+end
+@test _fill_lower_bounds_fullyspecified()
+
+function _fill_lower_bounds_semispecified()
+    RHEOS.fill_lower_bounds(Fract_Zener, (a=0.4, β=0.51, cᵧ=2.0, γ=0.7))==[0.0, 0.4, 0.0, 0.51, 2.0, 0.7]
+end
+@test _fill_lower_bounds_semispecified()
+
+function _fill_upper_bounds_nothing()
+    isnothing(RHEOS.fill_upper_bounds(Fract_Zener, nothing))
+end
+@test _fill_upper_bounds_nothing()
+
+function _fill_upper_bounds_fullyspecified()
+    RHEOS.fill_upper_bounds(Fract_Zener, (cₐ=1.0, a=0.4, cᵦ=1.5, β=0.51, cᵧ=2.0, γ=0.7))==[1.0, 0.4, 1.5, 0.51, 2.0, 0.7]
+end
+@test _fill_upper_bounds_fullyspecified()
+
+function _fill_upper_bounds_semispecified()
+    RHEOS.fill_upper_bounds(Fract_Zener, (a=0.4, β=0.51, cᵧ=2.0, γ=0.7))==[Inf, 0.4, Inf, 0.51, 2.0, 0.7]
+end
+@test _fill_upper_bounds_semispecified()
+
 function _modelfit_const_ramp_relax(tol)
     dt = 0.01
     t = Vector{RheoFloat}(0.0:dt:20.0)
