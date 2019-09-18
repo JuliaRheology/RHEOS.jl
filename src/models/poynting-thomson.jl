@@ -46,9 +46,6 @@ Fract_PT = RheoModelClass(
           )
 
 
-
-
-
 FractSLS_PT = RheoModelClass(
           # Model name
           name="fSLS_PT",
@@ -99,6 +96,7 @@ FractSLS_PT = RheoModelClass(
                                  "
           )
 
+          
 SLS_PT = RheoModelClass(
           # Model name
           name="SLS_PT",
