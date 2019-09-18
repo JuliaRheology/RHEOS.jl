@@ -215,6 +215,8 @@ function fill_init_params(model::RheoModelClass, p0::Union{NamedTuple,Nothing})
         p0a = model_parameters(p0, model.params, "initial guess")
     end
 
+    @assert model.constraint(p0a)  "Initial guess not feasible"
+
     return p0a
 end
 
@@ -282,8 +284,6 @@ function modelfit(data::RheoTimeData,
                   diff_method="BD")
 
     p0a = fill_init_params(model, p0)
-    @assert model.constraint(p0a)  "Initial guess not feasible"
-
     loa = fill_lower_bounds(model, lo)
     hia = fill_upper_bounds(model, hi)
 
@@ -466,8 +466,6 @@ function modelstepfit(data::RheoTimeData,
                   rel_tol = 1e-4) where {T1<:Real, T2<:Real, T3<:Real}
 
     p0a = fill_init_params(model, p0)
-    @assert model.constraint(p0a)  "Initial guess not feasible"
-
     loa = fill_lower_bounds(model, lo)
     hia = fill_upper_bounds(model, hi)
 
@@ -714,8 +712,6 @@ function dynamicmodelfit(data::RheoFreqData,
                 weights::Union{String, Vector{T}}="local") where T<:Real
 
     p0a = fill_init_params(model, p0)
-    @assert model.constraint(p0a)  "Initial guess not feasible"
-
     loa = fill_lower_bounds(model, lo)
     hia = fill_upper_bounds(model, hi)
 
