@@ -22,6 +22,9 @@ import DelimitedFiles: readdlm, writedlm
 # See julia docs for more info on this.
 const RheoFloat = Float64
 
+# Singularity approximation constant
+const singularity_offset = 10.0
+
 # convenience data types used as in many function parameters
 const IntOrNone = Union{Integer, Nothing}
 const RheovecOrNone = Union{Vector{RheoFloat}, Nothing}

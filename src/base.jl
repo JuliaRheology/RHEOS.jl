@@ -319,7 +319,7 @@ than the convolution method. However, it works for variable sample rate.
 """
 function boltzintegral_sing(modulus, time_series::Vector{Float64}, prescribed_dot::Vector{Float64})
 
-    offset_t0 = (time_series[2] - time_series[1])/10.0
+    offset_t0 = (time_series[2] - time_series[1])/singularity_offset
     # need to add an additional 'previous' time point to capture any instantaneous loading
     time_previous = time_series[1] - (time_series[2] - time_series[1])
     time_mod = vcat([time_previous], time_series)
@@ -330,7 +330,7 @@ function boltzintegral_sing(modulus, time_series::Vector{Float64}, prescribed_do
     I = zeros(length(time_mod))
     for (i,v) in enumerate(time_mod)
         if i>1
-            offset = (time_mod[i] - time_mod[i-1])/10.0
+            offset = (time_mod[i] - time_mod[i-1])/singularity_offset
         end
         τ = time_mod[1:i]
         Modulus_arg = v .- τ
@@ -525,7 +525,7 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOr
 
     elseif singularity && constant_sampling
         # remove singularity, just go close to it, 1/10th over first sample period
-        time_series[1] = 0.0 + (time_series[2] - time_series[1])/10.0
+        time_series[1] = 0.0 + (time_series[2] - time_series[1])/singularity_offset
         min_objective!(opt, (params, grad) -> obj_const_sing(params, grad, modulus,
                                                         time_series, dt,
                                                         prescribed_dot, measured;

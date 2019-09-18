@@ -406,7 +406,7 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
         convolved = boltzconvolve(modulus, t_zeroed, dt, dcontrolled)
 
     elseif sing && constantcheck(data.t)
-        t_zeroed[1] = 0.0 + (t_zeroed[2] - t_zeroed[1])/10.0
+        t_zeroed[1] = 0.0 + (t_zeroed[2] - t_zeroed[1])/singularity_offset
         convolved = boltzconvolve(modulus, t_zeroed, dt, dcontrolled)
 
     elseif !sing && !constantcheck(data.t)
