@@ -30,7 +30,8 @@ Fract_PT = RheoModelClass(
         constraint = quote
                  all([   (a<1) & (a>0)
                          (β<1) & (β>0)
-                          -a+β < 0] )
+                          -a+β < 0
+                         (γ<1) & (γ>0)] )
                 end,
           # Network
           info= "
