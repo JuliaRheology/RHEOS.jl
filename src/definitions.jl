@@ -560,6 +560,12 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
         $info, $expressions)   )
 end
 
+function modulusexists(modulus_single_input)
+   # 5.0 is not meaningful, just an input to check that the function does not return NaN
+    # at a non-zero value, which is the default function output for moduli that have
+    # not been defined.
+    return !isnan(modulus_single_input(5.0))
+end
 
 """
     RheoModel(G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, expressions::NamedTuple)
