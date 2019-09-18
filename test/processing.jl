@@ -950,8 +950,9 @@ function _modelsteppredict_sing_relax(tol)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
     computed_response = modelsteppredict(data0, model)
-
-    test1 = computed_response.σ[1]==0.0
+    
+    offset_time = dt/RHEOS.singularity_offset
+    test1 = computed_response.σ[1]==offset_time^(-0.5)
     test2 = all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), 2:length(t))
     test1 && test2
 end
@@ -970,7 +971,8 @@ function _modelsteppredict_sing_creep(tol)
 
     computed_response = modelsteppredict(data0, model)
 
-    test1 = computed_response.ϵ[1]==0.0
+    offset_time = dt/RHEOS.singularity_offset
+    test1 = computed_response.ϵ[1]==offset_time^(-0.5)
     test2 = all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), 2:length(t))
     test1 && test2
 end
@@ -979,7 +981,7 @@ end
 function _modelsteppredict_sing_shifted_relax(tol)
     dt = 0.01
     t = Vector{RheoFloat}(0.0:dt:20.0)
-    exact_response = t.^(-0.5)
+    exact_response = [i>=5.0 ? (i - 5.0).^(-0.5) : 0.0 for i in t]
     loading = ones(RheoFloat, length(t))
 
     modulus = quote α*t.^(-β) end
@@ -987,18 +989,22 @@ function _modelsteppredict_sing_shifted_relax(tol)
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
-    computed_response = modelsteppredict(data0, model)
+    computed_response = modelsteppredict(data0, model, step_on=5.0)
 
-    test1 = computed_response.σ[1]==0.0
-    test2 = all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), 2:length(t))
-    test1 && test2
+    stepon_el = RHEOS.closestindex(t, 5.0)
+
+    offset_time = dt/RHEOS.singularity_offset
+    test1 = computed_response.σ[stepon_el]≈offset_time^(-0.5)
+    test2 = all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), 1:(stepon_el-1))
+    test3 = all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), (stepon_el+1):length(t))
+    test1 && test2 && test3
 end
 @test _modelsteppredict_sing_shifted_relax(tol)
 
 function _modelsteppredict_sing_shifted_creep(tol)
     dt = 0.01
     t = Vector{RheoFloat}(0.0:dt:20.0)
-    exact_response = t.^(-0.5)
+    exact_response = [i>=5.0 ? (i - 5.0).^(-0.5) : 0.0 for i in t]
     loading = ones(RheoFloat, length(t))
 
     modulus = quote α*t.^(-β) end
@@ -1006,11 +1012,15 @@ function _modelsteppredict_sing_shifted_creep(tol)
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, σ = loading)
 
-    computed_response = modelsteppredict(data0, model)
+    computed_response = modelsteppredict(data0, model, step_on=5.0)
 
-    test1 = computed_response.ϵ[1]==0.0
-    test2 = all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), 2:length(t))
-    test1 && test2
+    stepon_el = RHEOS.closestindex(t, 5.0)
+
+    offset_time = dt/RHEOS.singularity_offset
+    test1 = computed_response.ϵ[stepon_el]≈offset_time^(-0.5)
+    test2 = all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), 1:(stepon_el-1))
+    test3 = all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), (stepon_el+1):length(t))
+    test1 && test2 && test3
 end
 @test _modelsteppredict_sing_shifted_creep(tol)
 

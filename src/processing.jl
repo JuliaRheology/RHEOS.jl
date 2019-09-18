@@ -552,12 +552,10 @@ end
 """
     modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 0.0)
 
-Same as `modelpredict` but assumes a step loading with step starting at `step_on`. Singularities are bypassed
-by adding 1 to the index of the singular element.
+Same as `modelpredict` but assumes a step loading with step starting at `step_on` or closest actual value to that
+specified. Singularities are bypassed by adding 1 to the index of the singular element.
 """
 function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 0.0)
-
-    step_on = convert(RheoFloat,step_on)
 
     check = RheoTimeDataType(data)
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
@@ -572,20 +570,22 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
         controlled = data.σ[round(Integer, length(data.σ)/2)]
     end
 
-    # get closest index to desired step-on time point
+    # get closest index and time to desired step-on time point
     stepon_el = closestindex(data.t, step_on)
+    stepon_closest = data.t[stepon_el]
 
     # check singularity presence at time closest to step
     sing = singularitytest(modsing)
 
     # get predicted
     if !sing
-        predicted = zeros(length(data.t))
-        predicted[stepon_el:end] = controlled*modulus(data.t[stepon_el:end] .- step_on)
+        predicted = zeros(RheoFloat, length(data.t))
+        predicted[stepon_el:end] = controlled*modulus(data.t[stepon_el:end] .- stepon_closest)
 
     elseif sing
-        predicted = zeros(length(data.t))
-        predicted[(stepon_el + 1):end] = controlled*modulus(data.t[(stepon_el + 1):end] .- step_on)
+        predicted = zeros(RheoFloat, length(data.t))
+        predicted[(stepon_el + 1):end] = controlled*modulus(data.t[(stepon_el + 1):end] .- stepon_closest)
+        predicted[stepon_el] = controlled*modulus([(data.t[stepon_el + 1] - data.t[stepon_el])/singularity_offset])[1]
 
     end
 
