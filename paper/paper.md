@@ -87,6 +87,6 @@ This example and others are available as Julia Jupyter notebooks, accessible fro
 
 # Acknowledgements
 
-JLK would like thank the George and Lillian Schiff Foundation for the PhD funding which facilitated this project. AB, JLK and AJK acknowledge the BBSRC grants BB/M002578/1, BB/K018175/1 and BB/P003184/1. All authors would like to thank Rohit Goswami, Grant Bruer and Adam Beall` for their valuable feedback during the review process.
+JLK would like thank the George and Lillian Schiff Foundation for the PhD funding which facilitated this project. AB, JLK and AJK acknowledge the BBSRC grants BB/M002578/1, BB/K018175/1 and BB/P003184/1. All authors would like to thank Rohit Goswami, Grant Bruer and Adam Beall for their valuable feedback during the review process.
 
 # References
