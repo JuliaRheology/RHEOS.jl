@@ -227,12 +227,12 @@ end
 @test _fill_init_params_nothing()
 
 function _fill_init_params_fullyspecified()
-    RHEOS.fill_init_params(Fract_Zener, (cₐ=1.0, a=0.4, cᵦ=1.5, β=0.51, cᵧ=2.0, γ=0.7))==[1.0, 0.4, 1.5, 0.51, 2.0, 0.7]
+    RHEOS.fill_init_params(Fract_Zener, (cₐ=1.0, a=0.51, cᵦ=1.5, β=0.4, cᵧ=2.0, γ=0.7))==[1.0, 0.51, 1.5, 0.4, 2.0, 0.7]
 end
 @test _fill_init_params_fullyspecified()
 
 function _fill_init_params_semispecified1()
-    RHEOS.fill_init_params(Fract_Zener, (a=0.4, cᵦ=1.5, β=0.51, cᵧ=2.0, γ=0.7))==[0.5, 0.4, 1.5, 0.51, 2.0, 0.7]
+    RHEOS.fill_init_params(Fract_Zener, (a=0.51, cᵦ=1.5, β=0.4, cᵧ=2.0, γ=0.7))==[0.5, 0.51, 1.5, 0.4, 2.0, 0.7]
 end
 @test _fill_init_params_semispecified1()
 
