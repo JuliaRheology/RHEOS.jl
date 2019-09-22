@@ -20,12 +20,6 @@ const RheoLog = Vector{RheoLogItem}
 
 # process=(type= :process, funct=:test, params=(x=1,y=1) , keywords=(k=1, l=2))
 
-
-
-#
-#  Constructors
-#
-
 # simply pass text as comment
 function RheoLogItem(s::String)
    return(RheoLogItem(Nothing,(comment=s,)))
@@ -423,10 +417,6 @@ rheoconv(t::Array{T,1}) where T<:Real = convert(Vector{RheoFloat},t)
 
 invLaplace(f::Function, t::Array{RheoFloat}) = InverseLaplace.talbotarr(f, t)
 invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
-
-# Define Null Expression, and make it default parameter
-# Model name and parameters should be required --> assert
-# info should have generic default value, such as "Model with $n params named $s..."
 
 function RheoModelClass(;name::String="Custom model",
                          p::Array{Symbol}=[],
