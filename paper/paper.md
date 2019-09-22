@@ -27,9 +27,9 @@ bibliography: paper.bib
 
 Rheology is the science of deformation and flow, with a focus on materials that do not exhibit simple linear elastic or viscous Newtonian behaviours. Rheology plays an important role in the characterisation of soft viscoelastic materials commonly found in the food and cosmetics industries, as well as in biology and bioengineering. Empirical and theoretical approaches are commonly used to identify and quantify material behaviours based on experimental data.
 
-RHEOS (RHEology, Open-Source) is a software package designed to make the analysis of rheological data simpler, faster and more reproducible. RHEOS is currently limited to the broad family of linear viscoelastic models. A particular strength of the library is its ability to handle rheological models containing fractional derivatives, which have demonstrable utility for the modelling of biological materials [@aime2018power;@bouzid2018computing;@bonfantiUnifiedRheologicalModel2019; @kaplanPectinMethylesterificationImplications2019] but have hitherto remained in relative obscurity -- possibly due to their mathematical and computational complexity. RHEOS is written in Julia [@bezansonJuliaFreshApproach2017], which provides excellent computational efficiency and approachable syntax. RHEOS is fully documented and has extensive testing coverage.
+RHEOS (RHEology, Open-Source) is a software package designed to make the analysis of rheological data simpler, faster, and more reproducible. RHEOS is currently limited to the broad family of linear viscoelastic models. A particular strength of the library is its ability to handle rheological models containing fractional derivatives, which have demonstrable utility for the modelling of biological materials [@aime2018power;@bouzid2018computing;@bonfantiUnifiedRheologicalModel2019; @kaplanPectinMethylesterificationImplications2019], but have hitherto remained in relative obscurity -- possibly due to their mathematical and computational complexity. RHEOS is written in Julia [@bezansonJuliaFreshApproach2017], which provides excellent computational efficiency and approachable syntax. RHEOS is fully documented and has extensive testing coverage.
 
-To our knowledge there is to this date no other software package that offers RHEOS' broad selection of rheology analysis tools and extensive library of both traditional and fractional models. It has been used to process data and validate a model in [@bonfantiUnifiedRheologicalModel2019], and is currently in use for several ongoing projects.
+To our knowledge, there is to this date no other software package that offers RHEOS' broad selection of rheology analysis tools and extensive library of both traditional and fractional models. It has been used to process data and validate a model in @bonfantiUnifiedRheologicalModel2019, and is currently in use for several ongoing projects.
 
 It should be noted that RHEOS is not an optimisation package. It builds on another optimisation package, NLopt [@johnsonNLoptNonlinearoptimizationPackage], by adding a large number of abstractions and functionality specific to the exploration of viscoelastic data.
 
@@ -37,7 +37,7 @@ It should be noted that RHEOS is not an optimisation package. It builds on anoth
 
 ## Arbitrary stress-strain curves and broad relaxation spectra require advanced software
 
-Many scientists and engineers who undertake rheological experiments would fit their data with one or several viscoelastic models in order to classify materials, quantify their behaviour and predict their response to external perturbations.
+Many scientists and engineers who undertake rheological experiments would fit their data with one or several viscoelastic models in order to classify materials, quantify their behaviour, and predict their response to external perturbations.
 
 Standard linear viscoelastic models take the form of an ordinary differential equation between stress $\sigma$ and strain $\epsilon$. Under simple perturbations (step or ramp in stress or strain, or frequency sweep), it is relatively straight-forward to extract time-scales and identify asymptotic behaviours required to identify parameter values. However, data often involves complex stress and strain signals, and materials whose behaviour involves a broad distribution of time-scales, including power law behaviours. Fitting models and predicting their response in the time domain then requires computing viscoelastic hereditary integrals such as:
 
@@ -48,12 +48,12 @@ where $G$ is the relaxation response (stress response to a step in strain) of th
 
 ## Learning about rheology is facilitated by the ability to explore a large database of models
 
-Obtaining intuition for fractional viscoelastic theory can be difficult and learning material is sparse: of popular rheology textbooks published in 1989 [@barnesIntroductionRheology1989; @findleyCreepRelaxationNonlinear1989], 2008 [@brinsonPolymerEngineeringScience2008], 2009 [@lakesViscoelasticMaterials2009] and 2013 [@wardMechanicalPropertiesSolid2013], fractional viscoelasticity is only mentioned briefly in one of them [@lakesViscoelasticMaterials2009]. Tools are needed to support researchers with their exploration of standard and advanced models and how they behave in response to idealised loading conditions, in particular when analytical expressions are difficult to obtain.
+Obtaining intuition for fractional viscoelastic theory can be difficult and learning material is sparse: of popular rheology textbooks published in 1989 [@barnesIntroductionRheology1989; @findleyCreepRelaxationNonlinear1989], 2008 [@brinsonPolymerEngineeringScience2008], 2009 [@lakesViscoelasticMaterials2009] and 2013 [@wardMechanicalPropertiesSolid2013], fractional viscoelasticity is only mentioned briefly in one of them [@lakesViscoelasticMaterials2009]. Tools are needed to support researchers with their exploration of standard and advanced models, and how they behave in response to idealised loading conditions, in particular when analytical expressions are difficult to obtain.
 
 
-## Extracting parameters, selecting models and comparing materials require standardised tools
+## Extracting parameters, selecting models, and comparing materials require standardised tools
 
-Because understanding of materials is often dependent on summarising their behaviour with a model, one must be able to test and compare a broad range of models to inform model selection and reliably identify material parameters. There are currently very limited options available in the public domain [@Bobrheology; @seifertPythonToolsAnalysis2019], and most research groups have to invest significant effort into developing custom software. An open-source standardised library of models and fitting algorithms would support the rheology research community and make analysis more systematic, transparent and reproducible.
+Because understanding of materials is often dependent on summarising their behaviour with a model, one must be able to test and compare a broad range of models to inform model selection and reliably identify material parameters. There are currently very limited options available in the public domain [@Bobrheology; @seifertPythonToolsAnalysis2019], and most research groups have to invest significant effort into developing custom software. An open-source standardised library of models and fitting algorithms would support the rheology research community and make analysis more systematic, transparent, and reproducible.
 
 
 
@@ -65,13 +65,13 @@ RHEOS addresses the issues outlined in the Statement of Need in several ways.
 
 - RHEOS includes an extensive library of both traditional and fractional viscoelastic models. Although this library will satisfy most users, it is also straightforward to add additional models to RHEOS should they need to.
 
-- As well as being able to fit models to experimental data, and predict the materials response to step loading of stress or strain, RHEOS can handle arbitrary loading for non-singular and singular models, and for constant or variable sample rates.
+- As well as being able to fit models to experimental data and predict the materials response to step loading of stress or strain, RHEOS can handle arbitrary loading for non-singular and singular models, and for constant or variable sample rates.
 
 - For intuition-building and model exploration, RHEOS includes signal generation features so that common loading patterns (e.g. step, ramp, stairs) can be applied to unfamiliar models.
 
 - As a convenience to the user, RHEOS also includes easy-to-use CSV importing and exporting functions, as well as a number of preprocessing functions for resampling and smoothing.
 
-All of the above features are linked together in a seamless interface intended to be very approachable for less experienced programmers. The different paradigms of creep, relaxation and oscillatory testing are all accounted for, and models fitted against one type of data can be used to predict against a different type of data. (For instance, fitting against relaxation data and predicting the frequency response spectrum.)
+All of the above features are linked together in a seamless interface intended to be very approachable for less experienced programmers. The different paradigms of creep, relaxation, and oscillatory testing are all accounted for, and models fitted against one type of data can be used to predict against a different type of data. (For instance, fitting against relaxation data and predicting the frequency response spectrum.)
 
 ## Workflow
 
@@ -83,10 +83,10 @@ A brief description of this workflow is the following. A CSV is imported into a 
 
 ![Qualitative assessment of the fitted model.](predict.pdf){ width=80% }
 
-This example and others are available as Julia Jupyter notebooks, accessible from both the RHEOS GitHub repository, and viewable from the RHEOS documentation.
+This example and others are available as Julia Jupyter notebooks, available in RHEOS GitHub repository and viewable on the RHEOS [documentation website](https://juliarheology.github.io/RHEOS.jl/).
 
 # Acknowledgements
 
-JLK would like thank the George and Lillian Schiff Foundation for the PhD funding which facilitated this project. AB, JLK and AJK acknowledge the BBSRC grants BB/M002578/1, BB/K018175/1 and BB/P003184/1. All authors would like to thank Rohit Goswami, Grant Bruer and Adam Beall for their valuable feedback during the review process.
+JLK would like thank the George and Lillian Schiff Foundation for the PhD funding which facilitated this project. AB, JLK, and AJK acknowledge the BBSRC grants BB/M002578/1, BB/K018175/1, and BB/P003184/1. All authors would like to thank Rohit Goswami, Grant Bruer, and Adam Beall for their valuable feedback during the review process.
 
 # References
