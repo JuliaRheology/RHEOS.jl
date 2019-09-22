@@ -48,7 +48,7 @@ where $G$ is the relaxation response (stress response to a step in strain) of th
 
 ## Learning about rheology is facilitated by the ability to explore a large database of models
 
-Obtaining intuition for fractional viscoelastic theory can be difficult and learning material is sparse: of popular rheology textbooks published in 1989 [@barnesIntroductionRheology1989; @findleyCreepRelaxationNonlinear1989], 2008 [@brinsonPolymerEngineeringScience2008], 2009 [@lakesViscoelasticMaterials2009] and 2013 [@wardMechanicalPropertiesSolid2013], fractional viscoelasticity is only mentioned briefly in one of them [@lakesViscoelasticMaterials2009]. Tools are needed to support researchers with their exploration of standard and advanced models, and how they behave in response to idealised loading conditions, in particular when analytical expressions are difficult to obtain.
+Obtaining intuition for fractional viscoelastic theory can be difficult and learning material is sparse: of popular rheology textbooks published over several decades [@barnesIntroductionRheology1989; @findleyCreepRelaxationNonlinear1989; @brinsonPolymerEngineeringScience2008; @lakesViscoelasticMaterials2009; @wardMechanicalPropertiesSolid2013], fractional viscoelasticity is only mentioned briefly in one of them [@lakesViscoelasticMaterials2009]. Tools are needed to support researchers with their exploration of standard and advanced models, and how they behave in response to idealised loading conditions, in particular when analytical expressions are difficult to obtain.
 
 
 ## Extracting parameters, selecting models, and comparing materials require standardised tools
