@@ -265,8 +265,6 @@ vectors in the right order.
 - `log`: a log of struct's events, e.g. preprocessing
 """
 struct RheoFreqData
-
-    # Complex modulus data
     Gp::Vector{RheoFloat}
     Gpp::Vector{RheoFloat}
     ω::Vector{RheoFloat}
