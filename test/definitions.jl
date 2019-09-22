@@ -19,7 +19,7 @@ function _operators_logs()
 end
 @test _operators_logs()
 
-function _|strain1stress2()
+function _union_strain1stress2()
     time_instance = timeline(t_start=0.0, t_end=15.0, step=0.2)
     imposed_strain = stressfunction(time_instance, sawtooth(offset=5.0, amp=2, period=5))
     imposed_stress = stressfunction(time_instance, stairs(offset=3.0, amp=0.5, width=4.0))
@@ -30,7 +30,7 @@ function _|strain1stress2()
 
     (combined.σ==imposed_stress.σ) && (combined.ϵ==imposed_strain.ϵ) && (combined.t==imposed_stress.t)
 end
-@test _|_strain1stress2()
+@test _union_strain1stress2()
 
 function _freeze_params()
     SLS2_mod = freeze_params( SLS2, (G₀=2,η₂=3.5))
