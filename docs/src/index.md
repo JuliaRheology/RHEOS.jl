@@ -59,7 +59,7 @@ If you use RHEOS in your work, please consider citing the following paper
 *TBA*
 
 ## References
-+ W. N. Findley, J. S. Lai, K. Onaran — *Creep and Relaxation of Nonlinear Viscoelastic Materials (with an Introduction to Linear Viscoelasticity)*, Dover Publications, New York. (1976)
++ W. N. Findley, J. S. Lai, K. Onaran — *Creep and Relaxation of Nonlinear Viscoelastic Materials (with an Introduction to Linear Viscoelasticity)*, Dover Publications, New York. (1989)
 
 + S. G. Johnson — *The NLopt nonlinear-optimization package*, https://github.com/stevengj/nlopt
 
