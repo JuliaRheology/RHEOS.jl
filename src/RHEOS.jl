@@ -12,7 +12,7 @@ using FunctionWrappers: FunctionWrapper
 import DSP.conv
 import SpecialFunctions.gamma
 # Base and stdlib imports
-import Base: +, -, *
+import Base: +, -, *,|
 import DelimitedFiles: readdlm, writedlm
 
 ######################################################################

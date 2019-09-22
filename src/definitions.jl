@@ -231,6 +231,23 @@ function *(d::RheoTimeData, operand::Real)
     return(operand * d)
 end
 
+function |(d1::RheoTimeData, d2::RheoTimeData)
+    # get types and type-check
+    type1 = RheoTimeDataType(d1)
+    type2 = RheoTimeDataType(d2)
+
+    @assert (type1==strain_only && type2==stress_only) || (type1==stress_only && type2==strain_only) "One RheoTimeData must be stress_only and the other must be strain_only"
+
+    # call recursively if not expected way round
+    (type1==strain_only && type2==stress_only) && return d2|d1
+
+    # expected case, type1==stress_only, type2==strain_only
+    @assert d1.t==d2.t "Data to be combined must have same time-series"
+
+    log = ((d1.log == nothing) || (d2.log == nothing)) ? nothing : [RheoLogItem((type = :source, funct = :|, params = (rl1 = d1.log, rl2 = d2.log), keywords = ()), ())]
+
+    return RheoTimeData(d1.σ, d2.ϵ, d1.t, log)
+end
 #=
 ------------------------------------
 Frequency data related functionality
