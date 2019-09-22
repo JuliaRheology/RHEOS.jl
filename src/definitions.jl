@@ -236,7 +236,7 @@ function |(d1::RheoTimeData, d2::RheoTimeData)
     type1 = RheoTimeDataType(d1)
     type2 = RheoTimeDataType(d2)
 
-    @assert (type1==strain_only && type2==stress_only) || (type1==stress_only && type2==strain_only) "One RheoTimeData must be stress_only and the other must be strain_only"
+    @assert ((type1==strain_only && type2==stress_only) || (type1==stress_only && type2==strain_only)) "One RheoTimeData must be stress_only and the other must be strain_only"
 
     # call recursively if not expected way round
     (type1==strain_only && type2==stress_only) && return d2|d1
