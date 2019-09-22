@@ -13,13 +13,6 @@ end
 
 const RheoLog = Vector{RheoLogItem}
 
-# different types of actions
-# source: create new data (import, model simulation, etc)
-# process: takes data -> new data returned  (cut, resample, filter, etc)
-# analysis: data provded, returns outcome of analysis, and log changes on original data (scale, modelfit, etc.)
-
-# process=(type= :process, funct=:test, params=(x=1,y=1) , keywords=(k=1, l=2))
-
 # simply pass text as comment
 function RheoLogItem(s::String)
    return(RheoLogItem(Nothing,(comment=s,)))
