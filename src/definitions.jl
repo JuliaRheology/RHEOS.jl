@@ -247,8 +247,6 @@ end
 #  Time shift operator >>
 #  shift time by a certain amount, trash the end and pad at the start with 0
 
-#  Union operator |
-#  Combine stress_only data and strain_only data into stress_strain
 
 #=
 ------------------------------------
