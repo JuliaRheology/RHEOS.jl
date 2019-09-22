@@ -244,10 +244,6 @@ function *(d::RheoTimeData, operand::Real)
     return(operand * d)
 end
 
-#  Time shift operator >>
-#  shift time by a certain amount, trash the end and pad at the start with 0
-
-
 #=
 ------------------------------------
 Frequency data related functionality
