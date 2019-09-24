@@ -70,6 +70,114 @@ function _resample_stressandstrain_multiplesections()
 end
 @test _resample_stressandstrain_multiplesections()
 
+function _indexweight_oneregiondownsample_includelastel()
+    timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
+
+    indices = indexweight(timedata, -2)
+
+    indices == [1, 3, 5, 7, 9, 11]
+end
+@test _indexweight_oneregiondownsample_includelastel()
+
+function _indexweight_oneregiondownsample_nolastel()
+    timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
+
+    indices = indexweight(timedata, -2; includelast=false)
+
+    indices == [1, 3, 5, 7, 9]
+end
+@test _indexweight_oneregiondownsample_nolastel()
+
+function _indexweight_oneregionupsample_includelastel()
+    timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
+
+    indices = indexweight(timedata, 2)
+
+    indices == [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11]
+end
+@test _indexweight_oneregionupsample_includelastel()
+
+function _indexweight_oneregionupsample_nolastel()
+    timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
+
+    indices = indexweight(timedata, 2; includelast=false)
+
+    indices == [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10]
+end
+@test _indexweight_oneregionupsample_nolastel()
+
+function _indexweight_tworegiondownsample_includelastel()
+    timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
+
+    indices = indexweight(timedata, [-2, -3]; time_boundaries=[0.0, 5.0, 10.0])
+
+    indices == [1, 3, 5, 6, 9, 11]
+end
+@test _indexweight_tworegiondownsample_includelastel()
+
+function _indexweight_tworegiondownsample_nolastel()
+    timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
+
+    indices = indexweight(timedata, [-2, -3]; time_boundaries=[0.0, 5.0, 10.0], includelast=false)
+
+    indices == [1, 3, 5, 6, 9]
+end
+@test _indexweight_tworegiondownsample_nolastel()
+
+function _indexweight_tworegionupsample_includelastel()
+    timedata = timeline(t_start=0.0, t_end=5.0, step=1.0)
+
+    indices = indexweight(timedata, [2, 3]; time_boundaries=[0.0, 3.0, 4.0])
+
+    indices == [1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5]
+end
+@test _indexweight_tworegionupsample_includelastel()
+
+function _indexweight_tworegionupsample_nolastel()
+    timedata = timeline(t_start=0.0, t_end=5.0, step=1.0)
+
+    indices = indexweight(timedata, [2, 3]; time_boundaries=[0.0, 3.0, 4.0], includelast=false)
+
+    indices == [1, 1, 2, 2, 3, 3, 4, 4, 4]
+end
+@test _indexweight_tworegionupsample_nolastel()
+
+function _indexweight_mixed_includelastel_finishup()
+    timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
+
+    indices = indexweight(timedata, [-2, 3, -3, 4]; time_boundaries=[0.0, 3.0, 5.0, 9.0, 10.0])
+
+    indices == [1, 3, 4, 4, 4, 5, 5, 5, 6, 9, 10, 10, 10, 10, 11, 11, 11, 11]
+end
+@test _indexweight_mixed_includelastel_finishup()
+
+function _indexweight_mixed_includelastel_finishdown()
+    timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
+
+    indices = indexweight(timedata, [2, -3, 2, -2]; time_boundaries=[0.0, 3.0, 5.0, 7.0, 10.0])
+
+    indices == [1, 1, 2, 2, 3, 3, 4, 6, 6, 7, 7, 8, 10, 11]
+end
+@test _indexweight_mixed_includelastel_finishdown()
+
+function _indexweight_mixed_nolastel_finishup()
+    timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
+
+    indices = indexweight(timedata, [-2, 3, -3, 4]; time_boundaries=[0.0, 3.0, 5.0, 9.0, 10.0], includelast=false)
+
+    indices == [1, 3, 4, 4, 4, 5, 5, 5, 6, 9, 10, 10, 10, 10]
+end
+@test _indexweight_mixed_nolastel_finishup()
+
+function _indexweight_mixed_nolastel_finishdown()
+    timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
+
+    indices = indexweight(timedata, [2, -3, 2, -2]; time_boundaries=[0.0, 3.0, 5.0, 7.0, 10.0], includelast=false)
+
+    indices == [1, 1, 2, 2, 3, 3, 4, 6, 6, 7, 7, 8, 10]
+end
+@test _indexweight_mixed_nolastel_finishdown()
+
 function _cutting_strainonly()
     t0 = collect(0.0:1.0:5.0)
     ϵ0 = t0.^2

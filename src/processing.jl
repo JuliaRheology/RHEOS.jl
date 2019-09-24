@@ -54,16 +54,16 @@ This function returns array indices (i.e. an array of integers) which can be sen
 to provide a weighted fitting whilst maintaining constant sample-rate.
 """
 function indexweight(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
-    # assert correct function signature
-    @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
-    @assert (count(iszero, elperiods)==0) "Number of elements cannot be zero"
-
-    # convert boundaries from times to element indices
+    # get element-wise boundaries
     if isnothing(time_boundaries)
-        boundaries = [1,length(self.t)];
+        boundaries = [1,length(self.t)]
     else
         boundaries = closestindices(self.t, time_boundaries)
     end
+    
+    # assert correct function signature
+    @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
+    @assert (count(iszero, elperiods)==0) "Number of elements cannot be zero"
 
     # initialise indices array
     indices = Integer[]
@@ -84,12 +84,17 @@ function indexweight(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_bo
 
     # last element may be missed, so check and add if needed
     lastel = boundaries[end]
-    if includelastel && indices[end]<lastel
+    numlastel = count(i->i==lastel, indices)
+    countlastel = elperiods[end]
+    if includelast && !signbit(countlastel) && numlastel<countlastel
+        # up-sample case
+        indices = vcat(indices, lastel*ones(Integer, countlastel-numlastel))
+
+    elseif includelast && signbit(countlastel) && indices[end]<lastel
         append!(indices, lastel)
     end
 
-    # return unique indices in case of overlap
-    return unique(indices)
+    return indices
 end
 
 """
