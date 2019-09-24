@@ -1,0 +1,35 @@
+{
+    "description": "RHEOS - Open Source Rheology data analysis software",
+    "license": "MIT",
+    "title": "RHEOS.jl — A Julia Package for Rheology Data Analysis",
+    "version": "v0.9.1",
+    "upload_type": "software",
+    "publication_date": "2019-09-23",
+    "creators": [
+        {
+            "affiliation": "University of Cambridge",
+            "name": "Jonathan Louis Kaplan"
+        },
+        {
+            "affiliation": "University of Cambridge",
+            "name": "Alessandra Bonfanti"
+        },
+        {
+            "affiliation": "University of Cambridge",
+            "name": "Alexandre J Kabla"
+        }
+    ],
+    "access_right": "open",
+    "related_identifiers": [
+        {
+            "scheme": "url",
+            "identifier": "https://github.com/JuliaRheology/RHEOS.jl/tree/v0.9.1",
+            "relation": "isSupplementTo"
+        },
+        {
+            "scheme": "doi",
+            "identifier": "10.5281/zenodo.3458309",
+            "relation": "isVersionOf"
+        }
+    ]
+}
