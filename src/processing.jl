@@ -549,7 +549,7 @@ end
     modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 0.0)
 
 Same as `modelpredict` but assumes a step loading with step starting at `step_on` or closest actual value to that
-specified. Singularities are bypassed by adding 1 to the index of the singular element.
+specified. If the loading data is variable, the magnitude in the middle of the array is used.
 """
 function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 0.0)
 
