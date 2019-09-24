@@ -32,7 +32,7 @@ using PyPlot
 plot(data.t,data.σ, &quot;o&quot;, markersize = 5);
 plot(maxwell_predict.t,maxwell_predict.σ, color = &quot;red&quot;);
 xlabel(&quot;Time&quot;);
-ylabel(&quot;Stress&quot;);</code></pre><p><img src="../fitpredictTime_files/fitpredictTime_20_0.png" alt="png"/></p><p><strong>Simulate different model behaviours</strong></p><p>The ability of predicting model&#39;s response can be exploited to simulate the behaviour of the model to other external loading conditions. For example, we will explore the response of the fitted model to a creep experiment. </p><p>First we need to define an incomplete <a href="../API/#RHEOS.RheoTimeData"><code>RheoTimeData</code></a> struct, which can be achieved via the data generation functions provided in RHEOS (see section <a href="@ref">Generating data</a>).</p><pre class="language-julia"><code class="language-julia"># Define timeline
+ylabel(&quot;Stress&quot;);</code></pre><p><img src="../fitpredictTime_files/fitpredictTime_20_0.png" alt="png"/></p><p><strong>Simulate different model behaviours</strong></p><p>The ability of predicting model&#39;s response can be exploited to simulate the behaviour of the model to other external loading conditions. For example, we will explore the response of the fitted model to a creep experiment. </p><p>First we need to define an incomplete <a href="../API/#RHEOS.RheoTimeData"><code>RheoTimeData</code></a> struct, which can be achieved via the data generation functions provided in RHEOS (see section <a href="../generatingdata/#Generating-Data-1">Generating Data</a>).</p><pre class="language-julia"><code class="language-julia"># Define timeline
 dσ = timeline()
 # and a step in stress
 dσ = stressfunction(dσ,hstep())
