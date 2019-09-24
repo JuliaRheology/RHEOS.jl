@@ -175,12 +175,12 @@ end
 
 Resample two arrays with new sample rate(s).
 It can either reduce the sample rate by not taking every array element or it can increase the sample
-rate by inserting new elements. If the number of elements per period (elperiods) is a positive number, then it uppersamples; if
+rate by inserting new elements. If the number of elements per period (elperiods) is a positive number, then it upsamples; if
 it is negative it downsamples.
 
 The function returns the resampled x and y arrays.
 """
-function fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elperiods::Union{Vector{U}, U}) where T<:RheoFloat where U<:Integer
+function fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elperiods::Union{Vector{U}, U}; includelastel::Bool=true) where T<:RheoFloat where U<:Integer
 
     # assert correct function signature
     @assert length(x)==length(y) "X and Y arrays must have same length."
@@ -211,7 +211,7 @@ function fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elper
 
     # last element may be missed, so check and add if needed
     lastel = boundaries[end]
-    if xᵦ[end]<x[lastel]
+    if includelastel && xᵦ[end]<x[lastel]
         append!(xᵦ,x[lastel])
         append!(yᵦ,y[lastel])
     end

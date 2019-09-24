@@ -14,11 +14,14 @@ Resample can downsample or upsample data. If the number of `elperiods` is negati
 vice versa if it is positive. If `time_boundaries` are not specified, resampling is applied to the whole set of data.
 If number of elements per period (`elperiods`) is `1` or `-1` it returns the original `RheoTimeData`, whilst `0` is not accepted as a valid
 argument for `elperiods`.
+
+The last element may or may not be included with a normal downsampling. By default the last element is forced to be included
+but this can be negated by providing the keyword argument `includelastel=false`.
 """
-function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing) where {K<:Integer,T<:Real}
+function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
 
     @assert (count(iszero, elperiods)==0) "Number of elements cannot be zero"
-    # convert boundaries from times to element indicies
+    # convert boundaries from times to element indices
     if isnothing(time_boundaries)
         boundaries = [1,length(self.t)];
     else
@@ -27,14 +30,14 @@ function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_bound
 
     check = RheoTimeDataType(self)
     if (check == strain_only)
-        (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods)
+        (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
         sigma = [];
     elseif (check == stress_only)
-        (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods)
+        (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods; includelastel=includelast)
         epsilon = [];
     elseif (check == strain_and_stress)
-        (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods)
-        (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods)
+        (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods; includelastel=includelast)
+        (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
     end
 
     log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:resample, params=(elperiods = elperiods, ), keywords=(time_boundaries = time_boundaries, ) ),
@@ -42,6 +45,51 @@ function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_bound
 
     return RheoTimeData(sigma, epsilon, time, log)
 
+end
+
+"""
+    indexweight(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
+
+This function returns array indices (i.e. an array of integers) which can be sent to the `modelfit` function
+to provide a weighted fitting whilst maintaining constant sample-rate.
+"""
+function indexweight(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
+    # assert correct function signature
+    @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
+    @assert (count(iszero, elperiods)==0) "Number of elements cannot be zero"
+
+    # convert boundaries from times to element indices
+    if isnothing(time_boundaries)
+        boundaries = [1,length(self.t)];
+    else
+        boundaries = closestindices(self.t, time_boundaries)
+    end
+
+    # initialise indices array
+    indices = Integer[]
+
+    # loop through boundaries
+    for i in 1:(length(boundaries)-1)
+        # upsampling, starts at each element then intepolates up N times
+        if !signbit(elperiods[i])
+            for j in boundaries[i]:(boundaries[i+1]-1)
+                indices = vcat(indices, j*ones(Integer, elperiods[i]))
+            end
+
+        # downsampling, simply takes every N element as in downsample function
+        elseif signbit(elperiods[i])
+            append!(indices, collect(boundaries[i]:abs(elperiods[i]):(boundaries[i+1]-1)))
+        end
+    end
+
+    # last element may be missed, so check and add if needed
+    lastel = boundaries[end]
+    if includelastel && indices[end]<lastel
+        append!(indices, lastel)
+    end
+
+    # return unique indices in case of overlap
+    return unique(indices)
 end
 
 """
