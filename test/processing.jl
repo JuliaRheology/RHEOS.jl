@@ -951,10 +951,7 @@ function _modelsteppredict_sing_relax(tol)
 
     computed_response = modelsteppredict(data0, model)
     
-    offset_time = dt/RHEOS.singularity_offset
-    test1 = computed_response.σ[1]==offset_time^(-0.5)
-    test2 = all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), 2:length(t))
-    test1 && test2
+    all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), 1:length(t))
 end
 @test _modelsteppredict_sing_relax(tol)
 
@@ -971,10 +968,7 @@ function _modelsteppredict_sing_creep(tol)
 
     computed_response = modelsteppredict(data0, model)
 
-    offset_time = dt/RHEOS.singularity_offset
-    test1 = computed_response.ϵ[1]==offset_time^(-0.5)
-    test2 = all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), 2:length(t))
-    test1 && test2
+    all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), 1:length(t))
 end
 @test _modelsteppredict_sing_creep(tol)
 
@@ -993,11 +987,7 @@ function _modelsteppredict_sing_shifted_relax(tol)
 
     stepon_el = RHEOS.closestindex(t, 5.0)
 
-    offset_time = dt/RHEOS.singularity_offset
-    test1 = computed_response.σ[stepon_el]≈offset_time^(-0.5)
-    test2 = all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), 1:(stepon_el-1))
-    test3 = all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), (stepon_el+1):length(t))
-    test1 && test2 && test3
+    all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), 1:length(t))
 end
 @test _modelsteppredict_sing_shifted_relax(tol)
 
@@ -1016,11 +1006,7 @@ function _modelsteppredict_sing_shifted_creep(tol)
 
     stepon_el = RHEOS.closestindex(t, 5.0)
 
-    offset_time = dt/RHEOS.singularity_offset
-    test1 = computed_response.ϵ[stepon_el]≈offset_time^(-0.5)
-    test2 = all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), 1:(stepon_el-1))
-    test3 = all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), (stepon_el+1):length(t))
-    test1 && test2 && test3
+    all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), 1:length(t))
 end
 @test _modelsteppredict_sing_shifted_creep(tol)
 

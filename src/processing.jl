@@ -574,15 +574,12 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
     sing = singularitytest(modsing)
 
     # get predicted
+    predicted = zeros(RheoFloat, length(data.t))
     if !sing
-        predicted = zeros(RheoFloat, length(data.t))
         predicted[stepon_el:end] = controlled*modulus(data.t[stepon_el:end] .- stepon_closest)
-
     elseif sing
-        predicted = zeros(RheoFloat, length(data.t))
-        predicted[(stepon_el + 1):end] = controlled*modulus(data.t[(stepon_el + 1):end] .- stepon_closest)
-        predicted[stepon_el] = controlled*modulus([(data.t[stepon_el + 1] - data.t[stepon_el])/singularity_offset])[1]
-
+        predicted[stepon_el:end] = controlled*modulus(data.t[stepon_el:end] .- stepon_closest)
+        @warn "Singularity (Inf value) is present in modulus used for modelsteppredict"
     end
 
     if check == stress_only
