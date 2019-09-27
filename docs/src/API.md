@@ -11,6 +11,7 @@ RheoModel
 ## Sampling and Filtering Functions
 ```@docs
 resample
+indexweight
 cutting
 smooth
 extract
