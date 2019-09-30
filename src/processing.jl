@@ -59,7 +59,7 @@ If `time_boundaries` are not specified, resampling is applied to the whole set o
 indicies for that boundary, whilst `0` is not accepted as a valid argument for `elperiods`.
 
 The last element may or may not be included. By default the last element is forced to be included
-but this can be negated by providing the keyword argument `includelastel=false`.
+but this can be negated by providing the keyword argument `includelast=false`.
 """
 function indexweight(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
     # get element-wise boundaries
