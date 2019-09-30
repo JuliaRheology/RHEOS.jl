@@ -59,7 +59,7 @@ function importcsv(filepath::String, interface::Interface; t_col::IntOrNone = no
    ϵ,σ = interface.to_ϵσ(data.ϵ, data.σ)
 
 	 log = if savelog
-			 info = (comment=comment, folder=pwd(), stats=(t_min=data[1,t_col],t_max=data[end,t_col], n_sample=size(data[:,t_col])))
+			 info = (comment=comment, folder=pwd(), stats=(t_min=data.t[1],t_max=data.t[end], n_sample=size(data.t[:])))
 			 kwds = NamedTuple{(:t_col, uϵ_col_sym, uσ_col_sym),Tuple{IntOrNone,IntOrNone,IntOrNone}}( (t_col, uϵ_col, uσ_col) )
 			 RheoLogItem( (type=:source, funct=:importcsv, params=(filepath=filepath, interface=interface), keywords=kwds), info )
 		   else
