@@ -557,7 +557,7 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOr
 
     elseif constant_sampling && singularity && !isnothing(indweights)
         indsingular = indweights[indweights.>1]
-        measured_weighted = measured_weighted[indsingular]
+        measured_weighted = measured[indsingular]
         # remove singularity, just go close to it, 1/10th over first sample period
         time_series[1] = 0.0 + (time_series[2] - time_series[1])/singularity_offset
         min_objective!(opt, (params, grad) -> obj_const_weighted(params, grad, modulus,
