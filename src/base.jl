@@ -605,22 +605,22 @@ function obj_step_nonsing(params, grad, modulus, t, prescribed::Float64, measure
     cost = sum((measured - estimated).^2)
 end
 
-function obj_step_sing(params, grad, modulus, t, prescribed::Float64, measured::Vector{Float64}; _insight=false)
+function obj_step_weighted(params, grad, modulus, t, prescribed::Float64, measured::Vector{Float64}, weights; _insight=false)
     if _insight
         println("Current Parameters: ", params)
     end
 
     mod = (t->modulus(t,params))
-    estimated = prescribed*mod(t)[2:end]
+    estimated = prescribed*mod(t)
 
-    cost = sum((measured[2:end] - estimated).^2)
+    cost = sum((measured - estimated[weights]).^2)
 end
 
 function leastsquares_stepinit(params_init::Vector{RheoFloat}, low_bounds::RheovecOrNone,
                            hi_bounds::RheovecOrNone, modulus,
                            time_series::Vector{RheoFloat}, prescribed::RheoFloat,
                            measured::Vector{RheoFloat}; insight::Bool = false,
-                           singularity::Bool = false, _rel_tol = 1e-4)
+                           singularity::Bool = false, _rel_tol = 1e-4, indweights=nothing)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(:LN_SBPLX, length(params_init))
@@ -647,14 +647,29 @@ function leastsquares_stepinit(params_init::Vector{RheoFloat}, low_bounds::Rheov
     prescribed = convert(Float64,prescribed)
     measured = convert(Vector{Float64},measured)
 
-    if !singularity
+    if isnothing(indweights) && !singularity
         min_objective!(opt, (params, grad) -> obj_step_nonsing(params, grad, modulus,
                                                             time_series, prescribed, measured;
                                                             _insight = insight))
 
-    elseif singularity
-        min_objective!(opt, (params, grad) -> obj_step_sing(params, grad, modulus,
-                                                        time_series, prescribed, measured;
+    elseif isnothing(indweights) && singularity
+        indices = collect(Integer, 2:length(measured))
+        measured_weighted = measured[indices]
+        min_objective!(opt, (params, grad) -> obj_step_weighted(params, grad, modulus,
+                                                        time_series, prescribed, measured_weighted, indices;
+                                                        _insight = insight))
+
+    elseif !isnothing(indweights) && !singularity
+        measured_weighted = measured[indweights]
+        min_objective!(opt, (params, grad) -> obj_step_weighted(params, grad, modulus,
+                                                            time_series, prescribed, measured_weighted, indweights;
+                                                            _insight = insight))
+
+    elseif !isnothing(indweights) && singularity
+        indsingular = indweights[indweights.>1]
+        measured_weighted = measured[indsingular]
+        min_objective!(opt, (params, grad) -> obj_step_weighted(params, grad, modulus,
+                                                        time_series, prescribed, measured_weighted, indsingular;
                                                         _insight = insight))
 
     end

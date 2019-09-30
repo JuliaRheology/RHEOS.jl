@@ -602,17 +602,17 @@ function _obj_step_nonsing()
 end
 @test _obj_step_nonsing()
 
-function _obj_step_sing()
+function _obj_step_weighted()
     t = Vector{RheoFloat}(0.0:0.5:20.0)
     params = [2.0, 0.5]
     modulus = (x, p)->p[1]*x.^(-p[2])
     loading = 1.0
     expected_response = loading*params[1]*t.^(-params[2])
-    cost = RHEOS.obj_step_sing(params, nothing, modulus, t, loading, expected_response) 
+    cost = RHEOS.obj_step_weighted(params, nothing, modulus, t, loading, expected_response[2:end], collect(Integer, 2:length(t))) 
     
     cost < tol
 end
-@test _obj_step_sing()
+@test _obj_step_weighted()
 
 function _leastsquares_stepinit_nonsing_ramp(tol)
     dt = 0.01
