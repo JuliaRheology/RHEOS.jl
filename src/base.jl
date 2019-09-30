@@ -465,6 +465,23 @@ function obj_const_sing(params, grad,modulus, time_series,dt, prescribed_dot, me
 end
 
 """
+    obj_const_weighted(params, grad, modulus, time_series, dt, prescribed_dot, measured_weighted, weights; _insight::Bool = false)
+
+Post-convolution weighted constant sample-rate cost function for emphasising regions without introducing variable sample-rates.
+"""
+function obj_const_weighted(params, grad, modulus, time_series, dt, prescribed_dot, measured_weighted, weights; _insight::Bool = false)
+
+    _insight && println("Current Parameters: ", params)
+
+    # Replace parameters inside the viscoelastic modulus
+    mod = (t->modulus(t,params))
+    convolved = boltzconvolve(mod, time_series, dt, prescribed_dot)
+
+    cost = sum((measured_weighted - convolved[weights]).^2)
+    return cost
+end
+
+"""
     leastsquares_init(params_init, low_bounds, hi_bounds, modulus, time_series, dt, prescribed_dot, measured; insight = false, sampling = "constant", singularity = false)
 
 Initialise then begin a least squares fitting of the supplied data.
@@ -482,13 +499,14 @@ Initialise then begin a least squares fitting of the supplied data.
 - `constant_sampling`: true if sample rate is constant, false otherwise
 - `insight`: Declare whether insight info should be shown when this function is called, true or false
 - `singularity`: Presence of singularity in model
+- `indweight`: indices weighting, see `modelfit` for more discussion
 """
 function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOrNone,
                            hi_bounds::RheovecOrNone, modulus,
                            time_series::Vector{RheoFloat}, dt::RheoFloat,
                            prescribed_dot::Vector{RheoFloat}, measured::Vector{RheoFloat};
                            insight::Bool = false, constant_sampling::Bool=true,
-                           singularity::Bool = false, _rel_tol = 1e-4)
+                           singularity::Bool = false, _rel_tol = 1e-4, indweights=nothing)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(:LN_SBPLX, length(params_init))
@@ -516,14 +534,13 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOr
 
     # set Opt object as a minimisation objective. Use a closure for additional
     # arguments sent to object objectivefunc
-    if !singularity && constant_sampling
-
+    if constant_sampling && !singularity && isnothing(indweights)
         min_objective!(opt, (params, grad) -> obj_const_nonsing(params, grad, modulus,
                                                             time_series, dt,
                                                             prescribed_dot, measured;
                                                             _insight = insight))
 
-    elseif singularity && constant_sampling
+    elseif constant_sampling && singularity && isnothing(indweights)
         # remove singularity, just go close to it, 1/10th over first sample period
         time_series[1] = 0.0 + (time_series[2] - time_series[1])/singularity_offset
         min_objective!(opt, (params, grad) -> obj_const_sing(params, grad, modulus,
@@ -531,31 +548,44 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOr
                                                         prescribed_dot, measured;
                                                         _insight = insight))
 
-    elseif !singularity && !constant_sampling
+    elseif constant_sampling && !singularity && !isnothing(indweights)
+        measured_weighted = measured[indweights]
+        min_objective!(opt, (params, grad) -> obj_const_weighted(params, grad, modulus,
+                                                            time_series, dt,
+                                                            prescribed_dot, measured_weighted, indweights;
+                                                            _insight = insight))
 
+    elseif constant_sampling && singularity && !isnothing(indweights)
+        indsingular = indweights[indweights.>1]
+        measured_weighted = measured_weighted[indsingular]
+        # remove singularity, just go close to it, 1/10th over first sample period
+        time_series[1] = 0.0 + (time_series[2] - time_series[1])/singularity_offset
+        min_objective!(opt, (params, grad) -> obj_const_weighted(params, grad, modulus,
+                                                        time_series, dt,
+                                                        prescribed_dot, measured_weighted, indsingular;
+                                                        _insight = insight))
+
+    elseif !constant_sampling && !singularity
         min_objective!(opt, (params, grad) -> obj_var_nonsing(params, grad, modulus,
                                                         time_series, prescribed_dot,
                                                         measured; _insight = insight))
 
-    elseif singularity && !constant_sampling
+    elseif !constant_sampling && singularity
         @warn "Note that large changes in sample rate, particularly from low sample rate to 
         much higher sample rate can introduce significant innacuracies due to the singularity 
         approximation method being used. To avoid this, please resample your data to a constant
         sample rate before fitting."
-
         min_objective!(opt, (params, grad) -> obj_var_sing(params, grad, modulus,
                                                         time_series, prescribed_dot,
                                                         measured; _insight = insight))
 
     end
-    #
 
     # minimise objective func, minx are the parameters resulting in minimum
     (minf, minx, ret) = NLopt.optimize(opt, params_init)
 
     # return all
     return (convert(RheoFloat,minf), convert(Vector{RheoFloat},minx), ret)
-
 
 end
 
