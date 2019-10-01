@@ -98,6 +98,15 @@ function derivBD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 
 end
 
+"""
+    derivF1()
+
+"""
+function derivF1(y::Vector{RheoFloat}, x::Vector{RheoFloat})
+
+    return 1
+end
+
 function constantcheck(t::Vector{RheoFloat})
     # get array of backward differences
     diff = t[2:end] - t[1:end-1]
