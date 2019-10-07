@@ -99,11 +99,62 @@ function derivBD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 end
 
 """
+    doublederivBD(y, x)
+
+Given two arrays of data, x and y, calculate d^2(y)/dx^2 using 2nd order
+backward difference. Assumes y==0 at at negative element points, i.e.
+y is 'at rest'.
+"""
+function derivBD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
+
+    # get length
+    N = length(x)
+
+    # assert y and x arrays are same length
+    @assert length(y)==N "X and Y Array lengths must match."
+
+    # initialise zero array of length y
+    yddot = similar(y)
+
+    # assume 'imaginary' previous point is 0.0, and Δx is the same as the next one ahead
+    # this is a physical assumption that material is at rest before first data point.
+    # Could be problematic in some cases if sudden jump as we are actually missing
+    # important information about how quickly that jump happened.
+    Δx₀ = x[2] - x[1]
+    @inbounds yddot[1] = y[1]/Δx₀^2
+    @inbounds yddot[2] = (y[2] - 2*y[1])/Δx₀^2
+
+    # backwards difference method for rest of points
+    @inbounds for i in 3:N
+        yddot[i] = (y[i] - 2*y[i-1] + y[i-2])/((x[i] - x[i-1])^2)
+    end
+
+    return yddot
+
+end
+
+"""
     derivF1()
 
 """
 function derivF1(y::Vector{RheoFloat}, x::Vector{RheoFloat})
+    deriv = RHEOS.derivBD
 
+    data = loaddata("fractsls_predicted.jld2")
+    t = data.t
+    dt = t[2] - t[1]
+    σ = data.σ
+    σderiv = deriv(σ, t)
+    σdoublederiv = deriv(σderiv, t)
+    ϵ = data.ϵ
+    ϵderiv = deriv(ϵ, t)
+    ϵdoublederiv = deriv(ϵderiv, t)
+
+    I1 = sigderiv[1]*t.^(1-α)
+    I2 = conv(t.^(1-α), sigdoublederiv)[1:length(t)]*dt
+    return (I1 + I2)/gamma(2 - α)
+
+end
     return 1
 end
 
