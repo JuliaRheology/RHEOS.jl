@@ -101,7 +101,9 @@ end
 """
     doublederivCD(y, x)
 
-Given two arrays of data, x and y, calculate d^2(y)/dx^2 using 2nd order difference.
+Given two arrays of data, x and y, calculate d^2(y)/dx^2 using 2nd order difference. Data
+should conform to the following constraints:
+- No step loading (signal should start at 0)
 """
 function doublederivCD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
     # get length
@@ -115,12 +117,13 @@ function doublederivCD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
     
     # no physical assumptions made, unlike for first order BD derivative. 
     # forward difference for first element, backwards difference for last element
-    @inbounds yddot[1] = (y[3] - 2*y[2] + y[1])/(x[2] - x[1])^2
-    @inbounds yddot[N] = (y[N] - 2*y[N-1] + y[N-2])/(x[2] - x[1])^2
+    # @inbounds yddot[1] = (y[3] - 2*y[2] + y[1])/(x[2] - x[1])^2
+    @inbounds yddot[1] = (y[2] - 2*y[1])/(x[2] - x[1])^2
+    @inbounds yddot[N] = (y[N] - 2*y[N-1] + y[N-2])/(x[N] - x[N-1])^2
 
     # central difference method for rest of points
     @inbounds for i in 2:(N-1)
-        yddot[i] = (y[i+1] - 2*y[i] + y[i-1])/(x[2] - x[1])^2
+        yddot[i] = (y[i+1] - 2*y[i] + y[i-1])/(x[i] - x[i-1])^2
     end
 
     return yddot

@@ -67,66 +67,6 @@ function _doublederivCD_cubic_oscillatory(tol)
 end
 @test _doublederivCD_cubic_oscillatory(tol)
 
-function _derivFbasic_sing_linear(tol)
-    # fractional derivative of quadratic signal
-    dt = 0.001
-    t = Vector{RheoFloat}(0.0:dt:20.0)
-    β = 0.5
-    exact_response = t.^(2-β) / gamma(3-β)
-
-    loading = 0.5*t.^2
-    ldot = RHEOS.derivBD(loading, t)
-    lddot = RHEOS.doublederivCD(loading, t)
-    
-    integration_response = RHEOS.derivFbasic(β, ldot, lddot, t, dt)
-    
-    all(i -> isapprox(exact_response[i], integration_response[i], atol=tol), eachindex(exact_response))
-end
-@test _derivFbasic_sing_linear(tol)
-
-# function _BROKENderivFbasic_sing_step(tol)
-#     # fractional derivative of step signal
-#     dt = 0.001
-#     t = Vector{RheoFloat}(0.0:dt:20.0)
-#     β = 0.5
-#     exact_response = t.^(-β) / gamma(1-β)
-
-#     loading = ones(length(t))
-#     ldot = RHEOS.derivBD(loading, t)
-#     lddot = RHEOS.doublederivCD(loading, t)
-
-#     integration_response = RHEOS.derivFbasic(β, ldot, lddot, t, dt)
-
-#     plot(t, integration_response)
-#     plot(t, exact_response, "--")
-    
-#     # note that first element is skipped due to singularity
-#     all(i -> isapprox(exact_response[i], integration_response[i], atol=tol), 2:length(t))
-# end
-# @test _BROKENderivFbasic_sing_step(tol)
-
-# function _BROKENderivFbasic_sing_parabolic(tol)
-#     # response of power-law model to
-#     # a parabola: 2500 - (t-50)^2
-#     dt = 0.001
-#     t = Vector{RheoFloat}(0.0:dt:20.0)
-#     β = 0.5
-#     exact_response = (100/(1-β))*t.^(1-β) .- (2/((1-β)*(2-β)))*t.^(2-β)
-    
-#     loading = 2500.0 .- (t .- 50).^2
-#     loading_derivative = RHEOS.derivBD(loading, t)
-
-#     t[1] = dt/10.0
-#     integration_response = RHEOS.derivFbasic(x->x.^(-β), t, dt, loading_derivative)
-#     # note that first element is skipped due to singularity
-#     # and the higher tolerance and skipping of many elements
-#     # this is one of the hardest cases for the trapezoidal
-#     # method of hereditary integration to handle when then there
-#     # is a singularity.
-#     all(i -> isapprox(exact_response[i], integration_response[i], atol=7.0), 250:length(t))
-# end
-# @test _BROKENderivFbasic_sing_parabolic(tol)
-
 @test RHEOS.constantcheck([1.0, 2.0, 3.0])==true
 @test RHEOS.constantcheck([1.0, 2.0, 4.0])==false
 
