@@ -117,8 +117,7 @@ function doublederivCD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
     
     # no physical assumptions made, unlike for first order BD derivative. 
     # forward difference for first element, backwards difference for last element
-    # @inbounds yddot[1] = (y[3] - 2*y[2] + y[1])/(x[2] - x[1])^2
-    @inbounds yddot[1] = (y[2] - 2*y[1])/(x[2] - x[1])^2
+    @inbounds yddot[1] = (y[3] - 2*y[2] + y[1])/(x[2] - x[1])^2
     @inbounds yddot[N] = (y[N] - 2*y[N-1] + y[N-2])/(x[N] - x[N-1])^2
 
     # central difference method for rest of points
