@@ -32,7 +32,7 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 ## Citation
 If you use RHEOS in your work, please consider citing the following papers as appropriate:
 
-Kaplan et al., (2019). RHEOS.jl -- A Julia Package for Rheology Data Analysis. Journal of Open Source Software, 4(41), 1700, [https://doi.org/10.21105/joss.01700](https://doi.org/10.21105/joss.01700)
+Kaplan et al., (2019). _RHEOS.jl -- A Julia Package for Rheology Data Analysis_. Journal of Open Source Software, 4(41), 1700, [https://doi.org/10.21105/joss.01700](https://doi.org/10.21105/joss.01700)
 
 _TBA: Forthcoming Review_
 
