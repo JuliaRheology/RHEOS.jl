@@ -43,7 +43,7 @@ The sections in this documentation each aim to provide tutorials in different el
 **Note that all sections in this documentation are compiled from Jupyter notebooks (located in RHEOS/examples/) that can be locally modified to explore the functionalities offered by RHEOS** (Apart from [API](@ref) and [Architecture](@ref) sections.)
 
 ## Installation
-1. Install Julia, version 1.1.1
+1. Install Julia, version 1.2
 2. From Julia REPL, enter pkg mode by pressing ```]```
 3. (Optional) Enable desired Project.toml environment
 4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
