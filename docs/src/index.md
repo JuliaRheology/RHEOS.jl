@@ -57,13 +57,13 @@ If you believe you have found any bugs or invalid behaviour in RHEOS, please fee
 ## Citation
 If you use RHEOS in your work, please consider citing the following papers as appropriate:
 
-Kaplan et al., (2019). _RHEOS.jl -- A Julia Package for Rheology Data Analysis_. Journal of Open Source Software, 4(41), 1700, [https://doi.org/10.21105/joss.01700](https://doi.org/10.21105/joss.01700)
+J. L. Kaplan, A. Bonfanti, A. J. Kabla (2019). _RHEOS.jl -- A Julia Package for Rheology Data Analysis_. Journal of Open Source Software, 4(41), 1700, [https://doi.org/10.21105/joss.01700](https://doi.org/10.21105/joss.01700)
 
 _TBA: Forthcoming Review_
 
 ## References
-+ W. N. Findley, J. S. Lai, K. Onaran — *Creep and Relaxation of Nonlinear Viscoelastic Materials (with an Introduction to Linear Viscoelasticity)*, Dover Publications, New York. (1989)
++ W. N. Findley, J. S. Lai, K. Onaran (1989). *Creep and Relaxation of Nonlinear Viscoelastic Materials (with an Introduction to Linear Viscoelasticity)*, Dover Publications, New York. 
 
-+ S. G. Johnson — *The NLopt nonlinear-optimization package*, https://github.com/stevengj/nlopt
++ S. G. Johnson. *The NLopt nonlinear-optimization package*, https://github.com/stevengj/nlopt
 
-+ J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah — *Julia: A Fresh Approach to Numerical Computing*, SIAM Review, doi: 10.1137/141000671. (2017)
++ J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah (2017). *Julia: A Fresh Approach to Numerical Computing*, SIAM Review, doi: 10.1137/141000671.
