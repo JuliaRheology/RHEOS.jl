@@ -56,7 +56,9 @@ If you believe you have found any bugs or invalid behaviour in RHEOS, please fee
 
 ## Citation
 If you use RHEOS in your work, please consider citing the following papers as appropriate:
+
 Kaplan et al., (2019). RHEOS.jl -- A Julia Package for Rheology Data Analysis. Journal of Open Source Software, 4(41), 1700, [https://doi.org/10.21105/joss.01700](https://doi.org/10.21105/joss.01700)
+
 _TBA: Forthcoming Review_
 
 ## References
