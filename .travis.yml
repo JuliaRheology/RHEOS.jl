@@ -6,7 +6,13 @@ os:
   # - osx
 
 julia:
-  - 1.1.1
+  - 1.1
+  - 1.2
+  - nightly
+
+matrix:
+  allow_failures:
+    - julia: nightly
 
 notifications:
   email: false
@@ -26,18 +32,32 @@ install:
 jobs:
   include:
     - stage: "Documentation"
-      julia: 1.1.1
+      julia: 1.2
       os: linux
       script:
         - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
         - julia --project=docs/ docs/make.jl
       after_success: skip
       
-    - stage: "Testing"
-      julia: 1.1.1
+    - stage: "Testing 1.1"
+      julia: 1.1
       os: linux
       script:
-        - julia -e "using Pkg; Pkg.add(\"Test\"); Pkg.test(\"RHEOS\")"
+        - julia -e "using Pkg; Pkg.add(\"Test\"); Pkg.add(\"SpecialFunctions\"); Pkg.test(\"RHEOS\")"
+      after_success: skip
+
+    - stage: "Testing 1.2"
+      julia: 1.2
+      os: linux
+      script:
+        - julia -e "using Pkg; Pkg.add(\"Test\"); Pkg.add(\"SpecialFunctions\"); Pkg.test(\"RHEOS\")"
+      after_success: skip
+
+    - stage: "Testing Nightly"
+      julia: Nightly
+      os: linux
+      script:
+        - julia -e "using Pkg; Pkg.add(\"Test\"); Pkg.add(\"SpecialFunctions\"); Pkg.test(\"RHEOS\")"
       after_success: skip
 
 

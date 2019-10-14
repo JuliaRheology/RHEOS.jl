@@ -1,6 +1,12 @@
 environment:
   matrix:
-  - julia_version: 1.1.1
+  - julia_version: 1.1
+  - julia_version: 1.2
+  - julia_version: nightly
+
+matrix:
+  allow_failures:
+    - julia_version: nightly
 
 platform:
   - x86 # 32-bit
@@ -26,4 +32,3 @@ build_script:
 test_script:
   - echo "%JL_TEST_SCRIPT%"
   - C:\julia\bin\julia -e "using Pkg; Pkg.add(\"Test\"); Pkg.test(\"RHEOS\")"
-  # - C:\julia\bin\julia -e "%JL_TEST_SCRIPT%"
