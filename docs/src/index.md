@@ -55,8 +55,9 @@ The sections in this documentation each aim to provide tutorials in different el
 If you believe you have found any bugs or invalid behaviour in RHEOS, please feel free to file an issue on this repository. You can also raise an issue if you feel that any part of the documentation needs clarification, or for any feature requests. Even better than just raising an issue, you could both raise an issue and issue a pull request which fixes that issue. Note that meta-documentation on running tests and building documentation locally is available at the [JuliaRheology/RheoHelpDocs](https://github.com/JuliaRheology/RheoHelpDocs) repository. Please be aware that RHEOS is released with a [Contributor Code of Conduct](https://github.com/JuliaRheology/RHEOS.jl/blob/master/CONDUCT.md) and by participating in this project you agree to abide by its terms.
 
 ## Citation
-If you use RHEOS in your work, please consider citing the following paper
-*TBA*
+If you use RHEOS in your work, please consider citing the following papers as appropriate:
+Kaplan et al., (2019). RHEOS.jl -- A Julia Package for Rheology Data Analysis. Journal of Open Source Software, 4(41), 1700, [https://doi.org/10.21105/joss.01700](https://doi.org/10.21105/joss.01700)
+_TBA: Forthcoming Review_
 
 ## References
 + W. N. Findley, J. S. Lai, K. Onaran — *Creep and Relaxation of Nonlinear Viscoelastic Materials (with an Introduction to Linear Viscoelasticity)*, Dover Publications, New York. (1989)
