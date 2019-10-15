@@ -3,6 +3,9 @@ uuid = "728860ae-c896-11e8-0b91-0f38ecad5046"
 authors = ["J Louis Kaplan <jonathanlouiskaplan@outlook.com>", "Alessandra Bonfanti <bonfantiale.ab@gmail.com>", "Alexandre Kabla <ajk61@cam.ac.uk>"]
 version = "0.9.2"
 
+[compat]
+julia = "1.1"
+
 [deps]
 DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
