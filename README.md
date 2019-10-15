@@ -4,9 +4,9 @@
 </a>
 </div>
 
-| **Documentation**                                                                   | **Build + Test Status**                                                                                        | **License**                           | **Paper**                       |
-|:-----------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|:-------------------------------------:|:-------------------------------:|
-| [![Stable][docs-sta-img]][docs-sta-url] &nbsp; [![Dev][docs-dev-img]][docs-dev-url] | Linux: [![Build Status][travis-img]][travis-url] &nbsp; Windows: [![Build Status][appveyor-img]][appveyor-url] | [![License][license-img]](LICENSE.md) | [![status][joss-img]][joss-url] |
+| **Build + Test Status**                                                                                        |**Documentation**                                                                    | **License**                           | **Paper**                       |
+|:--------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|:-------------------------------------:|:-------------------------------:|
+| Linux: [![Build Status][travis-img]][travis-url] &nbsp; Windows: [![Build Status][appveyor-img]][appveyor-url] | [![Stable][docs-sta-img]][docs-sta-url] &nbsp; [![Dev][docs-dev-img]][docs-dev-url] | [![License][license-img]](LICENSE.md) | [![status][joss-img]][joss-url] |
 
 # RHEOS - RHEology, Open-Source
 RHEOS, an abbreviation of Rheology Open Source, is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:
