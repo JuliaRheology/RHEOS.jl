@@ -4,12 +4,9 @@
 </a>
 </div>
 
-Linux: [![Build Status](https://travis-ci.org/JuliaRheology/RHEOS.jl.svg?branch=master)](https://travis-ci.org/JuliaRheology/RHEOS.jl) &nbsp;
-Windows: [![Build Status](https://ci.appveyor.com/api/projects/status/github/JuliaRheology/RHEOS.jl?branch=master&svg=true)](https://ci.appveyor.com/project/JuliaRheology/RHEOS-jl) &nbsp;
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaRheology.github.io/RHEOS.jl/stable) &nbsp;
-[![Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaRheology.github.io/RHEOS.jl/dev) &nbsp;
-[![License](https://img.shields.io/badge/License-MIT-ff69b2.svg?style=flat)](LICENSE.md) &nbsp;
-[![status](https://joss.theoj.org/papers/553250d815e1990db1b89c742854c71a/status.svg)](https://joss.theoj.org/papers/553250d815e1990db1b89c742854c71a)
+| **Documentation**                                                                   | **Build + Test Status**                                                                                        | **License**                           | **Paper**                       |
+|:-----------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|:-------------------------------------:|:-------------------------------:|
+| [![Stable][docs-sta-img]][docs-sta-url] &nbsp; [![Dev][docs-dev-img]][docs-dev-url] | Linux: [![Build Status][travis-img]][travis-url] &nbsp; Windows: [![Build Status][appveyor-img]][appveyor-url] | [![License][license-img]](LICENSE.md) | [![status][joss-img]][joss-url] |
 
 # RHEOS - RHEology, Open-Source
 RHEOS, an abbreviation of Rheology Open Source, is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:
@@ -29,6 +26,9 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 2. From Julia REPL, enter pkg mode by pressing ```]```
 3. (Optional) Enable desired Project.toml environment
 4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
+
+## Documentation
+Clicking [here][docs-sta-url] or the blue docs/stable badge at the top of this README will take you to the documentation of the latest stable release. If you installed RHEOS using the instructions in the previous section, you will most likely want the stable documentation. Clicking [here][docs-dev-url] or the blue docs/dev badge at the top of this README will take you to the latest documentation as directly built from the master branch. Developers who want to contribute to RHEOS will most likely want the dev documentation.
 
 ## Citation
 If you use RHEOS in your work, please consider citing the following papers as appropriate:
@@ -50,3 +50,20 @@ If you believe you have found any bugs or invalid behaviour in RHEOS, please fee
 + S. G. Johnson. *The NLopt nonlinear-optimization package*, https://github.com/stevengj/nlopt
 
 + J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah (2017). *Julia: A Fresh Approach to Numerical Computing*, SIAM Review, doi: 10.1137/141000671.
+
+[docs-sta-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-sta-url]: https://JuliaRheology.github.io/RHEOS.jl/stable
+
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-dev-url]: https://JuliaRheology.github.io/RHEOS.jl/dev
+
+[travis-img]: https://travis-ci.org/JuliaRheology/RHEOS.jl.svg?branch=master
+[travis-url]: https://travis-ci.org/JuliaRheology/RHEOS.jl
+
+[appveyor-img]: https://ci.appveyor.com/api/projects/status/github/JuliaRheology/RHEOS.jl?branch=master&svg=true
+[appveyor-url]: https://ci.appveyor.com/project/JuliaRheology/RHEOS-jl
+
+[license-img]: https://img.shields.io/badge/License-MIT-ff69b2.svg?style=flat
+
+[joss-img]: https://joss.theoj.org/papers/553250d815e1990db1b89c742854c71a/status.svg
+[joss-url]: https://joss.theoj.org/papers/553250d815e1990db1b89c742854c71a
