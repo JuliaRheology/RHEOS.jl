@@ -28,7 +28,7 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
 
 ## Documentation
-Clicking [here][docs-sta-url] or the blue docs/stable badge at the top of this README will take you to the documentation of the latest stable release. If you installed RHEOS using the instructions in the previous section, you will most likely want the stable documentation. Clicking [here][docs-dev-url] or the blue docs/dev badge at the top of this README will take you to the latest documentation as directly built from the master branch. Developers who want to contribute to RHEOS will most likely want the dev documentation.
+[Click here][docs-sta-url] or the blue `docs/stable` badge at the top of this README to access the documentation of the current _stable release_. If you installed RHEOS using the instructions in the previous section, you will most likely want the stable documentation. [Click here][docs-dev-url] or the blue `docs/dev` badge at the top of this README to access the _latest documentation built from the master branch_. 
 
 ## Citation
 If you use RHEOS in your work, please consider citing the following papers as appropriate:
