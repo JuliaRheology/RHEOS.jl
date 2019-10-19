@@ -189,7 +189,7 @@ Jeffreys_Zener = RheoModelClass(
                 # Model name
                 name="jeffreys_Zener",
                 # Model parameters,
-                p = [ :ηₐ, :k, :ηᵧ],
+                p = [:ηₐ, :k, :ηᵧ],
                 # Relaxation modulus
                 G = quote
                         diracterm = t!=0.0 ? 0.0 : Inf
