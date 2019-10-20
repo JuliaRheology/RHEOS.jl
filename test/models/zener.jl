@@ -133,50 +133,94 @@ function FractSolid_Gpp_reduce_SLS()
 end
 @test FractSolid_Gpp_reduce_SLS()
 
-# function Fract_Zener_G_reduce_SLS()
+function Fract_Zener_G_reduce_Jeffreys()
+    dt = 0.001
+    # NaN at 0.0 due to Gamma function so start at dt
+    t = collect(dt:dt:10.0)
 
-#     Jeffreys_Zener
-#     return true
-# end
+    fraczen = Fract_Zener.Ga(t, [2.0, 1.0, 1.0, 0.0, 0.5, 1.0])
+    stanJef = Jeffreys_Zener.Ga(t, [2.0, 1.0, 0.5])
 
-# function FractJeffreys_Zener_G_reduce_Jeffreys()
+    all(i -> isapprox(fraczen[i], stanJef[i]), eachindex(t))
+end
+@test Fract_Zener_G_reduce_Jeffreys()
 
-#     Jeffreys_Zener
-#     return true
-# end
+function FractJeffreys_Zener_G_reduce_Jeffreys()
+    dt = 0.001
+    # NaN at 0.0 due to Gamma function so start at dt
+    t = collect(dt:dt:10.0)
 
-# function Fract_Zener_J_reduce_SLS()
+    fracJef = FractJeffreys_Zener.Ga(t, [2.0, 1.0, 0.0, 0.5])
+    stanJef = Jeffreys_Zener.Ga(t, [2.0, 1.0, 0.5])
 
-#     Jeffreys_Zener
-#     return true
-# end
+    all(i -> isapprox(fracJef[i], stanJef[i]), eachindex(t))
+end
+@test FractJeffreys_Zener_G_reduce_Jeffreys()
 
-# function FractJeffreys_Zener_J_reduce_Jeffreys()
+function Fract_Zener_J_reduce_Jeffreys()
+    dt = 0.001
+    # NaN at 0.0 due to InverseLaplace function so start at dt
+    t = collect(dt:dt:10.0)
 
-#     Jeffreys_Zener
-#     return true
-# end
+    fraczen = Fract_Zener.Ja(t, [2.0, 1.0, 1.0, 0.0, 0.5, 1.0])
+    stanJef = Jeffreys_Zener.Ja(t, [2.0, 1.0, 0.5])
 
-# function Fract_Zener_Gp_reduce_SLS()
+    all(i -> isapprox(fraczen[i], stanJef[i]), eachindex(t))
+end
+@test Fract_Zener_J_reduce_Jeffreys()
 
-#     Jeffreys_Zener
-#     return true
-# end
+function FractJeffreys_Zener_J_reduce_Jeffreys()
+    dt = 0.001
+    # NaN at 0.0 due to InverseLaplace function so start at dt
+    t = collect(dt:dt:10.0)
 
-# function FractJeffreys_Zener_Gp_reduce_Jeffreys()
+    fracJef = FractJeffreys_Zener.Ja(t, [2.0, 1.0, 0.0, 0.5])
+    stanJef = Jeffreys_Zener.Ja(t, [2.0, 1.0, 0.5])
 
-#     Jeffreys_Zener
-#     return true
-# end
+    all(i -> isapprox(fracJef[i], stanJef[i]), eachindex(t))
+end
+@test FractJeffreys_Zener_J_reduce_Jeffreys()
 
-# function Fract_Zener_Gpp_reduce_SLS()
+function Fract_Zener_Gp_reduce_Jeffreys()
+    ω_step = 0.01
+    chirp = collect(0.0:ω_step:10000.0)
 
-#     Jeffreys_Zener
-#     return true
-# end
+    fraczen = Fract_Zener.Gpa(chirp, [2.0, 1.0, 1.0, 0.0, 0.5, 1.0])
+    stanJef = Jeffreys_Zener.Gpa(chirp, [2.0, 1.0, 0.5])
 
-# function FractJeffreys_Zener_Gpp_reduce_Jeffreys()
+    all(i -> isapprox(fraczen[i], stanJef[i]), eachindex(chirp))
+end
+@test Fract_Zener_Gp_reduce_Jeffreys()
 
-#     Jeffreys_Zener
-#     return true
-# end
+function FractJeffreys_Zener_Gp_reduce_Jeffreys()
+    ω_step = 0.01
+    chirp = collect(0.0:ω_step:10000.0)
+
+    fracJef = FractJeffreys_Zener.Gpa(chirp, [2.0, 1.0, 0.0, 0.5])
+    stanJef = Jeffreys_Zener.Gpa(chirp, [2.0, 1.0, 0.5])
+
+    all(i -> isapprox(fracJef[i], stanJef[i]), eachindex(chirp))
+end
+@test FractJeffreys_Zener_Gp_reduce_Jeffreys()
+
+function Fract_Zener_Gpp_reduce_Jeffreys()
+    ω_step = 0.01
+    chirp = collect(0.0:ω_step:10000.0)
+
+    fraczen = Fract_Zener.Gppa(chirp, [2.0, 1.0, 1.0, 0.0, 0.5, 1.0])
+    stanJef = Jeffreys_Zener.Gppa(chirp, [2.0, 1.0, 0.5])
+
+    all(i -> isapprox(fraczen[i], stanJef[i]), eachindex(chirp))
+end
+@test Fract_Zener_Gpp_reduce_Jeffreys()
+
+function FractJeffreys_Zener_Gpp_reduce_Jeffreys()
+    ω_step = 0.01
+    chirp = collect(0.0:ω_step:10000.0)
+
+    fracJef = FractJeffreys_Zener.Gppa(chirp, [2.0, 1.0, 0.0, 0.5])
+    stanJef = Jeffreys_Zener.Gppa(chirp, [2.0, 1.0, 0.5])
+
+    all(i -> isapprox(fracJef[i], stanJef[i]), eachindex(chirp))
+end
+@test FractJeffreys_Zener_Gpp_reduce_Jeffreys()
