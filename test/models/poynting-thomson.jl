@@ -1,17 +1,14 @@
-# function Fract_PT_G_reduce_SLS()
-#     dt = 0.001
-#     # NaN at 0.0 due to InverseLaplace so start at dt
-#     t = collect(dt:dt:10.0)
+function Fract_PT_G_reduce_SLS()
+    dt = 0.001
+    # NaN at 0.0 due to InverseLaplace so start at dt
+    t = collect(dt:dt:10.0)
 
-#     fracpt = Fract_PT.Ga(t, [2.0, 1.0, 1.0, 0.0, 0.5, 0.0])
-#     stanSLS = SLS_PT.Ga(t, [2.0, 1.0, 0.5])
+    fracpt = Fract_PT.Ga(t, [2.0, 1.0, 1.0, 0.0, 0.5, 0.0])
+    stanSLS = SLS_PT.Ga(t, [2.0, 1.0, 0.5])
 
-#     plot(fracpt)
-#     plot(stanSLS, "--")
-
-#     all(i -> isapprox(fracpt[i], stanSLS[i]), eachindex(t))
-# end
-# @test Fract_PT_G_reduce_SLS()
+    all(i -> isapprox(fracpt[i], stanSLS[i]), eachindex(t))
+end
+@test Fract_PT_G_reduce_SLS()
 
 function FractSLS_PT_G_reduce_SLS()
     dt = 0.001
@@ -90,20 +87,17 @@ function FractSLS_PT_Gpp_reduce_SLS()
 end
 @test FractSLS_PT_Gpp_reduce_SLS()
 
-# function Fract_PT_G_reduce_Jeffreys()
-#     dt = 0.001
-#     # NaN at 0.0 due to Gamma function so start at dt
-#     t = collect(dt:dt:10.0)
+function Fract_PT_G_reduce_Jeffreys(tol)
+    dt = 0.001
+    # NaN at 0.0 due to Gamma function so start at dt
+    t = collect(dt:dt:10.0)
 
-#     fracpt = Fract_PT.Ga(t, [2.0, 1.0, 1.0, 0.0, 0.5, 1.0])
-#     stanJef = Jeffreys_PT.Ga(t, [2.0, 1.0, 0.5])
+    fracpt = Fract_PT.Ga(t, [2.0, 1.0, 1.0, 0.0, 0.5, 1.0])
+    stanJef = Jeffreys_PT.Ga(t, [2.0, 1.0, 0.5])
 
-#     plot(fracpt)
-#     plot(stanJef, "--")
-
-#     all(i -> isapprox(fracpt[i], stanJef[i]), eachindex(t))
-# end
-# @test Fract_PT_G_reduce_Jeffreys()
+    all(i -> isapprox(fracpt[i], stanJef[i], atol=tol), eachindex(t))
+end
+@test Fract_PT_G_reduce_Jeffreys(tol)
 
 function FractJeffreys_PT_G_reduce_Jeffreys()
     dt = 0.001

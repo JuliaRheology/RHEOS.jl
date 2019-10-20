@@ -7,7 +7,7 @@ Fract_PT = RheoModelClass(
           p = [:cₐ, :a, :cᵦ, :β, :cᵧ, :γ],
           # Relaxation modulus
           G = quote
-                  G(s) = (1/s)*(cᵧ*s^γ *(cₐ * s^a + cᵦ * s^β))/(cᵧ*s^γ* + cₐ*s^a + cᵦ*s^β)
+                  G(s) = (1/s)*(cᵧ*s^γ *(cₐ * s^a + cᵦ * s^β))/(cᵧ*s^γ + cₐ*s^a + cᵦ*s^β)
                   InverseLaplace.talbot(s -> G(s), t)
               end,
           # Creep modulus
