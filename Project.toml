@@ -5,8 +5,6 @@ version = "0.9.2"
 
 [compat]
 julia = "1.1"
-FFTW = "0.1"
-InverseLaplace = "0.1"
 
 [deps]
 DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
