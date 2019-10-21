@@ -4,7 +4,7 @@ authors = ["J Louis Kaplan <jonathanlouiskaplan@outlook.com>", "Alessandra Bonfa
 version = "0.9.2"
 
 [compat]
-julia = "1.1"
+julia = "1.2"
 
 [deps]
 DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
