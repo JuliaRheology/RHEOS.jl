@@ -29,7 +29,6 @@ install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - pip install jupyter
   - pip install nbconvert
-  # - julia -e "using Pkg; Pkg.add(\"Test\")"
 
 jobs:
   include:
@@ -40,26 +39,4 @@ jobs:
         - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
         - julia --project=docs/ docs/make.jl
       after_success: skip
-      
-    # - stage: "Testing 1.1"
-    #   julia: 1.1
-    #   os: linux
-    #   script:
-    #     - julia -e "using Pkg; Pkg.add(\"Test\"); Pkg.add(\"SpecialFunctions\"); Pkg.test(\"RHEOS\")"
-    #   after_success: skip
-
-    # - stage: "Testing 1.2"
-    #   julia: 1.2
-    #   os: linux
-    #   script:
-    #     - julia -e "using Pkg; Pkg.add(\"Test\"); Pkg.add(\"SpecialFunctions\"); Pkg.test(\"RHEOS\")"
-    #   after_success: skip
-
-    # - stage: "Testing Nightly"
-    #   julia: Nightly
-    #   os: linux
-    #   script:
-    #     - julia -e "using Pkg; Pkg.add(\"Test\"); Pkg.add(\"SpecialFunctions\"); Pkg.test(\"RHEOS\")"
-    #   after_success: skip
-
 
