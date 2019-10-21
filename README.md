@@ -4,9 +4,9 @@
 </a>
 </div>
 
-| **Build + Test Status**                                                                                        |**Documentation**                                                                    | **License**                           | **Paper**                       |
-|:--------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|:-------------------------------------:|:-------------------------------:|
-| Linux: [![Build Status][travis-img]][travis-url] &nbsp; Windows: [![Build Status][appveyor-img]][appveyor-url] | [![Stable][docs-sta-img]][docs-sta-url] &nbsp; [![Dev][docs-dev-img]][docs-dev-url] | [![License][license-img]](LICENSE.md) | [![status][joss-img]][joss-url] |
+| **Build + Test Status**                                                                                 |**Documentation**                                                             | **Code Coverage**                                                                   | **License**                           | **Paper**                       |
+|:-------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|:-------------------------------------:|:-------------------------------:|
+| Linux: [![Build Status][travis-img]][travis-url] Windows: [![Build Status][appveyor-img]][appveyor-url] | [![Stable][docs-sta-img]][docs-sta-url] [![Dev][docs-dev-img]][docs-dev-url] | [![codecov][codecov-img]][codecov-url] [![coveralls][coveralls-img]][coveralls-url] | [![License][license-img]](LICENSE.md) | [![status][joss-img]][joss-url] |
 
 # RHEOS - RHEology, Open-Source
 RHEOS, an abbreviation of Rheology Open Source, is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:
@@ -51,17 +51,23 @@ If you believe you have found any bugs or invalid behaviour in RHEOS, please fee
 
 + J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah (2017). *Julia: A Fresh Approach to Numerical Computing*, SIAM Review, doi: 10.1137/141000671.
 
+[travis-img]: https://travis-ci.org/JuliaRheology/RHEOS.jl.svg?branch=master
+[travis-url]: https://travis-ci.org/JuliaRheology/RHEOS.jl
+
+[appveyor-img]: https://ci.appveyor.com/api/projects/status/github/JuliaRheology/RHEOS.jl?branch=master&svg=true
+[appveyor-url]: https://ci.appveyor.com/project/JuliaRheology/RHEOS-jl
+
 [docs-sta-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-sta-url]: https://JuliaRheology.github.io/RHEOS.jl/stable
 
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-dev-url]: https://JuliaRheology.github.io/RHEOS.jl/dev
 
-[travis-img]: https://travis-ci.org/JuliaRheology/RHEOS.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/JuliaRheology/RHEOS.jl
+[codecov-img]: https://codecov.io/gh/JuliaRheology/RHEOS.jl/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/JuliaRheology/RHEOS.jl
 
-[appveyor-img]: https://ci.appveyor.com/api/projects/status/github/JuliaRheology/RHEOS.jl?branch=master&svg=true
-[appveyor-url]: https://ci.appveyor.com/project/JuliaRheology/RHEOS-jl
+[coveralls-img]: https://coveralls.io/repos/github/JuliaRheology/RHEOS.jl/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/JuliaRheology/RHEOS.jl?branch=master
 
 [license-img]: https://img.shields.io/badge/License-MIT-ff69b2.svg?style=flat
 
