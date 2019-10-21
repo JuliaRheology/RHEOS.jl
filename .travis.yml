@@ -1,45 +1,50 @@
 ## Documentation: http://docs.travis-ci.com/user/languages/julia/
 language: julia
 
-jobs:
-  - stage: "Tests"
-  julia:
-    - 1.2
-    - 1.3
-    - nightly
-  os:
-    - linux
-  matrix:
-    allow_failures:
-      - julia: 1.3
-      - julia: nightly
-  script:
-    - export JULIA_PROJECT=""
-    - julia --project -e 'using Pkg; Pkg.build(); Pkg.test(; coverage=true);'   
-  notifications:
-    email: false
-  after_success:
-    - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
-    - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
+julia:
+  - 1.2
+  - 1.3
+  - nightly
+os:
+  - linux
+matrix:
+  allow_failures:
+    - julia: 1.3
+    - julia: nightly
 
-  - stage: "Documentation Build"
-    julia: 1.2
-    os: linux
-    install:
-      - pip install --user --upgrade pip
-      - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-          wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-        else
-          wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-        fi
-      - bash miniconda.sh -b -p $HOME/miniconda
-      - export PATH="$HOME/miniconda/bin:$PATH"
-      - pip install jupyter
-      - pip install nbconvert
+jobs:
+  include:
+    - stage: "Tests"
+      julia: 1.2
+      julia: 1.3
+      julia: nightly
     script:
-      - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
-      - julia --project=docs/ docs/make.jl
-    after_success: skip
+      - export JULIA_PROJECT=""
+      - julia --project -e 'using Pkg; Pkg.build(); Pkg.test(; coverage=true);'   
+    notifications:
+      email: false
+    after_success:
+      - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
+      - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
+
+    - stage: "Documentation Build"
+      julia: 1.2
+      os: linux
+      install:
+        - pip install --user --upgrade pip
+        - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+            wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+          else
+            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+          fi
+        - bash miniconda.sh -b -p $HOME/miniconda
+        - export PATH="$HOME/miniconda/bin:$PATH"
+        - pip install jupyter
+        - pip install nbconvert
+      script:
+        - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
+        - julia --project=docs/ docs/make.jl
+      after_success: skip
 
 
 
