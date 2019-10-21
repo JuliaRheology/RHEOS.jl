@@ -6,7 +6,7 @@
 
 | **Build + Test Status**                                                                                 |**Documentation**                                                             | **Code Coverage**                                                                   | **License**                           | **Paper**                       |
 |:-------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|:-------------------------------------:|:-------------------------------:|
-| Linux: [![Build Status][travis-img]][travis-url] Windows: [![Build Status][appveyor-img]][appveyor-url] | [![Stable][docs-sta-img]][docs-sta-url] [![Dev][docs-dev-img]][docs-dev-url] | [![codecov][codecov-img]][codecov-url] [![coveralls][coveralls-img]][coveralls-url] | [![License][license-img]](LICENSE.md) | [![status][joss-img]][joss-url] |
+| Linux: [![Build Status][travis-img]][travis-url] &nbsp; Windows: [![Build Status][appveyor-img]][appveyor-url] | [![Stable][docs-sta-img]][docs-sta-url] [![Dev][docs-dev-img]][docs-dev-url] | [![codecov][codecov-img]][codecov-url] &nbsp; [![coveralls][coveralls-img]][coveralls-url] | [![License][license-img]](LICENSE.md) | [![status][joss-img]][joss-url] |
 
 # RHEOS - RHEology, Open-Source
 RHEOS, an abbreviation of Rheology Open Source, is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:
