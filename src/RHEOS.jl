@@ -66,6 +66,9 @@ export resample, indexweight, cutting, smooth, extract
 export modelfit, modelpredict, modelstepfit, modelsteppredict
 export dynamicmodelfit, dynamicmodelpredict
 
+#JPK_preproc.jl
+export JPKconvertRHEOS
+
 ######################################################
 # bundled dependencies from rheos-cambridge forked repos
 MittLeffLiteDir = joinpath(@__DIR__, "..", "deps", "MittLeffLite", "MittLeffLite.jl")
@@ -77,6 +80,8 @@ include("IO.jl")
 include("modeldatabase.jl")
 include("datagen.jl")
 include("processing.jl")
-#include("interface.jl")
+include("interface.jl")
+
+include("JPK_preproc.jl")
 ######################################################
 end
