@@ -82,6 +82,7 @@ include("datagen.jl")
 include("processing.jl")
 include("interface.jl")
 
-include("JPK_preproc.jl")
+include("AFM_JPKpreprocessing.jl")
+include("AFM_preprocessing.jl")
 ######################################################
 end
