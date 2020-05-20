@@ -2,7 +2,7 @@ function Fract_Zener_G_reduce_SLS()
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fraczen = Fract_Zener.Ga(t, [2.0, 1.0, 1.0, 0.0, 0.5, 0.0])
+    fraczen = Ga(Fract_Zener)(t, [2.0, 1.0, 1.0, 0.0, 0.5, 0.0])
     stanSLS = SLS_Zener.Ga(t, [2.0, 1.0, 0.5])
 
     all(i -> isapprox(fraczen[i], stanSLS[i]), eachindex(t))
@@ -13,7 +13,7 @@ function FractSLS_Zener_G_reduce_SLS()
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fracSLS = FractSLS_Zener.Ga(t, [2.0, 1.0, 1.0, 0.5])
+    fracSLS = Ga(FractSLS_Zener)(t, [2.0, 1.0, 1.0, 0.5])
     stanSLS = SLS_Zener.Ga(t, [2.0, 1.0, 0.5])
 
     all(i -> isapprox(fracSLS[i], stanSLS[i]), eachindex(t))
@@ -24,7 +24,7 @@ function FractSolid_G_reduce_SLS()
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fracSpec = FractSolid.Ga(t, [2.0, 1.0, 0.0, 0.5])
+    fracSpec = Ga(FractSolid)(t, [2.0, 1.0, 0.0, 0.5])
     stanSLS = SLS_Zener.Ga(t, [2.0, 1.0, 0.5])
 
     all(i -> isapprox(fracSpec[i], stanSLS[i]), eachindex(t))
@@ -138,7 +138,7 @@ function Fract_Zener_G_reduce_Jeffreys()
     # NaN at 0.0 due to Gamma function so start at dt
     t = collect(dt:dt:10.0)
 
-    fraczen = Fract_Zener.Ga(t, [2.0, 1.0, 1.0, 0.0, 0.5, 1.0])
+    fraczen = Ga(Fract_Zener)(t, [2.0, 1.0, 1.0, 0.0, 0.5, 1.0])
     stanJef = Jeffreys_Zener.Ga(t, [2.0, 1.0, 0.5])
 
     all(i -> isapprox(fraczen[i], stanJef[i]), eachindex(t))
@@ -150,7 +150,7 @@ function FractJeffreys_Zener_G_reduce_Jeffreys()
     # NaN at 0.0 due to Gamma function so start at dt
     t = collect(dt:dt:10.0)
 
-    fracJef = FractJeffreys_Zener.Ga(t, [2.0, 1.0, 0.0, 0.5])
+    fracJef = Ga(FractJeffreys_Zener)(t, [2.0, 1.0, 0.0, 0.5])
     stanJef = Jeffreys_Zener.Ga(t, [2.0, 1.0, 0.5])
 
     all(i -> isapprox(fracJef[i], stanJef[i]), eachindex(t))

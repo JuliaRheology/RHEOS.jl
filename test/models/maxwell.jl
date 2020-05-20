@@ -2,7 +2,7 @@ function Fract_Maxwell_G_reduce()
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fm_model = Fract_Maxwell.Ga(t, [1.0, 1.0, 1.0, 0.0])
+    fm_model = Ga(Fract_Maxwell)(t, [1.0, 1.0, 1.0, 0.0])
     maxwell = Maxwell.Ga(t, [1.0, 1.0])
 
     all(i -> isapprox(fm_model[i], maxwell[i]), eachindex(t))
@@ -13,7 +13,7 @@ function FractS_Maxwell_G_reduce()
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fms_model = FractS_Maxwell.Ga(t, [1.0, 1.0, 1.0])
+    fms_model = Ga(FractS_Maxwell)(t, [1.0, 1.0, 1.0])
     maxwell = Maxwell.Ga(t, [1.0, 1.0])
 
     all(i -> isapprox(fms_model[i], maxwell[i]), eachindex(t))
@@ -24,7 +24,7 @@ function FractD_Maxwell_G_reduce()
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fmd_model = FractD_Maxwell.Ga(t, [1.0, 1.0, 0.0])
+    fmd_model = Ga(FractD_Maxwell)(t, [1.0, 1.0, 0.0])
     maxwell = Maxwell.Ga(t, [1.0, 1.0])
 
     all(i -> isapprox(fmd_model[i], maxwell[i]), eachindex(t))

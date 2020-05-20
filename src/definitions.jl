@@ -425,6 +425,9 @@ end
 rheoconv(t::Real) = RheoFloat(t)
 rheoconv(t::Array{T,1}) where T<:Real = convert(Vector{RheoFloat},t)
 
+
+
+
 invLaplace(f::Function, t::Array{RheoFloat}) = InverseLaplace.talbotarr(f, t)
 invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
 
@@ -623,3 +626,33 @@ end
 function Base.show(io::IO, m::RheoModel)
     print(io,m.info)
 end
+
+
+
+
+
+
+
+
+function Ga(m::RheoModelClass)
+	(ta,p) -> [m.G(t,p) for t in ta]
+end
+
+
+function Ga(m::RheoModel)
+	ta -> [m.G(t) for t in ta]
+end
+
+
+
+
+function Ja(m::RheoModelClass)
+	(ta,p) -> [m.J(t,p) for t in ta]
+end
+
+
+function Ja(m::RheoModel)
+	ta -> [m.J(t) for t in ta]
+end
+
+
