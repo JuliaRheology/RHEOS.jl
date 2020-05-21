@@ -14,7 +14,7 @@ function FractSLS_PT_G_reduce_SLS()
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fracSLS = FractSLS_PT.Ga(t, [2.0, 1.0, 1.0, 0.5])
+    fracSLS = Ga(FractSLS_PT)(t, [2.0, 1.0, 1.0, 0.5])
     stanSLS = SLS_PT.Ga(t, [2.0, 1.0, 0.5])
 
     all(i -> isapprox(fracSLS[i], stanSLS[i]), eachindex(t))
@@ -25,7 +25,7 @@ function Fract_PT_J_reduce_SLS(tol)
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fracpt = Fract_PT.Ja(t, [2.0, 0.999, 1.0, 0.0, 0.5, 0.0])
+    fracpt = Ja(Fract_PT)(t, [2.0, 0.999, 1.0, 0.0, 0.5, 0.0])
     stanSLS = SLS_PT.Ja(t, [2.0, 1.0, 0.5])
 
     all(i -> isapprox(fracpt[i], stanSLS[i], atol=tol), eachindex(t))
@@ -36,7 +36,7 @@ function FractSLS_PT_J_reduce_SLS(tol)
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fracSLS = FractSLS_PT.Ja(t, [2.0, 0.999, 1.0, 0.5])
+    fracSLS = Ja(FractSLS_PT)(t, [2.0, 0.999, 1.0, 0.5])
     stanSLS = SLS_PT.Ja(t, [2.0, 1.0, 0.5])
 
     all(i -> isapprox(fracSLS[i], stanSLS[i], atol=tol), eachindex(t))
@@ -103,7 +103,7 @@ function FractJeffreys_PT_G_reduce_Jeffreys()
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fracJef = FractJeffreys_PT.Ga(t, [2.0, 1.0, 0.0, 0.5])
+    fracJef = Ga(FractJeffreys_PT)(t, [2.0, 1.0, 0.0, 0.5])
     stanJef = Jeffreys_PT.Ga(t, [2.0, 1.0, 0.5])
 
     all(i -> isapprox(fracJef[i], stanJef[i]), eachindex(t))
@@ -114,7 +114,7 @@ function Fract_PT_J_reduce_Jeffreys(tol)
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fracpt = Fract_PT.Ja(t, [2.0, 0.999, 1.0, 0.0, 0.5, 1.0])
+    fracpt = Ja(Fract_PT)(t, [2.0, 0.999, 1.0, 0.0, 0.5, 1.0])
     stanJef = Jeffreys_PT.Ja(t, [2.0, 1.0, 0.5])
 
     all(i -> isapprox(fracpt[i], stanJef[i], atol=tol), eachindex(t))
@@ -125,7 +125,7 @@ function FractJeffreys_PT_J_reduce_Jeffreys(tol)
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fracJef = FractJeffreys_PT.Ja(t, [2.0, 1.0, 0.001, 0.5])
+    fracJef = Ja(FractJeffreys_PT)(t, [2.0, 1.0, 0.001, 0.5])
     stanJef = Jeffreys_PT.Ja(t, [2.0, 1.0, 0.5])
 
     all(i -> isapprox(fracJef[i], stanJef[i], atol=tol), eachindex(t))

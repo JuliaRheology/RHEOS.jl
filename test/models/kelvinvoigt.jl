@@ -37,7 +37,7 @@ function Fract_KelvinVoigt_J_reduce(tol)
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fm_model = Fract_KelvinVoigt.Ja(t, [1.0, 0.99999, 1.0, 0.00001])
+    fm_model = Ja(Fract_KelvinVoigt)(t, [1.0, 0.99999, 1.0, 0.00001])
     kelvinvoigt = KelvinVoigt.Ja(t, [1.0, 1.0])
 
     all(i -> isapprox(fm_model[i], kelvinvoigt[i], atol=tol), eachindex(t))
@@ -48,7 +48,7 @@ function FractS_KelvinVoigt_J_reduce(tol)
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fms_model = FractS_KelvinVoigt.Ja(t, [1.0, 0.99999, 1.0])
+    fms_model = Ja(FractS_KelvinVoigt)(t, [1.0, 0.99999, 1.0])
     kelvinvoigt = KelvinVoigt.Ja(t, [1.0, 1.0])
 
     all(i -> isapprox(fms_model[i], kelvinvoigt[i], atol=tol), eachindex(t))
@@ -59,7 +59,7 @@ function FractD_KelvinVoigt_J_reduce(tol)
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fmd_model = FractD_KelvinVoigt.Ja(t, [1.0, 1.0, 0.00001])
+    fmd_model = Ja(FractD_KelvinVoigt)(t, [1.0, 1.0, 0.00001])
     kelvinvoigt = KelvinVoigt.Ja(t, [1.0, 1.0])
 
     all(i -> isapprox(fmd_model[i], kelvinvoigt[i], atol=tol), eachindex(t))

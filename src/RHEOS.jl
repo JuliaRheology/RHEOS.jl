@@ -39,8 +39,9 @@ export RheoModelClass, RheoModel, model_parameters
 export LoadingType, strain_imposed, stress_imposed
 export TimeDataType, time_only, strain_only, stress_only, strain_and_stress
 export FreqDataType, invalid_freq_data, freq_only, with_modulus
-export rheoconv,invLaplace
+export rheoconv, invLaplace
 export freeze_params
+export Ga, Ja
 
 # IO.jl
 export importcsv, exportcsv#, savedata, loaddata, savemodel, loadmodel

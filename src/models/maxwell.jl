@@ -9,6 +9,7 @@ Fract_Maxwell = RheoModelClass(
           G = quote
                  cᵦ*t^(-β)*mittleff(a - β, 1 - β, -cᵦ*t^(a - β)/cₐ)
               end,
+          Ga_safe = false,
           # Creep modulus
           J = quote
                 t^(a)/(cₐ*gamma(1 + a)) + t^(β)/(cᵦ*gamma(1 + β))
@@ -49,6 +50,7 @@ FractS_Maxwell = RheoModelClass(
                 # special case when α==0.0, 2 springs in series
                 a==0.0 ? 1.0/(1.0/cₐ + 1.0/k) : k*mittleff(a, -k*t^a/cₐ) # normal case otherwise
             end,
+        Ga_safe = false,
         # Creep modulus
         J = quote
               t^(a)/(cₐ*gamma(1 + a)) + 1/k
@@ -87,6 +89,7 @@ FractD_Maxwell = RheoModelClass(
           G = quote
                 cᵦ*t^(-β)*mittleff(1 - β, 1 - β, -cᵦ*t^(1 - β)/η)
               end,
+          Ga_safe = false,
           # Creep modulus
           J = quote
                 t/η + t^β/(cᵦ*gamma(1 + β))
