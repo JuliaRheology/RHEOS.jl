@@ -9,6 +9,7 @@ Fract_Zener = RheoModelClass(
           G = quote
                  cᵦ*t^(-β)*mittleff(a - β, 1 - β, -cᵦ*t^(a - β)/cₐ) + cᵧ*t^(-γ)/gamma(1 - γ)
               end,
+          Ga_safe = false,
           # Creep modulus
           J = quote
                   Ĵ(s) = (1/s)*(cₐ*s^a + cᵦ*s^β)/(cₐ*s^a*cᵦ*s^β + cᵧ*s^γ*(cₐ*s^a + cᵦ*s^β))
@@ -56,6 +57,7 @@ FractSLS_Zener = RheoModelClass(
         G = quote
                 kᵦ*mittleff(a, -(kᵦ/cₐ)*t^a) + kᵧ
             end,
+        Ga_safe = false,
         # Creep modulus
         J = quote
                 Ĵ(s) = (1/s)*(cₐ*s^a + kᵦ)/(cₐ*s^a*kᵦ + kᵧ*(cₐ*s^a + kᵦ))
@@ -144,7 +146,8 @@ FractJeffreys_Zener = RheoModelClass(
                             diracterm = t!=0.0 ? 0.0 : Inf
                             cᵦ*t^(-β)*mittleff(1-β, 1-β, -cᵦ*t^(1-β)/ηₐ) + ηᵧ*diracterm
                         end,
-                    # Creep modulus
+                    Ga_safe = false,
+                   # Creep modulus
                     J = quote
                             Ĵ(s) = (1/s)*(ηₐ*s + cᵦ*s^β)/(ηₐ*s*cᵦ*s^β + ηᵧ*s*(ηₐ*s + cᵦ*s^β))
                             InverseLaplace.talbot(s -> Ĵ(s), t)
@@ -235,6 +238,7 @@ FractSolid = RheoModelClass(
         G = quote
               k + cᵦ*t^(-β)*mittleff(1 - β, 1 - β, -cᵦ*(t^(1 - β))/η)
             end,
+        Ga_safe = false,
         # Creep modulus
         J = quote
               a = η/cᵦ

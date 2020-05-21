@@ -13,6 +13,7 @@ Fract_KelvinVoigt =  RheoModelClass(
         J = quote
               (t^(a)/cₐ)*mittleff(a - β, 1 + a, -cᵦ*t^(a - β)/cₐ)
             end,
+        Ja_safe = false,
         # Storage modulus
         Gp = quote
                 cₐ*ω^a*cos(a*π/2) + cᵦ*ω^β*cos(β*π/2)
@@ -52,6 +53,7 @@ FractS_KelvinVoigt =  RheoModelClass(
         J = quote
               (t^(a)/cₐ)*mittleff(a, 1 + a, -k*t^a/cₐ)
             end,
+        Ja_safe = false,
         # Storage modulus
         Gp = quote
                 if a!=1.0
@@ -93,6 +95,7 @@ FractD_KelvinVoigt =  RheoModelClass(
         J = quote
               (t/η)*mittleff(1 - β, 1 + 1, -cᵦ*t^(1.0 - β)/η)
             end,
+        Ja_safe = false,
         # Storage modulus
         Gp = quote
                 # cosine floating point error work-around

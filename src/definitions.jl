@@ -549,7 +549,7 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
     Gpp = expr_replace(m.expressions.Gpp, nt)
     constraint = expr_replace(m.expressions.constraint, nt)
 
-    expressions=NamedTuple{(:G, :J, :Gp, :Gpp, :constraint, :Ga_safe, :Ja_safe)}( ( G, J, Gp, Gpp, constraint, Ga_safe, Ja_safe ) )
+    expressions=NamedTuple{(:G, :J, :Gp, :Gpp, :constraint, :Ga_safe, :Ja_safe)}( ( G, J, Gp, Gpp, constraint, m.expressions.Ga_safe, m.expressions.Ja_safe ) )
 
     @eval return( RheoModelClass($name, $p,
         ((t,params) -> begin $unpack_expr; $G; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
@@ -618,7 +618,7 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple)
     Gp = expr_replace(m.expressions.Gp, nt)
     Gpp = expr_replace(m.expressions.Gpp, nt)
 
-    expressions=NamedTuple{(:G, :J, :Gp, :Gpp, :constraint, :Ga_safe, :Ja_safe)}( ( G, J, Gp, Gpp, constraint, Ga_safe, Ja_safe ) )
+    expressions=NamedTuple{(:G, :J, :Gp, :Gpp, :Ga_safe, :Ja_safe)}( ( G, J, Gp, Gpp, m.expressions.Ga_safe, m.expressions.Ja_safe ) )
 
     @eval return( RheoModel(
     (t -> begin $G; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
