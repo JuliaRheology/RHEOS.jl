@@ -376,6 +376,12 @@ function rheologrun(arli::RheoLog, d::Union{RheoTimeData,RheoFreqData,Nothing} =
   return(d)
 end
 
+
+
+
+
+
+
 #=
 ---------------------------
 Model related functionality
@@ -438,11 +444,15 @@ function RheoModelClass(;name::String="Custom model",
                          Gp::Expr = quote NaN end,
                          Gpp::Expr = quote NaN end,
                          constraint::Expr = quote true end,
-                         info=name)
+                         info=name,
+                         # flags to avoid bugs related to the FunctionWrappers and MittLeff
+                         Ga_safe::Bool = true,
+                         Ja_safe::Bool = true
+                         )
 
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
     unpack_expr = Meta.parse(string(join(string.(p), ","), ",=params"))
-    expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint)
+    expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint, Ga_safe=Ga_safe, Ja_safe=Ja_safe)
 
     @eval return(RheoModelClass($name, $p,
         ((t,params) -> begin $unpack_expr; $G; end)                 |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
@@ -539,8 +549,7 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
     Gpp = expr_replace(m.expressions.Gpp, nt)
     constraint = expr_replace(m.expressions.constraint, nt)
 
-    expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}( ( G, J, Gp, Gpp ) )
-
+    expressions=NamedTuple{(:G, :J, :Gp, :Gpp, :constraint, :Ga_safe, :Ja_safe)}( ( G, J, Gp, Gpp, constraint, Ga_safe, Ja_safe ) )
 
     @eval return( RheoModelClass($name, $p,
         ((t,params) -> begin $unpack_expr; $G; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
@@ -609,7 +618,7 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple)
     Gp = expr_replace(m.expressions.Gp, nt)
     Gpp = expr_replace(m.expressions.Gpp, nt)
 
-    expressions=NamedTuple{(:G,:J,:Gp,:Gpp)}( ( G, J, Gp, Gpp ) )
+    expressions=NamedTuple{(:G, :J, :Gp, :Gpp, :constraint, :Ga_safe, :Ja_safe)}( ( G, J, Gp, Gpp, constraint, Ga_safe, Ja_safe ) )
 
     @eval return( RheoModel(
     (t -> begin $G; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
@@ -632,27 +641,37 @@ end
 
 
 
-
-
 function Ga(m::RheoModelClass)
-	(ta,p) -> [m.G(t,p) for t in ta]
+    if m.expressions.Ga_safe
+        m.Ga
+    else
+        (ta,p) -> [m.G(t,p) for t in ta]
+    end
 end
+
+function Ja(m::RheoModelClass)
+    if m.expressions.Ja_safe
+        m.Ja
+    else
+        (ta,p) -> [m.J(t,p) for t in ta]
+    end
+end
+
 
 
 function Ga(m::RheoModel)
-	ta -> [m.G(t) for t in ta]
+    if m.expressions.Ga_safe
+        m.Ga
+    else
+        ta -> [m.G(t) for t in ta]
+    end
 end
-
-
-
-
-function Ja(m::RheoModelClass)
-	(ta,p) -> [m.J(t,p) for t in ta]
-end
-
 
 function Ja(m::RheoModel)
-	ta -> [m.J(t) for t in ta]
+    if m.expressions.Ja_safe
+        m.Ja
+    else
+        ta -> [m.J(t) for t in ta]
+    end
 end
-
 
