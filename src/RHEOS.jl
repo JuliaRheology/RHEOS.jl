@@ -10,7 +10,7 @@ using JLD2
 using DataStructures
 using FunctionWrappers: FunctionWrapper
 import DSP.conv
-import SpecialFunctions.gamma
+
 # Base and stdlib imports
 import Base: +, -, *,|
 import DelimitedFiles: readdlm, writedlm
@@ -66,9 +66,6 @@ export resample, indexweight, cutting, smooth, extract
 export modelfit, modelpredict, modelstepfit, modelsteppredict
 export dynamicmodelfit, dynamicmodelpredict
 
-#JPK_preproc.jl
-export JPKconvertRHEOS
-
 ######################################################
 # bundled dependencies from rheos-cambridge forked repos
 MittLeffLiteDir = joinpath(@__DIR__, "..", "deps", "MittLeffLite", "MittLeffLite.jl")
@@ -82,7 +79,5 @@ include("datagen.jl")
 include("processing.jl")
 include("interface.jl")
 
-include("AFM_JPKpreprocessing.jl")
-include("AFM_preprocessing.jl")
 ######################################################
 end
