@@ -54,9 +54,6 @@ If you believe you have found any bugs or invalid behaviour in RHEOS, please fee
 [travis-img]: https://travis-ci.org/JuliaRheology/RHEOS.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/JuliaRheology/RHEOS.jl
 
-[appveyor-img]: https://ci.appveyor.com/api/projects/status/github/JuliaRheology/RHEOS.jl?branch=master&svg=true
-[appveyor-url]: https://ci.appveyor.com/project/JuliaRheology/RHEOS-jl
-
 [docs-sta-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-sta-url]: https://JuliaRheology.github.io/RHEOS.jl/stable
 
