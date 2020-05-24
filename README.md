@@ -4,9 +4,9 @@
 </a>
 </div>
 
-| **Build + Test Status**                                                                 |**Documentation**                                                             | **Test Coverage**                                                                   | **Paper**                       |
-|:---------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|:-------------------------------:|
-| [![Build Status][travis-img]][travis-url] [![Build Status][appveyor-img]][appveyor-url] | [![Stable][docs-sta-img]][docs-sta-url] [![Dev][docs-dev-img]][docs-dev-url] | [![codecov][codecov-img]][codecov-url] [![coveralls][coveralls-img]][coveralls-url] | [![status][joss-img]][joss-url] |
+|**Test Status**|**Documentation**|**Test Coverage**|**Paper**|
+|:-------------:|:---------------:|:---------------:|:-------:|
+| [![Build Status][travis-img]][travis-url] | [![Stable][docs-sta-img]][docs-sta-url] [![Dev][docs-dev-img]][docs-dev-url] | [![codecov][codecov-img]][codecov-url] [![coveralls][coveralls-img]][coveralls-url] | [![status][joss-img]][joss-url] |
 
 # RHEOS - RHEology, Open-Source
 RHEOS, an abbreviation of Rheology Open Source, is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:
@@ -22,7 +22,7 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 - Artificial loading conditions can be generated within RHEOS to better understand a model's response
 
 ## Installation
-1. Install Julia, version 1.2
+1. Install the latest version of Julia, version 1.4.1
 2. From Julia REPL, enter pkg mode by pressing ```]```
 3. (Optional) Enable desired Project.toml environment
 4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
@@ -51,11 +51,8 @@ If you believe you have found any bugs or invalid behaviour in RHEOS, please fee
 
 + J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah (2017). *Julia: A Fresh Approach to Numerical Computing*, SIAM Review, doi: 10.1137/141000671.
 
-[travis-img]: https://travis-ci.org/JuliaRheology/RHEOS.jl.svg?branch=master
+[travis-img]: https://travis-ci.org/JuliaRheology/RHEOS.jl.svg
 [travis-url]: https://travis-ci.org/JuliaRheology/RHEOS.jl
-
-[appveyor-img]: https://ci.appveyor.com/api/projects/status/github/JuliaRheology/RHEOS.jl?branch=master&svg=true
-[appveyor-url]: https://ci.appveyor.com/project/JuliaRheology/RHEOS-jl
 
 [docs-sta-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-sta-url]: https://JuliaRheology.github.io/RHEOS.jl/stable

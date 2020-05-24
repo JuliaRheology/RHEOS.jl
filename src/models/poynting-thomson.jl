@@ -14,7 +14,8 @@ Fract_PT = RheoModelClass(
           J = quote
                   t^a/cₐ* mittleff(a - β, 1 + a, -cᵦ*t^(a-β)/cₐ) + t^γ / (cᵧ * gamma(1 + γ))
               end,
-          # Storage modulus
+          Ja_safe = false,
+         # Storage modulus
           Gp = quote
                   denominator = (cₐ * ω^a)^2 + (cᵦ * ω^β)^2 + (cᵧ * ω^γ)^2 + 2* (cₐ * ω^a) * (cᵦ * ω^β) * cos((a-β)*π/2) + 2* (cₐ * ω^a) * (cᵧ * ω^γ) * cos((a-γ)*π/2) + 2* (cᵦ * ω^β) * (cᵧ * ω^γ)* cos((β-γ)*π/2)
                   numerator = (cᵧ * ω^γ) * cos(γ*π/2) * ((cₐ * ω^a)^2 + (cᵦ * ω^β)^2) + (cᵧ * ω^γ)^2 * ((cₐ * ω^a)*cos(a*π/2)+(cᵦ * ω^β)*cos(β*π/2)) + (cₐ * ω^a) * (cᵦ * ω^β) * (cᵧ * ω^γ) * (cos((a-β-γ)*π/2)+cos((β-a-γ)*π/2))
@@ -58,10 +59,12 @@ FractSLS_PT = RheoModelClass(
                 Zkᵧ = kᵦ * kᵧ / (kᵦ + kᵧ)
                 Zkᵦ*mittleff(a, -(Zkᵦ/Zcₐ)*t^a) + Zkᵧ
               end,
+          Ga_safe = false,
           # Creep modulus
           J = quote
                   1/kᵧ + t^(a)/cₐ * mittleff(a, 1 + a, -kᵦ*t^(a)/cₐ)
               end,
+          Ja_safe = false,
           # Storage modulus
           Gp = quote
                   Zkᵦ = (kᵧ)^2/(kᵦ + kᵧ)
@@ -160,10 +163,12 @@ FractJeffreys_PT = RheoModelClass(
                       diracterm = t!=0.0 ? 0.0 : Inf
                       Zcᵦ*t^(-β)*mittleff(1-β, 1-β, -Zcᵦ*t^(1-β)/Zηₐ) + Zηᵧ*diracterm
                   end,
+              Ga_safe = false,
               # Creep modulus
               J = quote
                      t/ηₐ * mittleff(1-β, 2, -cᵦ*t^(1-β)/ηₐ) + t/ηᵧ
                   end,
+              Ja_safe = false,
               # Storage modulus
               Gp = quote
                       Zηₐ = (ηᵧ)^2/(ηₐ + ηᵧ)
