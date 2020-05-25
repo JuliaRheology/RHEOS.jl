@@ -492,13 +492,19 @@ function expr_replace(ex, nt)
     return e
 end
 
-function model_parameters(nt::NamedTuple, params::Vector{Symbol}, err_string::String)
-    # check that every parameter in m exists in the named tuple nt
-    @assert all(i->i in keys(nt),params) "Missing parameter(s) in " * err_string
-    # check that no extra parameters have been provided
-    @assert length(params) == length(nt) "Mismatch number of model parameters and parameters provided in " * err_string
 
-    p = map(i->RheoFloat(nt[i]), params)
+#
+#  Function used to check and convert any named tupple of parameters into an array ordered as expected by the moduli functions of the RheoModelClass
+#
+
+
+function check_and_reorder_parameters(nt::NamedTuple, params_order::Vector{Symbol}; err_string::String="calling function")
+    # check that every parameter in m exists in the named tuple nt
+    @assert all(i->i in keys(nt),params_order) "Missing parameter(s) in " * err_string
+    # check that no extra parameters have been provided
+    @assert length(params_order) == length(nt) "Mismatch number of model parameters and parameters provided in " * err_string
+
+    p = map(i->RheoFloat(nt[i]), params_order)
 end
 
 """
@@ -605,8 +611,9 @@ end
 function RheoModel(m::RheoModelClass, nt0::NamedTuple)
 
     # check all parameters are provided and create a well ordered named tuple
-    p = model_parameters(nt0, m.params,"model definition")
+    p = check_and_reorder_parameters(nt0, m.params, err_string = "model definition")
     nt=NamedTuple{Tuple(m.params)}(p)
+    
     # string printed
     info = string("\nModel: $(m.name)\n\nParameter values: $nt \n",m.info)
 
@@ -639,7 +646,7 @@ end
 
 
 #
-# These are internal function to access the array versions of the relaxation and creep moduli
+# These are internal functions to access the array versions of the relaxation and creep moduli
 # They are used in processing.jl as well as in the user level moduli functions
 # 
 
@@ -679,4 +686,94 @@ function _Ja(m::RheoModel)
         ta -> [m._J(t) for t in ta]
     end
 end
+
+
+
+
+
+
+
+
+#
+# These are functions enabling users to access the different moduli functions for each model
+#
+
+"""
+    relaxmod(m::RheoModel, time (single value or array))
+    relaxmod(m::RheoModelClass, time (single value or array), parameters (array, named tupple or keyword parameters))
+    
+    This function provides access to the relaxation modulus of a given model m. It can be used with a broad range of inputs.
+    
+    examples:
+    
+    relaxmod(Maxwell, 1, k=1., η=1)
+  
+    relaxmod(Maxwell, [1,2,3], [1,1])
+    
+    m = RheoModel(Maxwell, k=1., η=1)
+    g = relaxmod(m)
+    g([0,1,2])
+"""
+
+
+# julia> relaxmod(Maxwell, 1, )
+# 0.36787944117144233
+# 
+# julia> relaxmod(Maxwell, 1, (k=1.,η=1))
+# 0.36787944117144233
+# 
+# julia> relaxmod(Maxwell, 1)
+# 0.36787944117144233
+ 
+# julia> relaxmod(Maxwell, [1,2,3], k=1.,η=1)
+#
+# 
+# 
+# julia> relaxmod(Maxwell,k=1.,η=1)(1.)
+# 0.36787944117144233
+# 
+# 
+# julia> relaxmod(Maxwell,[1,1])(1)
+# 0.36787944117144233
+ 
+
+
+function relaxmod(m::RheoModel, t::Number)
+    m._G(t)
+end
+
+function relaxmod(m::RheoModel, ta::Vector{T}) where T <: Number
+    _Ga(m)(ta)
+end
+
+relaxmod(m) = x -> relaxmod(m,x)
+
+
+
+
+function relaxmod(m::RheoModelClass, t::Number, params::Vector{T}) where T <: Number
+        m._G(t, params)
+end
+
+
+function relaxmod(m::RheoModelClass, t::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
+        _Ga(m)(t, params)
+end
+
+
+function relaxmod(m::RheoModelClass, x, params::NamedTuple)
+    # check all parameters are provided and create a well ordered named tuple
+    p = check_and_reorder_parameters(params, m.params, err_string = "relaxmod")
+    relaxmod(m, x, p)
+end
+
+
+function relaxmod(m::RheoModelClass, x; kwargs...)
+    relaxmod(m, x, kwargs.data)
+end
+
+relaxmod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> relaxmod(m, x, params)
+relaxmod(m::RheoModelClass, params::NamedTuple) =  x -> relaxmod(m, x, params)
+relaxmod(m::RheoModelClass; kwargs...) =  x -> relaxmod(m, x, kwargs.data)
+
 
