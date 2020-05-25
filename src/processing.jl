@@ -273,7 +273,7 @@ function fill_init_params(model::RheoModelClass, p0::Union{NamedTuple,Nothing})
         @warn "Unspecified initial guesses filled by default values: $p0a"
 
     else
-        p0a = model_parameters(p0, model.params, "initial guess")
+        p0a = check_and_reorder_parameters(p0, model.params,  err_string="initial guess")
     end
 
     @assert model.constraint(p0a)  "Initial guess not feasible"
@@ -292,7 +292,7 @@ function fill_lower_bounds(model::RheoModelClass, lo::Union{NamedTuple,Nothing})
         end
 
     else
-        loa = model_parameters(lo, model.params, "low bounds")
+        loa = check_and_reorder_parameters(lo, model.params,  err_string="low bounds")
     end
 
     return loa
@@ -309,7 +309,7 @@ function fill_upper_bounds(model::RheoModelClass, hi::Union{NamedTuple,Nothing})
         end
 
     else
-        hia = model_parameters(hi, model.params, "high bounds")
+        hia = check_and_reorder_parameters(hi, model.params, err_string="high bounds")
     end
 
     return hia
