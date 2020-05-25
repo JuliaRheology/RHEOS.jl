@@ -404,14 +404,14 @@ struct RheoModelClass
     name::String
     params::Vector{Symbol}
 
-    G::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
-    Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
-    J::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
-    Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
-    Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
-    Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
-    Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
-    Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
+    _G::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
+    _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
+    _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
+    _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
+    _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
+    _Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
+    _Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
+    _Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
 
     constraint::FunctionWrapper{Bool,Tuple{Vector{RheoFloat}}}
 
@@ -582,17 +582,16 @@ rather than calling the default constructor explicitly.
 """
 struct RheoModel
 
-    G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
-    Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
-    J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
-    Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
-    Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
-    Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
-    Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
-    Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
+    _G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
+    _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
+    _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    _Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
+    _Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    _Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
+    
     expressions::NamedTuple
-
-
     params::NamedTuple
     info::String    # do we need this?
     # log::OrderedDict{Any,Any}
@@ -639,39 +638,45 @@ end
 
 
 
+#
+# These are internal function to access the array versions of the relaxation and creep moduli
+# They are used in processing.jl as well as in the user level moduli functions
+# 
 
 
-function Ga(m::RheoModelClass)
+
+
+function _Ga(m::RheoModelClass)
     if m.expressions.Ga_safe
-        m.Ga
+        m._Ga
     else
-        (ta,p) -> [m.G(t,p) for t in ta]
+        (ta,p) -> [m._G(t,p) for t in ta]
     end
 end
 
-function Ja(m::RheoModelClass)
+function _Ja(m::RheoModelClass)
     if m.expressions.Ja_safe
-        m.Ja
+        m._Ja
     else
-        (ta,p) -> [m.J(t,p) for t in ta]
+        (ta,p) -> [m._J(t,p) for t in ta]
     end
 end
 
 
 
-function Ga(m::RheoModel)
+function _Ga(m::RheoModel)
     if m.expressions.Ga_safe
-        m.Ga
+        m._Ga
     else
-        ta -> [m.G(t) for t in ta]
+        ta -> [m._G(t) for t in ta]
     end
 end
 
-function Ja(m::RheoModel)
+function _Ja(m::RheoModel)
     if m.expressions.Ja_safe
-        m.Ja
+        m._Ja
     else
-        ta -> [m.J(t) for t in ta]
+        ta -> [m._J(t) for t in ta]
     end
 end
 

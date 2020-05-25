@@ -371,14 +371,14 @@ function modelfit(data::RheoTimeData,
     if modloading == stress_imposed
         dcontrolled = deriv(data.σ, data.t)
         measured = data.ϵ
-        modulus = Ja(model)
-        modsing = (t->model.J(t,p0a))
+        modulus = _Ja(model)
+        modsing = (t->model._J(t,p0a))
         modused = "J"
     elseif modloading == strain_imposed
         dcontrolled = deriv(data.ϵ, data.t)
         measured = data.σ
-        modulus = Ga(model)
-        modsing = (t->model.G(t,p0a))
+        modulus = _Ga(model)
+        modsing = (t->model._G(t,p0a))
         modused ="G"
     end
 
@@ -455,12 +455,12 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
 
     if (check == strain_only)
-        modulus = Ga(model)
-        modsing = model.G
+        modulus = _Ga(model)
+        modsing = model._G
         dcontrolled = deriv(data.ϵ, data.t)
     elseif (check == stress_only)
-        modulus = Ja(model)
-        modsing = model.J
+        modulus = _Ja(model)
+        modsing = model._J
         dcontrolled = deriv(data.σ, data.t)
     end
 
@@ -554,31 +554,31 @@ function modelstepfit(data::RheoTimeData,
             # step amplitude is set to the middle value of the 'loading' data array
             controlled = data.σ[round(Integer, length(data.σ)/2)]
             measured = data.ϵ
-            modulus = Ja(model)
-            modsing = (t->model.J(t, p0a))
+            modulus = _Ja(model)
+            modsing = (t->model._J(t, p0a))
             modused = "J"
         elseif (modloading == strain_imposed)
             # step amplitude is set to the middle value of the 'loading' data array
             controlled = data.ϵ[round(Integer, length(data.σ)/2)]
             measured = data.σ
-            modulus = Ga(model)
-            modsing = (t->model.G(t, p0a))
+            modulus = _Ga(model)
+            modsing = (t->model._G(t, p0a))
             modused = "G"
         end
     # if step provided then can use that value
     elseif !isnothing(step)
         if (modloading == stress_imposed)
             @assert (check == strain_only)||(check == strain_and_stress) "Strain required"
-            modulus = Ja(model)
-            modsing = (t->model.J(t, p0a))
+            modulus = _Ja(model)
+            modsing = (t->model._J(t, p0a))
             controlled = convert(RheoFloat, step);
             measured = data.ϵ
             modused = "J"
         elseif (modloading == strain_imposed)
             @assert (check == stress_only)||(check == strain_and_stress) "Stress required"
             measured = data.σ
-            modulus = Ga(model)
-            modsing = (t->model.G(t, p0a))
+            modulus = _Ga(model)
+            modsing = (t->model._G(t, p0a))
             controlled =convert(RheoFloat, step);
             modused = "G"
         end
@@ -634,12 +634,12 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
 
     if (check == strain_only)
-        modulus = Ga(model)
-        modsing = model.G
+        modulus = _Ga(model)
+        modsing = model._G
         controlled = data.ϵ[round(Integer, length(data.ϵ)/2)]
     elseif (check == stress_only)
-        modulus = Ja(model)
-        modsing = model.J
+        modulus = _Ja(model)
+        modsing = model._J
         controlled = data.σ[round(Integer, length(data.σ)/2)]
     end
 
@@ -808,23 +808,23 @@ function dynamicmodelfit(data::RheoFreqData,
 
     # set objective/cost function
     if weights=="none"
-        min_objective!(opt, (params, grad) -> obj_dynamic(params, grad, data.ω, data.Gp, data.Gpp, model.Gpa, model.Gppa; _insight = verbose))
+        min_objective!(opt, (params, grad) -> obj_dynamic(params, grad, data.ω, data.Gp, data.Gpp, model._Gpa, model._Gppa; _insight = verbose))
 
     elseif weights=="mean"
         meanGp = sum(data.Gp)/length(data.Gp)
         meanGpp = sum(data.Gp)/length(data.Gp)
-        min_objective!(opt, (params, grad) -> obj_dynamic_mean(params, grad, data.ω, data.Gp, data.Gpp, model.Gpa, model.Gppa, meanGp, meanGpp; _insight = verbose))
+        min_objective!(opt, (params, grad) -> obj_dynamic_mean(params, grad, data.ω, data.Gp, data.Gpp, model._Gpa, model._Gppa, meanGp, meanGpp; _insight = verbose))
 
     elseif weights=="log"
         @warn "Note that a logarithmic rescaling will fail if Gp or Gpp data contain 0.0 values as it will result in -Inf cost. Trying a different rescaling scheme, or not fitting around ω≈0.0 may alleviate the issue."
-        min_objective!(opt, (params, grad) -> obj_dynamic_log(params, grad, data.ω, data.Gp, data.Gpp, model.Gpa, model.Gppa; _insight = verbose))
+        min_objective!(opt, (params, grad) -> obj_dynamic_log(params, grad, data.ω, data.Gp, data.Gpp, model._Gpa, model._Gppa; _insight = verbose))
 
     elseif weights=="local"
         @warn "Note that a local rescaling will fail if Gp or Gpp data contain 0.0 values as it will result in division by 0.0. Trying a different rescaling scheme, or not fitting around ω≈0.0 may alleviate the issue."
-        min_objective!(opt, (params, grad) -> obj_dynamic_local(params, grad, data.ω, data.Gp, data.Gpp, model.Gpa, model.Gppa; _insight = verbose))
+        min_objective!(opt, (params, grad) -> obj_dynamic_local(params, grad, data.ω, data.Gp, data.Gpp, model._Gpa, model._Gppa; _insight = verbose))
 
     elseif typeof(weights)==Vector{T} && length(weights)==2
-        min_objective!(opt, (params, grad) -> obj_dynamic_manual(params, grad, data.ω, data.Gp, data.Gpp, model.Gpa, model.Gppa, weights; _insight = verbose))
+        min_objective!(opt, (params, grad) -> obj_dynamic_manual(params, grad, data.ω, data.Gp, data.Gpp, model._Gpa, model._Gppa, weights; _insight = verbose))
 
     end
 
@@ -856,8 +856,8 @@ frequencies and model given as arguments.
 """
 function dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
 
-    predGp = model.Gpa(data.ω)
-    predGpp = model.Gppa(data.ω)
+    predGp = model._Gpa(data.ω)
+    predGpp = model._Gppa(data.ω)
 
     log = data.log == nothing ? nothing : [ data.log;
             RheoLogItem( (type=:process, funct=:dynamicmodelpredict, params=(model::RheoModel,), keywords=() ),
