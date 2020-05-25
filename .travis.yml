@@ -3,16 +3,16 @@ language: julia
 
 os:
   - linux
-  - osx
-  - windows
+  # - osx
+  # - windows
 
 julia:
   - 1.4.1
-  - nightly
+  # - nightly
 
 allow_failures:
   - julia: 1.4.1
-  - julia: nightly
+  # - julia: nightly
 
 notifications:
   email: false
