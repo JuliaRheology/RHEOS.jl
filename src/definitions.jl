@@ -437,12 +437,16 @@ rheoconv(t::Array{T,1}) where T<:Real = convert(Vector{RheoFloat},t)
 invLaplace(f::Function, t::Array{RheoFloat}) = InverseLaplace.talbotarr(f, t)
 invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
 
-function RheoModelClass(;name::String="Custom model",
-                         p::Array{Symbol}=[],
-                         G::Expr = quote NaN end,
-                         J::Expr = quote NaN end,
-                         Gp::Expr = quote NaN end,
-                         Gpp::Expr = quote NaN end,
+
+# place holder for undefined moduli/compliance functions
+const nullexp = :(NaN)
+
+function RheoModelClass(;name::String,
+                         p::Array{Symbol},
+                         G::Expr = nullexp,
+                         J::Expr = nullexp,
+                         Gp::Expr = nullexp,
+                         Gpp::Expr = nullexp,
                          constraint::Expr = quote true end,
                          info=name,
                          # flags to avoid bugs related to the FunctionWrappers and MittLeff
@@ -491,6 +495,19 @@ function expr_replace(ex, nt)
     end
     return e
 end
+
+
+
+function modulusexists(modulus_single_input)
+   # 5.0 is not meaningful, just an input to check that the function does not return NaN
+    # at a non-zero value, which is the default function output for moduli that have
+    # not been defined.
+    return !isnan(modulus_single_input(5.0))
+end
+
+
+
+
 
 
 #
@@ -578,13 +595,6 @@ end
 
 
 
-
-function modulusexists(modulus_single_input)
-   # 5.0 is not meaningful, just an input to check that the function does not return NaN
-    # at a non-zero value, which is the default function output for moduli that have
-    # not been defined.
-    return !isnan(modulus_single_input(5.0))
-end
 
 """
     RheoModel(G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, expressions::NamedTuple)
@@ -706,31 +716,6 @@ end
 #
 # These are functions enabling users to access the different moduli functions for each model
 #
-
-
-
-
-# julia> relaxmod(Maxwell, 1, )
-# 0.36787944117144233
-#
-# julia> relaxmod(Maxwell, 1, (k=1.,η=1))
-# 0.36787944117144233
-#
-# julia> relaxmod(Maxwell, 1)
-# 0.36787944117144233
-
-# julia> relaxmod(Maxwell, [1,2,3], k=1.,η=1)
-#
-#
-#
-# julia> relaxmod(Maxwell,k=1.,η=1)(1.)
-# 0.36787944117144233
-#
-#
-# julia> relaxmod(Maxwell,[1,1])(1)
-# 0.36787944117144233
-
-
 
 
 
