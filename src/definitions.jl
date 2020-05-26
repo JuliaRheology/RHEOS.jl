@@ -1083,7 +1083,7 @@ function dynamicmod(m::RheoModel, ωa::Vector{T}) where T <: Number
     m._Gpa(ωa) + m._Gppa(ωa) * im
 end
 
-lossmod(m) = x -> lossmod(m,x)
+dynamicmod(m) = x -> dynamicmod(m,x)
 
 
 
