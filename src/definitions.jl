@@ -439,16 +439,30 @@ invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
 
 
 # place holder for undefined moduli/compliance functions
-const nullexp = :(NaN)
+const nanexp = quote NaN end
+
+# function RheoModelClass(;name::String="Custom model",
+#                          p::Array{Symbol}=[],
+#                          G::Expr = quote NaN end,
+#                          J::Expr = quote NaN end,
+#                          Gp::Expr = quote NaN end,
+#                          Gpp::Expr = quote NaN end,
+#                          constraint::Expr = quote true end,
+#                          info=name,
+#                          # flags to avoid bugs related to the FunctionWrappers and MittLeff
+#                          Ga_safe::Bool = true,
+#                          Ja_safe::Bool = true
+#                          )
+
 
 function RheoModelClass(;name::String,
                          p::Array{Symbol},
-                         G::Expr = nullexp,
-                         J::Expr = nullexp,
-                         Gp::Expr = nullexp,
-                         Gpp::Expr = nullexp,
+                         G::Expr = nanexp,
+                         J::Expr = nanexp,
+                         Gp::Expr = nanexp,
+                         Gpp::Expr = nanexp,
                          constraint::Expr = quote true end,
-                         info=name,
+                         info="" #name * ": model with parameters " * string(join(string.(p), ", "), "."),
                          # flags to avoid bugs related to the FunctionWrappers and MittLeff
                          Ga_safe::Bool = true,
                          Ja_safe::Bool = true
