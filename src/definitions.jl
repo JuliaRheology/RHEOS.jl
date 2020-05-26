@@ -448,7 +448,7 @@ function RheoModelClass(;name::String,
                          Gp::Expr = nanexp,
                          Gpp::Expr = nanexp,
                          constraint::Expr = quote true end,
-                         info="" #name * ": model with parameters " * string(join(string.(p), ", "), "."),
+                         info="", #name * ": model with parameters " * string(join(string.(p), ", "), "."),
                          # flags to avoid bugs related to the FunctionWrappers and MittLeff
                          Ga_safe::Bool = true,
                          Ja_safe::Bool = true
