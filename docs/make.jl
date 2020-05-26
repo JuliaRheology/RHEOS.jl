@@ -3,7 +3,8 @@ using Documenter, RHEOS
 # convert Jupyter notebooks to markdown and do some simple preprocessing before
 # feeding into Documenter.jl
 function convert_to_markdown(file)
-    run(`jupyter nbconvert examples/$file --to markdown --template docs/documenter.tpl --output-dir docs/src-staging`)
+    # run(`jupyter nbconvert examples/$file --to markdown --template docs/documenter.tpl --output-dir docs/src-staging`)
+    run(`jupyter nbconvert examples/$file --to markdown`)
     return "docs/src-staging/$(replace(file, "ipynb"=>"md"))"
 end
 
