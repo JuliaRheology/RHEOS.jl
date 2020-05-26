@@ -1,0 +1,74 @@
+[1mdiff --git a/docs/make.jl b/docs/make.jl[m
+[1mindex f1a9366..433f3f7 100644[m
+[1m--- a/docs/make.jl[m
+[1m+++ b/docs/make.jl[m
+[36m@@ -1,11 +1,8 @@[m
+ using Documenter, RHEOS[m
+[31m-[m
+[31m-[m
+ ##[m
+ [m
+ # convert Jupyter notebooks to markdown and do some simple preprocessing before[m
+ # feeding into Documenter.jl[m
+[31m-[m
+ function convert_to_markdown(file)[m
+     run(`jupyter nbconvert examples/$file --to markdown --template docs/documenter.tpl --output-dir docs/src-staging`)[m
+     return "docs/src-staging/$(replace(file, "ipynb"=>"md"))"[m
+[36m@@ -34,12 +31,9 @@[m [msymlink("../src/index.md","docs/src-staging/index.md")[m
+ symlink("../src/API.md","docs/src-staging/API.md")[m
+ symlink("../src/architecture.md","docs/src-staging/architecture.md")[m
+ [m
+[31m-[m
+[31m-[m
+ mkdir("docs/src-staging/assets")[m
+ cp("docs/src/assets/logo.png", "docs/src-staging/assets/logo.png")[m
+ cp("docs/src/assets/diagram.svg", "docs/src-staging/assets/diagram.svg")[m
+[31m-##[m
+ [m
+ # highlight output cells (i.e. anything withouout a language specified) white[m
+ [m
+[36m@@ -50,9 +44,6 @@[m [mcp("docs/src/assets/diagram.svg", "docs/src-staging/assets/diagram.svg")[m
+ end[m
+ [m
+ ##[m
+[31m-[m
+[31m-[m
+[31m-[m
+ makedocs(modules=[RHEOS],[m
+          doctest=false, clean=true,[m
+          format =Documenter.HTML(),[m
+[36m@@ -60,24 +51,24 @@[m [mmakedocs(modules=[RHEOS],[m
+          source = "src-staging",[m
+          authors="Louis Kaplan",[m
+          pages = [[m
+[31m-             "Home" => "index.md",[m
+[32m+[m[32m         "Home" => "index.md",[m
+ 	     "Architecture" => "architecture.md",[m
+ 	     "File I/O" => "fileIO.md",[m
+ 	     "Preprocessing" => "preprocessing.md",[m
+ 	     "Generating Data" => "generatingdata.md",[m
+ 	     "Fit and Predict" => ["Time data" => "fitpredictTime.md",[m
+[31m-				   "Frequency data" => "fitpredictFreq.md"],[m
+[31m-             "Models" => ["Basic Elements" => "elements.md",[m
+[31m-			 "Maxwell" => "fractionalMaxwell.md",[m
+[31m-			 "Kelvin-Voigt" => "fractionalKelvinVoigt.md",[m
+[31m-			 "Zener" => "fractionalZener.md",[m
+[31m-			 "Poynting-Thomson" => "fractionalPT.md",[m
+[31m-		         "Burgers" => "burgers.md",[m
+[31m-			 "Create Your Model" => "createmodel.md"],[m
+[32m+[m				[32m               "Frequency data" => "fitpredictFreq.md"],[m
+[32m+[m[32m         "Models" => ["Basic Elements" => "elements.md",[m
+[32m+[m[32m                      "Maxwell" => "fractionalMaxwell.md",[m
+[32m+[m			[32m          "Kelvin-Voigt" => "fractionalKelvinVoigt.md",[m
+[32m+[m			[32m          "Zener" => "fractionalZener.md",[m
+[32m+[m			[32m          "Poynting-Thomson" => "fractionalPT.md",[m
+[32m+[m		[32m              "Burgers" => "burgers.md",[m
+[32m+[m			[32m          "Create Your Model" => "createmodel.md"],[m
+ 	     "Examples" => "examples.md",[m
+             #  "Fitting Data" => "fittingdata.md",[m
+             #  "Predicting Responses" => "predictingresponse.md",[m
+[31m-              "API" => "API.md"[m
+[32m+[m[32m         "API" => "API.md"[m
+          ][m
+          )[m
+ [m
