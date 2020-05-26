@@ -761,8 +761,8 @@ Examples:
 Examples:
 
     m = RheoModel(Maxwell, k=1., η=1)
-    g = relaxmod(m)
-    g([0,1,2])
+    G = relaxmod(m)
+    G([0,1,2])
 """
 function relaxmod(m::RheoModel, t::Number)
     m._G(t)
@@ -834,7 +834,7 @@ Examples:
     creepcomp(Maxwell, [1,2,3], [1,1])
 
 
-* When no time value is provided, relaxmod returns the creep compliance function itself.
+* When no time value is provided, creepcomp returns the creep compliance function itself.
 
     creepcomp(m::RheoModel)
 
@@ -843,8 +843,8 @@ Examples:
 Examples:
 
     m = RheoModel(Maxwell, k=1., η=1)
-    g = creepcomp(m)
-    g([0,1,2])
+    J = creepcomp(m)
+    J([0,1,2])
 """
 function creepcomp(m::RheoModel, t::Number)
     m._J(t)
@@ -902,6 +902,31 @@ creepcomp(m::RheoModelClass; kwargs...) =  x -> creepcomp(m, x, kwargs.data)
     storagemod(m[, ω, params])
 
 provide access to the storage modulus (G') of a given model m.
+
+* When a frequency value is provided (or an array of frequency values), the function returns the corresponding value(s) of the storage modulus.
+
+    storagemod(m::RheoModel, frequency (single value or array))
+
+    storagemod(m::RheoModelClass, frequency (single value or array), parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    storagemod(Maxwell, 1, k=1., η=1)
+
+    storagemod(Maxwell, [1,2,3], [1,1])
+
+
+* When no time value is provided, storagemod returns the storage modulus function itself.
+
+    storagemod(m::RheoModel)
+
+    storagemod(m::RheoModelClass, parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    m = RheoModel(Maxwell, k=1., η=1)
+    Gp = storagemod(m)
+    Gp([0,1,2])
 """
 function storagemod(m::RheoModel, ω::Number)
     m._Gp(ω)
@@ -949,6 +974,31 @@ storagemod(m::RheoModelClass; kwargs...) =  x -> storagemod(m, x, kwargs.data)
     lossmod(m[, ω, params])
 
 provide access to the loss modulus (G'') of a given model m.
+
+* When a frequency value is provided (or an array of frequency values), the function returns the corresponding value(s) of the loss modulus.
+
+    lossmod(m::RheoModel, frequency (single value or array))
+
+    lossmod(m::RheoModelClass, frequency (single value or array), parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    lossmod(Maxwell, 1, k=1., η=1)
+
+    lossmod(Maxwell, [1,2,3], [1,1])
+
+
+* When no time value is provided, lossmod returns the loss modulus function itself.
+
+    lossmod(m::RheoModel)
+
+    lossmod(m::RheoModelClass, parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    m = RheoModel(Maxwell, k=1., η=1)
+    Gpp = lossmod(m)
+    Gpp([0,1,2])
 """
 function lossmod(m::RheoModel, ω::Number)
     m._Gpp(ω)
@@ -998,7 +1048,32 @@ lossmod(m::RheoModelClass; kwargs...) =  x -> lossmod(m, x, kwargs.data)
 
 provide access to the complex dynamic modulus (G' + i G'') of a given model m.
 
-Use abs() and angle() to get the magnitude and phase of the complex modulus.
+* When a frequency value is provided (or an array of frequency values), the function returns the corresponding value(s) of the complex dynamic modulus.
+
+    dynamicmod(m::RheoModel, frequency (single value or array))
+
+    dynamicmod(m::RheoModelClass, frequency (single value or array), parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    dynamicmod(Maxwell, 1, k=1., η=1)
+
+    dynamicmod(Maxwell, [1,2,3], [1,1])
+
+
+* When no time value is provided, lossmod returns the complex dynamic modulus function itself.
+
+    dynamicmod(m::RheoModel)
+
+    dynamicmod(m::RheoModelClass, parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    m = RheoModel(Maxwell, k=1., η=1)
+    Gpp = dynamicmod(m)
+    Gpp([0,1,2])
+
+Note: use abs() and angle() to get the magnitude and phase of the complex modulus.
 """
 function dynamicmod(m::RheoModel, ω::Number)
     m._Gp(ω) + m._Gpp(ω) * im
