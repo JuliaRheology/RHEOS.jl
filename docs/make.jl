@@ -21,6 +21,7 @@ rm("docs/src-staging", force=true, recursive=true)
 mkdir("docs/src-staging")
 for file in readdir("examples")
     if endswith(file, "ipynb")
+        println(file)
         file |> convert_to_markdown |> convert_equations
     elseif !startswith(file, ".")
         cp("examples/$file", "docs/src-staging/$file")
