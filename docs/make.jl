@@ -1,6 +1,6 @@
 using Documenter, RHEOS
 ##
-
+cd("..")
 # convert Jupyter notebooks to markdown and do some simple preprocessing before
 # feeding into Documenter.jl
 function convert_to_markdown(file)
@@ -36,7 +36,6 @@ cp("docs/src/assets/logo.png", "docs/src-staging/assets/logo.png")
 cp("docs/src/assets/diagram.svg", "docs/src-staging/assets/diagram.svg")
 
 # highlight output cells (i.e. anything withouout a language specified) white
-
 @eval Documenter.Writers.HTMLWriter function mdconvert(c::Markdown.Code, parent::MDBlockContext; kwargs...)
     @tags pre code
     language = isempty(c.language) ? "none" : c.language
