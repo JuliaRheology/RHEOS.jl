@@ -786,8 +786,8 @@ function dynamicmodelfit(data::RheoFreqData,
     hia = fill_upper_bounds(model, hi)
 
     # check necessary moduli are defined
-    modsingGp = (ω->model.Gp(ω,p0a))
-    modsingGpp = (ω->model.Gpp(ω,p0a))
+    modsingGp = (ω->model._Gp(ω,p0a))
+    modsingGpp = (ω->model._Gpp(ω,p0a))
     @assert modulusexists(modsingGp) "Storage modulus not defined for this model"
     @assert modulusexists(modsingGpp) "Loss modulus not defined for this model"
 
