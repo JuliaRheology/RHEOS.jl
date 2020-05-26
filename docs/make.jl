@@ -1,5 +1,5 @@
 using Documenter, RHEOS
-##
+###
 run(`tree`)
 # convert Jupyter notebooks to markdown and do some simple preprocessing before
 # feeding into Documenter.jl
