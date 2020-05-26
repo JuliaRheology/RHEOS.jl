@@ -109,7 +109,7 @@ end
 
 
 
-function Fract_KelvinVoigt_Gp_reduce()
+function Fract_KelvinVoigt_Gpp_reduce()
     ω_step = 0.01;
     chirp = collect(0.0:ω_step:10000.0);
 
@@ -118,9 +118,9 @@ function Fract_KelvinVoigt_Gp_reduce()
 
     all(i -> isapprox(fm_model[i], kelvinvoigt[i]), eachindex(chirp))
 end
-@test Fract_KelvinVoigt_Gp_reduce()
+@test Fract_KelvinVoigt_Gpp_reduce()
 
-function FractS_KelvinVoigt_Gp_reduce()
+function FractS_KelvinVoigt_Gpp_reduce()
     ω_step = 0.01;
     chirp = collect(0.0:ω_step:10000.0);
 
@@ -129,9 +129,9 @@ function FractS_KelvinVoigt_Gp_reduce()
 
     all(i -> isapprox(fms_model[i], kelvinvoigt[i]), eachindex(chirp))
 end
-@test FractS_KelvinVoigt_Gp_reduce()
+@test FractS_KelvinVoigt_Gpp_reduce()
 
-function FractD_KelvinVoigt_Gp_reduce()
+function FractD_KelvinVoigt_Gpp_reduce()
     ω_step = 0.01;
     chirp = collect(0.0:ω_step:10000.0);
 
@@ -140,4 +140,4 @@ function FractD_KelvinVoigt_Gp_reduce()
 
     all(i -> isapprox(fmd_model[i], kelvinvoigt[i]), eachindex(chirp))
 end
-@test FractD_KelvinVoigt_Gp_reduce()
+@test FractD_KelvinVoigt_Gpp_reduce()
