@@ -404,14 +404,14 @@ struct RheoModelClass
     name::String
     params::Vector{Symbol}
 
-    G::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
-    Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
-    J::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
-    Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
-    Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
-    Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
-    Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
-    Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
+    _G::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
+    _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
+    _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
+    _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
+    _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
+    _Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
+    _Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
+    _Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
 
     constraint::FunctionWrapper{Bool,Tuple{Vector{RheoFloat}}}
 
@@ -492,13 +492,19 @@ function expr_replace(ex, nt)
     return e
 end
 
-function model_parameters(nt::NamedTuple, params::Vector{Symbol}, err_string::String)
-    # check that every parameter in m exists in the named tuple nt
-    @assert all(i->i in keys(nt),params) "Missing parameter(s) in " * err_string
-    # check that no extra parameters have been provided
-    @assert length(params) == length(nt) "Mismatch number of model parameters and parameters provided in " * err_string
 
-    p = map(i->RheoFloat(nt[i]), params)
+#
+#  Function used to check and convert any named tupple of parameters into an array ordered as expected by the moduli functions of the RheoModelClass
+#
+
+
+function check_and_reorder_parameters(nt::NamedTuple, params_order::Vector{Symbol}; err_string::String="calling function")
+    # check that every parameter in m exists in the named tuple nt
+    @assert all(i->i in keys(nt),params_order) "Missing parameter(s) in " * err_string
+    # check that no extra parameters have been provided
+    @assert length(params_order) == length(nt) "Mismatch number of model parameters and parameters provided in " * err_string
+
+    p = map(i->RheoFloat(nt[i]), params_order)
 end
 
 """
@@ -564,6 +570,15 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
         $info, $expressions)   )
 end
 
+
+function freeze_params(m::RheoModelClass; kwargs...)
+    return(freeze_params(m,kwargs.data))
+end
+
+
+
+
+
 function modulusexists(modulus_single_input)
    # 5.0 is not meaningful, just an input to check that the function does not return NaN
     # at a non-zero value, which is the default function output for moduli that have
@@ -573,7 +588,7 @@ end
 
 """
     RheoModel(G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, expressions::NamedTuple)
-    
+
 `RheoModel` contains all known moduli of a particular model, as for a `RheoModelClass` model name. However, a `RheoModel`
 has all it's parameters fixed to known values.
 
@@ -582,17 +597,16 @@ rather than calling the default constructor explicitly.
 """
 struct RheoModel
 
-    G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
-    Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
-    J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
-    Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
-    Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
-    Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
-    Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
-    Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
+    _G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
+    _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
+    _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    _Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
+    _Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    _Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
+
     expressions::NamedTuple
-
-
     params::NamedTuple
     info::String    # do we need this?
     # log::OrderedDict{Any,Any}
@@ -606,8 +620,9 @@ end
 function RheoModel(m::RheoModelClass, nt0::NamedTuple)
 
     # check all parameters are provided and create a well ordered named tuple
-    p = model_parameters(nt0, m.params,"model definition")
+    p = check_and_reorder_parameters(nt0, m.params, err_string = "model definition")
     nt=NamedTuple{Tuple(m.params)}(p)
+
     # string printed
     info = string("\nModel: $(m.name)\n\nParameter values: $nt \n",m.info)
 
@@ -639,39 +654,461 @@ end
 
 
 
+#
+# These are internal functions to access the array versions of the relaxation and creep moduli
+# They are used in processing.jl as well as in the user level moduli functions
+#
 
 
-function Ga(m::RheoModelClass)
+
+
+function _Ga(m::RheoModelClass)
     if m.expressions.Ga_safe
-        m.Ga
+        m._Ga
     else
-        (ta,p) -> [m.G(t,p) for t in ta]
+        (ta,p) -> [m._G(t,p) for t in ta]
     end
 end
 
-function Ja(m::RheoModelClass)
+function _Ja(m::RheoModelClass)
     if m.expressions.Ja_safe
-        m.Ja
+        m._Ja
     else
-        (ta,p) -> [m.J(t,p) for t in ta]
+        (ta,p) -> [m._J(t,p) for t in ta]
     end
 end
 
 
 
-function Ga(m::RheoModel)
+function _Ga(m::RheoModel)
     if m.expressions.Ga_safe
-        m.Ga
+        m._Ga
     else
-        ta -> [m.G(t) for t in ta]
+        ta -> [m._G(t) for t in ta]
     end
 end
 
-function Ja(m::RheoModel)
+function _Ja(m::RheoModel)
     if m.expressions.Ja_safe
-        m.Ja
+        m._Ja
     else
-        ta -> [m.J(t) for t in ta]
+        ta -> [m._J(t) for t in ta]
     end
 end
 
+
+
+
+
+
+
+
+#
+# These are functions enabling users to access the different moduli functions for each model
+#
+
+
+
+
+# julia> relaxmod(Maxwell, 1, )
+# 0.36787944117144233
+#
+# julia> relaxmod(Maxwell, 1, (k=1.,η=1))
+# 0.36787944117144233
+#
+# julia> relaxmod(Maxwell, 1)
+# 0.36787944117144233
+
+# julia> relaxmod(Maxwell, [1,2,3], k=1.,η=1)
+#
+#
+#
+# julia> relaxmod(Maxwell,k=1.,η=1)(1.)
+# 0.36787944117144233
+#
+#
+# julia> relaxmod(Maxwell,[1,1])(1)
+# 0.36787944117144233
+
+
+
+
+
+"""
+    relaxmod(m[, t, params])
+
+provide access to the relaxation modulus (G) of a given model m. It can be used with a broad range of inputs.
+
+* When a time value is provided (or an array of time values), the function returns the corresponding value(s) of the relaxation modulus.
+
+    relaxmod(m::RheoModel, time (single value or array))
+
+    relaxmod(m::RheoModelClass, time (single value or array), parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    relaxmod(Maxwell, 1, k=1., η=1)
+
+    relaxmod(Maxwell, [1,2,3], [1,1])
+
+
+* When no time value is provided, relaxmod returns the relaxation function itself.
+
+    relaxmod(m::RheoModel)
+
+    relaxmod(m::RheoModelClass, parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    m = RheoModel(Maxwell, k=1., η=1)
+    G = relaxmod(m)
+    G([0,1,2])
+"""
+function relaxmod(m::RheoModel, t::Number)
+    m._G(t)
+end
+
+function relaxmod(m::RheoModel, ta::Vector{T}) where T <: Number
+    _Ga(m)(ta)
+end
+
+relaxmod(m) = x -> relaxmod(m,x)
+
+
+
+
+function relaxmod(m::RheoModelClass, t::Number, params::Vector{T}) where T <: Number
+    m._G(t, params)
+end
+
+
+function relaxmod(m::RheoModelClass, ta::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
+    _Ga(m)(ta, params)
+end
+
+
+function relaxmod(m::RheoModelClass, x, params::NamedTuple)
+    # check all parameters are provided and create a well ordered named tuple
+    p = check_and_reorder_parameters(params, m.params, err_string = "relaxmod")
+    relaxmod(m, x, p)
+end
+
+
+function relaxmod(m::RheoModelClass, x; kwargs...)
+    relaxmod(m, x, kwargs.data)
+end
+
+relaxmod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> relaxmod(m, x, params)
+relaxmod(m::RheoModelClass, params::NamedTuple) =  x -> relaxmod(m, x, params)
+relaxmod(m::RheoModelClass; kwargs...) =  x -> relaxmod(m, x, kwargs.data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+    creepcomp(m[, t, params])
+
+provide access to the creep compliance (J) of a given model m. It can be used with a broad range of inputs.
+
+* When a time value is provided (or an array of time values), the function returns the corresponding value(s) of the creep compliance.
+
+    creepcomp(m::RheoModel, time (single value or array))
+
+    creepcomp(m::RheoModelClass, time (single value or array), parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    creepcomp(Maxwell, 1, k=1., η=1)
+
+    creepcomp(Maxwell, [1,2,3], [1,1])
+
+
+* When no time value is provided, creepcomp returns the creep compliance function itself.
+
+    creepcomp(m::RheoModel)
+
+    creepcomp(m::RheoModelClass, parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    m = RheoModel(Maxwell, k=1., η=1)
+    J = creepcomp(m)
+    J([0,1,2])
+"""
+function creepcomp(m::RheoModel, t::Number)
+    m._J(t)
+end
+
+function creepcomp(m::RheoModel, ta::Vector{T}) where T <: Number
+    _Ja(m)(ta)
+end
+
+creepcomp(m) = x -> creepcomp(m,x)
+
+
+
+
+function creepcomp(m::RheoModelClass, t::Number, params::Vector{T}) where T <: Number
+    m._J(t, params)
+end
+
+
+function creepcomp(m::RheoModelClass, ta::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
+    _Ja(m)(ta, params)
+end
+
+
+function creepcomp(m::RheoModelClass, x, params::NamedTuple)
+    # check all parameters are provided and create a well ordered named tuple
+    p = check_and_reorder_parameters(params, m.params, err_string = "relaxmod")
+    creepcomp(m, x, p)
+end
+
+
+function creepcomp(m::RheoModelClass, x; kwargs...)
+    creepcomp(m, x, kwargs.data)
+end
+
+creepcomp(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> creepcomp(m, x, params)
+creepcomp(m::RheoModelClass, params::NamedTuple) =  x -> creepcomp(m, x, params)
+creepcomp(m::RheoModelClass; kwargs...) =  x -> creepcomp(m, x, kwargs.data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+    storagemod(m[, ω, params])
+
+provide access to the storage modulus (G') of a given model m.
+
+* When a frequency value is provided (or an array of frequency values), the function returns the corresponding value(s) of the storage modulus.
+
+    storagemod(m::RheoModel, frequency (single value or array))
+
+    storagemod(m::RheoModelClass, frequency (single value or array), parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    storagemod(Maxwell, 1, k=1., η=1)
+
+    storagemod(Maxwell, [1,2,3], [1,1])
+
+
+* When no time value is provided, storagemod returns the storage modulus function itself.
+
+    storagemod(m::RheoModel)
+
+    storagemod(m::RheoModelClass, parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    m = RheoModel(Maxwell, k=1., η=1)
+    Gp = storagemod(m)
+    Gp([0,1,2])
+"""
+function storagemod(m::RheoModel, ω::Number)
+    m._Gp(ω)
+end
+
+function storagemod(m::RheoModel, ωa::Vector{T}) where T <: Number
+    m._Gpa(ωa)
+end
+
+storagemod(m) = x -> storagemod(m,x)
+
+
+
+
+function storagemod(m::RheoModelClass, ω::Number, params::Vector{T}) where T <: Number
+    m._Gp(ω, params)
+end
+
+
+function storagemod(m::RheoModelClass, ωa::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
+      m._Gpa(ωa, params)
+end
+
+
+function storagemod(m::RheoModelClass, x, params::NamedTuple)
+    # check all parameters are provided and create a well ordered named tuple
+    p = check_and_reorder_parameters(params, m.params, err_string = "relaxmod")
+    storagemod(m, x, p)
+end
+
+
+function storagemod(m::RheoModelClass, x; kwargs...)
+    storagemod(m, x, kwargs.data)
+end
+
+storagemod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> storagemod(m, x, params)
+storagemod(m::RheoModelClass, params::NamedTuple) =  x -> storagemod(m, x, params)
+storagemod(m::RheoModelClass; kwargs...) =  x -> storagemod(m, x, kwargs.data)
+
+
+
+
+
+"""
+    lossmod(m[, ω, params])
+
+provide access to the loss modulus (G'') of a given model m.
+
+* When a frequency value is provided (or an array of frequency values), the function returns the corresponding value(s) of the loss modulus.
+
+    lossmod(m::RheoModel, frequency (single value or array))
+
+    lossmod(m::RheoModelClass, frequency (single value or array), parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    lossmod(Maxwell, 1, k=1., η=1)
+
+    lossmod(Maxwell, [1,2,3], [1,1])
+
+
+* When no time value is provided, lossmod returns the loss modulus function itself.
+
+    lossmod(m::RheoModel)
+
+    lossmod(m::RheoModelClass, parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    m = RheoModel(Maxwell, k=1., η=1)
+    Gpp = lossmod(m)
+    Gpp([0,1,2])
+"""
+function lossmod(m::RheoModel, ω::Number)
+    m._Gpp(ω)
+end
+
+function lossmod(m::RheoModel, ωa::Vector{T}) where T <: Number
+    m._Gppa(ωa)
+end
+
+lossmod(m) = x -> lossmod(m,x)
+
+
+
+
+function lossmod(m::RheoModelClass, ω::Number, params::Vector{T}) where T <: Number
+    m._Gpp(ω, params)
+end
+
+
+function lossmod(m::RheoModelClass, ωa::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
+    m._Gppa(ωa, params)
+end
+
+
+function lossmod(m::RheoModelClass, x, params::NamedTuple)
+    # check all parameters are provided and create a well ordered named tuple
+    p = check_and_reorder_parameters(params, m.params, err_string = "relaxmod")
+    lossmod(m, x, p)
+end
+
+
+function lossmod(m::RheoModelClass, x; kwargs...)
+    lossmod(m, x, kwargs.data)
+end
+
+lossmod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> lossmod(m, x, params)
+lossmod(m::RheoModelClass, params::NamedTuple) =  x -> lossmod(m, x, params)
+lossmod(m::RheoModelClass; kwargs...) =  x -> lossmod(m, x, kwargs.data)
+
+
+
+
+
+
+"""
+    dynamicmod(m[, ω, params])
+
+provide access to the complex dynamic modulus (G' + i G'') of a given model m.
+
+* When a frequency value is provided (or an array of frequency values), the function returns the corresponding value(s) of the complex dynamic modulus.
+
+    dynamicmod(m::RheoModel, frequency (single value or array))
+
+    dynamicmod(m::RheoModelClass, frequency (single value or array), parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    dynamicmod(Maxwell, 1, k=1., η=1)
+
+    dynamicmod(Maxwell, [1,2,3], [1,1])
+
+
+* When no time value is provided, lossmod returns the complex dynamic modulus function itself.
+
+    dynamicmod(m::RheoModel)
+
+    dynamicmod(m::RheoModelClass, parameters (array, named tupple or keyword parameters))
+
+Examples:
+
+    m = RheoModel(Maxwell, k=1., η=1)
+    Gpp = dynamicmod(m)
+    Gpp([0,1,2])
+
+Note: use abs() and angle() to get the magnitude and phase of the complex modulus.
+"""
+function dynamicmod(m::RheoModel, ω::Number)
+    m._Gp(ω) + m._Gpp(ω) * im
+end
+
+function dynamicmod(m::RheoModel, ωa::Vector{T}) where T <: Number
+    m._Gpa(ωa) + m._Gppa(ωa) * im
+end
+
+lossmod(m) = x -> lossmod(m,x)
+
+
+
+
+function dynamicmod(m::RheoModelClass, ω::Number, params::Vector{T}) where T <: Number
+    m._Gp(ω) + m._Gpp(ω) * im
+end
+
+
+function dynamicmod(m::RheoModelClass, ωa::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
+    m._Gpa(ωa, params) + m._Gppa(ωa, params) * im
+end
+
+
+function dynamicmod(m::RheoModelClass, x, params::NamedTuple)
+    # check all parameters are provided and create a well ordered named tuple
+    p = check_and_reorder_parameters(params, m.params, err_string = "relaxmod")
+    dynamicmod(m, x, p)
+end
+
+
+function dynamicmod(m::RheoModelClass, x; kwargs...)
+    dynamicmod(m, x, kwargs.data)
+end
+
+dynamicmod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> dynamicmod(m, x, params)
+dynamicmod(m::RheoModelClass, params::NamedTuple) =  x -> dynamicmod(m, x, params)
+dynamicmod(m::RheoModelClass; kwargs...) =  x -> dynamicmod(m, x, kwargs.data)

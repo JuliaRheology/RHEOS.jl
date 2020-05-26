@@ -1,3 +1,7 @@
+println("===============================================")
+println("Testing processing.jl")
+println("===============================================")
+
 function _resample_strainonly()
     t0 = collect(0.0:0.01:1.0)
     ϵ0 = t0.^2
@@ -1402,8 +1406,8 @@ function _dynamicmodelfit(tol)
     ω = Vector{RheoFloat}(0.0:0.01:20.0)
     actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
-    dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
-    dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
+    dataGp = storagemod(actual_model,ω)
+    dataGpp = lossmod(actual_model,ω)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
@@ -1420,8 +1424,8 @@ function _dynamicmodelfit_noinit(tol)
     ω = Vector{RheoFloat}(0.0:0.01:20.0)
     actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
-    dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
-    dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
+    dataGp = storagemod(actual_model,ω)
+    dataGpp = lossmod(actual_model,ω)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     modelout = dynamicmodelfit(data0, SLS_Zener, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="none", rel_tol=1e-6)
@@ -1437,8 +1441,8 @@ function _dynamicmodelfit_nobounds(tol)
     ω = Vector{RheoFloat}(0.0:0.01:20.0)
     actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
-    dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
-    dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
+    dataGp = storagemod(actual_model,ω)
+    dataGpp = lossmod(actual_model,ω)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
@@ -1455,8 +1459,8 @@ function _dynamicmodelfit_mean(tol)
     ω = Vector{RheoFloat}(0.0:0.01:20.0)
     actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
-    dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
-    dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
+    dataGp = storagemod(actual_model,ω)
+    dataGpp = lossmod(actual_model,ω)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
@@ -1473,8 +1477,8 @@ function _dynamicmodelfit_log(tol)
     ω = Vector{RheoFloat}(0.01:0.01:20.0)
     actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
-    dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
-    dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
+    dataGp = storagemod(actual_model,ω)
+    dataGpp = lossmod(actual_model,ω)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
@@ -1491,8 +1495,8 @@ function _dynamicmodelfit_local(tol)
     ω = Vector{RheoFloat}(0.01:0.01:20.0)
     actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
-    dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
-    dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
+    dataGp = storagemod(actual_model,ω)
+    dataGpp = lossmod(actual_model,ω)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
@@ -1509,8 +1513,8 @@ function _dynamicmodelfit_manualweights(tol)
     ω = Vector{RheoFloat}(0.01:0.01:20.0)
     actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
-    dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
-    dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
+    dataGp = storagemod(actual_model,ω)
+    dataGpp = lossmod(actual_model,ω)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
@@ -1527,8 +1531,8 @@ function _dynamicmodelpredict(tol)
     ω = Vector{RheoFloat}(0.0:0.01:20.0)
     actual_model = RheoModel(SLS_Zener, η=5.0, kᵦ=2.5, kᵧ=7.5)
 
-    dataGp = actual_model.Gpa(ω, [5.0, 2.5, 7.5])
-    dataGpp = actual_model.Gppa(ω, [5.0, 2.5, 7.5])
+    dataGp = storagemod(actual_model,ω)
+    dataGpp = lossmod(actual_model,ω)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     datapredicted = dynamicmodelpredict(data0, actual_model)
