@@ -1,10 +1,14 @@
+println("===============================================")
+println("Testing kelvinvoigt.jl")
+println("===============================================")
+
 function Fract_KelvinVoigt_G_reduce()
     dt = 0.001
     # fractional modulus is NaN not inf at 0.0 so start at dt
     t = collect(dt:dt:10.0)
 
-    fm_model = Fract_KelvinVoigt.Ga(t, [1.0, 1.0, 1.0, 0.0])
-    kelvinvoigt = KelvinVoigt.Ga(t, [1.0, 1.0])
+    fm_model = relaxmod(Fract_KelvinVoigt, t, [1.0, 1.0, 1.0, 0.0])
+    kelvinvoigt = relaxmod(KelvinVoigt, t, [1.0, 1.0])
 
     all(i -> isapprox(fm_model[i], kelvinvoigt[i]), eachindex(t))
 end
@@ -15,8 +19,8 @@ function FractS_KelvinVoigt_G_reduce()
     # fractional modulus is NaN not inf at 0.0 so start at dt
     t = collect(dt:dt:10.0)
 
-    fms_model = FractS_KelvinVoigt.Ga(t, [1.0, 1.0, 1.0])
-    kelvinvoigt = KelvinVoigt.Ga(t, [1.0, 1.0])
+    fms_model = relaxmod(FractS_KelvinVoigt, t, [1.0, 1.0, 1.0])
+    kelvinvoigt = relaxmod(KelvinVoigt, t, [1.0, 1.0])
 
     all(i -> isapprox(fms_model[i], kelvinvoigt[i]), eachindex(t))
 end
@@ -26,19 +30,21 @@ function FractD_KelvinVoigt_G_reduce()
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fmd_model = FractD_KelvinVoigt.Ga(t, [1.0, 1.0, 0.0])
-    kelvinvoigt = KelvinVoigt.Ga(t, [1.0, 1.0])
+    fmd_model = relaxmod(FractD_KelvinVoigt, t, [1.0, 1.0, 0.0])
+    kelvinvoigt = relaxmod(KelvinVoigt, t, [1.0, 1.0])
 
     all(i -> isapprox(fmd_model[i], kelvinvoigt[i]), eachindex(t))
 end
 @test FractD_KelvinVoigt_G_reduce()
 
+
+
 function Fract_KelvinVoigt_J_reduce(tol)
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fm_model = Ja(Fract_KelvinVoigt)(t, [1.0, 0.99999, 1.0, 0.00001])
-    kelvinvoigt = KelvinVoigt.Ja(t, [1.0, 1.0])
+    fm_model = creepmod(Fract_KelvinVoigt, t, [1.0, 0.99999, 1.0, 0.00001])
+    kelvinvoigt = creepmod(KelvinVoigt, t, [1.0, 1.0])
 
     all(i -> isapprox(fm_model[i], kelvinvoigt[i], atol=tol), eachindex(t))
 end
@@ -48,8 +54,8 @@ function FractS_KelvinVoigt_J_reduce(tol)
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fms_model = Ja(FractS_KelvinVoigt)(t, [1.0, 0.99999, 1.0])
-    kelvinvoigt = KelvinVoigt.Ja(t, [1.0, 1.0])
+    fms_model = creepmod(FractS_KelvinVoigt, t, [1.0, 0.99999, 1.0])
+    kelvinvoigt = creepmod(KelvinVoigt, t, [1.0, 1.0])
 
     all(i -> isapprox(fms_model[i], kelvinvoigt[i], atol=tol), eachindex(t))
 end
@@ -59,19 +65,21 @@ function FractD_KelvinVoigt_J_reduce(tol)
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fmd_model = Ja(FractD_KelvinVoigt)(t, [1.0, 1.0, 0.00001])
-    kelvinvoigt = KelvinVoigt.Ja(t, [1.0, 1.0])
+    fmd_model = creepmod(FractD_KelvinVoigt, t, [1.0, 1.0, 0.00001])
+    kelvinvoigt = creepmod(KelvinVoigt, t, [1.0, 1.0])
 
     all(i -> isapprox(fmd_model[i], kelvinvoigt[i], atol=tol), eachindex(t))
 end
 @test FractD_KelvinVoigt_J_reduce(tol)
 
+
+
 function Fract_KelvinVoigt_Gp_reduce()
     ω_step = 0.01;
     chirp = collect(0.0:ω_step:10000.0);
 
-    fm_model = Fract_KelvinVoigt.Gpa(chirp, [1.0, 1.0, 1.0, 0.0])
-    kelvinvoigt = KelvinVoigt.Gpa(chirp, [1.0, 1.0])
+    fm_model = storagemod(Fract_KelvinVoigt, chirp, [1.0, 1.0, 1.0, 0.0])
+    kelvinvoigt = storagemod(KelvinVoigt, chirp, [1.0, 1.0])
 
     all(i -> isapprox(fm_model[i], kelvinvoigt[i]), eachindex(chirp))
 end
@@ -81,8 +89,8 @@ function FractS_KelvinVoigt_Gp_reduce()
     ω_step = 0.01;
     chirp = collect(0.0:ω_step:10000.0);
 
-    fms_model = FractS_KelvinVoigt.Gpa(chirp, [1.0, 1.0, 1.0])
-    kelvinvoigt = KelvinVoigt.Gpa(chirp, [1.0, 1.0])
+    fms_model = storagemod(FractS_KelvinVoigt, chirp, [1.0, 1.0, 1.0])
+    kelvinvoigt = storagemod(KelvinVoigt, chirp, [1.0, 1.0])
 
     all(i -> isapprox(fms_model[i], kelvinvoigt[i]), eachindex(chirp))
 end
@@ -92,19 +100,21 @@ function FractD_KelvinVoigt_Gp_reduce()
     ω_step = 0.01;
     chirp = collect(0.0:ω_step:10000.0);
 
-    fmd_model = FractD_KelvinVoigt.Gpa(chirp, [1.0, 1.0, 0.0])
-    kelvinvoigt = KelvinVoigt.Gpa(chirp, [1.0, 1.0])
+    fmd_model = storagemod(FractD_KelvinVoigt, chirp, [1.0, 1.0, 0.0])
+    kelvinvoigt = storagemod(KelvinVoigt, chirp, [1.0, 1.0])
 
     all(i -> isapprox(fmd_model[i], kelvinvoigt[i]), eachindex(chirp))
 end
 @test FractD_KelvinVoigt_Gp_reduce()
 
+
+
 function Fract_KelvinVoigt_Gp_reduce()
     ω_step = 0.01;
     chirp = collect(0.0:ω_step:10000.0);
 
-    fm_model = Fract_KelvinVoigt.Gppa(chirp, [1.0, 1.0, 1.0, 0.0])
-    kelvinvoigt = KelvinVoigt.Gppa(chirp, [1.0, 1.0])
+    fm_model = lossmod(Fract_KelvinVoigt, chirp, [1.0, 1.0, 1.0, 0.0])
+    kelvinvoigt = lossmod(KelvinVoigt, chirp, [1.0, 1.0])
 
     all(i -> isapprox(fm_model[i], kelvinvoigt[i]), eachindex(chirp))
 end
@@ -114,8 +124,8 @@ function FractS_KelvinVoigt_Gp_reduce()
     ω_step = 0.01;
     chirp = collect(0.0:ω_step:10000.0);
 
-    fms_model = FractS_KelvinVoigt.Gppa(chirp, [1.0, 1.0, 1.0])
-    kelvinvoigt = KelvinVoigt.Gppa(chirp, [1.0, 1.0])
+    fms_model = lossmod(FractS_KelvinVoigt, chirp, [1.0, 1.0, 1.0])
+    kelvinvoigt = lossmod(KelvinVoigt, chirp, [1.0, 1.0])
 
     all(i -> isapprox(fms_model[i], kelvinvoigt[i]), eachindex(chirp))
 end
@@ -125,8 +135,8 @@ function FractD_KelvinVoigt_Gp_reduce()
     ω_step = 0.01;
     chirp = collect(0.0:ω_step:10000.0);
 
-    fmd_model = FractD_KelvinVoigt.Gppa(chirp, [1.0, 1.0, 0.0])
-    kelvinvoigt = KelvinVoigt.Gppa(chirp, [1.0, 1.0])
+    fmd_model = lossmod(FractD_KelvinVoigt, chirp, [1.0, 1.0, 0.0])
+    kelvinvoigt = lossmod(KelvinVoigt, chirp, [1.0, 1.0])
 
     all(i -> isapprox(fmd_model[i], kelvinvoigt[i]), eachindex(chirp))
 end
