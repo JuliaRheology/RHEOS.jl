@@ -570,6 +570,15 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
         $info, $expressions)   )
 end
 
+
+function freeze_params(m::RheoModelClass; kwargs...)
+    return(freeze_params(m,kwargs.data))
+end
+
+
+
+
+
 function modulusexists(modulus_single_input)
    # 5.0 is not meaningful, just an input to check that the function does not return NaN
     # at a non-zero value, which is the default function output for moduli that have

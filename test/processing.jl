@@ -1,3 +1,7 @@
+println("===============================================")
+println("Testing processing.jl")
+println("===============================================")
+
 function _resample_strainonly()
     t0 = collect(0.0:0.01:1.0)
     ϵ0 = t0.^2
