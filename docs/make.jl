@@ -1,6 +1,5 @@
 using Documenter, RHEOS
 ###
-run(`tree`)
 # convert Jupyter notebooks to markdown and do some simple preprocessing before
 # feeding into Documenter.jl
 function convert_to_markdown(file)
@@ -27,9 +26,9 @@ for file in readdir("examples")
         cp("examples/$file", "docs/src-staging/$file")
     end
 end
-symlink("../src/index.md","docs/src-staging/index.md")
-symlink("../src/API.md","docs/src-staging/API.md")
-symlink("../src/architecture.md","docs/src-staging/architecture.md")
+cp("docs/src/index.md","docs/src-staging/index.md")
+cp("docs/src/API.md","docs/src-staging/API.md")
+cp("docs/src/architecture.md","docs/src-staging/architecture.md")
 
 mkdir("docs/src-staging/assets")
 cp("docs/src/assets/logo.png", "docs/src-staging/assets/logo.png")
@@ -64,9 +63,7 @@ makedocs(modules=[RHEOS],
 			          "Poynting-Thomson" => "fractionalPT.md",
 		              "Burgers" => "burgers.md",
 			          "Create Your Model" => "createmodel.md"],
-	     "Examples" => "examples.md",
-            #  "Fitting Data" => "fittingdata.md",
-            #  "Predicting Responses" => "predictingresponse.md",
+	    "Examples" => "examples.md",
          "API" => "API.md"
          ]
          )
