@@ -890,16 +890,16 @@ creepmod(m::RheoModelClass; kwargs...) =  x -> creepmod(m, x, kwargs.data)
 
 
 """
-    storagemod(m[, t, params])
+    storagemod(m[, ω, params])
 
 provide access to the storage modulus (G') of a given model m.
 """
-function storagemod(m::RheoModel, t::Number)
-    m._Gp(t)
+function storagemod(m::RheoModel, ω::Number)
+    m._Gp(ω)
 end
 
-function storagemod(m::RheoModel, ta::Vector{T}) where T <: Number
-    m._Gpa(ta)
+function storagemod(m::RheoModel, ωa::Vector{T}) where T <: Number
+    m._Gpa(ωa)
 end
 
 storagemod(m) = x -> storagemod(m,x)
@@ -907,13 +907,13 @@ storagemod(m) = x -> storagemod(m,x)
 
 
 
-function storagemod(m::RheoModelClass, t::Number, params::Vector{T}) where T <: Number
-    m._Gp(t, params)
+function storagemod(m::RheoModelClass, ω::Number, params::Vector{T}) where T <: Number
+    m._Gp(ω, params)
 end
 
 
-function storagemod(m::RheoModelClass, ta::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
-      m._Gpa(ta, params)
+function storagemod(m::RheoModelClass, ωa::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
+      m._Gpa(ωa, params)
 end
 
 
@@ -937,16 +937,16 @@ storagemod(m::RheoModelClass; kwargs...) =  x -> storagemod(m, x, kwargs.data)
 
 
 """
-    lossmod(m[, t, params])
+    lossmod(m[, ω, params])
 
 provide access to the loss modulus (G'') of a given model m.
 """
-function lossmod(m::RheoModel, t::Number)
-    m._Gpp(t)
+function lossmod(m::RheoModel, ω::Number)
+    m._Gpp(ω)
 end
 
-function lossmod(m::RheoModel, ta::Vector{T}) where T <: Number
-    m._Gppa(ta)
+function lossmod(m::RheoModel, ωa::Vector{T}) where T <: Number
+    m._Gppa(ωa)
 end
 
 lossmod(m) = x -> lossmod(m,x)
@@ -954,13 +954,13 @@ lossmod(m) = x -> lossmod(m,x)
 
 
 
-function lossmod(m::RheoModelClass, t::Number, params::Vector{T}) where T <: Number
-    m._Gpp(t, params)
+function lossmod(m::RheoModelClass, ω::Number, params::Vector{T}) where T <: Number
+    m._Gpp(ω, params)
 end
 
 
-function lossmod(m::RheoModelClass, ta::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
-    m._Gppa(ta, params)
+function lossmod(m::RheoModelClass, ωa::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
+    m._Gppa(ωa, params)
 end
 
 
@@ -985,18 +985,18 @@ lossmod(m::RheoModelClass; kwargs...) =  x -> lossmod(m, x, kwargs.data)
 
 
 """
-    dynamicmod(m[, t, params])
+    dynamicmod(m[, ω, params])
 
 provide access to the complex dynamic modulus (G' + i G'') of a given model m.
 
 Use abs() and angle() to get the magnitude and phase of the complex modulus.
 """
-function dynamicmod(m::RheoModel, t::Number)
-    m._Gp(t) + m._Gpp(t) * im
+function dynamicmod(m::RheoModel, ω::Number)
+    m._Gp(ω) + m._Gpp(ω) * im
 end
 
-function dynamicmod(m::RheoModel, ta::Vector{T}) where T <: Number
-    m._Gpa(ta) + m._Gppa(ta) * im
+function dynamicmod(m::RheoModel, ωa::Vector{T}) where T <: Number
+    m._Gpa(ωa) + m._Gppa(ωa) * im
 end
 
 lossmod(m) = x -> lossmod(m,x)
@@ -1004,13 +1004,13 @@ lossmod(m) = x -> lossmod(m,x)
 
 
 
-function dynamicmod(m::RheoModelClass, t::Number, params::Vector{T}) where T <: Number
-    m._Gp(t) + m._Gpp(t) * im
+function dynamicmod(m::RheoModelClass, ω::Number, params::Vector{T}) where T <: Number
+    m._Gp(ω) + m._Gpp(ω) * im
 end
 
 
-function dynamicmod(m::RheoModelClass, ta::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
-    m._Gpa(ta, params) + m._Gppa(ta, params) * im 
+function dynamicmod(m::RheoModelClass, ωa::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
+    m._Gpa(ωa, params) + m._Gppa(ωa, params) * im 
 end
 
 
