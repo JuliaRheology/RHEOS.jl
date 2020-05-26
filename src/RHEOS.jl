@@ -10,7 +10,7 @@ using JLD2
 using DataStructures
 using FunctionWrappers: FunctionWrapper
 import DSP.conv
-import Statistics.mean
+#import Statistics.mean
 
 # Base and stdlib imports
 import Base: +, -, *,|
@@ -88,7 +88,7 @@ include("datagen.jl")
 include("processing.jl")
 include("interface.jl")
 
-include("opt/AFM_JPKimport.jl")
-include("opt/AFM_preprocessing.jl")
+#include("opt/AFM_JPKimport.jl")
+#include("opt/AFM_preprocessing.jl")
 ######################################################
 end
