@@ -17,9 +17,9 @@ jobs:
           version: 1.4
       - name: Install Python dependencies
         run: |
-        python -m pip install --user --upgrade pip
-        python -m pip install jupyter
-        python -m pip install nbconvert
+          python -m pip install --user --upgrade pip
+          python -m pip install jupyter
+          python -m pip install nbconvert
       - name: Install julia dependencies
         run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       - name: Build and deploy
