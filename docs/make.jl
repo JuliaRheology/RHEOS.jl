@@ -1,10 +1,6 @@
 using Documenter, RHEOS
 ##
-pwd()
-println(pwd())
-cd("..")
-pwd()
-println(pwd())
+run(`tree`)
 # convert Jupyter notebooks to markdown and do some simple preprocessing before
 # feeding into Documenter.jl
 function convert_to_markdown(file)
