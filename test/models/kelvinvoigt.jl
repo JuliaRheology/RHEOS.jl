@@ -43,8 +43,8 @@ function Fract_KelvinVoigt_J_reduce(tol)
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fm_model = creepmod(Fract_KelvinVoigt, t, [1.0, 0.99999, 1.0, 0.00001])
-    kelvinvoigt = creepmod(KelvinVoigt, t, [1.0, 1.0])
+    fm_model = creepcomp(Fract_KelvinVoigt, t, [1.0, 0.99999, 1.0, 0.00001])
+    kelvinvoigt = creepcomp(KelvinVoigt, t, [1.0, 1.0])
 
     all(i -> isapprox(fm_model[i], kelvinvoigt[i], atol=tol), eachindex(t))
 end
@@ -54,8 +54,8 @@ function FractS_KelvinVoigt_J_reduce(tol)
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fms_model = creepmod(FractS_KelvinVoigt, t, [1.0, 0.99999, 1.0])
-    kelvinvoigt = creepmod(KelvinVoigt, t, [1.0, 1.0])
+    fms_model = creepcomp(FractS_KelvinVoigt, t, [1.0, 0.99999, 1.0])
+    kelvinvoigt = creepcomp(KelvinVoigt, t, [1.0, 1.0])
 
     all(i -> isapprox(fms_model[i], kelvinvoigt[i], atol=tol), eachindex(t))
 end
@@ -65,8 +65,8 @@ function FractD_KelvinVoigt_J_reduce(tol)
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fmd_model = creepmod(FractD_KelvinVoigt, t, [1.0, 1.0, 0.00001])
-    kelvinvoigt = creepmod(KelvinVoigt, t, [1.0, 1.0])
+    fmd_model = creepcomp(FractD_KelvinVoigt, t, [1.0, 1.0, 0.00001])
+    kelvinvoigt = creepcomp(KelvinVoigt, t, [1.0, 1.0])
 
     all(i -> isapprox(fmd_model[i], kelvinvoigt[i], atol=tol), eachindex(t))
 end

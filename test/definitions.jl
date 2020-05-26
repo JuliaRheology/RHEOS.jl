@@ -84,6 +84,6 @@ end
 
 function _scalar_moduli()
     m=RheoModel(Spring, k=2)
-    relaxmod(m, 1) == relaxmod(Spring, k=2, 1) == 2. && creepmod(m, 1) == creepmod(Spring, k=2, 1) == 0.5 &&  storagemod(m, 1) == storagemod(Spring, k=2, 1) == 2. && lossmod(m, 1) == lossmod(Spring, k=2, 1) == 0.0
+    relaxmod(m, 1) == relaxmod(Spring, k=2, 1) == 2. && creepcomp(m, 1) == creepcomp(Spring, k=2, 1) == 0.5 &&  storagemod(m, 1) == storagemod(Spring, k=2, 1) == 2. && lossmod(m, 1) == lossmod(Spring, k=2, 1) == 0.0
 end
 @test _scalar_moduli()

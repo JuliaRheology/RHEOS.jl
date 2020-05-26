@@ -41,8 +41,8 @@ function Fract_Maxwell_J_reduce()
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fm_model = creepmod(Fract_Maxwell, t, [1.0, 1.0, 1.0, 0.0])
-    maxwell = creepmod(Maxwell, t, [1.0, 1.0])
+    fm_model = creepcomp(Fract_Maxwell, t, [1.0, 1.0, 1.0, 0.0])
+    maxwell = creepcomp(Maxwell, t, [1.0, 1.0])
 
     all(i -> isapprox(fm_model[i], maxwell[i]), eachindex(t))
 end
@@ -52,8 +52,8 @@ function FractS_Maxwell_J_reduce()
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fms_model = creepmod(FractS_Maxwell, t, [1.0, 1.0, 1.0])
-    maxwell = creepmod(Maxwell, t, [1.0, 1.0])
+    fms_model = creepcomp(FractS_Maxwell, t, [1.0, 1.0, 1.0])
+    maxwell = creepcomp(Maxwell, t, [1.0, 1.0])
 
     all(i -> isapprox(fms_model[i], maxwell[i]), eachindex(t))
 end
@@ -63,8 +63,8 @@ function FractD_Maxwell_J_reduce()
     dt = 0.001
     t = collect(0.0:dt:10.0)
 
-    fmd_model = creepmod(FractD_Maxwell, t, [1.0, 1.0, 0.0])
-    maxwell = creepmod(Maxwell, t, [1.0, 1.0])
+    fmd_model = creepcomp(FractD_Maxwell, t, [1.0, 1.0, 0.0])
+    maxwell = creepcomp(Maxwell, t, [1.0, 1.0])
 
     all(i -> isapprox(fmd_model[i], maxwell[i]), eachindex(t))
 end

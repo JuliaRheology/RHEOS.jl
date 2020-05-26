@@ -15,9 +15,9 @@ end
 function springpot_spring_reduce_J()
     t = Vector{RheoFloat}(0.0:0.1:10.0)
 
-    springpot_J = creepmod(Springpot, cᵦ = 1.5, β=0)
+    springpot_J = creepcomp(Springpot, cᵦ = 1.5, β=0)
     springpot = springpot_J(t)
-    spring = creepmod(Spring,t, [1.5])
+    spring = creepcomp(Spring,t, [1.5])
 
     all(i -> isapprox(springpot[i], spring[i]), eachindex(t))
 end
@@ -54,8 +54,8 @@ end
 function springpot_dashpot_reduce_J()
     t = Vector{RheoFloat}(0.0:0.1:10.0)
 
-    springpot = creepmod(Springpot,t, [1.5, 1.0])
-    dashpot = creepmod(Dashpot,t, [1.5])
+    springpot = creepcomp(Springpot,t, [1.5, 1.0])
+    dashpot = creepcomp(Dashpot,t, [1.5])
 
     all(i -> isapprox(springpot[i], dashpot[i]), eachindex(t))
 end
