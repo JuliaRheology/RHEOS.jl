@@ -17,6 +17,7 @@ jobs:
           version: 1.4
       - name: Install Python dependencies
         run: |
+          pip install --upgrade pip
           pip install jupyter
           pip install nbconvert
       - name: Install julia dependencies
