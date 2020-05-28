@@ -10,6 +10,11 @@ julia:
   - 1.4.1
   # - nightly
 
+branches:
+  only:
+    - master
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+
 allow_failures:
   - julia: nightly
 
@@ -31,10 +36,6 @@ jobs:
     - name: "Documentation"
       julia: 1.4
       os: linux
-      branches:
-        only:
-          - master
-          - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
       install:
         - pip install --user --upgrade pip
         - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
