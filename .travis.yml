@@ -4,11 +4,11 @@ language: julia
 os:
   - linux
   - osx
-  - windows
+  # - windows
   
 julia:
   - 1.4.1
-  - nightly
+  # - nightly
 
 allow_failures:
   - julia: nightly
@@ -26,5 +26,28 @@ script:
 after_success:
   - julia -e 'import Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder()); Coveralls.submit(process_folder())'
 
-
+jobs:
+  include:
+    - name: "Documentation"
+      julia: 1.4
+      os: linux
+      branches:
+        only:
+          - master
+          - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+      install:
+        - pip install --user --upgrade pip
+        - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+            wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+          else
+            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+          fi
+        - bash miniconda.sh -b -p $HOME/miniconda
+        - export PATH="$HOME/miniconda/bin:$PATH"
+        - pip install jupyter
+        - pip install nbconvert
+      script:
+        - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
+        - julia --project=docs/ docs/make.jl
+      after_success: skip
 
