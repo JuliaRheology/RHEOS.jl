@@ -19,6 +19,7 @@ end
 
 rm("docs/src-staging", force=true, recursive=true)
 mkdir("docs/src-staging")
+println(readdir("docs"))
 for file in readdir("examples")
     if endswith(file, "ipynb")
         println(file)
