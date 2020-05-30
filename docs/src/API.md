@@ -6,6 +6,16 @@ RheoTimeData
 RheoFreqData
 RheoModelClass
 RheoModel
+freeze_params
+```
+
+## Moduli/compliance functions
+```@docs
+relaxmod
+creepcomp
+storagemod
+lossmod
+dynamicmod
 ```
 
 ## Sampling and Filtering Functions

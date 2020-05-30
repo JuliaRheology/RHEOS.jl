@@ -10,7 +10,6 @@ using JLD2
 using DataStructures
 using FunctionWrappers: FunctionWrapper
 import DSP.conv
-#import Statistics.mean
 
 # Base and stdlib imports
 import Base: +, -, *,|
@@ -68,12 +67,6 @@ export resample, indexweight, cutting, smooth, extract
 export modelfit, modelpredict, modelstepfit, modelsteppredict
 export dynamicmodelfit, dynamicmodelpredict
 
-# opt/AFM_JPKimport.jl
-export importJPK
-
-# opt/AFM_preprocessing.jl
-export contact_point
-
 
 ######################################################
 # bundled dependencies from rheos-cambridge forked repos
@@ -88,7 +81,4 @@ include("datagen.jl")
 include("processing.jl")
 include("interface.jl")
 
-#include("opt/AFM_JPKimport.jl")
-#include("opt/AFM_preprocessing.jl")
-######################################################
 end
