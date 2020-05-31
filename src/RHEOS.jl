@@ -41,7 +41,7 @@ export TimeDataType, time_only, strain_only, stress_only, strain_and_stress
 export FreqDataType, invalid_freq_data, freq_only, with_modulus
 export rheoconv, invLaplace
 export freeze_params
-export Ga, Ja
+export relaxmod, creepcomp, storagemod, lossmod, dynamicmod
 
 # IO.jl
 export importcsv, exportcsv#, savedata, loaddata, savemodel, loadmodel
@@ -67,6 +67,7 @@ export resample, indexweight, cutting, smooth, extract
 export modelfit, modelpredict, modelstepfit, modelsteppredict
 export dynamicmodelfit, dynamicmodelpredict
 
+
 ######################################################
 # bundled dependencies from rheos-cambridge forked repos
 MittLeffLiteDir = joinpath(@__DIR__, "..", "deps", "MittLeffLite", "MittLeffLite.jl")
@@ -80,5 +81,4 @@ include("datagen.jl")
 include("processing.jl")
 include("interface.jl")
 
-######################################################
 end
