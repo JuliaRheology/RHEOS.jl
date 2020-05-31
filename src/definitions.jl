@@ -388,7 +388,7 @@ Model related functionality
 ---------------------------
 =#
 """
-    RheoModelClass(name::String, params::Vector{Symbol}, G::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, J::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, constraint::FunctionWrapper{Bool,Tuple{Vector{RheoFloat}}}, info::String, expressions::NamedTuple)
+    RheoModelClass(name::String, params::Vector{Symbol}, _G::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, _Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, constraint::FunctionWrapper{Bool,Tuple{Vector{RheoFloat}}}, info::String, expressions::NamedTuple)
 
 `RheoModelClass` contains a model name, it's symbolic parameters and all its moduli (both single-input and array-input versions).
 
@@ -597,7 +597,7 @@ end
 
 
 """
-    RheoModel(G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, expressions::NamedTuple)
+    RheoModel(_G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, _Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, expressions::NamedTuple)
 
 `RheoModel` contains all known moduli of a particular model, as for a `RheoModelClass` model name. However, a `RheoModel`
 has all it's parameters fixed to known values.
