@@ -6,7 +6,6 @@ RheoTimeData
 RheoFreqData
 RheoModelClass
 RheoModel
-freeze_params
 ```
 
 ## Moduli/compliance functions
