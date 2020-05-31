@@ -46,7 +46,7 @@ The sections in this documentation each aim to provide tutorials in different el
 1. Install Julia (latest version recommended, 1.4)
 2. From Julia REPL, enter pkg mode by pressing ```]```
 3. (Optional) Enable desired Project.toml environment
-4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
+4. Run the command ```add RHEOS```
 
 ## Embedded Dependencies
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
