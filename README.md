@@ -33,11 +33,9 @@ If you installed RHEOS using the instructions above then you will have the _late
 ## Citation
 If you use RHEOS in your work, please consider citing the following papers as appropriate:
 
-J. L. Kaplan, A. Bonfanti, A. J. Kabla (2019). _RHEOS.jl -- A Julia Package for Rheology Data Analysis_. Journal of Open Source Software, 4(41), 1700, [https://doi.org/10.21105/joss.01700](https://doi.org/10.21105/joss.01700)
++ J. L. Kaplan, A. Bonfanti, A. J. Kabla (2019). _RHEOS.jl -- A Julia Package for Rheology Data Analysis_. Journal of Open Source Software, 4(41), 1700, [https://doi.org/10.21105/joss.01700](https://doi.org/10.21105/joss.01700)
 
-A. Bonfanti, J. L. Kaplan, G. Charras, J. Kabla (2020) *Fractional viscoelastic models for power-law materials*, arXiv::2003.07834
-
-_TBA: Forthcoming Review_
++ A. Bonfanti, J. L. Kaplan, G. Charras, J. Kabla (2020) *Fractional viscoelastic models for power-law materials*, arXiv::2003.07834
 
 ## Embedded Dependencies
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
