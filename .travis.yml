@@ -4,11 +4,11 @@ language: julia
 os:
   - linux
   - osx
-  # - windows
+  - windows
   
 julia:
   - 1.4.1
-  # - nightly
+  - nightly
 
 branches:
   only:
