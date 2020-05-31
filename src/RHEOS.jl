@@ -67,6 +67,9 @@ export resample, indexweight, cutting, smooth, extract
 export modelfit, modelpredict, modelstepfit, modelsteppredict
 export dynamicmodelfit, dynamicmodelpredict
 
+#interface.jl
+export Interface
+export AFM, Tweezers
 
 ######################################################
 # bundled dependencies from rheos-cambridge forked repos
