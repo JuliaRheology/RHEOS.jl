@@ -43,8 +43,8 @@ The sections in this documentation each aim to provide tutorials in different el
 **Note that all sections in this documentation are compiled from Jupyter notebooks (located in RHEOS/examples/) that can be locally modified to explore the functionalities offered by RHEOS** (Apart from [API](@ref) and [Architecture](@ref) sections.)
 
 ## Installation
-1. Install Julia (latest version recommended, 1.4)
-2. From Julia REPL, enter pkg mode by pressing ```]```
+1. Install Julia (latest version recommended)
+2. From interactive command-line Julia REPL, enter pkg mode by pressing ```]```
 3. (Optional) Enable desired Project.toml environment
 4. Run the command ```add RHEOS```
 
@@ -59,7 +59,8 @@ If you use RHEOS in your work, please consider citing the following papers as ap
 
 J. L. Kaplan, A. Bonfanti, A. J. Kabla (2019). _RHEOS.jl -- A Julia Package for Rheology Data Analysis_. Journal of Open Source Software, 4(41), 1700, [https://doi.org/10.21105/joss.01700](https://doi.org/10.21105/joss.01700)
 
-_TBA: Forthcoming Review_
+A. Bonfanti, J. L. Kaplan, G. Charras, A. J. Kabla (2020) *Fractional viscoelastic models for power-law materials*, arXiv::2003.07834, to appear in Soft Matter.
+
 
 ## References
 + W. N. Findley, J. S. Lai, K. Onaran (1989). *Creep and Relaxation of Nonlinear Viscoelastic Materials (with an Introduction to Linear Viscoelasticity)*, Dover Publications, New York. 
