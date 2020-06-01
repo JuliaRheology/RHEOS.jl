@@ -25,7 +25,7 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 1. Install the latest version of Julia
 2. From Julia interactive command-line REPL, enter pkg mode by pressing ```]```
 3. (Optional) Enable desired Project.toml environment
-4. Run the command ```add "https://github.com/JuliaRheology/RHEOS.jl"```
+4. Run the command ```add RHEOS```
 
 ## Documentation
 If you installed RHEOS using the instructions above then you will have the _latest stable release_ of RHEOS; to access the documentation for this version [click here][docs-sta-url] or the blue `docs/stable` badge at the top of this README page. To access the _latest documentation built directly from the master branch_ [click here][docs-dev-url] or the blue `docs/dev` badge at the top of this README page. 
