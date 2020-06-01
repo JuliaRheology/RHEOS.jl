@@ -21,3 +21,13 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 julia = "1.4"
+DSP = "0.6"
+DataStructures = "0.17"
+Documenter = "0.24"
+FunctionWrappers = "1.1"
+ImageFiltering = "0.6"
+InverseLaplace = "0.3"
+JLD2 = "0.1"
+NLopt = "0.6"
+QuadGK = "2.3"
+SpecialFunctions = "0.10"
