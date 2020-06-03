@@ -9,6 +9,8 @@ using NLopt
 using JLD2
 using DataStructures
 using FunctionWrappers: FunctionWrapper
+using Dierckx
+
 import DSP.conv
 
 # Base and stdlib imports
