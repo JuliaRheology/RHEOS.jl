@@ -5,23 +5,36 @@ os:
   - linux
   - osx
   - windows
-
+  
 julia:
-  - 1.4.1
+  - 1.4.2
   - nightly
 
-matrix:
-  allow_failures:
-    - julia: 1.4.1
-    - julia: nightly
+branches:
+  only:
+    - master
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+
+allow_failures:
+  - julia: nightly
 
 notifications:
   email: false
 
+git:
+  depth: false
+
+script:
+  - export JULIA_PROJECT=""
+  - julia --project -e 'using Pkg; Pkg.build(); Pkg.test(; coverage=true);'
+
+after_success:
+  - julia -e 'import Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder()); Coveralls.submit(process_folder())'
+
 jobs:
   include:
-    - stage: "Documentation"
-      julia: 1.4.1
+    - name: "Documentation"
+      julia: 1.4
       os: linux
       install:
         - pip install --user --upgrade pip
@@ -38,5 +51,4 @@ jobs:
         - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
         - julia --project=docs/ docs/make.jl
       after_success: skip
-      
 

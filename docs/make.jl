@@ -1,11 +1,7 @@
 using Documenter, RHEOS
-
-
-##
-
+###
 # convert Jupyter notebooks to markdown and do some simple preprocessing before
 # feeding into Documenter.jl
-
 function convert_to_markdown(file)
     run(`jupyter nbconvert examples/$file --to markdown --template docs/documenter.tpl --output-dir docs/src-staging`)
     return "docs/src-staging/$(replace(file, "ipynb"=>"md"))"
@@ -23,26 +19,25 @@ end
 
 rm("docs/src-staging", force=true, recursive=true)
 mkdir("docs/src-staging")
+# println(readdir("docs"))
+# println(pwd())
 for file in readdir("examples")
     if endswith(file, "ipynb")
+        # println(file)
         file |> convert_to_markdown |> convert_equations
     elseif !startswith(file, ".")
         cp("examples/$file", "docs/src-staging/$file")
     end
 end
-symlink("../src/index.md","docs/src-staging/index.md")
-symlink("../src/API.md","docs/src-staging/API.md")
-symlink("../src/architecture.md","docs/src-staging/architecture.md")
-
-
+cp("docs/src/index.md","docs/src-staging/index.md")
+cp("docs/src/API.md","docs/src-staging/API.md")
+cp("docs/src/architecture.md","docs/src-staging/architecture.md")
 
 mkdir("docs/src-staging/assets")
 cp("docs/src/assets/logo.png", "docs/src-staging/assets/logo.png")
 cp("docs/src/assets/diagram.svg", "docs/src-staging/assets/diagram.svg")
-##
 
 # highlight output cells (i.e. anything withouout a language specified) white
-
 @eval Documenter.Writers.HTMLWriter function mdconvert(c::Markdown.Code, parent::MDBlockContext; kwargs...)
     @tags pre code
     language = isempty(c.language) ? "none" : c.language
@@ -50,9 +45,6 @@ cp("docs/src/assets/diagram.svg", "docs/src-staging/assets/diagram.svg")
 end
 
 ##
-
-
-
 makedocs(modules=[RHEOS],
          doctest=false, clean=true,
          format =Documenter.HTML(),
@@ -60,24 +52,22 @@ makedocs(modules=[RHEOS],
          source = "src-staging",
          authors="Louis Kaplan",
          pages = [
-             "Home" => "index.md",
+         "Home" => "index.md",
 	     "Architecture" => "architecture.md",
 	     "File I/O" => "fileIO.md",
 	     "Preprocessing" => "preprocessing.md",
 	     "Generating Data" => "generatingdata.md",
 	     "Fit and Predict" => ["Time data" => "fitpredictTime.md",
-				   "Frequency data" => "fitpredictFreq.md"],
-             "Models" => ["Basic Elements" => "elements.md",
-			 "Maxwell" => "fractionalMaxwell.md",
-			 "Kelvin-Voigt" => "fractionalKelvinVoigt.md",
-			 "Zener" => "fractionalZener.md",
-			 "Poynting-Thomson" => "fractionalPT.md",
-		         "Burgers" => "burgers.md",
-			 "Create Your Model" => "createmodel.md"],
-	     "Examples" => "examples.md",
-            #  "Fitting Data" => "fittingdata.md",
-            #  "Predicting Responses" => "predictingresponse.md",
-              "API" => "API.md"
+				               "Frequency data" => "fitpredictFreq.md"],
+         "Models" => ["Basic Elements" => "elements.md",
+                      "Maxwell" => "fractionalMaxwell.md",
+			          "Kelvin-Voigt" => "fractionalKelvinVoigt.md",
+			          "Zener" => "fractionalZener.md",
+			          "Poynting-Thomson" => "fractionalPT.md",
+		              "Burgers" => "burgers.md",
+			          "Create Your Model" => "createmodel.md"],
+	    "Examples" => "examples.md",
+         "API" => "API.md"
          ]
          )
 
