@@ -51,24 +51,33 @@ end
 function resample(d::RheoTimeData, t::Vector{T}) where T<:Real
 
     @assert hastime(d) "Data without time information cannot be resampled."
-    if hasstress(d)
-        σr = Spline1D(d.t,d.σ)(t)
-    else
-        σr = d.σ
-    end
-    if hasstrain(d)
-        ϵr = Spline1D(d.t,d.ϵ)(t)
-    else
-        ϵr = d.ϵ
-    end
-
+    σr = hasstress(d) ? Spline1D(d.t,d.σ)(t) : d.σ
+    ϵr = hasstress(d) ? Spline1D(d.t,d.ϵ)(t) : d.ϵ
     log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=(t = t, ), keywords=NamedTuple() ),
                                     (comment="Resample the data",) ) ]
-
     return RheoTimeData(σr, ϵr, t, log)
 
 end
 
+function resample(d::RheoTimeData; scale::T1=1, dt::T2=0) where {T1<:Real, T2<:Real}
+
+    @assert hastime(d) "Data without time information cannot be resampled."
+    if scale != 1
+        idxt=Array(1:length(d.t))
+        newidxt=Array(1:scale:length(d.t))
+        t=Spline1D(idxt,d.t)(newidxt)
+    else
+        mn, mx = extrema(d.t)
+        dt==0 ? δt=(mx-mn)/(length(d.t)-1) : δt=dt
+        t=Array{RheoFloat}(mn:δt:mx)
+    end
+    σr = hasstress(d) ? Spline1D(d.t,d.σ)(t) : d.σ
+    ϵr = hasstrain(d) ? Spline1D(d.t,d.ϵ)(t) : d.ϵ
+    log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=NamedTuple(), keywords=(scale = scale, dt = dt) ),
+                                    (comment="Resample the data",) ) ]
+    return RheoTimeData(σr, ϵr, t, log)
+
+end
 
 
 """
