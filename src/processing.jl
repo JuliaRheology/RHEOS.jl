@@ -58,7 +58,18 @@ but this can be negated by providing the keyword argument `includelastel=false`.
 #     return RheoTimeData(σr, ϵr, t, log)
 #
 # end
+"""
+    resample(d::RheoTimeData [, t = array of time value or range, dt = time step required, scale = multiplicator to apply to existing sampling rate] )
 
+Resample data.
+
+Usage:
+
+* 'resample(d)' would keep the number of sampling points the same but interpolate to set a uniform time step.
+* 'resample(d, t=-1:0.1:10)' would resample by interpolation to generate a new dataset with time points given by the range or array values passed with keyword 't'.
+* 'resample(d, dt=0.1)' would resample by interpolation to generate a new dataset with time step 'dt'.
+* 'resample(d, scale=2)' would resample by multiplying the timestep by 'scale'. This could down-sample (scale>1) or upsample (scale<1). If timestep are non uniform, it would interpolate values accordingly.
+"""
 function resample(d::RheoTimeData; t::Union{Vector{T},R}=RheoFloat[], scale::T1=1, dt::T2=0) where {T<:Real, R <: AbstractRange, T1<:Real, T2<:Real}
 
     @assert hastime(d) "Data without time information cannot be resampled."
