@@ -39,23 +39,6 @@ end
 #      end
 # end
 
-"""
-    showlog(d::Union{RheoTimeData,RheoFreqData})
-
-shows the record of operations on a rheological data.
-"""
-function showlog(d::Union{RheoTimeData,RheoFreqData})
-    if d.log != nothing
-        for idx in 1:length(d.log)
-            println(idx)
-            print("     action = "); println(d.log[idx].action)
-            print("     info   = "); println(d.log[idx].info)
-        end
-    else
-        println("No log data available")
-    end
-end
-
 
 #=
 -------------------------------
