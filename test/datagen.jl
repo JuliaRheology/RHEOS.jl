@@ -10,9 +10,9 @@ end
 @test _timeline()
 
 function _frequencyspec()
-    freq_instance = frequencyspec(ω_start=0.0, ω_end=15.0, step=0.1)
+    freq_instance = frequencyspec(ω_start=0.01, ω_end=100, logstep=0.1)
 
-    typeof(freq_instance)==RheoFreqData && freq_instance.ω==(0.0:0.1:15.0)
+    typeof(freq_instance)==RheoFreqData && (freq_instance.ω[21]≈1.)
 end
 @test _frequencyspec()
 
