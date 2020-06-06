@@ -91,8 +91,6 @@ function resample(d::RheoTimeData; t::Union{Vector{T},R}=RheoFloat[], scale::T1=
             t = Vector{RheoFloat}(t)
         end
     end
-    println(keywords)
-    println(t)
     σr = hasstress(d) ? Spline1D(d.t,d.σ)(t) : d.σ
     ϵr = hasstrain(d) ? Spline1D(d.t,d.ϵ)(t) : d.ϵ
     log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=NamedTuple(), keywords=keywords ),
