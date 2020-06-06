@@ -18,62 +18,73 @@ argument for `elperiods`.
 The last element may or may not be included with a normal downsampling. By default the last element is forced to be included
 but this can be negated by providing the keyword argument `includelastel=false`.
 """
-function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
+# function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
+#
+#     @assert (count(iszero, elperiods)==0) "Number of elements cannot be zero"
+#     # convert boundaries from times to element indices
+#     if isnothing(time_boundaries)
+#         boundaries = [1,length(self.t)];
+#     else
+#         boundaries = closestindices(self.t, time_boundaries)
+#     end
+#
+#     check = RheoTimeDataType(self)
+#     if (check == strain_only)
+#         (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
+#         sigma = [];
+#     elseif (check == stress_only)
+#         (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods; includelastel=includelast)
+#         epsilon = [];
+#     elseif (check == strain_and_stress)
+#         (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods; includelastel=includelast)
+#         (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
+#     end
+#
+#     log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:resample, params=(elperiods = elperiods, ), keywords=(time_boundaries = time_boundaries, ) ),
+#                                         (comment="Resample the data",) ) ]
+#
+#     return RheoTimeData(sigma, epsilon, time, log)
+#
+# end
 
-    @assert (count(iszero, elperiods)==0) "Number of elements cannot be zero"
-    # convert boundaries from times to element indices
-    if isnothing(time_boundaries)
-        boundaries = [1,length(self.t)];
-    else
-        boundaries = closestindices(self.t, time_boundaries)
-    end
 
-    check = RheoTimeDataType(self)
-    if (check == strain_only)
-        (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
-        sigma = [];
-    elseif (check == stress_only)
-        (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods; includelastel=includelast)
-        epsilon = [];
-    elseif (check == strain_and_stress)
-        (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods; includelastel=includelast)
-        (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
-    end
+# function resample(d::RheoTimeData, t::Vector{T}) where T<:Real
+#
+#     @assert hastime(d) "Data without time information cannot be resampled."
+#     σr = hasstress(d) ? Spline1D(d.t,d.σ)(t) : d.σ
+#     ϵr = hasstress(d) ? Spline1D(d.t,d.ϵ)(t) : d.ϵ
+#     log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=(t = t, ), keywords=NamedTuple() ),
+#                                     (comment="Resample the data",) ) ]
+#     return RheoTimeData(σr, ϵr, t, log)
+#
+# end
 
-    log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:resample, params=(elperiods = elperiods, ), keywords=(time_boundaries = time_boundaries, ) ),
-                                        (comment="Resample the data",) ) ]
-
-    return RheoTimeData(sigma, epsilon, time, log)
-
-end
-
-
-function resample(d::RheoTimeData, t::Vector{T}) where T<:Real
+function resample(d::RheoTimeData; t::Union{Vector{T},R}=RheoFloat[], scale::T1=1, dt::T2=0) where {T<:Real, R <: AbstractRange, T1<:Real, T2<:Real}
 
     @assert hastime(d) "Data without time information cannot be resampled."
-    σr = hasstress(d) ? Spline1D(d.t,d.σ)(t) : d.σ
-    ϵr = hasstress(d) ? Spline1D(d.t,d.ϵ)(t) : d.ϵ
-    log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=(t = t, ), keywords=NamedTuple() ),
-                                    (comment="Resample the data",) ) ]
-    return RheoTimeData(σr, ϵr, t, log)
-
-end
-
-function resample(d::RheoTimeData; scale::T1=1, dt::T2=0) where {T1<:Real, T2<:Real}
-
-    @assert hastime(d) "Data without time information cannot be resampled."
-    if scale != 1
-        idxt=Array(1:length(d.t))
-        newidxt=Array(1:scale:length(d.t))
-        t=Spline1D(idxt,d.t)(newidxt)
+    if length(t)==0
+        if scale != 1
+            idxt=Array(1:length(d.t))
+            newidxt=Array(1:scale:length(d.t))
+            t=Spline1D(idxt,d.t)(newidxt)
+            keywords=(scale = scale,)
+        else
+            mn, mx = extrema(d.t)
+            dt==0 ? δt=(mx-mn)/(length(d.t)-1) : δt=dt
+            t=Array{RheoFloat}(mn:δt:mx)
+            keywords=(dt = dt,)
+        end
     else
-        mn, mx = extrema(d.t)
-        dt==0 ? δt=(mx-mn)/(length(d.t)-1) : δt=dt
-        t=Array{RheoFloat}(mn:δt:mx)
+        keywords=(t = t,)
+        if typeof(t) <: AbstractRange
+            t = Vector{RheoFloat}(t)
+        end
     end
+    println(keywords)
+    println(t)
     σr = hasstress(d) ? Spline1D(d.t,d.σ)(t) : d.σ
     ϵr = hasstrain(d) ? Spline1D(d.t,d.ϵ)(t) : d.ϵ
-    log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=NamedTuple(), keywords=(scale = scale, dt = dt) ),
+    log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=NamedTuple(), keywords=keywords ),
                                     (comment="Resample the data",) ) ]
     return RheoTimeData(σr, ϵr, t, log)
 
