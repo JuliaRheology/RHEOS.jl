@@ -107,6 +107,33 @@ function RheoTimeDataType(d::RheoTimeData)
     return check_time_data_consistency(d.t,d.ϵ,d.σ)
 end
 
+"""
+    hastime(d::RheoTimeData)
+
+returns 'true' if d contains a time array
+"""
+function hastime(d::RheoTimeData)
+    return (d.t != RheoFloat[])
+end
+
+"""
+    hasstress(d::RheoTimeData)
+
+returns 'true' if d contains stress data
+"""
+function hasstress(d::RheoTimeData)
+    return (d.σ != RheoFloat[])
+end
+
+"""
+    hasstrain(d::RheoTimeData)
+
+returns 'true' if d contains strain data
+"""
+function hasstrain(d::RheoTimeData)
+    return (d.ϵ != RheoFloat[])
+end
+
 @enum LoadingType strain_imposed=1 stress_imposed=2
 
 function Base.show(io::IO, d::RheoTimeData)

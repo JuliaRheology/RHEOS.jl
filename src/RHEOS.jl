@@ -9,6 +9,8 @@ using NLopt
 using JLD2
 using DataStructures
 using FunctionWrappers: FunctionWrapper
+using Dierckx
+
 import DSP.conv
 
 # Base and stdlib imports
@@ -34,11 +36,13 @@ export RheoFloat
 
 # definitions.jl
 export RheoLogItem, RheoLog, rheologrun
-export RheoTimeData, RheoTimeDataType, RheoFreqData, RheoFreqDataType, check_time_data_consistency
-export RheoModelClass, RheoModel, model_parameters
+export RheoTimeData, RheoFreqData
+export RheoTimeDataType, RheoFreqDataType, check_time_data_consistency
 export LoadingType, strain_imposed, stress_imposed
+export hastime, hasstress, hasstrain
 export TimeDataType, time_only, strain_only, stress_only, strain_and_stress
 export FreqDataType, invalid_freq_data, freq_only, with_modulus
+export RheoModelClass, RheoModel, model_parameters
 export rheoconv, invLaplace
 export freeze_params
 export relaxmod, creepcomp, storagemod, lossmod, dynamicmod

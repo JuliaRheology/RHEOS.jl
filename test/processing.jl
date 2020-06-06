@@ -2,77 +2,109 @@ println("===============================================")
 println("Testing processing.jl")
 println("===============================================")
 
-function _resample_strainonly()
-    t0 = collect(0.0:0.01:1.0)
-    ϵ0 = t0.^2
 
-    t1 = collect(0.0:0.1:1.0)
-    ϵ1 = t1.^2
-
-    data0 = RheoTimeData(t = t0, ϵ = ϵ0)
-
-    dataout = resample(data0, -10)
-
-    dataout.t==t1 && dataout.ϵ==ϵ1
+function _resample_timeonly()
+    d = timeline(t_start=0, t_end=1, step=1//4)
+    d = resample(d,dt=0.1)
+    (length(d.t)==11) && (d.t[2]==0.1)
 end
-@test _resample_strainonly()
+@test _resample_timeonly()
 
 function _resample_stressonly()
-    t0 = collect(0.0:0.01:1.0)
-    σ0 = t0.^2
+    d = RheoTimeData(σ=[1,2,4,7], t=[0,1,3,6])
+    d = resample(d) # make timestep uniform without changing number of points
+    (length(d.t)==4) && (d.t[2]==2) && (d.σ[2]≈3)
 
-    t1 = collect(0.0:0.1:1.0)
-    σ1 = t1.^2
-
-    data0 = RheoTimeData(t = t0, σ = σ0)
-
-    dataout = resample(data0, -10)
-
-    dataout.t==t1 && dataout.σ==σ1
 end
 @test _resample_stressonly()
 
-function _resample_stressandstrain()
-    t0 = collect(0.0:0.01:1.0)
-    ϵ0 = t0.^2
-    σ0 = t0.^3
-
-    t1 = collect(0.0:0.1:1.0)
-    ϵ1 = t1.^2
-    σ1 = t1.^3
-
-    data0 = RheoTimeData(t = t0, σ = σ0, ϵ = ϵ0)
-
-    dataout = resample(data0, -10)
-
-    dataout.t==t1 && dataout.ϵ==ϵ1 && dataout.σ==σ1
+function _resample_strainonly()
+    d = RheoTimeData(ϵ=[1,2,4,7], t=[0,1,3,6])
+    d = resample(d,t=1:1//4:2)
+    (length(d.t)==5) && (d.t[2]==5//4) && (d.ϵ[2]≈9//4)
 end
-@test _resample_stressandstrain()
+@test _resample_strainonly()
 
-function _resample_stressandstrain_multiplesections()
-    t0 = collect(-10.0:0.5:10.0)
-    ϵ0 = 2*t0
-    σ0 = 2*t0
-
-    # data for comparison composed
-    # of multiple sections
-    t1a = collect(-10.0:0.1:-5.1)
-    t1b = collect(-5.0:1.0:0.0)
-    t1c = collect(0.05:0.05:4.95)
-    t1d = collect(5.0:2.0:10.0)
-    t1e = [t0[end]]
-
-    t1 = vcat(t1a, t1b, t1c, t1d, t1e)
-    ϵ1 = 2*t1
-    σ1 = 2*t1
-
-    data0 = RheoTimeData(t = t0, σ = σ0, ϵ = ϵ0)
-
-    dataout = resample(data0, [5, -2, 10, -4]; time_boundaries = [-10.0, -5.0, 0.0, 5.0, 10.0])
-
-    dataout.t==t1 && dataout.ϵ==ϵ1 && dataout.σ==σ1
+function _resample_stressstrain()
+    d = RheoTimeData(ϵ=[1,2,4,7], t=[0,1,3,6], σ=[7,4,2,1])
+    d = resample(d,scale=1//2)
+    (length(d.t)==7) && (d.t[4]≈1.875) && (d.σ[4]≈2.6328125) && (d.ϵ[4]≈2.875)
 end
-@test _resample_stressandstrain_multiplesections()
+@test _resample_stressstrain()
+
+
+
+# function _resample_strainonly()
+#     t0 = collect(0.0:0.01:1.0)
+#     ϵ0 = t0.^2
+#
+#     t1 = collect(0.0:0.1:1.0)
+#     ϵ1 = t1.^2
+#
+#     data0 = RheoTimeData(t = t0, ϵ = ϵ0)
+#
+#     dataout = resample(data0, -10)
+#
+#     dataout.t==t1 && dataout.ϵ==ϵ1
+# end
+# @test _resample_strainonly()
+#
+# function _resample_stressonly()
+#     t0 = collect(0.0:0.01:1.0)
+#     σ0 = t0.^2
+#
+#     t1 = collect(0.0:0.1:1.0)
+#     σ1 = t1.^2
+#
+#     data0 = RheoTimeData(t = t0, σ = σ0)
+#
+#     dataout = resample(data0, -10)
+#
+#     dataout.t==t1 && dataout.σ==σ1
+# end
+# @test _resample_stressonly()
+#
+# function _resample_stressandstrain()
+#     t0 = collect(0.0:0.01:1.0)
+#     ϵ0 = t0.^2
+#     σ0 = t0.^3
+#
+#     t1 = collect(0.0:0.1:1.0)
+#     ϵ1 = t1.^2
+#     σ1 = t1.^3
+#
+#     data0 = RheoTimeData(t = t0, σ = σ0, ϵ = ϵ0)
+#
+#     dataout = resample(data0, -10)
+#
+#     dataout.t==t1 && dataout.ϵ==ϵ1 && dataout.σ==σ1
+# end
+# @test _resample_stressandstrain()
+#
+# function _resample_stressandstrain_multiplesections()
+#     t0 = collect(-10.0:0.5:10.0)
+#     ϵ0 = 2*t0
+#     σ0 = 2*t0
+#
+#     # data for comparison composed
+#     # of multiple sections
+#     t1a = collect(-10.0:0.1:-5.1)
+#     t1b = collect(-5.0:1.0:0.0)
+#     t1c = collect(0.05:0.05:4.95)
+#     t1d = collect(5.0:2.0:10.0)
+#     t1e = [t0[end]]
+#
+#     t1 = vcat(t1a, t1b, t1c, t1d, t1e)
+#     ϵ1 = 2*t1
+#     σ1 = 2*t1
+#
+#     data0 = RheoTimeData(t = t0, σ = σ0, ϵ = ϵ0)
+#
+#     dataout = resample(data0, [5, -2, 10, -4]; time_boundaries = [-10.0, -5.0, 0.0, 5.0, 10.0])
+#
+#     dataout.t==t1 && dataout.ϵ==ϵ1 && dataout.σ==σ1
+# end
+# @test _resample_stressandstrain_multiplesections()
 
 function _indexweight_oneregiondownsample_includelastel()
     timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
@@ -1242,7 +1274,7 @@ function _modelsteppredict_sing_relax(tol)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
     computed_response = modelsteppredict(data0, model)
-    
+
     all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), 1:length(t))
 end
 @test _modelsteppredict_sing_relax(tol)

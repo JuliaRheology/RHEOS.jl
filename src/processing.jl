@@ -18,34 +18,87 @@ argument for `elperiods`.
 The last element may or may not be included with a normal downsampling. By default the last element is forced to be included
 but this can be negated by providing the keyword argument `includelastel=false`.
 """
-function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
+# function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
+#
+#     @assert (count(iszero, elperiods)==0) "Number of elements cannot be zero"
+#     # convert boundaries from times to element indices
+#     if isnothing(time_boundaries)
+#         boundaries = [1,length(self.t)];
+#     else
+#         boundaries = closestindices(self.t, time_boundaries)
+#     end
+#
+#     check = RheoTimeDataType(self)
+#     if (check == strain_only)
+#         (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
+#         sigma = [];
+#     elseif (check == stress_only)
+#         (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods; includelastel=includelast)
+#         epsilon = [];
+#     elseif (check == strain_and_stress)
+#         (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods; includelastel=includelast)
+#         (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
+#     end
+#
+#     log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:resample, params=(elperiods = elperiods, ), keywords=(time_boundaries = time_boundaries, ) ),
+#                                         (comment="Resample the data",) ) ]
+#
+#     return RheoTimeData(sigma, epsilon, time, log)
+#
+# end
 
-    @assert (count(iszero, elperiods)==0) "Number of elements cannot be zero"
-    # convert boundaries from times to element indices
-    if isnothing(time_boundaries)
-        boundaries = [1,length(self.t)];
+
+# function resample(d::RheoTimeData, t::Vector{T}) where T<:Real
+#
+#     @assert hastime(d) "Data without time information cannot be resampled."
+#     σr = hasstress(d) ? Spline1D(d.t,d.σ)(t) : d.σ
+#     ϵr = hasstress(d) ? Spline1D(d.t,d.ϵ)(t) : d.ϵ
+#     log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=(t = t, ), keywords=NamedTuple() ),
+#                                     (comment="Resample the data",) ) ]
+#     return RheoTimeData(σr, ϵr, t, log)
+#
+# end
+"""
+    resample(d::RheoTimeData [, t = array of time value or range, dt = time step required, scale = multiplicator to apply to existing sampling rate] )
+
+Resample data.
+
+Usage:
+
+* 'resample(d)' would keep the number of sampling points the same but interpolate to set a uniform time step.
+* 'resample(d, t=-1:0.1:10)' would resample by interpolation to generate a new dataset with time points given by the range or array values passed with keyword 't'.
+* 'resample(d, dt=0.1)' would resample by interpolation to generate a new dataset with time step 'dt'.
+* 'resample(d, scale=2)' would resample by multiplying the timestep by 'scale'. This could down-sample (scale>1) or upsample (scale<1). If timestep are non uniform, it would interpolate values accordingly.
+"""
+function resample(d::RheoTimeData; t::Union{Vector{T},R}=RheoFloat[], scale::T1=1, dt::T2=0) where {T<:Real, R <: AbstractRange, T1<:Real, T2<:Real}
+
+    @assert hastime(d) "Data without time information cannot be resampled."
+    if length(t)==0
+        if scale != 1
+            idxt=Array(1:length(d.t))
+            newidxt=Array(1:scale:length(d.t))
+            t=Spline1D(idxt,d.t)(newidxt)
+            keywords=(scale = scale,)
+        else
+            mn, mx = extrema(d.t)
+            dt==0 ? δt=(mx-mn)/(length(d.t)-1) : δt=dt
+            t=Array{RheoFloat}(mn:δt:mx)
+            keywords=(dt = dt,)
+        end
     else
-        boundaries = closestindices(self.t, time_boundaries)
+        keywords=(t = t,)
+        if typeof(t) <: AbstractRange
+            t = Vector{RheoFloat}(t)
+        end
     end
-
-    check = RheoTimeDataType(self)
-    if (check == strain_only)
-        (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
-        sigma = [];
-    elseif (check == stress_only)
-        (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods; includelastel=includelast)
-        epsilon = [];
-    elseif (check == strain_and_stress)
-        (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods; includelastel=includelast)
-        (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
-    end
-
-    log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:resample, params=(elperiods = elperiods, ), keywords=(time_boundaries = time_boundaries, ) ),
-                                        (comment="Resample the data",) ) ]
-
-    return RheoTimeData(sigma, epsilon, time, log)
+    σr = hasstress(d) ? Spline1D(d.t,d.σ)(t) : d.σ
+    ϵr = hasstrain(d) ? Spline1D(d.t,d.ϵ)(t) : d.ϵ
+    log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=NamedTuple(), keywords=keywords ),
+                                    (comment="Resample the data",) ) ]
+    return RheoTimeData(σr, ϵr, t, log)
 
 end
+
 
 """
     indexweight(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
@@ -53,9 +106,9 @@ end
 This function returns array indices (i.e. an array of integers) which can be sent to the `modelfit`, `modelstepfit` or `modeldiffeqfit` functions
 to provide a weighted fitting whilst maintaining constant sample-rate.
 
-`indexweight` can underweight indices or overweight them. If `elperiods` in a given boundary is negative, every `abs(n)` index will be used, where `n` is the `elperiod` 
+`indexweight` can underweight indices or overweight them. If `elperiods` in a given boundary is negative, every `abs(n)` index will be used, where `n` is the `elperiod`
 corresponding to a given boundary. If `n` is positive, then indicies will be duplicated `n` times such that they are given a higher weighting during the fitting procedure.
-If `time_boundaries` are not specified, resampling is applied to the whole set of data. If number of elements per period (`elperiods`) is `1` or `-1` it returns the original 
+If `time_boundaries` are not specified, resampling is applied to the whole set of data. If number of elements per period (`elperiods`) is `1` or `-1` it returns the original
 indicies for that boundary, whilst `0` is not accepted as a valid argument for `elperiods`.
 
 The last element may or may not be included. By default the last element is forced to be included
@@ -68,7 +121,7 @@ function indexweight(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_bo
     else
         boundaries = closestindices(self.t, time_boundaries)
     end
-    
+
     # assert correct function signature
     @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
     @assert (count(iszero, elperiods)==0) "Number of elements cannot be zero"
@@ -301,7 +354,7 @@ end
 function fill_upper_bounds(model::RheoModelClass, hi::Union{NamedTuple,Nothing})
     if isnothing(hi)
         hia = nothing
-    
+
     elseif length(hi)<length(model.params)
         hia = Vector{RheoFloat}(undef, length(model.params))
         for (i,p) in enumerate(model.params)
