@@ -5,6 +5,19 @@
 timeline generation function forms the basis of any load-generation workflow
 ----------------------------------------------------------------------------
 =#
+
+"""
+    timeline(r)
+
+Generate `RheoTimeData` struct with only the time data based on the range provided.
+
+    * timeline(0:0.1:10)
+"""
+function timeline(r::R, savelog = true) where R <: AbstractRange
+    log = savelog ? [RheoLogItem( (type=:source, funct=:timeline, params=(r,), keywords=()), (comment="timeline created", type=time_only))] : nothing
+    RheoTimeData([], [], Vector{RheoFloat}(r), log)
+end
+
 """
     timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end - t_start)/250.)
 
@@ -14,11 +27,10 @@ Generate `RheoTimeData` struct with only the time data.
 
 - `t_start`: Starting time, typically 0
 - `t_end`: End time
-- `step`: Time between sample
+- `step`: Time between sample. Default set in order to provide ≈ 250 time points.
 """
 function timeline(;t_start::Real = 0., t_end::Real = 10., step::Real = (t_end - t_start)/250., savelog = true)
-    log = savelog ? [RheoLogItem( (type=:source, funct=:timeline, params=(), keywords=(t_start=t_start, t_end=t_end, step=step)), (comment="timeline created",))] : nothing
-    RheoTimeData([], [], collect(t_start:step:t_end), log)
+    timeline(t_start:step:t_end, savelog)
 end
 
 

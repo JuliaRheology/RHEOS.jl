@@ -1,3 +1,7 @@
+println("===============================================")
+println("Testing datagen.jl")
+println("===============================================")
+
 function _timeline()
     time_instance = timeline(t_start=0.0, t_end=15.0, step=0.1)
 
@@ -57,7 +61,7 @@ function _stairs()
     test3 = all(v -> v==1.0, imposed.σ[(imposed.t.>=7) .& (imposed.t.<11)])
     test4 = all(v -> v==1.5, imposed.σ[(imposed.t.>=11) .& (imposed.t.<15)])
     test5 = all(v -> v==2.0, imposed.σ[imposed.t.>=15])
-    
+
     test1 && test2 && test3 && test4 && test5
 end
 @test _stairs()
