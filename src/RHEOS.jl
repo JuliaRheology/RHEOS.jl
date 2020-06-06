@@ -35,7 +35,7 @@ const RheovecOrNone = Union{Vector{RheoFloat}, Nothing}
 export RheoFloat
 
 # definitions.jl
-export RheoLogItem, RheoLog, rheologrun
+export RheoLogItem, RheoLog, rheologrun, showlog
 export RheoTimeData, RheoFreqData
 export RheoTimeDataType, RheoFreqDataType, check_time_data_consistency
 export LoadingType, strain_imposed, stress_imposed
