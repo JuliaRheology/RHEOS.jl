@@ -51,7 +51,7 @@ If you believe you have found any bugs or invalid behaviour in RHEOS, please fee
 
 + J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah (2017). *Julia: A Fresh Approach to Numerical Computing*, SIAM Review, doi: 10.1137/141000671.
 
-[travis-img]: https://travis-ci.org/JuliaRheology/RHEOS.jl.svg
+[travis-img]: https://travis-ci.org/JuliaRheology/RHEOS.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/JuliaRheology/RHEOS.jl
 
 [docs-sta-img]: https://img.shields.io/badge/docs-stable-blue.svg
