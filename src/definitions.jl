@@ -73,7 +73,7 @@ end
 function RheoTimeData(;ϵ::Vector{T1} = RheoFloat[], σ::Vector{T2} = RheoFloat[], t::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_time_data_consistency(t,ϵ,σ)
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
-    log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
+                    log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
 end
 
 @enum TimeDataType invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
@@ -196,9 +196,6 @@ function +(d1::RheoTimeData, d2::RheoTimeData)
 
 end
 
-function +(rl1::RheoLog, rl2::RheoLog)
-    return(rheologrun(rl1) + rheologrun(rl2))
-end
 
 function -(d1::RheoTimeData, d2::RheoTimeData)
 
@@ -230,9 +227,6 @@ function -(d1::RheoTimeData, d2::RheoTimeData)
 
 end
 
-function -(rl1::RheoLog, rl2::RheoLog)
-    return(rheologrun(rl1) - rheologrun(rl2))
-end
 
 function -(d::RheoTimeData)
 
@@ -245,6 +239,18 @@ function -(d::RheoTimeData)
     return RheoTimeData(-d.σ, -d.ϵ, d.t, log)
 
 end
+
+
+# Required to execute +/- operators for logs
+
+function +(rl1::RheoLog, rl2::RheoLog)
+    return(rheologrun(rl1) + rheologrun(rl2))
+end
+
+function -(rl1::RheoLog, rl2::RheoLog)
+    return(rheologrun(rl1) - rheologrun(rl2))
+end
+
 
 function *(operand::Real, d::RheoTimeData)
 
@@ -653,7 +659,7 @@ end
     RheoModel(_G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, _Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, expressions::NamedTuple)
 
 `RheoModel` contains all known moduli of a particular model, as for a `RheoModelClass` model name. However, a `RheoModel`
-has all it's parameters fixed to known values.
+has all its parameters fixed to known values.
 
 Generally, users will begin with a defined `RheoModelClass` (e.g. SLS) and then specialise the parameters,
 rather than calling the default constructor explicitly.
