@@ -68,15 +68,16 @@ Usage:
 * 'resample(d)' would keep the number of sampling points the same but interpolate to set a uniform time step.
 * 'resample(d, t=-1:0.1:10)' would resample by interpolation to generate a new dataset with time points given by the range or array values passed with keyword 't'.
 * 'resample(d, dt=0.1)' would resample by interpolation to generate a new dataset with time step 'dt'.
-* 'resample(d, scale=2)' would resample by multiplying the timestep by 'scale'. This could down-sample (scale>1) or upsample (scale<1). If timestep are non uniform, it would interpolate values accordingly.
+* 'resample(d, scale=2)' would resample by multiplying the sampling rate by 'scale'. This could down-sample (scale<1) or upsample (scale>1). If timesteps are non uniform, it would interpolate values accordingly.
 """
-function resample(d::RheoTimeData; t::Union{Vector{T},R}=RheoFloat[], scale::T1=1, dt::T2=0) where {T<:Real, R <: AbstractRange, T1<:Real, T2<:Real}
+function resample(d::RheoTimeData; t::Union{Vector{T},R}=RheoFloat[], scale::T1=0, dt::T2=0) where {T<:Real, R <: AbstractRange, T1<:Real, T2<:Real}
 
     @assert hastime(d) "Data without time information cannot be resampled."
     if length(t)==0
-        if scale != 1
+        if scale > 0
+            δt = (typeof(scale)<:Union{Rational,Int}) ? 1//scale : 1. /scale
             idxt=Array(1:length(d.t))
-            newidxt=Array(1:scale:length(d.t))
+            newidxt=Array(1:δt:length(d.t))
             t=Spline1D(idxt,d.t)(newidxt)
             keywords=(scale = scale,)
         else

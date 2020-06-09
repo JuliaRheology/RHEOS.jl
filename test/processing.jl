@@ -27,7 +27,7 @@ end
 
 function _resample_stressstrain()
     d = RheoTimeData(ϵ=[1,2,4,7], t=[0,1,3,6], σ=[7,4,2,1])
-    d = resample(d,scale=1//2)
+    d = resample(d,scale=2)
     (length(d.t)==7) && (d.t[4]≈1.875) && (d.σ[4]≈2.6328125) && (d.ϵ[4]≈2.875)
 end
 @test _resample_stressstrain()
