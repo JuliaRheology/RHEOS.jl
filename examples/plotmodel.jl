@@ -49,7 +49,7 @@ function plotmodel(modelvect; ymaxG = nothing, ymaxJ = nothing)
     ax[2].grid(b=true, alpha = 0.2, axis="y", which="major");
     ax[2].grid(b=true, alpha = 0.2, axis="x", which="major");
 
-    dω = frequencyspec()
+    dω = frequencyspec(ω_start = 0.01, ω_end = 100)
     fig, ax = subplots(1,1, figsize=(5,5))
     for i = 1:1:length(modelvect)
         # Storage and Loss moduli
