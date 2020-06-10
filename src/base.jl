@@ -114,8 +114,8 @@ function doublederivCD(y::Vector{RheoFloat}, x::Vector{RheoFloat})
 
     # initialise zero array of length y
     yddot = similar(y)
-    
-    # no physical assumptions made, unlike for first order BD derivative. 
+
+    # no physical assumptions made, unlike for first order BD derivative.
     # forward difference for first element, backwards difference for last element
     @inbounds yddot[1] = (y[3] - 2*y[2] + y[1])/(x[2] - x[1])^2
     @inbounds yddot[N] = (y[N] - 2*y[N-1] + y[N-2])/(x[N] - x[N-1])^2
@@ -213,54 +213,54 @@ function getsigma(τ::Real, samplerate::Real)
     RheoFloat(σ)
 end
 
-"""
-    fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elperiods::Union{Vector{U}, U}) where T<:RheoFloat where U<:Integer
-
-Resample two arrays with new sample rate(s).
-It can either reduce the sample rate by not taking every array element or it can increase the sample
-rate by inserting new elements. If the number of elements per period (elperiods) is a positive number, then it upsamples; if
-it is negative it downsamples.
-
-The function returns the resampled x and y arrays.
-"""
-function fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elperiods::Union{Vector{U}, U}; includelastel::Bool=true) where T<:RheoFloat where U<:Integer
-
-    # assert correct function signature
-    @assert length(x)==length(y) "X and Y arrays must have same length."
-    @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
-
-    # initialise resampled arrays as empty
-    xᵦ = Vector{RheoFloat}(undef, 0)
-    yᵦ = Vector{RheoFloat}(undef, 0)
-
-    # loop through boundaries
-    for i in 1:length(boundaries)-1
-
-        # upsampling, starts at each element then intepolates up N times
-        if !signbit(elperiods[i])
-            for k in boundaries[i]:(boundaries[i+1]-1)
-                    x_add  = range(x[k], x[k+1]; length=elperiods[i]+1)[1:end-1]
-                    y_add =  y[k] .+ (x_add[1:end] .- x[k]).*(y[k+1] .- y[k])./(x[k+1] .- x[k])
-                    xᵦ = append!(xᵦ, x_add)
-                    yᵦ = append!(yᵦ, y_add)
-             end
-
-        # downsampling, simply takes every N element as in downsample function
-        elseif signbit(elperiods[i])
-            append!(xᵦ,x[boundaries[i]:abs(elperiods[i]):(boundaries[i+1]-1)])
-            append!(yᵦ,y[boundaries[i]:abs(elperiods[i]):(boundaries[i+1]-1)])
-        end
-    end
-
-    # last element may be missed, so check and add if needed
-    lastel = boundaries[end]
-    if includelastel && xᵦ[end]<x[lastel]
-        append!(xᵦ,x[lastel])
-        append!(yᵦ,y[lastel])
-    end
-
-    return xᵦ, yᵦ
-end
+# """
+#     fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elperiods::Union{Vector{U}, U}) where T<:RheoFloat where U<:Integer
+#
+# Resample two arrays with new sample rate(s).
+# It can either reduce the sample rate by not taking every array element or it can increase the sample
+# rate by inserting new elements. If the number of elements per period (elperiods) is a positive number, then it upsamples; if
+# it is negative it downsamples.
+#
+# The function returns the resampled x and y arrays.
+# """
+# function fixed_resample(x::Vector{T}, y::Vector{T}, boundaries::Vector{U}, elperiods::Union{Vector{U}, U}; includelastel::Bool=true) where T<:RheoFloat where U<:Integer
+#
+#     # assert correct function signature
+#     @assert length(x)==length(y) "X and Y arrays must have same length."
+#     @assert length(elperiods)==length(boundaries)-1 "Number of different sample periods must be 1 less than boundaries provided"
+#
+#     # initialise resampled arrays as empty
+#     xᵦ = Vector{RheoFloat}(undef, 0)
+#     yᵦ = Vector{RheoFloat}(undef, 0)
+#
+#     # loop through boundaries
+#     for i in 1:length(boundaries)-1
+#
+#         # upsampling, starts at each element then intepolates up N times
+#         if !signbit(elperiods[i])
+#             for k in boundaries[i]:(boundaries[i+1]-1)
+#                     x_add  = range(x[k], x[k+1]; length=elperiods[i]+1)[1:end-1]
+#                     y_add =  y[k] .+ (x_add[1:end] .- x[k]).*(y[k+1] .- y[k])./(x[k+1] .- x[k])
+#                     xᵦ = append!(xᵦ, x_add)
+#                     yᵦ = append!(yᵦ, y_add)
+#              end
+#
+#         # downsampling, simply takes every N element as in downsample function
+#         elseif signbit(elperiods[i])
+#             append!(xᵦ,x[boundaries[i]:abs(elperiods[i]):(boundaries[i+1]-1)])
+#             append!(yᵦ,y[boundaries[i]:abs(elperiods[i]):(boundaries[i+1]-1)])
+#         end
+#     end
+#
+#     # last element may be missed, so check and add if needed
+#     lastel = boundaries[end]
+#     if includelastel && xᵦ[end]<x[lastel]
+#         append!(xᵦ,x[lastel])
+#         append!(yᵦ,y[lastel])
+#     end
+#
+#     return xᵦ, yᵦ
+# end
 
 #=
 -----------------------------------------
@@ -496,7 +496,7 @@ sample rate is constant and model does feature singularity.
 """
 function obj_const_sing(params, grad,modulus, time_series,dt, prescribed_dot, measured; _insight::Bool = false)
 
-    _insight && println("Current Parameters: ", params) 
+    _insight && println("Current Parameters: ", params)
 
     mod = (t->modulus(t,params))
     # convolved = boltzconvolve_sing(modulus, time_series, dt, params, prescribed_dot)
@@ -614,8 +614,8 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOr
                                                         measured; _insight = insight))
 
     elseif !constant_sampling && singularity
-        @warn "Note that large changes in sample rate, particularly from low sample rate to 
-        much higher sample rate can introduce significant innacuracies due to the singularity 
+        @warn "Note that large changes in sample rate, particularly from low sample rate to
+        much higher sample rate can introduce significant innacuracies due to the singularity
         approximation method being used. To avoid this, please resample your data to a constant
         sample rate before fitting."
         min_objective!(opt, (params, grad) -> obj_var_sing(params, grad, modulus,

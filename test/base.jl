@@ -1,3 +1,7 @@
+println("===============================================")
+println("Testing base.jl")
+println("===============================================")
+
 function _trapz(tol)
     x = [i for i in -5.0:0.01:5.0]
     y = 3*x.^2
@@ -76,60 +80,60 @@ end
 
 @test RHEOS.getsigma(10.0, 1000.0)≈1873.9062512927758
 
-function _downsample_1region()
-    x0 = collect(0.0:0.01:1.0)
-    y0 = x0.^2
-
-    x1 = collect(0.0:0.1:1.0)
-    y1 = x1.^2
-    
-    xout, yout = RHEOS.fixed_resample(x0, y0, [1, length(x0)], [-10])
-
-    xout==x1 && yout==y1 
-end
-@test _downsample_1region()
-
-function _upsample_1region()
-    # must be linear as interpolation for upsampling is linear  
-    x0 = collect(0.0:0.1:10.0)
-    y0 = 2*x0
-
-    x1 = collect(0.0:0.01:10.0)
-    y1 = 2*x1
-    
-    xout, yout = RHEOS.fixed_resample(x0, y0, [1, length(x0)], [10])
-    
-    # note that we expect x (generated from range) to be exactly
-    # the same as target higher-sampled data. y will only be the
-    # same within floating point error, hence the approximate
-    # comparison
-    xout==x1 && yout≈y1
-end
-@test _upsample_1region()
-
-function _upanddown_multipleregions()
-    # data to be resampled
-    x0 = collect(-10.0:0.5:10.0)
-    y0 = 2*x0
-
-    # data for comparison composed
-    # of multiple sections
-    x1a = collect(-10.0:0.1:-5.1)
-    x1b = collect(-5.0:1.0:0.0)
-    x1c = collect(0.05:0.05:4.95)
-    x1d = collect(5.0:2.0:10.0)
-    x1e = [x0[end]]
-
-    x1 = vcat(x1a, x1b, x1c, x1d, x1e)
-    y1 = 2*x1
-
-    indices = [1, RHEOS.closestindex(x0, -5.0), RHEOS.closestindex(x0, 0.0), RHEOS.closestindex(x0, 5.0), length(x0)]
-
-    xout, yout = RHEOS.fixed_resample(x0, y0, indices, [5, -2, 10, -4])
-
-    xout==x1 && yout≈y1
-end
-@test _upanddown_multipleregions()
+# function _downsample_1region()
+#     x0 = collect(0.0:0.01:1.0)
+#     y0 = x0.^2
+#
+#     x1 = collect(0.0:0.1:1.0)
+#     y1 = x1.^2
+#
+#     xout, yout = RHEOS.fixed_resample(x0, y0, [1, length(x0)], [-10])
+#
+#     xout==x1 && yout==y1
+# end
+# @test _downsample_1region()
+#
+# function _upsample_1region()
+#     # must be linear as interpolation for upsampling is linear
+#     x0 = collect(0.0:0.1:10.0)
+#     y0 = 2*x0
+#
+#     x1 = collect(0.0:0.01:10.0)
+#     y1 = 2*x1
+#
+#     xout, yout = RHEOS.fixed_resample(x0, y0, [1, length(x0)], [10])
+#
+#     # note that we expect x (generated from range) to be exactly
+#     # the same as target higher-sampled data. y will only be the
+#     # same within floating point error, hence the approximate
+#     # comparison
+#     xout==x1 && yout≈y1
+# end
+# @test _upsample_1region()
+#
+# function _upanddown_multipleregions()
+#     # data to be resampled
+#     x0 = collect(-10.0:0.5:10.0)
+#     y0 = 2*x0
+#
+#     # data for comparison composed
+#     # of multiple sections
+#     x1a = collect(-10.0:0.1:-5.1)
+#     x1b = collect(-5.0:1.0:0.0)
+#     x1c = collect(0.05:0.05:4.95)
+#     x1d = collect(5.0:2.0:10.0)
+#     x1e = [x0[end]]
+#
+#     x1 = vcat(x1a, x1b, x1c, x1d, x1e)
+#     y1 = 2*x1
+#
+#     indices = [1, RHEOS.closestindex(x0, -5.0), RHEOS.closestindex(x0, 0.0), RHEOS.closestindex(x0, 5.0), length(x0)]
+#
+#     xout, yout = RHEOS.fixed_resample(x0, y0, indices, [5, -2, 10, -4])
+#
+#     xout==x1 && yout≈y1
+# end
+# @test _upanddown_multipleregions()
 
 @test RHEOS.singularitytest(x->1/x)
 @test RHEOS.singularitytest(x->1/(x-5.0), t1 = 5.0)
@@ -209,7 +213,7 @@ function _boltzintegral_nonsing_parabolic(tol)
     # a parabola: 2500 - (t-50)^2
     t = Vector{RheoFloat}(0.0:0.001:20.0)
     exact_response = 102 .- 102*exp.(-t) .- 2t
-    
+
     loading = 2500.0 .- (t .- 50).^2
     loading_derivative = RHEOS.derivBD(loading, t)
 
@@ -282,7 +286,7 @@ function _boltzintegral_sing_step(tol)
     loading_derivative = RHEOS.derivBD(loading, t)
 
     integration_response = RHEOS.boltzintegral_sing(x->x.^(-β), t, loading_derivative)
-    
+
     # note that first element is skipped due to singularity
     all(i -> isapprox(exact_response[i], integration_response[i], atol=tol), 2:length(t))
 end
@@ -294,7 +298,7 @@ function _boltzintegral_sing_parabolic(tol)
     t = Vector{RheoFloat}(0.0:0.001:20.0)
     β = 0.5
     exact_response = (100/(1-β))*t.^(1-β) .- (2/((1-β)*(2-β)))*t.^(2-β)
-    
+
     loading = 2500.0 .- (t .- 50).^2
     loading_derivative = RHEOS.derivBD(loading, t)
 
@@ -314,8 +318,8 @@ function _obj_var_nonsing_ramp(tol)
     exact_response = 1 .- exp.(-t)
     ramp_loading = t
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
-    
-    cost = RHEOS.obj_var_nonsing(nothing, nothing, (x, params)->exp.(-x), t, ramp_loading_derivative, exact_response) 
+
+    cost = RHEOS.obj_var_nonsing(nothing, nothing, (x, params)->exp.(-x), t, ramp_loading_derivative, exact_response)
 
     cost < length(t)*tol^2
 end
@@ -328,7 +332,7 @@ function _obj_var_nonsing_step(tol)
     step_loading = ones(length(t))
     step_loading_deriv = RHEOS.derivBD(step_loading,t)
 
-    cost = RHEOS.obj_var_nonsing(nothing, nothing, (x, params)->exp.(-x), t, step_loading_deriv, exact_response) 
+    cost = RHEOS.obj_var_nonsing(nothing, nothing, (x, params)->exp.(-x), t, step_loading_deriv, exact_response)
 
     cost < length(t)*tol^2
 end
@@ -339,11 +343,11 @@ function _obj_var_nonsing_parabolic()
     # a parabola: 2500 - (t-50)^2
     t = Vector{RheoFloat}(0.0:0.001:20.0)
     exact_response = 102 .- 102*exp.(-t) .- 2t
-    
+
     loading = 2500.0 .- (t .- 50).^2
     loading_derivative = RHEOS.derivBD(loading, t)
 
-    cost = RHEOS.obj_var_nonsing(nothing, nothing, (x, params)->exp.(-x), t, loading_derivative, exact_response) 
+    cost = RHEOS.obj_var_nonsing(nothing, nothing, (x, params)->exp.(-x), t, loading_derivative, exact_response)
     # note that cost is very high for parabolic as
     # hereditary integral approximation is not
     # good for this case.
@@ -361,9 +365,9 @@ function _obj_var_sing_linear(tol)
     loading = t
     loading_derivative = RHEOS.derivBD(loading, t)
 
-    cost = RHEOS.obj_var_sing(nothing, nothing, (x, params)->x.^(-β), t, loading_derivative, exact_response) 
-    
-    cost < 3*length(t)*tol 
+    cost = RHEOS.obj_var_sing(nothing, nothing, (x, params)->x.^(-β), t, loading_derivative, exact_response)
+
+    cost < 3*length(t)*tol
 end
 @test _obj_var_sing_linear(tol)
 
@@ -416,7 +420,7 @@ function _boltzconvolve_nonsing_parabolic(tol)
     dt = 0.001
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 102 .- 102*exp.(-t) .- 2t
-    
+
     loading = 2500.0 .- (t .- 50).^2
     loading_derivative = RHEOS.derivBD(loading, t)
 
@@ -430,7 +434,7 @@ end
 
 function _boltzconvolve_sing_linear(tol)
     # response of a power-law model
-    # to a linear loading: 
+    # to a linear loading:
     dt = 0.001
     t = Vector{RheoFloat}(0.0:dt:20.0)
     β = 0.5
@@ -438,10 +442,10 @@ function _boltzconvolve_sing_linear(tol)
 
     loading = t
     loading_derivative = RHEOS.derivBD(loading, t)
-    
+
     t[1] = dt/10.0
     integration_response = RHEOS.boltzconvolve(x->x.^(-β), t, dt, loading_derivative)
-    
+
     all(i -> isapprox(exact_response[i], integration_response[i], atol=5*tol), eachindex(exact_response))
 end
 @test _boltzconvolve_sing_linear(tol)
@@ -459,7 +463,7 @@ function _boltzconvolve_sing_step(tol)
 
     t[1] = dt/10.0
     integration_response = RHEOS.boltzconvolve(x->x.^(-β), t, dt, loading_derivative)
-    
+
     # note that first element is skipped due to singularity
     all(i -> isapprox(exact_response[i], integration_response[i], atol=tol), 2:length(t))
 end
@@ -472,7 +476,7 @@ function _boltzconvolve_sing_parabolic(tol)
     t = Vector{RheoFloat}(0.0:dt:20.0)
     β = 0.5
     exact_response = (100/(1-β))*t.^(1-β) .- (2/((1-β)*(2-β)))*t.^(2-β)
-    
+
     loading = 2500.0 .- (t .- 50).^2
     loading_derivative = RHEOS.derivBD(loading, t)
 
@@ -493,8 +497,8 @@ function _obj_const_nonsing_ramp(tol)
     exact_response = 1 .- exp.(-t)
     ramp_loading = t
     ramp_loading_derivative = RHEOS.derivBD(ramp_loading, t)
-    
-    cost = RHEOS.obj_const_nonsing(nothing, nothing, (x, params)->exp.(-x), t, dt, ramp_loading_derivative, exact_response) 
+
+    cost = RHEOS.obj_const_nonsing(nothing, nothing, (x, params)->exp.(-x), t, dt, ramp_loading_derivative, exact_response)
 
     cost < length(t)*tol^2
 end
@@ -507,7 +511,7 @@ function _obj_const_nonsing_step(tol)
     step_loading = ones(length(t))
     step_loading_deriv = RHEOS.derivBD(step_loading,t)
 
-    cost = RHEOS.obj_const_nonsing(nothing, nothing, (x, params)->exp.(-x), t, dt, step_loading_deriv, exact_response) 
+    cost = RHEOS.obj_const_nonsing(nothing, nothing, (x, params)->exp.(-x), t, dt, step_loading_deriv, exact_response)
 
     cost < length(t)*tol^2
 end
@@ -519,11 +523,11 @@ function _obj_const_nonsing_parabolic()
     dt = 0.01
     t = Vector{RheoFloat}(0.0:dt:20.0)
     exact_response = 102 .- 102*exp.(-t) .- 2t
-    
+
     loading = 2500.0 .- (t .- 50).^2
     loading_derivative = RHEOS.derivBD(loading, t)
 
-    cost = RHEOS.obj_const_nonsing(nothing, nothing, (x, params)->exp.(-x), t, dt, loading_derivative, exact_response) 
+    cost = RHEOS.obj_const_nonsing(nothing, nothing, (x, params)->exp.(-x), t, dt, loading_derivative, exact_response)
     # note that cost is very high for parabolic as
     # hereditary integral approximation is not
     # good for this case.
@@ -541,11 +545,11 @@ function _obj_const_sing_linear(tol)
 
     loading = t
     loading_derivative = RHEOS.derivBD(loading, t)
-      
+
     t[1] = dt/10.0
-    cost = RHEOS.obj_const_sing(nothing, nothing, (x, params)->x.^(-β), t, dt, loading_derivative, exact_response) 
-    
-    cost < 3*length(t)*tol 
+    cost = RHEOS.obj_const_sing(nothing, nothing, (x, params)->x.^(-β), t, dt, loading_derivative, exact_response)
+
+    cost < 3*length(t)*tol
 end
 @test _obj_const_sing_linear(tol)
 
@@ -587,7 +591,7 @@ end
 
 function _leastsquares_init_const_sing_ramp(tol)
     # response of a power-law model
-    # to a linear loading: 
+    # to a linear loading:
     dt = 0.01
     t = Vector{RheoFloat}(0.0:dt:20.0)
     β = 0.5
@@ -608,7 +612,7 @@ end
 
 function _leastsquares_init_var_sing_ramp(tol)
     # response of a power-law model
-    # to a linear loading: 
+    # to a linear loading:
     dt = 0.01
     t = [Vector{RheoFloat}(0.0:dt:(15.0-dt)); Vector{RheoFloat}(15.0:10*dt:20.0)]
     β = 0.5
@@ -633,8 +637,8 @@ function _obj_step_nonsing()
     modulus = (x, p)->p[1]*exp.(-x/p[2])
     loading = 1.0
     expected_response = params[1]*exp.(-t/params[2])
-    cost = RHEOS.obj_step_nonsing(params, nothing, modulus, t, loading, expected_response) 
-    
+    cost = RHEOS.obj_step_nonsing(params, nothing, modulus, t, loading, expected_response)
+
     cost < tol
 end
 @test _obj_step_nonsing()
@@ -645,8 +649,8 @@ function _obj_step_weighted()
     modulus = (x, p)->p[1]*x.^(-p[2])
     loading = 1.0
     expected_response = loading*params[1]*t.^(-params[2])
-    cost = RHEOS.obj_step_weighted(params, nothing, modulus, t, loading, expected_response[2:end], collect(Integer, 2:length(t))) 
-    
+    cost = RHEOS.obj_step_weighted(params, nothing, modulus, t, loading, expected_response[2:end], collect(Integer, 2:length(t)))
+
     cost < tol
 end
 @test _obj_step_weighted()
@@ -675,10 +679,10 @@ function _leastsquares_stepinit_sing_ramp(tol)
     loading = 1.0
     expected_response = loading*params[1]*t.^(-params[2])
 
-    modulus = (x, p) -> p[1]*x.^(-p[2]) 
+    modulus = (x, p) -> p[1]*x.^(-p[2])
     init_params = [1.0, 1.0]
     results = RHEOS.leastsquares_stepinit(init_params, [0.70, 0.1], [3.0, 1.5], modulus, t, loading, expected_response; singularity=true)
-    
+
     found_params = results[2]
 
     isapprox(params, found_params, atol=tol)

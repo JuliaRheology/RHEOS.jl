@@ -5,8 +5,23 @@
 timeline generation function forms the basis of any load-generation workflow
 ----------------------------------------------------------------------------
 =#
+
 """
-    timeline(;t_start::Real=0., t_end::Real=10., step::Real=(t_end - t_start)/250.)
+    timeline(r)
+
+Generate `RheoTimeData` struct with only the time data based on the range provided.
+
+# Example
+
+    timeline(0:0.1:10)   --> 0.  0.1   0.2  ...  9.9  10.
+"""
+function timeline(r::R; savelog = true) where R <: AbstractRange
+    log = savelog ? [RheoLogItem( (type=:source, funct=:timeline, params=(r,), keywords=()), (comment="timeline created", type=time_only))] : nothing
+    RheoTimeData([], [], Vector{RheoFloat}(r), log)
+end
+
+"""
+    timeline(;t_start::Real=0., t_end::Real, step::Real=(t_end - t_start)/250.)
 
 Generate `RheoTimeData` struct with only the time data.
 
@@ -14,28 +29,48 @@ Generate `RheoTimeData` struct with only the time data.
 
 - `t_start`: Starting time, typically 0
 - `t_end`: End time
-- `step`: Time between sample
+- `step`: Time between sample. Default set in order to provide ≈ 250 time points.
 """
-function timeline(;t_start::Real = 0., t_end::Real = 10., step::Real = (t_end - t_start)/250., savelog = true)
-    log = savelog ? [RheoLogItem( (type=:source, funct=:timeline, params=(), keywords=(t_start=t_start, t_end=t_end, step=step)), (comment="timeline created",))] : nothing
-    RheoTimeData([], [], collect(t_start:step:t_end), log)
+function timeline(;t_start::Real = 0., t_end::Real, step::Real = (t_end - t_start)/250., savelog = true)
+    timeline(t_start:step:t_end, savelog = savelog)
+end
+
+
+
+"""
+    frequencyspec(r::R; logscale=true)
+
+Generate `RheoFreqData` struct with only the frequency data distributed on a linear or log scale
+
+# Arguments
+
+- `r`: range, e.g. 1:0.1:100
+- `logscale`: if true, set the range in logscale, e.g. -2:0.1:20  --> 10 values per decade between 10^-2 and 10^2
+"""
+function frequencyspec(r::R; logscale=true, savelog = true) where R <: AbstractRange
+    if logscale
+        ω=[10^o for o in r]
+    else
+        ω=Vector{RheoFloat}(r)
+    end
+    log = savelog ? [RheoLogItem( (type=:source, funct=:frequencyspec, params=(r,), keywords=(logscale=logscale,)), (comment="frequency range created", type=freq_only))] : nothing
+    RheoFreqData([], [], ω, log)
 end
 
 
 """
-    frequencyspec(;ω_start::Real=1.0e-2, ω_end::Real=1.0e2, step::Real=(ω_end-ω_start)/1.0e5)
+    frequencyspec(;ω_start::Real, ω_end::Real, logstep::Real= log10(ω_end/ω_start)/10.)
 
-Generate `RheoFreqData` struct with only the frequency data.
+Generate `RheoFreqData` struct with only the frequency data distributed on a log scale
 
 # Arguments
 
-- `ω_start`: Starting time, typically 0
-- `ω_end`: End time
-- `step`: Step between frequencies
+- `ω_start`: min frequency
+- `ω_end`: max frequency
+- `logstep`: step between frequencies in log scale, e.g. 0.1 --> 10 values per decade.
 """
-function frequencyspec(;ω_start::Real = 1.0e-2, ω_end::Real = 1.0e2, step::Real = (ω_end-ω_start)/1.0e5, savelog = true)
-    log = savelog ? [ RheoLogItem( (type=:source, funct=:frequencyspec, params=(), keywords=(ω_start=ω_start, ω_end=ω_end, step=step)), (comment="frequency range created",)) ] : nothing
-    RheoFreqData([], [], collect(ω_start:step:ω_end), log)
+function frequencyspec(;ω_start::Real, ω_end::Real, logstep::Real = log10(ω_end/ω_start)/10., savelog = true)
+    frequencyspec(log10(ω_start):logstep:log10(ω_end), logscale=true, savelog = savelog)
 end
 
 #=

@@ -23,19 +23,22 @@ function RheoLogItem(;kwargs...)
    return(RheoLogItem(Nothing, kwargs.data))
 end
 
+
+#  There is a bug in julia that prevents the proper use of these functions.
 #
+
 # function Base.show(io::IO, rli::RheoLogItem)
 #     println()
 #     print("action = "); println(rli.action)
 #     print("info   = "); println(rli.info)
 # end
-
 # function Base.display(io::IO, rl::RheoLog)
 #     println("Hello!")
-#     for rli in rl
-#         print(rli)
-#     end
+#      for rli in rl
+#          print(rli)
+#      end
 # end
+
 
 #=
 -------------------------------
@@ -70,7 +73,7 @@ end
 function RheoTimeData(;ϵ::Vector{T1} = RheoFloat[], σ::Vector{T2} = RheoFloat[], t::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_time_data_consistency(t,ϵ,σ)
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
-    log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
+                    log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
 end
 
 @enum TimeDataType invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
@@ -105,6 +108,33 @@ end
 
 function RheoTimeDataType(d::RheoTimeData)
     return check_time_data_consistency(d.t,d.ϵ,d.σ)
+end
+
+"""
+    hastime(d::RheoTimeData)
+
+returns 'true' if d contains a time array
+"""
+function hastime(d::RheoTimeData)
+    return (d.t != RheoFloat[])
+end
+
+"""
+    hasstress(d::RheoTimeData)
+
+returns 'true' if d contains stress data
+"""
+function hasstress(d::RheoTimeData)
+    return (d.σ != RheoFloat[])
+end
+
+"""
+    hasstrain(d::RheoTimeData)
+
+returns 'true' if d contains strain data
+"""
+function hasstrain(d::RheoTimeData)
+    return (d.ϵ != RheoFloat[])
 end
 
 @enum LoadingType strain_imposed=1 stress_imposed=2
@@ -166,9 +196,6 @@ function +(d1::RheoTimeData, d2::RheoTimeData)
 
 end
 
-function +(rl1::RheoLog, rl2::RheoLog)
-    return(rheologrun(rl1) + rheologrun(rl2))
-end
 
 function -(d1::RheoTimeData, d2::RheoTimeData)
 
@@ -200,9 +227,6 @@ function -(d1::RheoTimeData, d2::RheoTimeData)
 
 end
 
-function -(rl1::RheoLog, rl2::RheoLog)
-    return(rheologrun(rl1) - rheologrun(rl2))
-end
 
 function -(d::RheoTimeData)
 
@@ -215,6 +239,18 @@ function -(d::RheoTimeData)
     return RheoTimeData(-d.σ, -d.ϵ, d.t, log)
 
 end
+
+
+# Required to execute +/- operators for logs
+
+function +(rl1::RheoLog, rl2::RheoLog)
+    return(rheologrun(rl1) + rheologrun(rl2))
+end
+
+function -(rl1::RheoLog, rl2::RheoLog)
+    return(rheologrun(rl1) - rheologrun(rl2))
+end
+
 
 function *(operand::Real, d::RheoTimeData)
 
@@ -353,6 +389,11 @@ function rheologrun(rli::RheoLogItem, d=nothing)
    println(rli.info)
 end
 
+"""
+    rheologrun(log::RheoLog, d::Union{RheoTimeData,RheoFreqData,Nothing} = nothing)
+
+execute all actions from the log. It applies them to the data `d` provided, or use the log's first action to reload/recreate it otherwise.
+"""
 function rheologrun(arli::RheoLog, d::Union{RheoTimeData,RheoFreqData,Nothing} = nothing)
 
   # check first item is a source item
@@ -376,6 +417,24 @@ function rheologrun(arli::RheoLog, d::Union{RheoTimeData,RheoFreqData,Nothing} =
   return(d)
 end
 
+
+
+"""
+    showlog(d::Union{RheoTimeData,RheoFreqData})
+
+shows the record of operations on a rheological data.
+"""
+function showlog(d::Union{RheoTimeData,RheoFreqData})
+    if d.log != nothing
+        for idx in 1:length(d.log)
+            println(idx)
+            print("     action = "); println(d.log[idx].action)
+            print("     info   = "); println(d.log[idx].info)
+        end
+    else
+        println("No log data available")
+    end
+end
 
 
 
@@ -600,7 +659,7 @@ end
     RheoModel(_G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, _Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, expressions::NamedTuple)
 
 `RheoModel` contains all known moduli of a particular model, as for a `RheoModelClass` model name. However, a `RheoModel`
-has all it's parameters fixed to known values.
+has all its parameters fixed to known values.
 
 Generally, users will begin with a defined `RheoModelClass` (e.g. SLS) and then specialise the parameters,
 rather than calling the default constructor explicitly.
