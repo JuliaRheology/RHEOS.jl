@@ -35,7 +35,7 @@ If you use RHEOS in your work, please consider citing the following papers as ap
 
 + J. L. Kaplan, A. Bonfanti, A. J. Kabla (2019). _RHEOS.jl -- A Julia Package for Rheology Data Analysis_. Journal of Open Source Software, 4(41), 1700, [https://doi.org/10.21105/joss.01700](https://doi.org/10.21105/joss.01700)
 
-+ A. Bonfanti, J. L. Kaplan, G. Charras, A. J. Kabla (2020) *Fractional viscoelastic models for power-law materials*, arXiv::2003.07834, to appear in Soft Matter.
++ A. Bonfanti, J. L. Kaplan, G. Charras, A. J. Kabla (2020). _Fractional viscoelastic models for power-law materials_. Soft Matter, 16, 6002-6020, [https://doi.org/10.1039/D0SM00354A](https://doi.org/10.1039/D0SM00354A)
 
 ## Embedded Dependencies
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
