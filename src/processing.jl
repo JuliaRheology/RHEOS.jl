@@ -575,6 +575,7 @@ Alternatively, it is possible to define the value of the step by defining the op
 - `data`: `RheoTimeData` struct containing all data
 - `model`: `RheoModelClass` containing moduli and parameters tuples
 - `modloading`: `strain_imposed` for relaxation modulus, `stress_imposed` for creep modulus
+- `step`: Optional amplitude for step
 - `p0`: Named tuple of initial parameters to use in fit (uses 0.5 for all parameters if none given)
 - `lo`: Named tuple of lower bounds for parameters
 - `hi`: Named tuple of upper bounds for parameters
@@ -636,6 +637,11 @@ function modelstepfit(data::RheoTimeData,
             controlled =convert(RheoFloat, step);
             modused = "G"
         end
+    end
+
+    # step is assumed to be at 0, warn if data does not start at 0
+    if data.t[1] != 0
+        @warn "Step fitting assumes that step occurs at time 0.0s but data does not start at 0.0s. If this mismatch is unintended, this fitting may return erroneous results."
     end
 
     # check necessary modulus is defined
