@@ -35,7 +35,7 @@ after_success:
 jobs:
   include:
     - name: "Documentation"
-      julia: 1.4
+      julia: 1.5
       os: linux
       install:
         - pip install --user --upgrade pip
