@@ -465,6 +465,8 @@ struct RheoModelClass
 
     _G::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
     _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
+    _Gi::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
+    _Gia::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
     _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
     _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
     _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
@@ -503,6 +505,7 @@ const nanexp = quote NaN end
 function RheoModelClass(;name::String,
                          p::Array{Symbol},
                          G::Expr = nanexp,
+                         Gi::Expr = nanexp,
                          J::Expr = nanexp,
                          Gp::Expr = nanexp,
                          Gpp::Expr = nanexp,
@@ -515,11 +518,13 @@ function RheoModelClass(;name::String,
 
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
     unpack_expr = Meta.parse(string(join(string.(p), ","), ",=params"))
-    expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint, Ga_safe=Ga_safe, Ja_safe=Ja_safe)
+    expressions = (G=G,Gi = Gi, J=J,Gp=Gp,Gpp=Gpp,constraint=constraint, Ga_safe=Ga_safe, Ja_safe=Ja_safe)
 
     @eval return(RheoModelClass($name, $p,
         ((t,params) -> begin $unpack_expr; $G; end)                 |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
         ((ta,params) -> begin $unpack_expr; [$G for t in ta]; end)  |> FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}},
+        ((t,params) -> begin $unpack_expr; $Gi; end)                 |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
+        ((ta,params) -> begin $unpack_expr; [$Gi for t in ta]; end)  |> FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}},
         ((t,params) -> begin $unpack_expr; $J; end)                 |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
         ((ta,params) -> begin $unpack_expr; [$J for t in ta]; end)  |> FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}},
         ((ω,params) -> begin $unpack_expr; $Gp; end)                |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
@@ -668,6 +673,8 @@ struct RheoModel
 
     _G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
     _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
+    _Gi::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+    _Gia::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
     _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
     _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
     _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
@@ -698,6 +705,7 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple)
     # This attaches expressions to the models with parameters substituted by values.
     # Future development: this could be disabled with a key word if processing time is an issue
     G = expr_replace(m.expressions.G, nt)
+    Gi = expr_replace(m.expressions.G, nt)
     J = expr_replace(m.expressions.J, nt)
     Gp = expr_replace(m.expressions.Gp, nt)
     Gpp = expr_replace(m.expressions.Gpp, nt)
@@ -707,6 +715,8 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple)
     @eval return( RheoModel(
     (t -> begin $G; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
     (ta -> begin [$G for t in ta]; end) |> FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}},
+    (t -> begin $Gi; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
+    (ta -> begin [$Gi for t in ta]; end) |> FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}},
     (t -> begin $J; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
     (ta -> begin [$J for t in ta]; end) |> FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}},
     (ω -> begin $Gp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},

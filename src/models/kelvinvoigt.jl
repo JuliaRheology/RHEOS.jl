@@ -134,6 +134,9 @@ KelvinVoigt =  RheoModelClass(
         G = quote
               t!=0.0 ? k : Inf
             end,
+        Gi = quote
+          k*t + η
+        end,
         # Creep modulus
         J = quote
               (1 - exp(-k*t/η))/k
