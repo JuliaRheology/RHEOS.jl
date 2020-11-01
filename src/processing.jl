@@ -430,8 +430,9 @@ function modelfit(data::RheoTimeData,
         modused = "J"
     elseif modloading == strain_imposed
         if model.flagi==true
-            dcontrolled = deriv(data.ϵ, data.t)
-            dcontrolled = deriv(dcontrolled, data.t)
+            # dcontrolled = deriv(data.ϵ, data.t)
+            # dcontrolled = deriv(dcontrolled, data.t)
+            dcontrolled = doublederivCD(data.ϵ, data.t)
             measured = data.σ
             modulus = _Gia(model)
             modsing = (t->model._Gi(t,p0a))
@@ -521,8 +522,10 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
         if model.flagi == true
             modulus = _Gia(model)
             modsing = model._Gi
-            dcontrolled = deriv(data.ϵ, data.t)
-            dcontrolled = deriv(dcontrolled, data.t) # second 1st order differentiation
+            # dcontrolled = deriv(data.ϵ, data.t)
+            # dcontrolled = deriv(dcontrolled, data.t) # second 1st order differentiation
+            dcontrolled = doublederivCD(data.ϵ, data.t)
+
         else
             modulus = _Ga(model)
             modsing = model._G
