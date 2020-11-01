@@ -476,6 +476,7 @@ struct RheoModelClass
 
     constraint::FunctionWrapper{Bool,Tuple{Vector{RheoFloat}}}
 
+    flagi::Bool
     info::String
     expressions::NamedTuple
 
@@ -513,12 +514,13 @@ function RheoModelClass(;name::String,
                          info="", #name * ": model with parameters " * string(join(string.(p), ", "), "."),
                          # flags to avoid bugs related to the FunctionWrappers and MittLeff
                          Ga_safe::Bool = true,
-                         Ja_safe::Bool = true
+                         Ja_safe::Bool = true,
+                         flagi::Bool = false
                          )
 
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
     unpack_expr = Meta.parse(string(join(string.(p), ","), ",=params"))
-    expressions = (G=G,Gi = Gi, J=J,Gp=Gp,Gpp=Gpp,constraint=constraint, Ga_safe=Ga_safe, Ja_safe=Ja_safe)
+    expressions = (G=G, Gi=Gi ,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint, Ga_safe=Ga_safe, Ja_safe=Ja_safe, flagi=flagi)
 
     @eval return(RheoModelClass($name, $p,
         ((t,params) -> begin $unpack_expr; $G; end)                 |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
@@ -532,7 +534,7 @@ function RheoModelClass(;name::String,
         ((ω,params) -> begin $unpack_expr; $Gpp; end)               |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
         ((ωa,params) -> begin $unpack_expr; [$Gpp for ω in ωa]; end) |> FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}},
         (params -> begin $unpack_expr; $constraint; end)            |> FunctionWrapper{Bool,Tuple{Vector{RheoFloat}}},
-        $info, $expressions) )
+        $flagi, $info, $expressions) )
 end
 
 # Cool replacement function inspired from
@@ -683,6 +685,7 @@ struct RheoModel
     _Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
 
     expressions::NamedTuple
+    flagi::Bool
     params::NamedTuple
     info::String    # do we need this?
     # log::OrderedDict{Any,Any}
@@ -693,7 +696,7 @@ function RheoModel(m::RheoModelClass; kwargs...)
     return(RheoModel(m,kwargs.data))
 end
 
-function RheoModel(m::RheoModelClass, nt0::NamedTuple)
+function RheoModel(m::RheoModelClass, nt0::NamedTuple, flagi::Bool=false)
 
     # check all parameters are provided and create a well ordered named tuple
     p = check_and_reorder_parameters(nt0, m.params, err_string = "model definition")
@@ -702,10 +705,13 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple)
     # string printed
     info = string("\nModel: $(m.name)\n\nParameter values: $nt \n",m.info)
 
+    # If flag is true, use the Gi expression
+    flagi = m.flagi
+
     # This attaches expressions to the models with parameters substituted by values.
     # Future development: this could be disabled with a key word if processing time is an issue
     G = expr_replace(m.expressions.G, nt)
-    Gi = expr_replace(m.expressions.G, nt)
+    Gi = expr_replace(m.expressions.Gi, nt)
     J = expr_replace(m.expressions.J, nt)
     Gp = expr_replace(m.expressions.Gp, nt)
     Gpp = expr_replace(m.expressions.Gpp, nt)
@@ -723,7 +729,7 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple)
     (ωa -> begin [$Gp for ω in ωa]; end) |> FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}},
     (ω -> begin $Gpp; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
     (ωa -> begin [$Gpp for ω in ωa]; end) |> FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}},
-    $expressions, $nt, $info) )
+    $expressions, $flagi, $nt, $info) )
 end
 
 function Base.show(io::IO, m::RheoModel)

@@ -159,5 +159,6 @@ KelvinVoigt =  RheoModelClass(
                |____╱╲  ╱╲  ╱╲  ____|
                       ╲╱  ╲╱  ╲╱
                                 k
-                "
+                ",
+        flagi = true
                 )
