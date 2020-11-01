@@ -429,11 +429,20 @@ function modelfit(data::RheoTimeData,
         modsing = (t->model._J(t,p0a))
         modused = "J"
     elseif modloading == strain_imposed
-        dcontrolled = deriv(data.ϵ, data.t)
-        measured = data.σ
-        modulus = _Ga(model)
-        modsing = (t->model._G(t,p0a))
-        modused ="G"
+        if model.flagi==true
+            dcontrolled = deriv(data.ϵ, data.t)
+            dcontrolled = deriv(dcontrolled, data.t)
+            measured = data.σ
+            modulus = _Gia(model)
+            modsing = (t->model._Gi(t,p0a))
+            modused ="Gi"
+        else
+            dcontrolled = deriv(data.ϵ, data.t)
+            measured = data.σ
+            modulus = _Ga(model)
+            modsing = (t->model._G(t,p0a))
+            modused ="G"
+        end
     end
 
     # check necessary modulus is defined
@@ -509,9 +518,17 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
 
     if (check == strain_only)
-        modulus = _Ga(model)
-        modsing = model._G
-        dcontrolled = deriv(data.ϵ, data.t)
+        if model.flagi == true
+            modulus = _Gia(model)
+            modsing = model._Gi
+            dcontrolled = deriv(data.ϵ, data.t)
+            dcontrolled = deriv(dcontrolled, data.t) # second 1st order differentiation
+        else
+            modulus = _Ga(model)
+            modsing = model._G
+            dcontrolled = deriv(data.ϵ, data.t)
+        end
+        
     elseif (check == stress_only)
         modulus = _Ja(model)
         modsing = model._J

@@ -514,13 +514,14 @@ function RheoModelClass(;name::String,
                          info="", #name * ": model with parameters " * string(join(string.(p), ", "), "."),
                          # flags to avoid bugs related to the FunctionWrappers and MittLeff
                          Ga_safe::Bool = true,
+                         Gia_safe::Bool = true,
                          Ja_safe::Bool = true,
                          flagi::Bool = false
                          )
 
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
     unpack_expr = Meta.parse(string(join(string.(p), ","), ",=params"))
-    expressions = (G=G, Gi=Gi ,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint, Ga_safe=Ga_safe, Ja_safe=Ja_safe, flagi=flagi)
+    expressions = (G=G, Gi=Gi ,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint, Ga_safe=Ga_safe, Gia_safe=Gia_safe, Ja_safe=Ja_safe, flagi=flagi)
 
     @eval return(RheoModelClass($name, $p,
         ((t,params) -> begin $unpack_expr; $G; end)                 |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
@@ -716,7 +717,7 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple, flagi::Bool=false)
     Gp = expr_replace(m.expressions.Gp, nt)
     Gpp = expr_replace(m.expressions.Gpp, nt)
 
-    expressions=NamedTuple{(:G, :J, :Gp, :Gpp, :Ga_safe, :Ja_safe)}( ( G, J, Gp, Gpp, m.expressions.Ga_safe, m.expressions.Ja_safe ) )
+    expressions=NamedTuple{(:G, :J, :Gp, :Gpp, :Ga_safe, :Gia_safe, :Ja_safe)}( ( G, J, Gp, Gpp, m.expressions.Ga_safe, m.expressions.Gia_safe, m.expressions.Ja_safe ) )
 
     @eval return( RheoModel(
     (t -> begin $G; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},
@@ -755,6 +756,14 @@ function _Ga(m::RheoModelClass)
     end
 end
 
+function _Gia(m::RheoModelClass)
+    if m.expressions.Gia_safe
+        m._Gia
+    else
+        (ta,p) -> [m._Gi(t,p) for t in ta] # TODO. This line was copy-pasted.
+    end
+end
+
 function _Ja(m::RheoModelClass)
     if m.expressions.Ja_safe
         m._Ja
@@ -770,6 +779,14 @@ function _Ga(m::RheoModel)
         m._Ga
     else
         ta -> [m._G(t) for t in ta]
+    end
+end
+
+function _Gia(m::RheoModel)
+    if m.expressions.Gia_safe
+        m._Gia
+    else
+        ta -> [m._Gi(t) for t in ta] # TODO. This line was copy-pasted.
     end
 end
 
