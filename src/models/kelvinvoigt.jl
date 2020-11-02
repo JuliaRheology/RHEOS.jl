@@ -130,11 +130,8 @@ KelvinVoigt =  RheoModelClass(
         name="KV",
         # Model parameters,
         p = [:η, :k],
-        # Relaxation modulus
+        # Relaxation modulus - ramp response
         G = quote
-              t!=0.0 ? k : Inf
-            end,
-        Gi = quote
           k*t + η
         end,
         # Creep modulus
@@ -160,5 +157,5 @@ KelvinVoigt =  RheoModelClass(
                       ╲╱  ╲╱  ╲╱
                                 k
                 ",
-        flagi = true
+        use_G_integral = true
                 )
