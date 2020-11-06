@@ -65,6 +65,10 @@ Dashpot =  RheoModelClass(
         name="dashpot",
         # Model parameters,
         p = [:η],
+        # Relaxation modulus
+        G = quote
+                η
+              end,
         # Creep modulus
         J = quote
               t/η
@@ -83,7 +87,9 @@ Dashpot =  RheoModelClass(
              _____| |_____
                  _|_|
                      η
-                "
+                ",
+        use_G_integral = true
+        
         )
 
 
