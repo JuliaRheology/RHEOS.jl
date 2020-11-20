@@ -146,6 +146,8 @@ KelvinVoigt =  RheoModelClass(
         Gpp = quote
                 η*ω
               end,
+        # Network description
+        description = (type="parallel", components=(:Dashpot, :Spring)),
         # Network
         info= "
                         ___

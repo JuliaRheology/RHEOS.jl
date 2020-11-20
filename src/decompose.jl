@@ -33,7 +33,7 @@ function decompose(model::RheoModel, data::RheoTimeData, output::Dict=Dict())
     elseif model.description.type == "parallel"
         datae = extract(data, strain_only);
     end
-    # print(model.description.type)
+    print(model.description.type)
 
     # model_params = model.params # to store a separate copy of the model parameters - to use for param matching
     model_param_values = [mp for mp in model.params] # store sequence of parameter values separately

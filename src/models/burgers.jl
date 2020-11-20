@@ -39,6 +39,8 @@ BurgersLiquid =  RheoModelClass(
                 denominator = p1^2 * ω^2 + (1-p2*ω^2)^2
                 numerator/denominator
               end,
+        # Network description
+        description = (type = "series", components=(:Dashpot, :Spring, :KelvinVoigt)),
         # Network
         info= "
 
