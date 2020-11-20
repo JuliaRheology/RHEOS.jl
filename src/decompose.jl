@@ -35,19 +35,36 @@ function decompose(model::RheoModel, data::RheoTimeData, output::Dict=Dict())
     end
     # print(model.description.type)
 
+    # model_params = model.params # to store a separate copy of the model parameters - to use for param matching
+    model_param_values = [mp for mp in model.params] # store sequence of parameter values separately
+    print("type ", typeof(model_param_values))
+
     # start the recursion 
-    for c in model.description.components
+    for (index, c) in enumerate(model.description.components)
         # c will be like :Dashpot or :Maxwell or :Spring
         component = eval(c)
         print(component.name)
+
+        """ 
+        # --- Matching the actual parameter symbol ---
 
         # Get that component's parameter values
         pkeys = component.params # this is the list of Symbols
         print(pkeys)
         pval = Vector{Float64}()
-        for p in pkeys
-            print(model.params[p])
-            push!(pval, model.params[p]) # want to push model parameter values to components
+        for p in pkeys # here we are iterating over the actual symbol
+            print(model_params[p])
+            push!(pval, model_params[p]) # want to push model parameter values to components
+        end
+        ptuple = (; zip(pkeys, pval)...)
+        """
+
+        # --- Matching the parameters in order ---
+        pkeys = component.params
+        pval = Vector{Float64}()
+        for i = 1:length(pkeys)
+            push!(pval, model_param_values[1])
+            popfirst!(model_param_values)
         end
         ptuple = (; zip(pkeys, pval)...)
         
@@ -57,7 +74,7 @@ function decompose(model::RheoModel, data::RheoTimeData, output::Dict=Dict())
         # NOTE: datae has one field missing, either stress or strain, depending on if it is a series or parallel branch
         component_data = modelpredict(datae, component_RM); 
 
-        # -- STEP 4.4: Recurse with that
+        # -- Recurse with that
         # output["data"] = data
         # output[c.name] = Dict("data"=>c_data) 
         output[component.name] = Dict()
