@@ -53,6 +53,8 @@ Spring =  RheoModelClass(
         Gpp = quote
                 0.0
               end,
+        # Network description
+        description = (type="basic",),
         # Network
         info= "
                 ___╱╲  ╱╲  ╱╲  ________
@@ -81,6 +83,8 @@ Dashpot =  RheoModelClass(
         Gpp = quote
                 η*ω
               end,
+        # Network description
+        description = (type="basic",),
         # Network
         info= "
                  ___

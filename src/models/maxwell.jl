@@ -145,6 +145,8 @@ Maxwell = RheoModelClass(
                 numerator = η*ω
                 numerator/denominator
               end,
+        # Network description
+        description = (type="series", components = (:Dashpot, :Spring)),
         # Network
         info= "
                 ___

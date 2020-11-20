@@ -75,6 +75,9 @@ export dynamicmodelfit, dynamicmodelpredict
 export Interface
 export AFM, Tweezers
 
+#decompose.jl
+export decompose
+
 ######################################################
 # bundled dependencies from rheos-cambridge forked repos
 MittLeffLiteDir = joinpath(@__DIR__, "..", "deps", "MittLeffLite", "MittLeffLite.jl")
@@ -87,5 +90,6 @@ include("modeldatabase.jl")
 include("datagen.jl")
 include("processing.jl")
 include("interface.jl")
+include("decompose.jl")
 
 end
