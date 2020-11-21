@@ -147,7 +147,7 @@ KelvinVoigt =  RheoModelClass(
                 η*ω
               end,
         # Network description
-        description = (type="parallel", components=(:Dashpot, :Spring)),
+        description = (type="parallel", components=((:Dashpot, (:η,)), (:Spring, (:k,)))),
         # Network
         info= "
                         ___

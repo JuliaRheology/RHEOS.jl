@@ -40,7 +40,7 @@ BurgersLiquid =  RheoModelClass(
                 numerator/denominator
               end,
         # Network description
-        description = (type = "series", components=(:Dashpot, :Spring, :KelvinVoigt)),
+        description = (type = "series", components=((:Dashpot, (:η₁,)), (:Spring, (:k₁,)), (:KelvinVoigt, (:η₂, :k₂)))),
         # Network
         info= "
 
