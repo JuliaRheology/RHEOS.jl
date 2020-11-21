@@ -1,6 +1,89 @@
-macro Name(arg)
-    string(arg)
- end
+
+"""
+decompose(model, data)
+
+Decomposes `model` into its components recursively, and stores the stress-strain data for each branch and element.
+
+# Arguments
+- `model`: RheoModel to decompose
+- `data`: RheoTimeData that is complete ie has no missing columns
+"""
+
+function decompose(model::RheoModel, data::RheoTimeData)
+
+
+# CHECK IF RHEOMODEL IS A BASIC ELEMENT
+if model.description.type == "basic"
+    return NamedTuple{(:data,)}((data,))
+end
+
+
+# ^^ If previous code block was skipped, this means the model can be split into simpler elements. 
+
+
+# CHECK IF IT IS SERIES OR PARALLEL CONNECTION
+if model.description.type == "series"
+    datae = extract(data, stress_only);
+elseif model.description.type == "parallel"
+    datae = extract(data, strain_only);
+end
+
+
+# EXTRACT THE COMPONENTS FROM 'description' OF THE RHEMODEL
+components = model.description.components # Get the components. This is a Tuple.
+
+
+
+# NamedTuples can't be edited once constructed, so creating Arrays for names and values beforehand
+values = [] # Array of type Any
+names = [] # Array of type Any
+
+
+
+# STORE THE RheoTimeData OF THAT PARTICULAR BRANCH
+push!(values, data)
+push!(names, :data)
+
+
+for c in components # c is like (:Dashpot, (:η,)) or :data
+
+    push!(names, c[1])
+
+    c_RMC = eval(c[1]) # like eval(:Dashpot) -> Gets the RheoModelClass
+
+
+
+    # GET THE PARAMETER VALUES AND MATCH TO THE PARAMETERS
+    pkeys = c_RMC.params # this is the list of parameters associated with the component RMC (as defined in Models)
+    pval = Vector{Float64}()
+
+    for p in c[2] # here we are iterating over the params (Symbols) defined in 'description' of RheoModel
+
+        push!(pval, model.params[p]) # want to push RheoModel parameter values to components
+
+    end
+
+  
+    ptuple = (; zip(pkeys, pval)...)
+
+
+
+    # CREATE THE RHEOMODEL AND PREDICT
+    c_RM = RheoModel(eval(c[1]), ptuple); # Create the component's RheoModel, and complete the dataset
+    c_data = modelpredict(datae, c_RM); # NOTE: datae has one field missing, either stress or strain, depending on if it is a series or parallel branch
+
+
+    # CARRY OUT THE RECURSION
+    push!(values, decompose(c_RM, c_data))
+
+end
+
+return NamedTuple{Tuple(names)}(Tuple(values))
+
+end
+
+
+
 
 """
     decompose(model, data, output, r_count = 0)
@@ -90,55 +173,3 @@ function decompose2(model::RheoModel, data::RheoTimeData, output::Dict=Dict())
     return output
 end
 
-function decompose(model::RheoModel, data::RheoTimeData, output::Dict=Dict())
-    
-
-    # check if we have reached a spring or dashpot
-    if model.description.type == "basic"
-        return NamedTuple{(:data,)}((data,))
-    end
-
-    # The model can be split into simpler elements. Check if it is a series or parallel connection
-    if model.description.type == "series"
-        datae = extract(data, stress_only);
-    elseif model.description.type == "parallel"
-        datae = extract(data, strain_only);
-    end
-
-    components = collect(model.description.components) # convert Tuple of components to array
-    # pushfirst!(components, :data) # add :data to the beginning
-
-    values = [] # Array of type Any
-    names = [] # Array of type Any
-
-    push!(values, data)
-    push!(names, :data)
-
-    for c in components # c is like (:Dashpot, (:η,)) or :data
-
-        push!(names, c[1])
-
-        c_RMC = eval(c[1]) # like eval(:Dashpot) -> Gets the RheoModelClass
-
-        pkeys = c_RMC.params # this is the list of parameters associated with the component RMC 
-        pval = Vector{Float64}()
-
-        for p in c[2] # here we are iterating over the params defined in 'description'
-
-            push!(pval, model.params[p]) # want to push RheoModel parameter values to components
-
-        end
-        ptuple = (; zip(pkeys, pval)...)
-
-        
-        c_RM = RheoModel(eval(c[1]), ptuple); # Create the component's RheoModel, and complete the dataset
-        
-        c_data = modelpredict(datae, c_RM); # NOTE: datae has one field missing, either stress or strain, depending on if it is a series or parallel branch
-
-        push!(values, decompose(c_RM, c_data))
-   
-    end
-
-    return NamedTuple{Tuple(names)}(Tuple(values))
-    
-end
