@@ -17,6 +17,8 @@ function docprepare()
 
     # copy readme to staging-docs
     cp("README.md", "docs/staging-docs/index.md")
+    # remove Logo image from index.md
+    
 
     # copy assets to staging directory
     cp("docs/src/assets", "docs/staging-docs/assets")
@@ -56,7 +58,7 @@ function maindocbuilder()
     makedocs(modules=[RHEOS],
             doctest= false, clean=true,
             format = Documenter.HTML(),
-            sitename="",
+            sitename="RHEOS.jl",
             source = "staging-docs",
             authors="J Louis Kaplan, Alessandra Bonfati, Alexandre Kabla",
             pages = ["Home" => "index.md",
