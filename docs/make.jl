@@ -56,7 +56,7 @@ function maindocbuilder()
     makedocs(modules=[RHEOS],
             doctest= false, clean=true,
             format = Documenter.HTML(),
-            sitename="RHEOS",
+            sitename="",
             source = "staging-docs",
             authors="J Louis Kaplan, Alessandra Bonfati, Alexandre Kabla",
             pages = ["Home" => "index.md",
