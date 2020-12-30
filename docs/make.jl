@@ -15,11 +15,14 @@ function docprepare()
     rm("docs/staging-docs", force=true, recursive=true)
     mkdir("docs/staging-docs")
 
-    # copy readme to staging-docs
-    cp("README.md", "docs/staging-docs/index.md")
-    # remove Logo image from index.md
+    # copy readme to staging-docs, remove Logo image
+    write("docs/staging-docs/index.md", 
+            open("README.md") do input
+                readuntil(input, "<!-- delim -->", keep = true)
+                read(input)
+            end)
+    # cp("README.md", "docs/staging-docs/index.md")
     
-
     # copy assets to staging directory
     cp("docs/src/assets", "docs/staging-docs/assets")
 

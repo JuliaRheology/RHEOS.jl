@@ -3,12 +3,14 @@
 <img src="https://raw.githubusercontent.com/JuliaRheology/RHEOS.jl/master/docs/src/assets/logo.png" height="130"></img>
 </a>
 </div>
+<!-- delim -->
+
+# RHEOS - RHEology, Open-Source
 
 |**Tests**|**Documentation**|**Coverage**|**Paper**|
 |:-------------:|:---------------:|:---------------:|:-------:|
 | [![Build Status](https://travis-ci.org/JuliaRheology/RHEOS.jl.svg?branch=master)](https://travis-ci.org/JuliaRheology/RHEOS.jl) | [![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaRheology.github.io/RHEOS.jl/stable) [![Development Documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaRheology.github.io/RHEOS.jl/dev) | [![Code Coverage](https://codecov.io/gh/JuliaRheology/RHEOS.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaRheology/RHEOS.jl) | [![status](https://joss.theoj.org/papers/553250d815e1990db1b89c742854c71a/status.svg)](https://joss.theoj.org/papers/553250d815e1990db1b89c742854c71a) |
 
-# RHEOS - RHEology, Open-Source
 RHEOS, an abbreviation of Rheology Open Source, is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:
 
 - Stress/Strain/Time data can be easily be fitted to a viscoelastic model
