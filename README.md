@@ -4,9 +4,9 @@
 </a>
 </div>
 
-|**Test Status**|**Documentation**|**Test Coverage**|**Paper**|
+|**Tests**|**Documentation**|**Coverage**|**Paper**|
 |:-------------:|:---------------:|:---------------:|:-------:|
-| [![Build Status][travis-img]][travis-url] | [![Stable][docs-sta-img]][docs-sta-url] [![Dev][docs-dev-img]][docs-dev-url] | [![codecov][codecov-img]][codecov-url] [![coveralls][coveralls-img]][coveralls-url] | [![status][joss-img]][joss-url] |
+| [![Build Status][travis-img]][travis-url] | [![Stable][docs-sta-img]][docs-sta-url] [![Dev][docs-dev-img]][docs-dev-url] | [![codecov][codecov-img]][codecov-url] | [![status][joss-img]][joss-url] |
 
 # RHEOS - RHEology, Open-Source
 RHEOS, an abbreviation of Rheology Open Source, is a software package written in the Julia programming language that provides tools for analyzing rheological data. Features include:
@@ -62,11 +62,6 @@ If you believe you have found any bugs or invalid behaviour in RHEOS, please fee
 
 [codecov-img]: https://codecov.io/gh/JuliaRheology/RHEOS.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/JuliaRheology/RHEOS.jl
-
-[coveralls-img]: https://coveralls.io/repos/github/JuliaRheology/RHEOS.jl/badge.svg?branch=master
-[coveralls-url]: https://coveralls.io/github/JuliaRheology/RHEOS.jl?branch=master
-
-[license-img]: https://img.shields.io/badge/License-MIT-ff69b2.svg?style=flat
 
 [joss-img]: https://joss.theoj.org/papers/553250d815e1990db1b89c742854c71a/status.svg
 [joss-url]: https://joss.theoj.org/papers/553250d815e1990db1b89c742854c71a
