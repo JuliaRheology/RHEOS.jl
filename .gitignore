@@ -1,9 +1,7 @@
 docs/build/
 docs/site/
-docs/src-staging/
-examples/.ipynb_checkpoints
+docs/staging-docs/
+docs/staging-nb/
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
-examples/export_timedata.csv
-examples/export_frequdata.csv
