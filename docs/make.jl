@@ -67,6 +67,7 @@ function maindocbuilder()
             pages = ["Home" => "index.md",
                      "Architecture" => "architecture.md",
                      "File I/O" => "fileio.md",
+                     "Preprocessing" => "preprocessing.md",
                      "API" => "API.md"])
 
     deploydocs(repo = "github.com/JuliaRheology/RHEOS.jl.git",

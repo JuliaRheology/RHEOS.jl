@@ -1,4 +1,4 @@
-name: Tests
+name: stable
 
 on:
   push:
@@ -17,7 +17,6 @@ jobs:
         matrix:
           version: # test on Latest and nightly
             - 1
-            - nightly
           arch: # only test 64 bit 
             - x64
           os: # add mac test if needed
