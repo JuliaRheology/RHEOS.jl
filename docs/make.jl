@@ -66,6 +66,7 @@ function maindocbuilder()
             authors="J Louis Kaplan, Alessandra Bonfati, Alexandre Kabla",
             pages = ["Home" => "index.md",
                      "Architecture" => "architecture.md",
+                     "File I/O" => "fileio.md",
                      "API" => "API.md"])
 
     deploydocs(repo = "github.com/JuliaRheology/RHEOS.jl.git",
