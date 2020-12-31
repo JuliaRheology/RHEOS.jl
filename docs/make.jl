@@ -59,11 +59,11 @@ function maindocbuilder()
 
     # build docs from staging area
     makedocs(modules=[RHEOS],
-            doctest= false, clean=true,
+            doctest = false, clean=true,
             format = Documenter.HTML(),
-            sitename="RHEOS.jl",
+            sitename ="RHEOS.jl",
             source = "staging-docs",
-            authors="J Louis Kaplan, Alessandra Bonfati, Alexandre Kabla",
+            authors = "J Louis Kaplan, Alessandra Bonfati, Alexandre Kabla",
             pages = ["Home" => "index.md",
                      "Architecture" => "architecture.md",
                      "File I/O" => "fileio.md",
