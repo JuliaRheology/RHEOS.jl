@@ -71,6 +71,13 @@ function maindocbuilder()
                      "Generating Data" => "gendata.md",
                      "Fit and Predict" => ["Time data" => "fitpredictTime.md",
                                            "Frequency data" => "fitpredictFreq.md"],
+                     "Models" => ["Basic Elements" => "model_elements.md",
+                                  "Maxwell" => "model_maxwell.md",
+                                  "Kelvin-Voigt" => "model_kv.md",
+                                  "Zener" => "model_zener.md",
+                                  "Poynting-Thomson" => "model_pt.md",
+                                  "Burgers" => "model_burgers.md",
+                                  "Create Your Model" => "model_create.md"],
                      "Additional Examples" => "examples.md",
                      "API" => "API.md"])
 
