@@ -71,6 +71,7 @@ function maindocbuilder()
                      "Generating Data" => "gendata.md",
                      "Fit and Predict" => ["Time data" => "fitpredictTime.md",
                                            "Frequency data" => "fitpredictFreq.md"],
+                     "Additional Examples" => "examples.md",
                      "API" => "API.md"])
 
     deploydocs(repo = "github.com/JuliaRheology/RHEOS.jl.git",
