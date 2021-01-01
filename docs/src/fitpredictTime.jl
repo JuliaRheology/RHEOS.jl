@@ -22,7 +22,7 @@ using RHEOS
 
 # ## Fitting
 
-# ### Step 1: Loading in Experimental Data
+# #### Step 1: Loading in Experimental Data
 
 # RHEOS has a convenient function to import data from CSV files (more information in [File I/O](@ref) section).
 
@@ -31,7 +31,7 @@ RheoTimeDataType(data)
 
 # The time, strain and stress data are stored into a [`RheoTimeData`](@ref) struct.
 
-# ### Step 2: Fitting Models
+# #### Step 2: Fitting Models
 
 # Let's fit a Maxwell model via its relaxation modulus, G, as our data is from a stress relaxation test, thus the strain is imposed. The first argument is our data, the second argument tells RHEOS which model to fit ([`RheoModelClass`](@ref)) and the final argument tells RHEOS whether to fit the model using a relaxation modulus (*strain* imposed) or creep modulus (*stress* imposed). The function will return a [`RheoModel`](@ref) object, i.e. a [`RheoModelClass`](@ref) with fixed values for the parameters.
 
@@ -63,7 +63,7 @@ Fmaxwell_model = modelfit(data, FractS_Maxwell, strain_imposed, lo = Lo, hi = Hi
 
 # Given an incomplete data set (time data with only either stress or strain missing) and model with values substituted into parameters ([`RheoModel`](@ref)), return a new "complete" dataset based on the model with the simulated missing variable.
 
-# ### Assess Quality of the Fit
+# #### Assess Quality of the Fit
 
 # The ability of predicting model's response is first exploited to assess the quality of the fits above. The incomplete [`RheoTimeData`](@ref) variable is defined by extracting the time and the imposed variable (for the current example, the strain).
 
@@ -86,7 +86,7 @@ ax.set_xlabel("Time")
 ax.set_ylabel("Stress")
 fig
 
-# ### Simulate different model behaviours
+# #### Simulate different model behaviours
 
 # The ability of predicting model's response can be exploited to simulate the behaviour of the model to other external loading conditions. For example, we will explore the response of the fitted model to a creep experiment.
 

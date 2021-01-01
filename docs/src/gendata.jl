@@ -7,7 +7,7 @@
 using RHEOS
 using PyPlot
 
-# ### Step 1: Generate Timeline
+# #### Step 1: Generate Timeline
 # The first step requires the generation of a [`RheoTimeData`](@ref) struct with only the time data. This is achieved with the [`timeline`](@ref) function. If no parameter is specified, it generates a time data from `t_start = 0` to `t_end = 10`, with a default time step of `(t_start-t_end)/250 = 0.04`.
 
 datat = timeline(t_start = 0, t_end = 20.0, step = 0.02)
@@ -18,7 +18,7 @@ RheoTimeDataType(datat)
 
 #nb # Note that the same functionality is provided to generate a frequency spectrum by using frequencyspec (see an example of its usage in the 'Fitting and Predicting - Frequency data' section).
 
-# ### Step 2: Generate Stress or Strain Data
+# #### Step 2: Generate Stress or Strain Data
 
 # The user can decide either to generate strain data ([`strainfunction`](@ref)) or stress data ([`stressfunction`](@ref)). Both functions require a [`RheoTimeData`](@ref) with time data defined and a function that takes the time as an input to generate the desired set of data. Both function return a new [`RheoTimeData`](@ref) struct with time data and either stress or strain data. Below is an example.  
 
