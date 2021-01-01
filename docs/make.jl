@@ -68,6 +68,7 @@ function maindocbuilder()
                      "Architecture" => "architecture.md",
                      "File I/O" => "fileio.md",
                      "Preprocessing" => "preprocessing.md",
+                     "Generating Data" => "gendata.md",
                      "API" => "API.md"])
 
     deploydocs(repo = "github.com/JuliaRheology/RHEOS.jl.git",
