@@ -1,6 +1,7 @@
 [deps]
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
+RHEOS = "728860ae-c896-11e8-0b91-0f38ecad5046"
 
 [compat]
 julia = "1"
