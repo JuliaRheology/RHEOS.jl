@@ -1,4 +1,9 @@
 using PyPlot
+using PyCall
+
+gs = pyimport("matplotlib.gridspec")
+pushfirst!(PyVector(pyimport("sys")."path"), "")
+plothelper = pyimport("plothelper")
 
 function plotmodel(modelvect; ymaxG = nothing, ymaxJ = nothing)
 
@@ -13,55 +18,64 @@ function plotmodel(modelvect; ymaxG = nothing, ymaxJ = nothing)
 
     colplot = ["red", "#dc7633", "#229954", "#d4ac0d", "blue"]
 
-    fig, ax = subplots(1,2, figsize=(15,7))
+    fig, spec, ax1, ax2, ax3 = plothelper.get_fig_axes()
+    spec.update(wspace = 0.25,
+                hspace = 0.25,
+                top = 0.96,
+                bottom = 0.07,
+                left = 0.07,
+                right = 0.98)
 
     for i = 1:1:length(modelvect)
         #Relaxation modulus
         dG = modelpredict(dϵ, modelvect[i])
-        ax[1].plot(dG.t, dG.σ, color=colplot[i])
-        ax[1].plot([-5*dt,0,dG.t[1]],[0.0, 0.0,dG.σ[1]], color=colplot[i])
+        ax1.plot(dG.t, dG.σ, color=colplot[i])
+        ax1.plot([-5*dt,0,dG.t[1]],[0.0, 0.0,dG.σ[1]], color=colplot[i])
 
         # Creep modulus
         dJ = modelpredict(dσ, modelvect[i,1])
-        ax[2].plot(dJ.t, dJ.ϵ, color=colplot[i])
-        ax[2].plot([-5*dt,0,dJ.t[1]],[0.0, 0.0,dJ.ϵ[1]], color=colplot[i])
+        ax2.plot(dJ.t, dJ.ϵ, color=colplot[i])
+        ax2.plot([-5*dt,0,dJ.t[1]],[0.0, 0.0,dJ.ϵ[1]], color=colplot[i])
     end
 
     # Plot settings
 
-    ax[1].set_xlabel("Time", fontsize = 14);
-    ax[1].set_ylabel("Stress", fontsize = 14);
-    ax[1].tick_params("both", labelsize=12);
-    ax[1].set_title("Relaxation response", fontsize = 14);
-    isnothing(ymaxJ) ? ax[1].set_ylim(bottom = -dt, top = ymaxG) : ax[1].set_ylim(bottom = -dt)
-    ax[1].tick_params("both", labelsize=12)
-    ax[1].tick_params(axis="x", which="minor", bottom=true)
-    ax[1].grid(b=true, alpha = 0.2, axis="y", which="major");
-    ax[1].grid(b=true, alpha = 0.2, axis="x", which="major");
+    ax1.set_xlabel("Time", fontsize = 10)
+    ax1.set_ylabel("Stress", fontsize = 10)
+    ax1.tick_params("both", labelsize = 9)
+    ax1.set_title("Relaxation response", fontsize = 10)
+    isnothing(ymaxJ) ? ax1.set_ylim(bottom = -dt, top = ymaxG) : ax1.set_ylim(bottom = -dt)
+    ax1.tick_params("both", labelsize = 9)
+    ax1.tick_params(axis="x", which="minor", bottom=true)
+    ax1.grid(b=true, alpha = 0.2, axis="y", which="major")
+    ax1.grid(b=true, alpha = 0.2, axis="x", which="major")
 
-    ax[2].set_xlabel("Time", fontsize = 14);
-    ax[2].set_ylabel("Strain", fontsize = 14);
-    ax[2].tick_params("both", labelsize=12);
-    ax[2].set_title("Creep response", fontsize = 14);
-    isnothing(ymaxJ) ? ax[2].set_ylim(bottom = -dt, top = ymaxJ) : ax[2].set_ylim(bottom = -dt)
-    ax[2].tick_params("both", labelsize=12)
-    ax[2].tick_params(axis="x", which="minor", bottom=true)
-    ax[2].grid(b=true, alpha = 0.2, axis="y", which="major");
-    ax[2].grid(b=true, alpha = 0.2, axis="x", which="major");
+    ax2.set_xlabel("Time", fontsize = 10)
+    ax2.set_ylabel("Strain", fontsize = 10)
+    ax2.tick_params("both", labelsize = 9)
+    ax2.set_title("Creep response", fontsize = 10)
+    isnothing(ymaxJ) ? ax2.set_ylim(bottom = -dt, top = ymaxJ) : ax2.set_ylim(bottom = -dt)
+    ax2.tick_params("both", labelsize = 9)
+    ax2.tick_params(axis="x", which="minor", bottom=true)
+    ax2.grid(b=true, alpha = 0.2, axis="y", which="major")
+    ax2.grid(b=true, alpha = 0.2, axis="x", which="major")
 
-    dω = frequencyspec()
-    fig, ax = subplots(1,1, figsize=(5,5))
+    dω = frequencyspec(ω_start = 10e-2, ω_end = 10e2)
+
     for i = 1:1:length(modelvect)
         # Storage and Loss moduli
         d_Gp = dynamicmodelpredict(dω, modelvect[i])
-        ax.loglog(d_Gp.ω, d_Gp.Gp, color=colplot[i], "-")
-        ax.loglog(d_Gp.ω, d_Gp.Gpp, color=colplot[i], "--")
+        ax3.loglog(d_Gp.ω, d_Gp.Gp, color=colplot[i], "-")
+        ax3.loglog(d_Gp.ω, d_Gp.Gpp, color=colplot[i], "--")
     end
-    ax.set_xlabel("Frequency", fontsize = 10);
-    ax.set_ylabel("Storage (—) and Loss (- -) moduli", fontsize = 10);
-    ax.tick_params("both", labelsize=8);
-    ax.grid(b=true, alpha = 0.2, axis="y", which="major");
-    ax.grid(b=true, alpha = 0.2, axis="x", which="major");
-    ax.set_title("Frequency response", fontsize = 10);
+
+    ax3.set_xlabel("Frequency", fontsize = 10)
+    ax3.set_ylabel("Storage (—) and Loss (- -) moduli", fontsize = 10)
+    ax3.tick_params("both", labelsize = 9)
+    ax3.grid(b=true, alpha = 0.2, axis="y", which="major")
+    ax3.grid(b=true, alpha = 0.2, axis="x", which="major")
+    ax3.set_title("Frequency response", fontsize = 10)
+
+    return fig
 
 end
