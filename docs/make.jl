@@ -21,7 +21,6 @@ function docprepare()
                 readuntil(input, "<!-- delim -->", keep = true)
                 read(input)
             end)
-    # cp("README.md", "docs/staging-docs/index.md")
     
     # copy assets to staging directory
     cp("docs/src/assets", "docs/staging-docs/assets")
@@ -55,7 +54,7 @@ function maindocbuilder()
     docprepare()
 
     # prepare notebook files from source
-    # notebookprepare()
+    notebookprepare()
 
     # build docs from staging area
     makedocs(modules=[RHEOS],
@@ -64,30 +63,22 @@ function maindocbuilder()
             sitename ="RHEOS.jl",
             source = "staging-docs",
             authors = "J Louis Kaplan, Alessandra Bonfati, Alexandre Kabla",
-            # pages = ["Home" => "index.md",
-            #          "Architecture" => "architecture.md",
-            #          "File I/O" => "fileio.md",
-            #          "Preprocessing" => "preprocessing.md",
-            #          "Generating Data" => "gendata.md",
-            #          "Fit and Predict" => ["Time data" => "fitpredictTime.md",
-            #                                "Frequency data" => "fitpredictFreq.md"],
-            #          "Models" => ["Basic Elements" => "model_elements.md",
-            #                       "Maxwell" => "model_maxwell.md",
-            #                       "Kelvin-Voigt" => "model_kv.md",
-            #                       "Zener" => "model_zener.md",
-            #                       "Poynting-Thomson" => "model_pt.md",
-            #                       "Burgers" => "model_burgers.md",
-            #                       "Create Your Model" => "model_create.md"],
-            #          "Additional Examples" => "examples.md",
-            #          "API" => "API.md"])
-
-            pages = ["Models" => ["Basic Elements" => "model_elements.md",
+            pages = ["Home" => "index.md",
+                     "Architecture" => "architecture.md",
+                     "File I/O" => "fileio.md",
+                     "Preprocessing" => "preprocessing.md",
+                     "Generating Data" => "gendata.md",
+                     "Fit and Predict" => ["Time data" => "fitpredictTime.md",
+                                           "Frequency data" => "fitpredictFreq.md"],
+                     "Models" => ["Basic Elements" => "model_elements.md",
                                   "Maxwell" => "model_maxwell.md",
                                   "Kelvin-Voigt" => "model_kv.md",
                                   "Zener" => "model_zener.md",
                                   "Poynting-Thomson" => "model_pt.md",
                                   "Burgers" => "model_burgers.md",
-                                  "Create Your Model" => "model_create.md"]])
+                                  "Create Your Model" => "model_create.md"],
+                     "Additional Examples" => "examples.md",
+                     "API" => "API.md"])
 
     deploydocs(repo = "github.com/JuliaRheology/RHEOS.jl.git",
                deps = nothing,
