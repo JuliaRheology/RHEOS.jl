@@ -1,34 +1,43 @@
 # # Springpot
+#md # [![](https://mybinder.org/badge_logo.svg)](@__BINDER_ROOT_URL__/notebooks/model_elements.ipynb)
+#md # [![](https://img.shields.io/badge/show-nbviewer-579ACA.svg)](@__NBVIEWER_ROOT_URL__/notebooks/model_elements.ipynb)
 
 using RHEOS
+## include a helper function for plotting
+include("assets/plothelper.jl");
+#-
 
 # By typing the name of the model, it is possible to visualise its graphical representation and its parameters.
 
 Springpot
 
-# ### Constitutive Equation
+# #### Constitutive Equation
 # ```math
-# a = 1
+# \sigma(t) = c_{\beta} \frac{d^\beta \epsilon(t)}{dt^\beta}
 # ```
 
-# ### Relaxation Modulus
 # ```math
-# a = 1
+# \text{for}\; \ 0 \leq \beta \leq 1
 # ```
 
-# ### Creep Modulus
+# #### Relaxation Modulus
 # ```math
-# J(t)= frac{1}{c_{\beta} \Gamma (1 + \beta)} t^{\beta}
+# G(t) = \frac{c_{\beta} }{\Gamma(1-\beta)} t^{-\beta}
 # ```
 
-# ### Storage Modulus
+# #### Creep Modulus
 # ```math
-# a = 1
+# J(t) = \frac{1}{c_\beta \Gamma(1+\beta)}t^\beta
 # ```
 
-# ### Loss Modulus
+# #### Storage Modulus
 # ```math
-# a = 1
+# G^{\prime}(\omega) = c_\beta \omega^\beta \cos(\frac{\pi}{2}\beta)
+# ```
+
+# #### Loss Modulus
+# ```math
+# G^{\prime\prime}(\omega) = c_\beta \omega^\beta \sin(\frac{\pi}{2}\beta)
 # ```
 
 # # Spring
@@ -45,9 +54,6 @@ Dashpot
 
 # ## Qualitative Behaviours of the Moduli
 
-## include a helper function for plotting
-include("assets/plothelper.jl") 
-
 models = Vector{RheoModel}()
 
 ## Spring
@@ -56,7 +62,7 @@ push!(models, RheoModel(Spring, (k = 1.0,)))
 ## plot moduli for varying β
 for beta in [0.2, 0.5, 0.8]
     
-    push!(models, RheoModel(Springpot,(cᵦ = 1.0, β = beta)))
+    push!(models, RheoModel(Springpot, (cᵦ = 1.0, β = beta)))
  
 end
 
