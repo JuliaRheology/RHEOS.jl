@@ -63,7 +63,7 @@ function plotmodel(modelvect; ymaxG = nothing, ymaxJ = nothing)
     ax2.grid(b=true, alpha = 0.2, axis="y", which="major")
     ax2.grid(b=true, alpha = 0.2, axis="x", which="major")
 
-    dω = frequencyspec(ω_start = 1e-2, ω_end = 1e2)
+    dω = frequencyspec(ω_start = 1e-2, ω_end = 1e2, logstep = log10(1e2/1e-2)/30)
 
     for i = 1:1:length(modelvect)
         # Storage and Loss moduli
