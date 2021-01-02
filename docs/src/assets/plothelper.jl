@@ -1,6 +1,9 @@
 using PyPlot
 using PyCall
 
+# need a separate Python helper file for
+# centered lower figure as colon operator 
+# not implemented fully implemented in PyCall
 gs = pyimport("matplotlib.gridspec")
 pushfirst!(PyVector(pyimport("sys")."path"), joinpath("assets"))
 plothelper = pyimport("plothelper")
