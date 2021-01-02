@@ -4,7 +4,6 @@ on:
   push:
     branches: # add more branches as necessary
       - master
-      - literatedocs
     tags: "*"
   pull_request:
 
