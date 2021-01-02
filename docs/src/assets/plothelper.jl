@@ -2,7 +2,8 @@ using PyPlot
 using PyCall
 
 gs = pyimport("matplotlib.gridspec")
-pushfirst!(PyVector(pyimport("sys")."path"), "")
+# pushfirst!(PyVector(pyimport("sys")."path"), joinpath("src", "assets"))
+pushfirst!(PyVector(pyimport("sys")."path"), joinpath("docs", "src", "assets"))
 plothelper = pyimport("plothelper")
 
 function plotmodel(modelvect; ymaxG = nothing, ymaxJ = nothing)
