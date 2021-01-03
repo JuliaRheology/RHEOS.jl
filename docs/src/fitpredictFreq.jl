@@ -68,7 +68,7 @@ ax.loglog(fractKV_predict.ω, fractKV_predict.Gp, "--", color = "blue")
 ax.loglog(fractKV_predict.ω, fractKV_predict.Gpp, "--", color = "red")
 ax.set_xlabel("Frequency")
 ax.set_ylabel("Storage and Loss moduli")
-fig
+#!nb fig #hide
 
 # #### Simulate Different Model Behaviours
 
@@ -88,6 +88,6 @@ fig, ax = subplots(1, 1, figsize = (7, 5))
 ax.plot(FractKV_creepPredict.t, FractKV_creepPredict.ϵ)
 ax.set_xlabel("Time")
 ax.set_ylabel("Strain")
-fig
+#!nb fig #hide
 
 # **Reference frequency data**: Deng, Linhong, et al. "Fast and slow dynamics of the cytoskeleton." Nature materials 5.8 (2006): 636.

@@ -28,7 +28,7 @@ dsin = strainfunction(datat, t -> sin(2*t))
 fig, ax = subplots(1, 1, figsize = (8, 2))
 plot(dsin.t, dsin.ϵ)
 RheoTimeDataType(dsin)
-fig
+#!nb fig #hide
 
 # ## Pre-defined Functions
 
@@ -73,7 +73,7 @@ dtriangle = strainfunction(datat, triangle(offset = 4.0, amp = 1, period = 4))
     ax[2, 3].set_ylim(bottom = -0.1, top = 1.2)
     ax[2, 3].set_title("Tringle")
 
-fig
+#!nb fig #hide
 
 # ## More Complex Patterns
 
@@ -99,4 +99,4 @@ dcomplex = dhold + dsquare
     ax[3].set_ylim(bottom = -0.1, top = 3.2)
     ax[3].set_title("Ramp & hold & oscillations")
 
-fig
+#!nb fig #hide

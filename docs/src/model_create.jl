@@ -41,6 +41,6 @@ ax.set_xlabel("Time")
 ax.set_ylabel("Stress")
 ax.set_ylim(bottom = 0.1, top = 20)
 ax.grid("on")
-fig
+#!nb fig #hide
 
 # In a similar way, it is possible to define a model with only creep modulus. In this case, only strain can be fitted/predicted.

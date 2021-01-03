@@ -26,7 +26,7 @@ ax.plot(data.t, data.σ, ".", color = "green")
 ax.plot(data.t, data.ϵ, "-", color = "blue")
 ax.set_ylabel("Strain (blue), Stress (green)")
 ax.set_xlabel("Time")
-fig
+#!nb fig #hide
 #-
 
 ## We now fit a Maxwell model
@@ -49,7 +49,7 @@ ax.plot(data.t, data.σ, ".", color = "green")
 ax.plot(maxwell_predict.t, maxwell_predict.σ, color = "red")
 ax.set_xlabel("Time")
 ax.set_ylabel("Stress")
-fig
+#!nb fig #hide
 
 # ## Example 2
 
@@ -70,7 +70,7 @@ ax.plot(data.t, data.σ, ".", color = "green")
 ax.plot(maxwellD_predict.t, maxwellD_predict.σ, color = "red")
 ax.set_xlabel("Time")
 ax.set_ylabel("Stress")
-fig
+#!nb fig #hide
 
 # ## Example 3
 
@@ -98,4 +98,4 @@ end
 ax.set_xlabel("Time")
 ax.set_ylabel("Stress")
 ax.grid("on")
-fig
+#!nb fig #hide

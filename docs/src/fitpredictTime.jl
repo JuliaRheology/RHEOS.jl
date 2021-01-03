@@ -84,7 +84,7 @@ ax.plot(data.t, data.σ, "o", markersize = 5)
 ax.plot(maxwell_predict.t, maxwell_predict.σ, color = "red")
 ax.set_xlabel("Time")
 ax.set_ylabel("Stress")
-fig
+#!nb fig #hide
 
 # #### Simulate different model behaviours
 
@@ -109,7 +109,7 @@ ax.plot(maxwell_creepPredict.t, maxwell_creepPredict.σ, "--")
 ax.plot(maxwell_creepPredict.t, maxwell_creepPredict.ϵ)
 ax.set_xlabel("Time")
 ax.set_ylabel("Strain")
-fig
+#!nb fig #hide
 
 #md # !!! warning "Important"
 #md #     As for the fitting procedure, if an ideal step loading is assumed, RHEOS provides a dedicated function [`modelsteppredict`](@ref) that requires the same parameters as [`modelpredict`](@ref) which significantly reduces the computation time.
@@ -131,4 +131,4 @@ ax.plot(maxwell_creepPredict.t, maxwell_creepPredict.σ, "--")
 ax.plot(maxwell_creepPredict.t, maxwell_creepPredict.ϵ)
 ax.set_xlabel("Time")
 ax.set_ylabel("Strain")
-fig
+#!nb fig #hide

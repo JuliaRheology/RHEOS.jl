@@ -16,7 +16,7 @@ foo = timeline(t_start = 0, t_end = 10, step = 0.4)
 foo = strainfunction(foo, t -> sin(t))
 fig, ax = subplots(1, 1, figsize = (5, 5))
 ax.plot(foo.t, foo.ϵ, "--", marker = "o", markersize = 8, color = "blue")
-fig # for showing figure in docs
+#!nb fig #hide
 
 # To downsample the full data set , the function [`resample`](@ref) is used with a `scale` argument less than 1. Similarly, to increase the sample rate, the `scale` argument should be greater than 1.
 
@@ -38,7 +38,7 @@ ax[1].plot(foo_dsamp.t, foo_dsamp.ϵ, "--", marker = "x", markersize = 10, marke
 ax[2].set_title("Upsampling")
 ax[2].plot(foo.t, foo.ϵ, "--", marker = "o", markersize = 8, color = "blue")
 ax[2].plot(foo_usamp.t, foo_usamp.ϵ, "--", marker = "x", markersize = 10, markeredgewidth = 2, color = "orange")
-fig
+#!nb fig #hide
 
 # ## Cutting
 
@@ -50,7 +50,7 @@ foo_cut = cutting(foo, 2.0, 8.0)
 fig, ax = subplots(1, 1, figsize = (5, 5))
 ax.plot(foo.t, foo.ϵ, "--", marker = "o", markersize = 8, color = "blue")
 ax.plot(foo_cut.t, foo_cut.ϵ, "--", marker = "x", markersize = 10, markeredgewidth = 2, color = "orange")
-fig
+#!nb fig #hide
 
 # ## Smoothing
 
@@ -66,4 +66,4 @@ foo_smooth = smooth(foo_noisy, 1)
 fig, ax = subplots(1, 1, figsize = (5, 5))
 ax.plot(foo_noisy.t, foo_noisy.ϵ, color = "blue")
 ax.plot(foo_smooth.t, foo_smooth.ϵ, color = "orange")
-fig
+#!nb fig #hide
