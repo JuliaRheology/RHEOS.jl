@@ -92,7 +92,7 @@ function importcsv(filepath::String; t_col::IntOrNone = nothing, σ_col::IntOrNo
 end
 
 """
-    exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; delimiter=',', colorder=nothing)
+    exportcsv(rheodata::Union{RheoTimeData, RheoFreqData}, filedir::String; delimiter=',', colorder=nothing)
 
 Export `RheoTimeData` or `RheoFreqData` type to csv format. May be useful for plotting/analysis in other software.
 By default, full time data will be exported with columns ordered as (t, σ, ϵ). Partial time data will be ordered
@@ -100,14 +100,14 @@ as either (t, σ) or (t, ϵ). Full frequency data will be ordered as (ω, Gp, Gp
 by passing a NamedTuple to the `colorder` arguments. For example (σ = 1, t = 3, ϵ = 2) would export the columns in the
 order (σ, ϵ, t). As with `importcsv`, the delimiter can be set by keyword argument.
 """
-function exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; delimiter=',', colorder=nothing)
+function exportcsv(rheodata::Union{RheoTimeData, RheoFreqData}, filedir::String; delimiter=',', colorder=nothing)
 
     @assert endswith(lowercase(filedir), ".csv") "filedir must be a .csv file."
 
     # if ordering of columns not provided, get default ordering depending on data contained in struct
     if isnothing(colorder)
-        if typeof(self)==RheoTimeData
-            datacontained = RheoTimeDataType(self)
+        if typeof(rheodata)==RheoTimeData
+            datacontained = RheoTimeDataType(rheodata)
             if datacontained == stress_only
                 colorder = (t=1, σ=2)
             elseif datacontained == strain_only
@@ -116,61 +116,61 @@ function exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; del
                 colorder = (t=1, σ=2, ϵ=3)
             end
 
-        elseif typeof(self)==RheoFreqData
+        elseif typeof(rheodata)==RheoFreqData
             # invalid_freq_data=-1 freq_only=0 with_modulus=1
-            datacontained = RheoFreqDataType(self)
+            datacontained = RheoFreqDataType(rheodata)
             colorder = (ω = 1, Gp = 2, Gpp = 3)
         end
     end
 
     cols = collect(keys(colorder))
     sortedcols = sort(cols, by=i->getfield(colorder, i))
-    dataraw = getfield.((self,), sortedcols)
+    dataraw = getfield.((rheodata,), sortedcols)
     dataout = hcat(dataraw...)
     open(filedir, "w") do io
         writedlm(filedir, dataout, delimiter)
     end
 end
 
+"""
+    savedata(rheodata::Union{RheoTimeData, RheoFreqData}, filedir::String)
+
+Save RheoTimeData or RheoFreqData object using JLD2 format for re-use in
+a later Julia session.
+"""
+function savedata(rheodata::Union{RheoTimeData, RheoFreqData}, filedir::String)
+
+    @assert endswith(lowercase(filedir), ".jld2") "filedir must be a .jld2 file."
+
+    @save filedir rheodata
+
+end
+
+"""
+    loaddata(filedir::String)
+
+Loads RheoTimeData or RheoFreqData object from a jld2 file.
+"""
+function loaddata(filedir::String)
+
+    @assert endswith(lowercase(filedir), ".jld2") "filedir must be a .jld2 file."
+
+    @load filedir rheodata
+
+    return rheodata
+
+end
+
 # """
-#     savedata(self::Union{RheoTimeData, RheoFreqData}, filedir::String)
-
-# Save RheoTimeData or RheoFreqData object using JLD2 format for re-use in
-# a later Julia session.
-# """
-# function savedata(self::Union{RheoTimeData, RheoFreqData}, filedir::String)
-
-#     @assert endswith(lowercase(filedir), ".jld2") "filedir must be a .jld2 file."
-
-#     @save filedir self
-
-# end
-
-# """
-#     loaddata(filedir::String)
-
-# Loads RheoTimeData or RheoFreqData object from a jld2 file.
-# """
-# function loaddata(filedir::String)
-
-#     @assert endswith(lowercase(filedir), ".jld2") "filedir must be a .jld2 file."
-
-#     @load filedir self
-
-#     return self
-
-# end
-
-# """
-#     savemodel(self::RheologyModel, filedir::String; ext = ".jld2")
+#     savemodel(rheodata::RheologyModel, filedir::String; ext = ".jld2")
 
 # Save RheologyModel object using JLD2 format reuse in a later Julia session.
 # """
-# function savemodel(self::RheologyModel, filedir::String; ext = ".jld2")
+# function savemodel(rheodata::RheologyModel, filedir::String; ext = ".jld2")
 
 #     fulldir = string(filedir, ext)
 
-#     @save fulldir self
+#     @save fulldir rheodata
 
 # end
 
@@ -181,8 +181,8 @@ end
 # """
 # function loadmodel(filedir::String)
 
-#     @load filedir self
+#     @load filedir rheodata
 
-#     return self
+#     return rheodata
 
 # end

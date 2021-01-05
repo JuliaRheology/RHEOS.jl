@@ -6,6 +6,7 @@ module RHEOS
 # installed from Julia package repository
 using InverseLaplace
 using NLopt
+# using BSON: @load, @save
 using JLD2
 using DataStructures
 using FunctionWrappers: FunctionWrapper
@@ -48,7 +49,7 @@ export freeze_params
 export relaxmod, creepcomp, storagemod, lossmod, dynamicmod
 
 # IO.jl
-export importcsv, exportcsv#, savedata, loaddata, savemodel, loadmodel
+export importcsv, exportcsv, savedata, loaddata#, savemodel, loadmodel
 
 # models.jl
 export null_modulus

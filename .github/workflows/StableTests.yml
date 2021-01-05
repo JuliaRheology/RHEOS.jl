@@ -4,6 +4,7 @@ on:
   push:
     branches: # add more branches as necessary
       - master
+      - jld2IO
     tags: "*"
   pull_request:
 

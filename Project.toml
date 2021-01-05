@@ -4,6 +4,7 @@ authors = ["J Louis Kaplan <jonathanlouiskaplan@outlook.com>", "Alessandra Bonfa
 version = "0.9.3"
 
 [deps]
+BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"
 DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
@@ -27,7 +28,6 @@ Documenter = "0.24"
 FunctionWrappers = "1.1"
 ImageFiltering = "0.6"
 InverseLaplace = "0.3"
-JLD2 = "0.1"
 NLopt = "0.6"
 QuadGK = "2.3"
 SpecialFunctions = "0.10"
