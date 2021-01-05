@@ -130,16 +130,16 @@ function _saveload_timefull()
 end
 @test _saveload_timefull()
 
-# function _saveload_freqfull()
-#     fildir = joinpath(@__DIR__, "testdata", "datanonans.csv")
+function _saveload_freqfull()
+    fildir = joinpath(@__DIR__, "testdata", "datanonans.csv")
 
-#     rheofreqdataIN = importcsv(fildir; ω_col = 1, Gp_col = 2, Gpp_col = 3)
+    rheofreqdataIN = importcsv(fildir; ω_col = 1, Gp_col = 2, Gpp_col = 3)
 
-#     # default column ordering for full time data is (Gp, Gpp, ω)
-#     testdir = joinpath(@__DIR__, "testdata", "testbinaryloop.jld2")
-#     savedata(rheofreqdataIN, testdir)
-#     rheofreqdataOUT = loaddata(testdir)
+    # default column ordering for full time data is (Gp, Gpp, ω)
+    testdir = joinpath(@__DIR__, "testdata", "testbinaryloop.jld2")
+    savedata(rheofreqdataIN, testdir)
+    rheofreqdataOUT = loaddata(testdir)
 
-#     rheofreqdataIN.ω == rheofreqdataOUT.ω && rheofreqdataIN.Gp == rheofreqdataOUT.Gp && rheofreqdataIN.Gpp == rheofreqdataOUT.Gpp
-# end
-# @test _saveload_freqfull()
+    rheofreqdataIN.ω == rheofreqdataOUT.ω && rheofreqdataIN.Gp == rheofreqdataOUT.Gp && rheofreqdataIN.Gpp == rheofreqdataOUT.Gpp
+end
+@test _saveload_freqfull()

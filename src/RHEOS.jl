@@ -6,7 +6,6 @@ module RHEOS
 # installed from Julia package repository
 using InverseLaplace
 using NLopt
-# using BSON: @load, @save
 using JLD2
 using DataStructures
 using FunctionWrappers: FunctionWrapper
