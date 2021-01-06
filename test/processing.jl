@@ -106,46 +106,10 @@ end
 # end
 # @test _resample_stressandstrain_multiplesections()
 
-function _indexweight_oneregiondownsample_includelastel()
-    timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
-
-    indices = indexweight(timedata, -2)
-
-    indices == [1, 3, 5, 7, 9, 11]
-end
-@test _indexweight_oneregiondownsample_includelastel()
-
-function _indexweight_oneregiondownsample_nolastel()
-    timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
-
-    indices = indexweight(timedata, -2; includelast=false)
-
-    indices == [1, 3, 5, 7, 9]
-end
-@test _indexweight_oneregiondownsample_nolastel()
-
-function _indexweight_oneregionupsample_includelastel()
-    timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
-
-    indices = indexweight(timedata, 2)
-
-    indices == [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11]
-end
-@test _indexweight_oneregionupsample_includelastel()
-
-function _indexweight_oneregionupsample_nolastel()
-    timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
-
-    indices = indexweight(timedata, 2; includelast=false)
-
-    indices == [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10]
-end
-@test _indexweight_oneregionupsample_nolastel()
-
 function _indexweight_tworegiondownsample_includelastel()
     timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
 
-    indices = indexweight(timedata, [-2, -3]; time_boundaries=[0.0, 5.0, 10.0])
+    indices = indexweight(timedata; elperiods = [-2, -3], time_boundaries=[0.0, 5.0, 10.0])
 
     indices == [1, 3, 5, 6, 9, 11]
 end
@@ -154,7 +118,7 @@ end
 function _indexweight_tworegiondownsample_nolastel()
     timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
 
-    indices = indexweight(timedata, [-2, -3]; time_boundaries=[0.0, 5.0, 10.0], includelast=false)
+    indices = indexweight(timedata; elperiods = [-2, -3], time_boundaries=[0.0, 5.0, 10.0], includelast=false)
 
     indices == [1, 3, 5, 6, 9]
 end
@@ -163,7 +127,7 @@ end
 function _indexweight_tworegionupsample_includelastel()
     timedata = timeline(t_start=0.0, t_end=5.0, step=1.0)
 
-    indices = indexweight(timedata, [2, 3]; time_boundaries=[0.0, 3.0, 4.0])
+    indices = indexweight(timedata; elperiods = [2, 3], time_boundaries=[0.0, 3.0, 4.0])
 
     indices == [1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5]
 end
@@ -172,7 +136,7 @@ end
 function _indexweight_tworegionupsample_nolastel()
     timedata = timeline(t_start=0.0, t_end=5.0, step=1.0)
 
-    indices = indexweight(timedata, [2, 3]; time_boundaries=[0.0, 3.0, 4.0], includelast=false)
+    indices = indexweight(timedata; elperiods = [2, 3], time_boundaries=[0.0, 3.0, 4.0], includelast=false)
 
     indices == [1, 1, 2, 2, 3, 3, 4, 4, 4]
 end
@@ -181,7 +145,7 @@ end
 function _indexweight_mixed_includelastel_finishup()
     timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
 
-    indices = indexweight(timedata, [-2, 3, -3, 4]; time_boundaries=[0.0, 3.0, 5.0, 9.0, 10.0])
+    indices = indexweight(timedata; elperiods = [-2, 3, -3, 4], time_boundaries=[0.0, 3.0, 5.0, 9.0, 10.0])
 
     indices == [1, 3, 4, 4, 4, 5, 5, 5, 6, 9, 10, 10, 10, 10, 11, 11, 11, 11]
 end
@@ -190,7 +154,7 @@ end
 function _indexweight_mixed_includelastel_finishdown()
     timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
 
-    indices = indexweight(timedata, [2, -3, 2, -2]; time_boundaries=[0.0, 3.0, 5.0, 7.0, 10.0])
+    indices = indexweight(timedata; elperiods = [2, -3, 2, -2], time_boundaries=[0.0, 3.0, 5.0, 7.0, 10.0])
 
     indices == [1, 1, 2, 2, 3, 3, 4, 6, 6, 7, 7, 8, 10, 11]
 end
@@ -199,7 +163,7 @@ end
 function _indexweight_mixed_nolastel_finishup()
     timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
 
-    indices = indexweight(timedata, [-2, 3, -3, 4]; time_boundaries=[0.0, 3.0, 5.0, 9.0, 10.0], includelast=false)
+    indices = indexweight(timedata; elperiods = [-2, 3, -3, 4], time_boundaries=[0.0, 3.0, 5.0, 9.0, 10.0], includelast=false)
 
     indices == [1, 3, 4, 4, 4, 5, 5, 5, 6, 9, 10, 10, 10, 10]
 end
@@ -208,7 +172,7 @@ end
 function _indexweight_mixed_nolastel_finishdown()
     timedata = timeline(t_start=0.0, t_end=10.0, step=1.0)
 
-    indices = indexweight(timedata, [2, -3, 2, -2]; time_boundaries=[0.0, 3.0, 5.0, 7.0, 10.0], includelast=false)
+    indices = indexweight(timedata; elperiods = [2, -3, 2, -2], time_boundaries=[0.0, 3.0, 5.0, 7.0, 10.0], includelast=false)
 
     indices == [1, 1, 2, 2, 3, 3, 4, 6, 6, 7, 7, 8, 10]
 end
@@ -739,7 +703,7 @@ function _modelfit_const_ramp_creep_weighted_downsampled(tol)
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
-    indices = indexweight(data0, -100)
+    indices = indexweight(data0; elperiods = [-2, 2], time_boundaries = [0.0, 5.0, 20.0])
 
     init_params = (α=1.2, β=0.8)
     modelout_weighted = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.7, β=0.7), hi=(α=1.5, β=1.5), weights=indices)
@@ -763,7 +727,7 @@ function _modelfit_const_ramp_sing_creep_weighted_downsampled(tol)
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
-    indices = indexweight(data0, -100)
+    indices = indexweight(data0; elperiods = [-2, 2], time_boundaries = [0.0, 5.0, 20.0])
 
     init_params = (α=1.3, β=0.7)
     modelout_weighted = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5), weights=indices)
@@ -1109,10 +1073,9 @@ function _modelstepfit_nonsing_nobounds_relax_weighted_selftest(tol)
     model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = loading, σ = exact_response)
-    indices = indexweight(data0, -1)
 
     init_params = (α=1.3, β=0.7)
-    modelout = modelstepfit(data0, model, strain_imposed; p0=init_params, weights=indices)
+    modelout = modelstepfit(data0, model, strain_imposed; p0=init_params, weights=collect(Integer, 1:length(t)))
 
     found_params = modelout.params
 
@@ -1131,10 +1094,9 @@ function _modelstepfit_sing_relax_weighted_selftest(tol)
     model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = loading, σ = exact_response)
-    indices = indexweight(data0, -1)
 
     init_params = (α=1.3, β=0.7)
-    modelout = modelstepfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5), weights=indices)
+    modelout = modelstepfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5), weights=collect(Integer, 1:length(t)))
 
     found_params = modelout.params
 
@@ -1153,7 +1115,7 @@ function _modelstepfit_nonsing_nobounds_relax_weighted_closeness(tol)
     model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = loading, σ = exact_response)
-    indices = indexweight(data0, -100)
+    indices = indexweight(data0; elperiods = [-2, 2], time_boundaries = [0.0, 5.0, 20.0])
 
     init_params = (α=1.3, β=0.7)
     modelout_weighted = modelstepfit(data0, model, strain_imposed; p0=init_params, weights=indices)
@@ -1177,7 +1139,7 @@ function _modelstepfit_sing_relax_weighted_closeness(tol)
     model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = loading, σ = exact_response)
-    indices = indexweight(data0, -100)
+    indices = indexweight(data0; elperiods = [-2, 2], time_boundaries = [0.0, 5.0, 20.0])
 
     init_params = (α=1.3, β=0.7)
     modelout_weighted = modelstepfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5), weights=indices)
