@@ -70,6 +70,7 @@ function maindocbuilder()
                      "Generating Data" => "gendata.md",
                      "Fit and Predict" => ["Time data" => "fitpredictTime.md",
                                            "Frequency data" => "fitpredictFreq.md"],
+                     "Numerical Aspects" => "numerical.md",
                      "Models" => ["Basic Elements" => "model_elements.md",
                                   "Maxwell" => "model_maxwell.md",
                                   "Kelvin-Voigt" => "model_kv.md",
