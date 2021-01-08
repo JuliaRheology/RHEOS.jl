@@ -57,9 +57,9 @@ The documentation (accessible via the blue docs button) aims to provide tutorial
 
 ## Installation
 1. Install the latest version of Julia
-2. From Julia interactive command-line REPL, enter pkg mode by pressing ```]```
+2. From Julia interactive command-line REPL, enter pkg mode by pressing `]`
 3. (Optional) Enable desired Project.toml environment
-4. Run the command ```add RHEOS```
+4. Run the command `add RHEOS`
 
 ## Documentation
 If you installed RHEOS using the instructions above then you will have the _latest stable release_ of RHEOS; to access the documentation for this version [click here][docs-sta-url] or the blue `docs/stable` badge at the top of this README page. To access the _latest documentation built directly from the master branch_ [click here][docs-dev-url] or the blue `docs/dev` badge at the top of this README page. 
@@ -75,7 +75,11 @@ If you use RHEOS in your work, please consider citing the following papers as ap
 #### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
 
 ## Contributing to RHEOS
-If you believe you have found any bugs or invalid behaviour in RHEOS, please feel free to file an issue on this repository. You can also raise an issue if you feel that any part of the documentation needs clarification, or for any feature requests. Even better than just raising an issue, you could both raise an issue and issue a pull request which fixes that issue. Note that meta-documentation on running tests and building documentation locally is available at the [JuliaRheology/RheoHelpDocs](https://github.com/JuliaRheology/RheoHelpDocs) repository. Please be aware that RHEOS is released with a 'Contributor Code of Conduct' (CONDUCT.md) and by participating in this project you agree to abide by its terms.
+If you believe you have found any bugs or invalid behaviour in RHEOS, please feel free to file an issue on this repository. You can also raise an issue if you feel that any part of the documentation needs clarification, or for any feature requests. Even better than just raising an issue, you could both raise an issue and issue a pull request which fixes that issue.
+
+We generally work using a greatly simplified version of 'git flow'. Small changes and fixes are directly committed or PR'ed in to the `master` branch, as longs as tests pass. Larger developments are generally made in feature branches and then merged to `master` via a pull request, once tests are passing. Stable releases are tagged and sent to the Julia central package repository via JuliaRegistrator and TagBot.
+
+Note that meta-documentation on running tests and building documentation locally is available at the [JuliaRheology/RheoHelpDocs](https://github.com/JuliaRheology/RheoHelpDocs) repository. Please be aware that RHEOS is released with a 'Contributor Code of Conduct' (CONDUCT.md) and by participating in this project you agree to abide by its terms.
 
 ## References
 + W. N. Findley, J. S. Lai, K. Onaran (1989). *Creep and Relaxation of Nonlinear Viscoelastic Materials (with an Introduction to Linear Viscoelasticity)*, Dover Publications, New York. 
