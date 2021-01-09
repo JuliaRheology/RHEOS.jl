@@ -11,19 +11,19 @@ using RHEOS
 ## Import file
 data_1 = importcsv("assets/data_time.csv", t_col = 1, ϵ_col = 2, σ_col = 3)
 ## Check data type
-RheoTimeDataType(data_1)
+rheotimedatatype(data_1)
 
 ## Import incomplete data
 data_2 = importcsv("assets/data_time.csv", t_col = 1, ϵ_col = 2)
 ## Check data type
-RheoTimeDataType(data_2)
+rheotimedatatype(data_2)
 
 # The function [`importcsv`](@ref) can also be used to import frequency, storage modulus, and loss modulus data (as a complete set). In this case, the function returns a [`RheoFreqData`](@ref) object.
 
 ## Import file
 data_f = importcsv("assets/data_freq.csv", ω_col = 1, Gp_col = 2, Gpp_col = 3)
 ## Check data type
-RheoFreqDataType(data_f)
+rheofreqdatatype(data_f)
 
 # ## Export Data
 

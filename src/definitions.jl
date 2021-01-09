@@ -106,7 +106,7 @@ function check_time_data_consistency(t,e,s)
 
 end
 
-function RheoTimeDataType(d::RheoTimeData)
+function rheotimedatatype(d::RheoTimeData)
     return check_time_data_consistency(d.t,d.ϵ,d.σ)
 end
 
@@ -168,8 +168,8 @@ end
 
 function +(d1::RheoTimeData, d2::RheoTimeData)
 
-    type1 = RheoTimeDataType(d1)
-    type2 = RheoTimeDataType(d2)
+    type1 = rheotimedatatype(d1)
+    type2 = rheotimedatatype(d2)
     @assert (type1!=invalid_time_data) "Addition error: first parameter invalid"
     @assert (type2!=invalid_time_data) "Addition error: second parameter invalid"
     @assert (type1==type2) "Addition error: parameters inconsistent"
@@ -199,8 +199,8 @@ end
 
 function -(d1::RheoTimeData, d2::RheoTimeData)
 
-    type1 = RheoTimeDataType(d1)
-    type2 = RheoTimeDataType(d2)
+    type1 = rheotimedatatype(d1)
+    type2 = rheotimedatatype(d2)
     @assert (type1!=invalid_time_data) "Subtraction error: first parameter invalid"
     @assert (type2!=invalid_time_data) "Subtraction error: second parameter invalid"
     @assert (type1==type2) "Subtraction error: parameters inconsistent"
@@ -230,7 +230,7 @@ end
 
 function -(d::RheoTimeData)
 
-    type = RheoTimeDataType(d)
+    type = rheotimedatatype(d)
     @assert (type!=invalid_time_data) "unary - error: parameter invalid"
     @assert (type!=time_only) "unary - error: time only data cannot be manipulated this way"
 
@@ -254,7 +254,7 @@ end
 
 function *(operand::Real, d::RheoTimeData)
 
-    type = RheoTimeDataType(d)
+    type = rheotimedatatype(d)
     @assert (type!=invalid_time_data) "* error: parameter invalid"
     @assert (type!=time_only) "* error: time only data cannot be manipulated this way"
 
@@ -269,8 +269,8 @@ end
 
 function |(d1::RheoTimeData, d2::RheoTimeData)
     # get types and type-check
-    type1 = RheoTimeDataType(d1)
-    type2 = RheoTimeDataType(d2)
+    type1 = rheotimedatatype(d1)
+    type2 = rheotimedatatype(d2)
 
     @assert ((type1==strain_only && type2==stress_only) || (type1==stress_only && type2==strain_only)) "One RheoTimeData must be stress_only and the other must be strain_only"
 
@@ -338,7 +338,7 @@ function check_freq_data_consistency(o,gp,gpp)
 
 end
 
-function RheoFreqDataType(d::RheoFreqData)
+function rheofreqdatatype(d::RheoFreqData)
     return check_freq_data_consistency(d.ω,d.Gp,d.Gpp)
 end
 

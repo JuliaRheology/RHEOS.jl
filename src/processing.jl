@@ -28,7 +28,7 @@ but this can be negated by providing the keyword argument `includelastel=false`.
 #         boundaries = closestindices(self.t, time_boundaries)
 #     end
 #
-#     check = RheoTimeDataType(self)
+#     check = rheotimedatatype(self)
 #     if (check == strain_only)
 #         (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
 #         sigma = [];
@@ -176,7 +176,7 @@ function cutting(self::RheoTimeData, time_on::T1, time_off::T2) where {T1<:Numbe
     boundary_off = closestindex(self.t, time_off);
     time = self.t[boundary_on:boundary_off]
 
-    check = RheoTimeDataType(self)
+    check = rheotimedatatype(self)
     if (check == strain_only)
         ϵ = self.ϵ[boundary_on:boundary_off]
         σ = [];
@@ -215,7 +215,7 @@ function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
     Σ = getsigma(τ, samplerate)
 
     # smooth signal and return
-    check = RheoTimeDataType(self)
+    check = rheotimedatatype(self)
     if (check == strain_only)
         epsilon = Base.invokelatest(imfilter, self.ϵ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
         sigma = [];
@@ -252,7 +252,7 @@ function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
         @assert (typeof(type)==TimeDataType) || (typeof(type)==Int) "Cannot extract frequency data from RheoTimeData"
         @assert (type!= strain_and_stress) && (type!= invalid_time_data) "Cannot extract both stress and strain"
         @assert (type!= invalid_time_data) "Cannot extract information from invalid time data"
-        check = RheoTimeDataType(self)
+        check = rheotimedatatype(self)
 
 
         log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
@@ -277,7 +277,7 @@ function extract(self::RheoFreqData, type::Union{FreqDataType,Integer})
         type = typeof(type)==Int ? FreqDataType(type) : type
         @assert (type!= with_modulus) "Cannot extract frequency with moduli"
         @assert (type!= invalid_freq_data) "Cannot extract information from invalid frequency data"
-        check = RheoFreqDataType(self)
+        check = rheofreqdatatype(self)
         @assert (check == with_modulus) "Frequency and modulii required"
 
         log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
@@ -407,7 +407,7 @@ function modelfit(data::RheoTimeData,
 
     rel_tol = convert(RheoFloat,rel_tol)
 
-    check = RheoTimeDataType(data)
+    check = rheotimedatatype(data)
     @assert (check == strain_and_stress) "Both stress and strain are required"
 
     # check provided weights are all valid
@@ -506,7 +506,7 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
         deriv = derivCD
     end
 
-    check = RheoTimeDataType(data)
+    check = rheotimedatatype(data)
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
 
     if (check == strain_only)
@@ -602,7 +602,7 @@ function modelstepfit(data::RheoTimeData,
     rel_tol = convert(RheoFloat, rel_tol)
 
     # get data type provided
-    check = RheoTimeDataType(data)
+    check = rheotimedatatype(data)
     # if step amplitude not provided, use loading data specified
     if isnothing(step)
         @assert (check == strain_and_stress) "Both stress and strain are required if step amplitude not provided."
@@ -691,7 +691,7 @@ specified. If the loading data is variable, the magnitude in the middle of the a
 """
 function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 0.0)
 
-    check = RheoTimeDataType(data)
+    check = rheotimedatatype(data)
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
 
     if (check == strain_only)

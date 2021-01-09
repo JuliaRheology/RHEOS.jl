@@ -13,7 +13,7 @@ using RHEOS
 # RHEOS has a convenient function to import data from CSV files (more information in [File I/O](@ref) section).
 
 data = importcsv("assets/data_freq.csv", ω_col = 1, Gp_col = 2, Gpp_col = 3)
-RheoFreqDataType(data)
+rheofreqdatatype(data)
 
 # The frequency, storage modulus and loss modulus are stored into a [`RheoFreqData`](@ref) struct.
 
@@ -53,7 +53,7 @@ data_ext = extract(data, freq_only)
 ## Alternatively, a RheoFreqData with only frequency data can be generated as
 ## data_gen = frequencyspec(ω_start = 1.0e-2, ω_end = 1.0e2, step = 1.0e-5)
 
-RheoFreqDataType(data_ext)
+rheofreqdatatype(data_ext)
 
 # For the prediction, RHEOS' function [`dynamicmodelpredict`](@ref) requires the incomplete data set and a model with fixed parameters ([`RheoModel`](@ref)). For the assessment of the fitting quality the [`RheoModel`](@ref) is the output of the fitting function.
 

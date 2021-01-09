@@ -11,7 +11,7 @@ using PyPlot
 # The first step requires the generation of a [`RheoTimeData`](@ref) struct with only the time data. This is achieved with the [`timeline`](@ref) function. If no parameter is specified, it generates a time data from `t_start = 0` to `t_end = 10`, with a default time step of `(t_start-t_end)/250 = 0.04`.
 
 datat = timeline(t_start = 0, t_end = 20.0, step = 0.02)
-RheoTimeDataType(datat)
+rheotimedatatype(datat)
 
 #md # !!! note "Note"
 #md #     The same functionality is provided to generate a frequency spectrum by using [`frequencyspec`](@ref) (see an example of its usage in the [Fitting and Predicting - Frequency data](@ref) section).
@@ -27,7 +27,7 @@ dsin = strainfunction(datat, t -> sin(2*t))
 
 fig, ax = subplots(1, 1, figsize = (8, 2))
 plot(dsin.t, dsin.ϵ)
-RheoTimeDataType(dsin)
+rheotimedatatype(dsin)
 #!nb fig #hide
 
 # ## Pre-defined Functions

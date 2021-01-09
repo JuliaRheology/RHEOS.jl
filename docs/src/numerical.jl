@@ -28,7 +28,7 @@ weightings = [1, 1, 2, 2, 3, 3, 4, 6];
 
 ## As in original example, load in the data
 data = importcsv("assets/data_time.csv", t_col = 1, ϵ_col = 2, σ_col = 3)
-RheoTimeDataType(data)
+rheotimedatatype(data)
 #-
 
 # Now instead of going straight to fitting, we will construct a weightings array using [`indexweight`](@ref).

@@ -27,7 +27,7 @@ using RHEOS
 # RHEOS has a convenient function to import data from CSV files (more information in [File I/O](@ref) section).
 
 data = importcsv("assets/data_time.csv", t_col = 1, ϵ_col = 2, σ_col = 3)
-RheoTimeDataType(data)
+rheotimedatatype(data)
 
 # The time, strain and stress data are stored into a [`RheoTimeData`](@ref) struct.
 
@@ -70,7 +70,7 @@ Fmaxwell_model = modelfit(data, FractS_Maxwell, strain_imposed, lo = Lo, hi = Hi
 data_ext = extract(data, strain_only)
 ## alternatively: data_ext = extract(data, 1);
 
-RheoTimeDataType(data_ext)
+rheotimedatatype(data_ext)
 
 # For the prediction, RHEOS' function [`modelpredict`](@ref) requires the incomplete data set and a model with fixed parameters ([`RheoModel`](@ref)). For the assessment of the fitting quality the [`RheoModel`](@ref) required is the output of the fitting function.
 

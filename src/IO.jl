@@ -107,7 +107,7 @@ function exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; del
     # if ordering of columns not provided, get default ordering depending on data contained in struct
     if isnothing(colorder)
         if typeof(self)==RheoTimeData
-            datacontained = RheoTimeDataType(self)
+            datacontained = rheotimedatatype(self)
             if datacontained == stress_only
                 colorder = (t=1, σ=2)
             elseif datacontained == strain_only
@@ -118,7 +118,7 @@ function exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; del
 
         elseif typeof(self)==RheoFreqData
             # invalid_freq_data=-1 freq_only=0 with_modulus=1
-            datacontained = RheoFreqDataType(self)
+            datacontained = rheofreqdatatype(self)
             colorder = (ω = 1, Gp = 2, Gpp = 3)
         end
     end
