@@ -52,9 +52,6 @@ RHEOS addresses the issues outlined in the Statement of Need in several ways.
 
 All of the above features are linked together in a seamless interface intended to be very approachable for less experienced programmers. The different paradigms of creep, relaxation and oscillatory testing are all accounted for, and models fitted against one type of data can be used to predict against a different type of data. (For instance, fitting against relaxation data and predicting the frequency response spectrum.)
 
-## Documentation
-The documentation (accessible via the blue docs button) aims to provide tutorials in different elements of RHEOS. The API section is a comprehensive list of RHEOS types and functions, and brief descriptions of their use. For corrections or further questions, please note the 'Contributing to RHEOS' section below and create an issue on the [GitHub repository](https://github.com/JuliaRheology/RHEOS.jl). **Note that whenever you restart your Julia session you will have to reload RHEOS by typing `using RHEOS`, to avoid repetition this line is not included in every piece of example code.**  Any plotting library can be used but the tutorials within this documentation uses the PyPlot Julia package.
-
 ## Installation
 1. Install the latest version of Julia
 2. From Julia interactive command-line REPL, enter pkg mode by pressing `]`
@@ -62,7 +59,9 @@ The documentation (accessible via the blue docs button) aims to provide tutorial
 4. Run the command `add RHEOS`
 
 ## Documentation
-If you installed RHEOS using the instructions above then you will have the _latest stable release_ of RHEOS; to access the documentation for this version [click here][docs-sta-url] or the blue `docs/stable` badge at the top of this README page. To access the _latest documentation built directly from the master branch_ [click here][docs-dev-url] or the blue `docs/dev` badge at the top of this README page. 
+If you installed RHEOS using the instructions above then you will have the _latest stable release_ of RHEOS; to access the documentation for this version [click here](https://JuliaRheology.github.io/RHEOS.jl/stable) or the blue `docs/stable` badge at the top of this README page. To access the _latest documentation built directly from the master branch_ [click here](https://JuliaRheology.github.io/RHEOS.jl/dev) or the blue `docs/dev` badge at the top of this README page. 
+
+The documentation contains numerous examples of how to use RHEOS for common use cases. Each example can be explored interactively, without even downloading Julia or RHEOS, by clicking on the 'launch binder' button at the top of examples pages. **Note that whenever you restart your Julia session you will have to reload RHEOS by typing `using RHEOS` to follow along with the examples in the documentation. To avoid repetition this line is not included in every piece of example code.** For comprehensive descriptions of RHEOS types and functions, see the API section of the documentation. Any plotting library can be used but the tutorials within the documentation use the PyPlot Julia package. For corrections or clarifications to the documentation, please note the 'Contributing to RHEOS' section below and create an issue on the [GitHub repository](https://github.com/JuliaRheology/RHEOS.jl).
 
 ## Citation
 If you use RHEOS in your work, please consider citing the following papers as appropriate:
