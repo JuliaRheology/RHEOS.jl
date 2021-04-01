@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2018 Jonathan Louis Kaplan, Alessandra Bonfanti, Alexandre Kabla
+Copyright (c) 2021 Jonathan Louis Kaplan, Alessandra Bonfanti, Alexandre Kabla
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -5,59 +5,7 @@
 Preprocessing functions
 -----------------------
 =#
-"""
-    resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing)
 
-Resample data with new sample rate(s).
-
-`resample` can downsample or upsample data. If the number of `elperiods` is negative it is going to reduce the number of samples,
-vice versa if it is positive. If `time_boundaries` are not specified, resampling is applied to the whole set of data.
-If number of elements per period (`elperiods`) is `1` or `-1` it returns the original `RheoTimeData`, whilst `0` is not accepted as a valid
-argument for `elperiods`.
-
-The last element may or may not be included with a normal downsampling. By default the last element is forced to be included
-but this can be negated by providing the keyword argument `includelastel=false`.
-"""
-# function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
-#
-#     @assert (count(iszero, elperiods)==0) "Number of elements cannot be zero"
-#     # convert boundaries from times to element indices
-#     if isnothing(time_boundaries)
-#         boundaries = [1,length(self.t)];
-#     else
-#         boundaries = closestindices(self.t, time_boundaries)
-#     end
-#
-#     check = rheotimedatatype(self)
-#     if (check == strain_only)
-#         (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
-#         sigma = [];
-#     elseif (check == stress_only)
-#         (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods; includelastel=includelast)
-#         epsilon = [];
-#     elseif (check == strain_and_stress)
-#         (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods; includelastel=includelast)
-#         (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
-#     end
-#
-#     log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:resample, params=(elperiods = elperiods, ), keywords=(time_boundaries = time_boundaries, ) ),
-#                                         (comment="Resample the data",) ) ]
-#
-#     return RheoTimeData(sigma, epsilon, time, log)
-#
-# end
-
-
-# function resample(d::RheoTimeData, t::Vector{T}) where T<:Real
-#
-#     @assert hastime(d) "Data without time information cannot be resampled."
-#     σr = hasstress(d) ? Spline1D(d.t,d.σ)(t) : d.σ
-#     ϵr = hasstress(d) ? Spline1D(d.t,d.ϵ)(t) : d.ϵ
-#     log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=(t = t, ), keywords=NamedTuple() ),
-#                                     (comment="Resample the data",) ) ]
-#     return RheoTimeData(σr, ϵr, t, log)
-#
-# end
 """
     resample(d::RheoTimeData [, t = array of time value or range, dt = time step required, scale = multiplicator to apply to existing sampling rate] )
 
