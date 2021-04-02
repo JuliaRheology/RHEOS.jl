@@ -30,7 +30,7 @@ function RheoTimeData(interface::Interface ; t::Vector{T3} = RheoFloat[], commen
 
   typecheck = check_time_data_consistency(t,uϵ,uσ)
   ϵ,σ = interface.to_ϵσ(uϵ, uσ)
-  
+
   RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
   log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck, interface = interface)))]     )
 
@@ -75,7 +75,7 @@ end
 
 
 function AFM(R::Real)
-   Interface(:d, :f, (ϵ,σ)->(d = (R*(3. /4.).^(2. /3)) .* ϵ.^(2. /3), f = R.^2 .* σ ), (d,f)->(ϵ = 4. /(3. *R^1.5) .* d.^1.5, σ = f./R^2) )
+   Interface(:d, :f, (ϵ,σ)->(d = (R*(3. /4.)^(2. /3)) .* ϵ.^(2. /3), f = R^2 .* σ ), (d,f)->(ϵ = 4. /(3. *R^1.5) .* d.^1.5, σ = f./R^2) )
 end
 
 function Tweezers(R::Real)
