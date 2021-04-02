@@ -5,59 +5,7 @@
 Preprocessing functions
 -----------------------
 =#
-"""
-    resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing)
 
-Resample data with new sample rate(s).
-
-`resample` can downsample or upsample data. If the number of `elperiods` is negative it is going to reduce the number of samples,
-vice versa if it is positive. If `time_boundaries` are not specified, resampling is applied to the whole set of data.
-If number of elements per period (`elperiods`) is `1` or `-1` it returns the original `RheoTimeData`, whilst `0` is not accepted as a valid
-argument for `elperiods`.
-
-The last element may or may not be included with a normal downsampling. By default the last element is forced to be included
-but this can be negated by providing the keyword argument `includelastel=false`.
-"""
-# function resample(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
-#
-#     @assert (count(iszero, elperiods)==0) "Number of elements cannot be zero"
-#     # convert boundaries from times to element indices
-#     if isnothing(time_boundaries)
-#         boundaries = [1,length(self.t)];
-#     else
-#         boundaries = closestindices(self.t, time_boundaries)
-#     end
-#
-#     check = RheoTimeDataType(self)
-#     if (check == strain_only)
-#         (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
-#         sigma = [];
-#     elseif (check == stress_only)
-#         (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods; includelastel=includelast)
-#         epsilon = [];
-#     elseif (check == strain_and_stress)
-#         (time, sigma) = fixed_resample(self.t, self.σ, boundaries, elperiods; includelastel=includelast)
-#         (time, epsilon) = fixed_resample(self.t, self.ϵ, boundaries, elperiods; includelastel=includelast)
-#     end
-#
-#     log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:resample, params=(elperiods = elperiods, ), keywords=(time_boundaries = time_boundaries, ) ),
-#                                         (comment="Resample the data",) ) ]
-#
-#     return RheoTimeData(sigma, epsilon, time, log)
-#
-# end
-
-
-# function resample(d::RheoTimeData, t::Vector{T}) where T<:Real
-#
-#     @assert hastime(d) "Data without time information cannot be resampled."
-#     σr = hasstress(d) ? Spline1D(d.t,d.σ)(t) : d.σ
-#     ϵr = hasstress(d) ? Spline1D(d.t,d.ϵ)(t) : d.ϵ
-#     log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=(t = t, ), keywords=NamedTuple() ),
-#                                     (comment="Resample the data",) ) ]
-#     return RheoTimeData(σr, ϵr, t, log)
-#
-# end
 """
     resample(d::RheoTimeData [, t = array of time value or range, dt = time step required, scale = multiplicator to apply to existing sampling rate] )
 
@@ -102,20 +50,21 @@ end
 
 
 """
-    indexweight(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
+    indexweight(self::RheoTimeData; elperiods::Vector{K}, time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
 
 This function returns array indices (i.e. an array of integers) which can be sent to the `modelfit`, `modelstepfit` or `modeldiffeqfit` functions
 to provide a weighted fitting whilst maintaining constant sample-rate.
 
+Note that `time_boundaries` must have one more entry than `elperiods` so that all sections of weighting are fully defined by beginning and end points.
+
 `indexweight` can underweight indices or overweight them. If `elperiods` in a given boundary is negative, every `abs(n)` index will be used, where `n` is the `elperiod`
 corresponding to a given boundary. If `n` is positive, then indicies will be duplicated `n` times such that they are given a higher weighting during the fitting procedure.
-If `time_boundaries` are not specified, resampling is applied to the whole set of data. If number of elements per period (`elperiods`) is `1` or `-1` it returns the original
-indicies for that boundary, whilst `0` is not accepted as a valid argument for `elperiods`.
+If number of elements per period (`elperiods`) is `1` or `-1` it returns the original indicies for that boundary, whilst `0` is not accepted as a valid argument for `elperiods`.
 
 The last element may or may not be included. By default the last element is forced to be included
 but this can be negated by providing the keyword argument `includelast=false`.
 """
-function indexweight(self::RheoTimeData, elperiods::Union{Vector{K}, K}; time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
+function indexweight(self::RheoTimeData; elperiods::Vector{K}, time_boundaries::Union{Nothing, Vector{T}} = nothing, includelast=true) where {K<:Integer,T<:Real}
     # get element-wise boundaries
     if isnothing(time_boundaries)
         boundaries = [1,length(self.t)]
@@ -175,7 +124,7 @@ function cutting(self::RheoTimeData, time_on::T1, time_off::T2) where {T1<:Numbe
     boundary_off = closestindex(self.t, time_off);
     time = self.t[boundary_on:boundary_off]
 
-    check = RheoTimeDataType(self)
+    check = rheotimedatatype(self)
     if (check == strain_only)
         ϵ = self.ϵ[boundary_on:boundary_off]
         σ = [];
@@ -214,7 +163,7 @@ function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
     Σ = getsigma(τ, samplerate)
 
     # smooth signal and return
-    check = RheoTimeDataType(self)
+    check = rheotimedatatype(self)
     if (check == strain_only)
         epsilon = Base.invokelatest(imfilter, self.ϵ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
         sigma = [];
@@ -251,7 +200,7 @@ function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
         @assert (typeof(type)==TimeDataType) || (typeof(type)==Int) "Cannot extract frequency data from RheoTimeData"
         @assert (type!= strain_and_stress) && (type!= invalid_time_data) "Cannot extract both stress and strain"
         @assert (type!= invalid_time_data) "Cannot extract information from invalid time data"
-        check = RheoTimeDataType(self)
+        check = rheotimedatatype(self)
 
 
         log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
@@ -276,7 +225,7 @@ function extract(self::RheoFreqData, type::Union{FreqDataType,Integer})
         type = typeof(type)==Int ? FreqDataType(type) : type
         @assert (type!= with_modulus) "Cannot extract frequency with moduli"
         @assert (type!= invalid_freq_data) "Cannot extract information from invalid frequency data"
-        check = RheoFreqDataType(self)
+        check = rheofreqdatatype(self)
         @assert (check == with_modulus) "Frequency and modulii required"
 
         log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
@@ -406,7 +355,7 @@ function modelfit(data::RheoTimeData,
 
     rel_tol = convert(RheoFloat,rel_tol)
 
-    check = RheoTimeDataType(data)
+    check = rheotimedatatype(data)
     @assert (check == strain_and_stress) "Both stress and strain are required"
 
     # check provided weights are all valid
@@ -505,7 +454,7 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
         deriv = derivCD
     end
 
-    check = RheoTimeDataType(data)
+    check = rheotimedatatype(data)
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
 
     if (check == strain_only)
@@ -575,6 +524,7 @@ Alternatively, it is possible to define the value of the step by defining the op
 - `data`: `RheoTimeData` struct containing all data
 - `model`: `RheoModelClass` containing moduli and parameters tuples
 - `modloading`: `strain_imposed` for relaxation modulus, `stress_imposed` for creep modulus
+- `step`: Optional amplitude for step
 - `p0`: Named tuple of initial parameters to use in fit (uses 0.5 for all parameters if none given)
 - `lo`: Named tuple of lower bounds for parameters
 - `hi`: Named tuple of upper bounds for parameters
@@ -600,7 +550,7 @@ function modelstepfit(data::RheoTimeData,
     rel_tol = convert(RheoFloat, rel_tol)
 
     # get data type provided
-    check = RheoTimeDataType(data)
+    check = rheotimedatatype(data)
     # if step amplitude not provided, use loading data specified
     if isnothing(step)
         @assert (check == strain_and_stress) "Both stress and strain are required if step amplitude not provided."
@@ -636,6 +586,11 @@ function modelstepfit(data::RheoTimeData,
             controlled =convert(RheoFloat, step);
             modused = "G"
         end
+    end
+
+    # step is assumed to be at 0, warn if data does not start at 0
+    if data.t[1] != 0
+        @warn "Step fitting assumes that step occurs at time 0.0s but data does not start at 0.0s. If this mismatch is unintended, this fitting may return erroneous results."
     end
 
     # check necessary modulus is defined
@@ -684,7 +639,7 @@ specified. If the loading data is variable, the magnitude in the middle of the a
 """
 function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 0.0)
 
-    check = RheoTimeDataType(data)
+    check = rheotimedatatype(data)
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
 
     if (check == strain_only)

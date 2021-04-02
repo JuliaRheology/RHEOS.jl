@@ -37,7 +37,7 @@ export RheoFloat
 # definitions.jl
 export RheoLogItem, RheoLog, rheologrun, showlog
 export RheoTimeData, RheoFreqData
-export RheoTimeDataType, RheoFreqDataType, check_time_data_consistency
+export rheotimedatatype, rheofreqdatatype, check_time_data_consistency
 export LoadingType, strain_imposed, stress_imposed
 export hastime, hasstress, hasstrain
 export TimeDataType, time_only, strain_only, stress_only, strain_and_stress
