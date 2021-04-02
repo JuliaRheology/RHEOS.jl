@@ -29,6 +29,8 @@ function RheoTimeData(interface::Interface ; t::Vector{T3} = RheoFloat[], commen
    end
 
   typecheck = check_time_data_consistency(t,uϵ,uσ)
+  ϵ,σ = interface.to_ϵσ(uϵ, uσ)
+  
   RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
   log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck, interface = interface)))]     )
 

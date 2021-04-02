@@ -51,7 +51,7 @@ FractKV_model = dynamicmodelfit(data, Fract_KelvinVoigt, weights = "log", lo = L
 
 data_ext = extract(data, freq_only)
 ## Alternatively, a RheoFreqData with only frequency data can be generated as
-## data_gen = frequencyspec(ω_start = 1.0e-2, ω_end = 1.0e2, step = 1.0e-5)
+## data_ext = frequencyspec(ω_start = 1.0e-2, ω_end = 1.0e2, logstep = 0.1)
 
 rheofreqdatatype(data_ext)
 
