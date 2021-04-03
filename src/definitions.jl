@@ -449,7 +449,7 @@ Model related functionality
 """
     RheoModelClass(name::String, params::Vector{Symbol}, _G::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, _Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, constraint::FunctionWrapper{Bool,Tuple{Vector{RheoFloat}}}, info::String, expressions::NamedTuple)
 
-`RheoModelClass` contains a model name, it's symbolic parameters and all its moduli (both single-input and array-input versions).
+`RheoModelClass` contains a model name, its symbolic parameters and all its moduli (both single-input and array-input versions).
 
 It also contains information about any constraints that must be observed (e.g. the springpot coefficient being inbetween 0 and 1).
 
