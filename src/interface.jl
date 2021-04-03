@@ -3,7 +3,7 @@ export AFM
 """
     Interface(uϵ::Symbol,uσ::Symbol,from_ϵσ::Function,to_ϵσ::Function)
 
-The `Interface` struct contain information to map stress and strain to other related variables such as force and displacement in experimental such as atomic force microscopes or tweezers.
+The `Interface` struct contain information to map stress and strain to other related variables such as force and displacement in experimental systems such as atomic force microscopes or tweezers.
 
 """
 struct Interface
@@ -70,7 +70,7 @@ end
     importcsv(R::Real)
 
 Import function for raw data to be transformed to stress and strain using an `Interface`.
-Columns in the csv containging the force/displacement data need to be indicated as keyword arguments.
+Column numbers in the csv containging the force/displacement data need to be indicated as keyword arguments.
 
 # Examples
 ```julia-repl
