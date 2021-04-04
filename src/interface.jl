@@ -1,16 +1,46 @@
 export AFM
 
+"""
+    Interface(uϵ::Symbol,uσ::Symbol,from_ϵσ::Function,to_ϵσ::Function)
+
+The `Interface` struct contain information to map stress and strain to other related variables such as force and displacement in experimental systems such as atomic force microscopes or tweezers.
+
+"""
 struct Interface
 		  uϵ::Symbol
 		  uσ::Symbol
 		  from_ϵσ::Function
 		  to_ϵσ::Function
-	   end
+end
+
+
+
+
+"""
+    AFM(R::Real)
+
+Create and return an `Interface` struct using the Hertz contact model with indenter radius `R`.
+"""
+function AFM(R::Real)
+  Interface(:d, :f, (ϵ,σ)->(d = (R*(3. /4.)^(2. /3)) .* ϵ.^(2. /3), f = R^2 .* σ ), (d,f)->(ϵ = 4 /(3 *R^1.5) .* d.^1.5, σ = f./R^2) )
+end
+
+"""
+    Tweezers(R::Real)
+
+Create and return an `Interface` struct for a spherical probe of radius `R` embeded in a material.
+"""
+function Tweezers(R::Real)
+  Interface(:d, :f, (ϵ,σ)->(d = R .* ϵ, f = R^2 .* σ ), (d,f)->(ϵ = d ./ R, σ = f ./ R^2) )
+end
+
+
+
 
 
 function Base.getindex(d::RheoTimeData, i::Interface)
-		  return( NamedTuple{(i.uϵ, i.uσ),Tuple{Vector{RheoFloat},Vector{RheoFloat}}}( i.from_ϵσ(d.ϵ,d.σ) )   )
-	   end
+	return( NamedTuple{(i.uϵ, i.uσ),Tuple{Vector{RheoFloat},Vector{RheoFloat}}}( i.from_ϵσ(d.ϵ,d.σ) )   )
+end
 
 
 
@@ -29,12 +59,24 @@ function RheoTimeData(interface::Interface ; t::Vector{T3} = RheoFloat[], commen
    end
 
   typecheck = check_time_data_consistency(t,uϵ,uσ)
+  ϵ,σ = interface.to_ϵσ(uϵ, uσ)
+
   RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
   log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck, interface = interface)))]     )
 
 end
 
+"""
+    importcsv(R::Real)
 
+Import function for raw data to be transformed to stress and strain using an `Interface`.
+Column numbers in the csv containging the force/displacement data need to be indicated as keyword arguments.
+
+# Examples
+```julia-repl
+julia> importcsv("myfile.csv", AFM(2e-6), t_col=1, d_col=2, f_col=3)
+```
+"""
 function importcsv(filepath::String, interface::Interface; t_col::IntOrNone = nothing, delimiter = ',', comment = "Imported from csv file", savelog = true, kwargs...)
    cols = kwargs.data   # should contain column numbers for the strain and stress equivalent data
    uϵ_col_sym = Symbol(string(interface.uϵ) * "_col")
@@ -68,14 +110,4 @@ function importcsv(filepath::String, interface::Interface; t_col::IntOrNone = no
 
    return RheoTimeData(σ, ϵ, data.t, [log])
 
-end
-
-
-
-function AFM(R::Real)
-   Interface(:d, :f, (ϵ,σ)->(d = (R*(3. /4.).^(2. /3)) .* ϵ.^(2. /3), f = R.^2 .* σ ), (d,f)->(ϵ = 4. /(3. *R^1.5) .* d.^1.5, σ = f./R^2) )
-end
-
-function Tweezers(R::Real)
-   Interface(:d, :f, (ϵ,σ)->(d = (R) * ϵ, f = R^2 * σ ), (d,f)->(ϵ = 1 .*(d/R)^1.5, σ = f/R^2) )
 end

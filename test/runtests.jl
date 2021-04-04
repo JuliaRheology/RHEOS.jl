@@ -1,5 +1,5 @@
 using RHEOS
-using SpecialFunctions
+#using SpecialFunctions
 using Test
 
 const tol = (eps(RHEOS.RheoFloat))^(0.125)
@@ -9,6 +9,7 @@ include("base.jl")
 include("datagen.jl")
 include("IO.jl")
 include("processing.jl")
+include("interface.jl")
 
 include(joinpath(@__DIR__, "models", "elements.jl"))
 include(joinpath(@__DIR__, "models", "maxwell.jl"))
