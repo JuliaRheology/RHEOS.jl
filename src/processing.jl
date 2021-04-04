@@ -7,16 +7,23 @@ Preprocessing functions
 =#
 
 """
-    resample(d::RheoTimeData [, t = array of time value or range, dt = time step required, scale = multiplicator to apply to existing sampling rate] )
+    resample(d::RheoTimeData [, t, dt, scale )
 
-Resample data.
+Resample the data using 1D spline extrapolation (using the Dierckx.jl package).
 
-Usage:
+# Arguments
 
-* 'resample(d)' would keep the number of sampling points the same but interpolate to set a uniform time step.
-* 'resample(d, t=-1:0.1:10)' would resample by interpolation to generate a new dataset with time points given by the range or array values passed with keyword 't'.
-* 'resample(d, dt=0.1)' would resample by interpolation to generate a new dataset with time step 'dt'.
-* 'resample(d, scale=2)' would resample by multiplying the sampling rate by 'scale'. This could down-sample (scale<1) or upsample (scale>1). If timesteps are non uniform, it would interpolate values accordingly.
+- `d`: data as a `RheoTimeData` struct containing time with stress and/or strain. Without additional parameters, the data is resampled to provide a uniform sampling at constant number of timepoints.
+- `t`: an array or range that determines the timepoints where the data will be provided.
+- `dt`: if the array `t` is not provided, the parameter `dt` will set the timestep for a uniform resampling of the data.
+- `scale`: instead of specifying particular time points or timestep, an overall multiplicator on the sampling rate can be provided. This could down-sample (`scale`<1) or upsample (`scale`>1). If timesteps are non uniform, it would interpolate values accordingly.
+
+# Examples:
+
+* `resample(d)` keeps the number of sampling points the same but interpolates to set a uniform time step.
+* `resample(d, t=-1:0.1:10)` resamples by interpolation to generate a new dataset with time points given by the range `t`.
+* `resample(d, dt=0.1)` resamples by interpolation to generate a new dataset with uniform time step `dt`.
+* `resample(d, scale=2)` resamples by multiplying the sampling rate by 2.
 """
 function resample(d::RheoTimeData; t::Union{Vector{T},R}=RheoFloat[], scale::T1=0, dt::T2=0) where {T<:Real, R <: AbstractRange, T1<:Real, T2<:Real}
 

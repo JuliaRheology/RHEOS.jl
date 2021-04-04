@@ -732,7 +732,7 @@ end
 
 
 function _Ga(m::RheoModelClass)
-    if m.expressions.Ga_safe
+    if true #m.expressions.Ga_safe
         m._Ga
     else
         (ta,p) -> [m._G(t,p) for t in ta]
@@ -740,7 +740,7 @@ function _Ga(m::RheoModelClass)
 end
 
 function _Ja(m::RheoModelClass)
-    if m.expressions.Ja_safe
+    if true #m.expressions.Ja_safe
         m._Ja
     else
         (ta,p) -> [m._J(t,p) for t in ta]

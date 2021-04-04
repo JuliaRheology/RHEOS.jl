@@ -44,7 +44,7 @@ end
 
 
 
-function RheoTimeData(interface::Interface ; t::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing, kwargs...)  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoTimeData(interface::Interface ; t::Vector{T} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing, kwargs...)  where {T<:Real}
 
    if interface.uϵ in keys(kwargs)
 	  uϵ = convert(Vector{RheoFloat}, kwargs[interface.uϵ])
