@@ -5,7 +5,7 @@
 # RHEOS offers several functions for sampling and filtering data; this page is intended to be a brief tutorial of their use. For detailed descriptions of functions and their optional arguments, see the [API](@ref) section.
 
 using RHEOS
-using PyPlot 
+using PyPlot
 
 # ## Upsampling and Downsampling
 
@@ -42,7 +42,7 @@ ax[2].plot(foo_usamp.t, foo_usamp.ϵ, "--", marker = "x", markersize = 10, marke
 
 # ## Cutting
 
-# RHEOS provides a dedicated function, [`resample`](@ref), to remove the data outside a specified time interval.
+# RHEOS provides a dedicated function, [`cutting`](@ref), to remove the data outside a specified time interval.
 
 foo_cut = cutting(foo, 2.0, 8.0)
 
