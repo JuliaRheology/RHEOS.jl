@@ -32,6 +32,10 @@ SLS2 = RheoModelClass(
                "
         )
 
+
+
+#  Experimental / work in progress
+#  not functional yet
 #
 #  Generate array of parameter symbols and expression of the relaxation modulus
 #  for the generalised maxwell model
@@ -54,9 +58,3 @@ function G_GSLS(n)
 
     return (params, G_Expr)
 end
-
-
-# (p,e)=G_GSLS(3)
-
-
-# cd("/home/alexandre/.julia/dev/RHEOS/src/"); include("RHEOS.jl"); using Main.RHEOS; m=RheoModel(SLS2,(G₀=1., G₁=2., η₁=3., G₂=4., η₂=5.))

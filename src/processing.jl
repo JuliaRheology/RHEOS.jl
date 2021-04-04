@@ -20,10 +20,11 @@ Resample the data using 1D spline extrapolation (using the Dierckx.jl package).
 
 # Examples:
 
-* `resample(d)` keeps the number of sampling points the same but interpolates to set a uniform time step.
-* `resample(d, t=-1:0.1:10)` resamples by interpolation to generate a new dataset with time points given by the range `t`.
-* `resample(d, dt=0.1)` resamples by interpolation to generate a new dataset with uniform time step `dt`.
-* `resample(d, scale=2)` resamples by multiplying the sampling rate by 2.
+Assuming `d` is a `RheoTimeData` data set:
+- `resample(d)` keeps the number of sampling points the same but interpolates to set a uniform time step.
+- `resample(d, t=-1:0.1:10)` resamples by interpolation to generate a new dataset with time points given by the range `t`.
+- `resample(d, dt=0.1)` resamples by interpolation to generate a new dataset with uniform time step `dt`.
+- `resample(d, scale=2)` resamples by multiplying the sampling rate by 2.
 """
 function resample(d::RheoTimeData; t::Union{Vector{T},R}=RheoFloat[], scale::T1=0, dt::T2=0) where {T<:Real, R <: AbstractRange, T1<:Real, T2<:Real}
 
