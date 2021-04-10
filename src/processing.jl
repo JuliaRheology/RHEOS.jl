@@ -50,7 +50,7 @@ function resample(d::RheoTimeData; t::Union{Vector{T},R}=RheoFloat[], scale::T1=
     end
     σr = hasstress(d) ? Spline1D(d.t,d.σ)(t) : d.σ
     ϵr = hasstrain(d) ? Spline1D(d.t,d.ϵ)(t) : d.ϵ
-    log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=NamedTuple(), keywords=keywords ),
+    log = d.log === nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=NamedTuple(), keywords=keywords ),
                                     (comment="Resample the data",) ) ]
     return RheoTimeData(σr, ϵr, t, log)
 
@@ -144,7 +144,7 @@ function cutting(self::RheoTimeData, time_on::Real, time_off::Real)
         σ = self.σ[boundary_on:boundary_off]
     end
 
-    log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:cutting, params=(time_on = time_on, time_off = time_off), keywords=() ),
+    log = self.log === nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:cutting, params=(time_on = time_on, time_off = time_off), keywords=() ),
                                         (comment="Cut section of the data between $time_on and $time_off",) ) ]
 
     return RheoTimeData(σ, ϵ, time, log)
@@ -184,7 +184,7 @@ function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
     end
 
 
-    log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:smooth, params=(τ = τ,), keywords=(pad = pad,) ),
+    log = self.log === nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:smooth, params=(τ = τ,), keywords=(pad = pad,) ),
                                         (comment="Smooth data with timescale $τ",) ) ]
 
     RheoTimeData(sigma, epsilon, self.t, log)
@@ -211,7 +211,7 @@ function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
         check = rheotimedatatype(self)
 
 
-        log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
+        log = self.log === nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
                                             (comment="Data field extraction, $type from $check",) ) ]
 
 
@@ -236,7 +236,7 @@ function extract(self::RheoFreqData, type::Union{FreqDataType,Integer})
         check = rheofreqdatatype(self)
         @assert (check == with_modulus) "Frequency and modulii required"
 
-        log = self.log == nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
+        log = self.log === nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
                                             (comment="Frequency field extraction",) ) ]
         return RheoFreqData([], [], self.ω,log)
 end
@@ -430,7 +430,7 @@ function modelfit(data::RheoTimeData,
 
     nt = NamedTuple{Tuple(model.params)}(minx)
 
-    if data.log != nothing
+    if data.log !== nothing
         # Preparation of data for log item
         info=(comment="Fiting rheological model to data", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
         params=(model=model, modloading=modloading)
@@ -510,7 +510,7 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
         pred_mod = "relaxation function G"
     end
 
-    log = data.log == nothing ? nothing : [ data.log;
+    log = data.log === nothing ? nothing : [ data.log;
             RheoLogItem( (type=:process, funct=:modelpredict, params=(model::RheoModel,), keywords=(diff_method = diff_method,)),
                          (comment="Predicted data - modulus: $pred_mod, parameters:$(model.params)",) ) ]
 
@@ -625,7 +625,7 @@ function modelstepfit(data::RheoTimeData,
 
     nt = NamedTuple{Tuple(model.params)}(minx)
 
-    if data.log != nothing
+    if data.log !== nothing
         # Preparation of data for log item
         info=(comment="Fiting rheological model to data (step input assumed)", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
         params = (model = model, modloading = modloading)
@@ -696,7 +696,7 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
     end
     time = data.t
 
-    log = data.log == nothing ? nothing : [ data.log;
+    log = data.log === nothing ? nothing : [ data.log;
             RheoLogItem( (type=:process, funct=:modelsteppredict, params=(model::RheoModel,), keywords=(step_on = step_on,)),
                          (comment="Predicted step response - modulus: $pred_mod, parameters:$(model.params)",) ) ]
 
@@ -850,7 +850,7 @@ function dynamicmodelfit(data::RheoFreqData,
 
     nt = NamedTuple{Tuple(model.params)}(minx)
 
-    if data.log != nothing
+    if data.log !== nothing
         # Preparation of data for log item
         info = (comment="Fiting rheological model to frequency spectrum", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
         params = (model=model, )
@@ -876,7 +876,7 @@ function dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
     predGp = model._Gpa(data.ω)
     predGpp = model._Gppa(data.ω)
 
-    log = data.log == nothing ? nothing : [ data.log;
+    log = data.log === nothing ? nothing : [ data.log;
             RheoLogItem( (type=:process, funct=:dynamicmodelpredict, params=(model::RheoModel,), keywords=() ),
                          (comment="Calculated frequency spectrum - parameters:$(model.params)",) ) ]
 

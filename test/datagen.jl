@@ -76,9 +76,9 @@ function _square()
     offs = [1.5, 1.6, 1.7, 1.8, 1.9, 2.5, 2.6, 2.7, 2.8, 2.9]
     for (i,t) in enumerate(imposed.t)
         if t in ons && imposed.σ==0.0
-            testresult = testresult && false
+            testresult = false
         elseif t in offs && imposed.σ==1.0
-            testresult = testresult && false
+            testresult = false
         end
     end
     testresult

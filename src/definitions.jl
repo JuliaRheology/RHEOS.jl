@@ -73,7 +73,7 @@ end
 function RheoTimeData(;ϵ::Vector{T1} = RheoFloat[], σ::Vector{T2} = RheoFloat[], t::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_time_data_consistency(t,ϵ,σ)
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
-                    log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
+                    log === nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
 end
 
 @enum TimeDataType invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
@@ -176,7 +176,7 @@ function +(d1::RheoTimeData, d2::RheoTimeData)
     @assert (type1!=time_only) "Addition error: time only data cannot be added"
     @assert (d1.t == d2.t) "Addition error: timelines inconsistent"
 
-    log =   if (d1.log == nothing) || (d2.log == nothing)
+    log =   if (d1.log === nothing) || (d2.log === nothing)
                 nothing
             else
                 [ RheoLogItem( (type = :source, funct = :+, params = (rl1 = d1.log, rl2 = d2.log), keywords = ()), ()  ) ]
@@ -207,7 +207,7 @@ function -(d1::RheoTimeData, d2::RheoTimeData)
     @assert (type1!=time_only) "Subtraction error: time only data cannot be added"
     @assert (d1.t == d2.t) "Subtraction error: timelines inconsistent"
 
-    log =   if (d1.log == nothing) || (d2.log == nothing)
+    log =   if (d1.log === nothing) || (d2.log === nothing)
                 nothing
             else
                 [ RheoLogItem( (type = :source, funct = :-, params = (rl1 = d1.log, rl2 = d2.log), keywords = ()), ()  ) ]
@@ -234,7 +234,7 @@ function -(d::RheoTimeData)
     @assert (type!=invalid_time_data) "unary - error: parameter invalid"
     @assert (type!=time_only) "unary - error: time only data cannot be manipulated this way"
 
-    log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:-, params=(), keywords=() ), () ) ]
+    log = d.log === nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:-, params=(), keywords=() ), () ) ]
 
     return RheoTimeData(-d.σ, -d.ϵ, d.t, log)
 
@@ -258,7 +258,7 @@ function *(operand::Real, d::RheoTimeData)
     @assert (type!=invalid_time_data) "* error: parameter invalid"
     @assert (type!=time_only) "* error: time only data cannot be manipulated this way"
 
-    log = d.log == nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:*, params=(operand = operand), keywords=() ), () ) ]
+    log = d.log === nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:*, params=(operand = operand), keywords=() ), () ) ]
 
     return( RheoTimeData(operand .* d.σ, operand .* d.ϵ, d.t, log) )
 end
@@ -280,7 +280,7 @@ function |(d1::RheoTimeData, d2::RheoTimeData)
     # expected case, type1==stress_only, type2==strain_only
     @assert d1.t==d2.t "Data to be combined must have same time-series"
 
-    log = ((d1.log == nothing) || (d2.log == nothing)) ? nothing : [RheoLogItem((type = :source, funct = :|, params = (rl1 = d1.log, rl2 = d2.log), keywords = ()), ())]
+    log = ((d1.log === nothing) || (d2.log === nothing)) ? nothing : [RheoLogItem((type = :source, funct = :|, params = (rl1 = d1.log, rl2 = d2.log), keywords = ()), ())]
 
     return RheoTimeData(d1.σ, d2.ϵ, d1.t, log)
 end
@@ -315,7 +315,7 @@ end
 function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat[], ω::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_freq_data_consistency(ω,Gp,Gpp)
     RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω),
-    log == nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
+    log === nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
 end
 
 @enum FreqDataType invalid_freq_data=-1 freq_only=0 with_modulus=1
@@ -378,11 +378,11 @@ function rheologrun(rli::RheoLogItem, d=nothing)
 
       if typeof(rli.action) <: NamedTuple && :type in keys(rli.action)
          type=rli.action.type
-         if type==:source && d==nothing
+         if type==:source && d===nothing
             return(eval(rli.action.funct)(rli.action.params...;rli.action.keywords...))
-         elseif type==:process && d!=nothing
+         elseif type==:process && d!==nothing
             return(eval(rli.action.funct)(d,rli.action.params...;rli.action.keywords...))
-         elseif type==:analysis && d!=nothing
+         elseif type==:analysis && d!==nothing
             return(eval(rli.action.funct)(d,rli.action.params...;rli.action.keywords...))
          end
       end
@@ -397,7 +397,7 @@ execute all actions from the log. It applies them to the data `d` provided, or u
 function rheologrun(arli::RheoLog, d::Union{RheoTimeData,RheoFreqData,Nothing} = nothing)
 
   # check first item is a source item
-  if d == nothing
+  if d === nothing
         @assert typeof(arli[1].action) <: NamedTuple && :type in keys(arli[1].action) && arli[1].action.type == :source
                 "Source missing in RheoLog"
         end
@@ -406,7 +406,7 @@ function rheologrun(arli::RheoLog, d::Union{RheoTimeData,RheoFreqData,Nothing} =
   for rli in arli
       if typeof(rli.action) <: NamedTuple && :type in keys(rli.action)
           type=rli.action.type
-          if type==:analysis && d!=nothing
+          if type==:analysis && d!==nothing
               rheologrun(rli, d)
           else  d=rheologrun(rli, d)
           end
@@ -425,7 +425,7 @@ end
 shows the record of operations on a rheological data.
 """
 function showlog(d::Union{RheoTimeData,RheoFreqData})
-    if d.log != nothing
+    if d.log !== nothing
         for idx in 1:length(d.log)
             println(idx)
             print("     action = "); println(d.log[idx].action)
@@ -487,13 +487,16 @@ function Base.show(io::IO, m::RheoModelClass)
     return
 end
 
+
+
 rheoconv(t::Real) = RheoFloat(t)
-rheoconv(t::Array{T,1}) where T<:Real = convert(Vector{RheoFloat},t)
+rheoconv(t::RheoFloat) = t
+rheoconv(t::Vector{T}) where T<:Real = convert(Vector{RheoFloat},t)
+rheoconv(t::Vector{RheoFloat}) = t
 
 
 
-
-invLaplace(f::Function, t::Array{RheoFloat}) = InverseLaplace.talbotarr(f, t)
+invLaplace(f::Function, t::Vector{RheoFloat}) = InverseLaplace.talbotarr(f, t)
 invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
 
 
@@ -732,37 +735,37 @@ end
 
 
 function _Ga(m::RheoModelClass)
-    if true #m.expressions.Ga_safe
+#    if true #m.expressions.Ga_safe
         m._Ga
 #    else
 #        (ta,p) -> [m._G(t,p) for t in ta]
-    end
+#    end
 end
 
 function _Ja(m::RheoModelClass)
-    if true #m.expressions.Ja_safe
+#    if true #m.expressions.Ja_safe
         m._Ja
 #    else
 #        (ta,p) -> [m._J(t,p) for t in ta]
-    end
+#    end
 end
 
 
 
 function _Ga(m::RheoModel)
-    if true #m.expressions.Ga_safe
+#    if true #m.expressions.Ga_safe
         m._Ga
 #    else
 #        ta -> [m._G(t) for t in ta]
-    end
+#    end
 end
 
 function _Ja(m::RheoModel)
-    if true #m.expressions.Ja_safe
+#    if true #m.expressions.Ja_safe
         m._Ja
 #    else
 #        ta -> [m._J(t) for t in ta]
-    end
+#    end
 end
 
 
