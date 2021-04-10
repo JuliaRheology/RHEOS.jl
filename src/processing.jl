@@ -117,14 +117,14 @@ function indexweight(self::RheoTimeData; elperiods::Vector{K}, time_boundaries::
 end
 
 """
-    cutting(self::RheoTimeData, time_on::T1, time_off::T2) where {T1<:Number, T2<:Number}
+    cutting(self::RheoTimeData, time_on::Real, time_off::Real)
 
 Remove the data outside a specified time interval.
 
 By specifing a time interval (`time_on`, `time_off`), a new `RheoTimeData` is returned without the data
 lying outside time interval.
 """
-function cutting(self::RheoTimeData, time_on::T1, time_off::T2) where {T1<:Number, T2<:Number}
+function cutting(self::RheoTimeData, time_on::Real, time_off::Real)
 
     @assert isreal(time_on) && isreal(time_off) "Boundaries cannot be complex numbers"
 
@@ -549,7 +549,7 @@ function modelstepfit(data::RheoTimeData,
                   hi::Union{NamedTuple,Nothing} = nothing,
                   verbose::Bool = false,
                   rel_tol = 1e-4,
-                  weights::Union{Vector{Integer},Nothing} = nothing) where {T1<:Real, T2<:Real, T3<:Real}
+                  weights::Union{Vector{Integer},Nothing} = nothing)
 
     p0a = fill_init_params(model, p0)
     loa = fill_lower_bounds(model, lo)
