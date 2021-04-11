@@ -19,6 +19,7 @@ function _RheoTimeData_const_nolog()
     t = Vector{RheoFloat}(7.0:1.0:9.0)
 
     data = RheoTimeData(ϵ=eps, σ=sig, t=t, savelog=false)
+    showlog(data)
 
     data.σ==sig && data.ϵ==eps && data.t==t && isnothing(data.log)
 end
@@ -29,6 +30,7 @@ function _RheoTimeData_const_nostrain()
     t = Vector{RheoFloat}(7.0:1.0:9.0)
 
     data = RheoTimeData(σ=sig, t=t)
+    showlog(data)
 
     data.σ==sig && data.ϵ==RheoFloat[] && data.t==t && data.log[1].info.type == stress_only::TimeDataType
 end
