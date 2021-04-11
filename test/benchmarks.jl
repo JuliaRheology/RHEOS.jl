@@ -17,12 +17,13 @@ println("Version from Julia repo")
 println("Version from RHEOS (should be the same as above)")
 @btime RHEOS.mittleff(0.5, t0)
 
+println()
+println()
 
 println("=========================")
 println("Test on Moduli functions ")
 println("=========================")
 
-println()
 println()
 println("Test on the Maxwell model")
 println()
@@ -61,10 +62,11 @@ Version from Julia repo
   56.957 ns (1 allocation: 16 bytes)
 Version from RHEOS (should be the same as above)
   56.930 ns (1 allocation: 16 bytes)
+
+
 =========================
 Test on Moduli functions 
 =========================
-
 
 Test on the Maxwell model
 
@@ -83,6 +85,5 @@ From the RheoModel(Class)
   65.957 μs (3 allocations: 8.16 KiB)
   103.534 ns (1 allocation: 16 bytes)
   59.479 μs (1 allocation: 8.00 KiB)
-
 
 =#
