@@ -1,5 +1,18 @@
 #!/usr/bin/env julia
 
+#
+# Some wrapper function for external maths functions
+#
+@inline function mittleff(α,z)
+    α>0 ? mittlefforiginal(α,z) : 10000000000.
+end
+
+@inline function mittleff(α,β,z)
+    α>0 ? mittlefforiginal(α,β,z) : 10000000000.
+end
+
+
+
 models_directory = joinpath(@__DIR__, "models")
 
 # spring-pot, spring and dash-pot

@@ -90,7 +90,7 @@ time as its only argument. The original data's time signal is used.
 Normally used with a RheoTimeData generated using the `timeline` function.
 """
 function strainfunction(data::RheoTimeData, f::T) where T<:Function
-    log = data.log == nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
+    log = data.log === nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
                                     (comment="strain function applied to timeline",) ) ]
 
     return RheoTimeData(data.σ, convert(Vector{RheoFloat}, map(f, data.t)), data.t, log)
@@ -106,7 +106,7 @@ time as its only argument. The original data's time signal is used.
 Normally used with a `RheoTimeData` generated using the `timeline` function.
 """
 function stressfunction(data::RheoTimeData, f::T) where T<:Function
-    log = data.log == nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
+    log = data.log === nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
                                     (comment="stress function applied to timeline",) ) ]
     return RheoTimeData(convert(Vector{RheoFloat}, map(f, data.t)), data.ϵ, data.t, log)
 end

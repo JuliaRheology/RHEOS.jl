@@ -1,5 +1,4 @@
 using RHEOS
-#using SpecialFunctions
 using Test
 
 const tol = (eps(RHEOS.RheoFloat))^(0.125)

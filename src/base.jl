@@ -199,7 +199,7 @@ Preprocessing base functionality
 Generate sigma/std deviation for gaussian smoothing kernel.
 
 Acts as a low pass filter. Information of time scale τ will be half power,
-faster will be increasingly cut. Called by smoothgauss function.
+faster will be increasingly cut. Called by smooth function.
 """
 function getsigma(τ::Real, samplerate::Real)
 

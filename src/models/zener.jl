@@ -9,7 +9,6 @@ Fract_Zener = RheoModelClass(
           G = quote
                  cᵦ*t^(-β)*mittleff(a - β, 1 - β, -cᵦ*t^(a - β)/cₐ) + cᵧ*t^(-γ)/gamma(1 - γ)
               end,
-          Ga_safe = false,
           # Creep modulus
           J = quote
                   Ĵ(s) = (1/s)*(cₐ*s^a + cᵦ*s^β)/(cₐ*s^a*cᵦ*s^β + cᵧ*s^γ*(cₐ*s^a + cᵦ*s^β))
@@ -57,7 +56,6 @@ FractSLS_Zener = RheoModelClass(
         G = quote
                 kᵦ*mittleff(a, -(kᵦ/cₐ)*t^a) + kᵧ
             end,
-        Ga_safe = false,
         # Creep modulus
         J = quote
                 Ĵ(s) = (1/s)*(cₐ*s^a + kᵦ)/(cₐ*s^a*kᵦ + kᵧ*(cₐ*s^a + kᵦ))

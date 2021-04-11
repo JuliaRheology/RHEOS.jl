@@ -4,12 +4,16 @@ __precompile__(true)
 module RHEOS
 
 # installed from Julia package repository
-using InverseLaplace
 using NLopt
 using JLD2
 using DataStructures
 using FunctionWrappers: FunctionWrapper
 using Dierckx
+
+# useful for the various model functions
+using InverseLaplace
+import MittagLeffler: mittleff as mittlefforiginal
+import SpecialFunctions: gamma
 
 import DSP.conv
 
@@ -77,8 +81,8 @@ export AFM, Tweezers
 
 ######################################################
 # bundled dependencies from rheos-cambridge forked repos
-MittLeffLiteDir = joinpath(@__DIR__, "..", "deps", "MittLeffLite", "MittLeffLite.jl")
-include(MittLeffLiteDir)
+#MittLeffLiteDir = joinpath(@__DIR__, "..", "deps", "MittLeffLite", "MittLeffLite.jl")
+#include(MittLeffLiteDir)
 
 include("base.jl")
 include("definitions.jl")
