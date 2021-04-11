@@ -13,6 +13,7 @@ using Dierckx
 # useful for the various model functions
 using InverseLaplace
 import MittagLeffler: mittleff as mittlefforiginal
+import SpecialFunctions: gamma
 
 import DSP.conv
 
