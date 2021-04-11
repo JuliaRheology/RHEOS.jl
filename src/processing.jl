@@ -388,7 +388,7 @@ function modelfit(data::RheoTimeData,
     elseif modloading == strain_imposed
         dcontrolled = deriv(data.ϵ, data.t)
         measured = data.σ
-        modulus = model.Ja
+        modulus = model._Ga
         modsing = (t->model._G(t,p0a))
         modused ="G"
     end
@@ -566,7 +566,7 @@ function modelstepfit(data::RheoTimeData,
             # step amplitude is set to the middle value of the 'loading' data array
             controlled = data.σ[round(Integer, length(data.σ)/2)]
             measured = data.ϵ
-            modulus = model.Ja
+            modulus = model._Ja
             modsing = (t->model._J(t, p0a))
             modused = "J"
         elseif (modloading == strain_imposed)

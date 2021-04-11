@@ -783,7 +783,7 @@ end
 
 
 function relaxmod(m::RheoModelClass, ta::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
-    m.Ga(ta, params)
+    m._Ga(ta, params)
 end
 
 
