@@ -72,9 +72,6 @@ If you use RHEOS in your work, please consider citing the following papers as ap
 
 + A. Bonfanti, J. L. Kaplan, G. Charras, A. J. Kabla (2020). _Fractional viscoelastic models for power-law materials_. Soft Matter, 16, 6002-6020, [https://doi.org/10.1039/D0SM00354A](https://doi.org/10.1039/D0SM00354A)
 
-## Embedded Dependencies
-#### [MittagLeffler.jl](https://github.com/jlapeyre/MittagLeffler.jl)
-
 ## Contributing to RHEOS
 If you believe you have found any bugs or invalid behaviour in RHEOS, please feel free to file an issue on this repository. You can also raise an issue if you feel that any part of the documentation needs clarification, or for any feature requests. Even better than just raising an issue, you could both raise an issue and issue a pull request which fixes that issue.
 

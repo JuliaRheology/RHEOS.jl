@@ -1089,7 +1089,7 @@ dynamicmod(m::RheoModel) = x -> dynamicmod(m,x)
 
 
 function dynamicmod(m::RheoModelClass, ω::Number, params::Vector{T}) where T <: Number
-    m._Gp(ω) + m._Gpp(ω) * im
+    m._Gp(ω, params) + m._Gpp(ω, params) * im
 end
 
 

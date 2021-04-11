@@ -45,6 +45,19 @@ function _operators_logs()
 end
 @test _operators_logs()
 
+
+
+
+function _rheoconv()
+    vi64=Int64(1)
+    ai64=[vi64,vi64]
+    arf=Vector{RheoFloat}([1,2,3])
+    rheoconv(RheoFloat(1.0))===rheoconv(vi64) && typeof(rheoconv(ai64)) == Vector{RheoFloat} &&
+        arf === rheoconv(arf)  &&  ai64 !== rheoconv(ai64)
+end
+@test _rheoconv()
+
+
 function _union_strain1stress2()
     time_instance = timeline(t_start=0.0, t_end=15.0, step=0.2)
     imposed_strain = strainfunction(time_instance, sawtooth(offset=5.0, amp=2, period=5))
@@ -84,6 +97,10 @@ end
 
 function _scalar_moduli()
     m=RheoModel(Spring, k=2)
-    relaxmod(m, 1) == relaxmod(Spring, k=2, 1) == 2. && creepcomp(m, 1) == creepcomp(Spring, k=2, 1) == 0.5 &&  storagemod(m, 1) == storagemod(Spring, k=2, 1) == 2. && lossmod(m, 1) == lossmod(Spring, k=2, 1) == 0.0
+    (relaxmod(m))(1) == relaxmod(m, 1) == relaxmod(Spring, k=2, 1) == 2. &&
+        (creepcomp(m))(1) == creepcomp(m, 1) == creepcomp(Spring, k=2, 1) == 0.5 &&
+        (storagemod(m))(1) == storagemod(m, 1) == storagemod(Spring, k=2, 1) == 2. &&
+        (lossmod(m))(1) == lossmod(m, 1) == lossmod(Spring, k=2, 1) == 0.0 &&
+        (dynamicmod(m))(1) == dynamicmod(m, 1) == dynamicmod(Spring, k=2, 1) == 2.0 + 0.0*im 
 end
 @test _scalar_moduli()

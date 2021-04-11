@@ -878,7 +878,7 @@ function _modelstepfit_nonsing_noinitparams_relax(tol)
 
     data0 = RheoTimeData(t = t, ϵ = loading, σ = exact_response)
 
-    modelout = modelstepfit(data0, model, strain_imposed, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
+    modelout = modelstepfit(data0, model, strain_imposed, step=loading[1], lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
     found_params = modelout.params
 
@@ -898,7 +898,7 @@ function _modelstepfit_nonsing_noinitparams_creep(tol)
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = loading)
 
-    modelout = modelstepfit(data0, model, stress_imposed, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
+    modelout = modelstepfit(data0, model, stress_imposed, step=loading[1], lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
     found_params = modelout.params
 
