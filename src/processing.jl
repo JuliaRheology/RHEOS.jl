@@ -382,13 +382,13 @@ function modelfit(data::RheoTimeData,
     if modloading == stress_imposed
         dcontrolled = deriv(data.σ, data.t)
         measured = data.ϵ
-        modulus = _Ja(model)
+        modulus = model._Ja
         modsing = (t->model._J(t,p0a))
         modused = "J"
     elseif modloading == strain_imposed
         dcontrolled = deriv(data.ϵ, data.t)
         measured = data.σ
-        modulus = _Ga(model)
+        modulus = model.Ja
         modsing = (t->model._G(t,p0a))
         modused ="G"
     end
@@ -466,11 +466,11 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
 
     if (check == strain_only)
-        modulus = _Ga(model)
+        modulus = model._Ga
         modsing = model._G
         dcontrolled = deriv(data.ϵ, data.t)
     elseif (check == stress_only)
-        modulus = _Ja(model)
+        modulus = model._Ja
         modsing = model._J
         dcontrolled = deriv(data.σ, data.t)
     end
@@ -566,14 +566,14 @@ function modelstepfit(data::RheoTimeData,
             # step amplitude is set to the middle value of the 'loading' data array
             controlled = data.σ[round(Integer, length(data.σ)/2)]
             measured = data.ϵ
-            modulus = _Ja(model)
+            modulus = model.Ja
             modsing = (t->model._J(t, p0a))
             modused = "J"
         elseif (modloading == strain_imposed)
             # step amplitude is set to the middle value of the 'loading' data array
             controlled = data.ϵ[round(Integer, length(data.σ)/2)]
             measured = data.σ
-            modulus = _Ga(model)
+            modulus = model._Ga
             modsing = (t->model._G(t, p0a))
             modused = "G"
         end
@@ -581,7 +581,7 @@ function modelstepfit(data::RheoTimeData,
     elseif !isnothing(step)
         if (modloading == stress_imposed)
             @assert (check == strain_only)||(check == strain_and_stress) "Strain required"
-            modulus = _Ja(model)
+            modulus = model._Ja
             modsing = (t->model._J(t, p0a))
             controlled = convert(RheoFloat, step);
             measured = data.ϵ
@@ -589,7 +589,7 @@ function modelstepfit(data::RheoTimeData,
         elseif (modloading == strain_imposed)
             @assert (check == stress_only)||(check == strain_and_stress) "Stress required"
             measured = data.σ
-            modulus = _Ga(model)
+            modulus = model._Ga
             modsing = (t->model._G(t, p0a))
             controlled =convert(RheoFloat, step);
             modused = "G"
@@ -651,11 +651,11 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
 
     if (check == strain_only)
-        modulus = _Ga(model)
+        modulus = model._Ga
         modsing = model._G
         controlled = data.ϵ[round(Integer, length(data.ϵ)/2)]
     elseif (check == stress_only)
-        modulus = _Ja(model)
+        modulus = model._Ja
         modsing = model._J
         controlled = data.σ[round(Integer, length(data.σ)/2)]
     end

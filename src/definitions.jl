@@ -726,57 +726,10 @@ end
 
 
 
-#
-# These are internal functions to access the array versions of the relaxation and creep moduli
-# They are used in processing.jl as well as in the user level moduli functions
-#
-
-
-
-
-function _Ga(m::RheoModelClass)
-#    if true #m.expressions.Ga_safe
-        m._Ga
-#    else
-#        (ta,p) -> [m._G(t,p) for t in ta]
-#    end
-end
-
-function _Ja(m::RheoModelClass)
-#    if true #m.expressions.Ja_safe
-        m._Ja
-#    else
-#        (ta,p) -> [m._J(t,p) for t in ta]
-#    end
-end
-
-
-
-function _Ga(m::RheoModel)
-#    if true #m.expressions.Ga_safe
-        m._Ga
-#    else
-#        ta -> [m._G(t) for t in ta]
-#    end
-end
-
-function _Ja(m::RheoModel)
-#    if true #m.expressions.Ja_safe
-        m._Ja
-#    else
-#        ta -> [m._J(t) for t in ta]
-#    end
-end
-
-
-
-
-
-
 
 
 #
-# These are functions enabling users to access the different moduli functions for each model
+# These are exported functions enabling users to access the different moduli functions for each model
 #
 
 
@@ -816,10 +769,10 @@ function relaxmod(m::RheoModel, t::Number)
 end
 
 function relaxmod(m::RheoModel, ta::Vector{T}) where T <: Number
-    _Ga(m)(ta)
+    m._Ga(ta)
 end
 
-relaxmod(m) = x -> relaxmod(m,x)
+relaxmod(m::RheoModel) = x -> relaxmod(m,x)
 
 
 
@@ -830,7 +783,7 @@ end
 
 
 function relaxmod(m::RheoModelClass, ta::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
-    _Ga(m)(ta, params)
+    m.Ga(ta, params)
 end
 
 
@@ -898,10 +851,10 @@ function creepcomp(m::RheoModel, t::Number)
 end
 
 function creepcomp(m::RheoModel, ta::Vector{T}) where T <: Number
-    _Ja(m)(ta)
+    m._Ja(ta)
 end
 
-creepcomp(m) = x -> creepcomp(m,x)
+creepcomp(m::RheoModel) = x -> creepcomp(m,x)
 
 
 
@@ -912,7 +865,7 @@ end
 
 
 function creepcomp(m::RheoModelClass, ta::Vector{T1}, params::Vector{T2}) where {T1 <: Number, T2 <: Number}
-    _Ja(m)(ta, params)
+    m._Ja(ta, params)
 end
 
 
@@ -983,7 +936,7 @@ function storagemod(m::RheoModel, ωa::Vector{T}) where T <: Number
     m._Gpa(ωa)
 end
 
-storagemod(m) = x -> storagemod(m,x)
+storagemod(m::RheoModel) = x -> storagemod(m,x)
 
 
 
@@ -1055,7 +1008,7 @@ function lossmod(m::RheoModel, ωa::Vector{T}) where T <: Number
     m._Gppa(ωa)
 end
 
-lossmod(m) = x -> lossmod(m,x)
+lossmod(m::RheoModel) = x -> lossmod(m,x)
 
 
 
@@ -1130,7 +1083,7 @@ function dynamicmod(m::RheoModel, ωa::Vector{T}) where T <: Number
     m._Gpa(ωa) + m._Gppa(ωa) * im
 end
 
-dynamicmod(m) = x -> dynamicmod(m,x)
+dynamicmod(m::RheoModel) = x -> dynamicmod(m,x)
 
 
 
