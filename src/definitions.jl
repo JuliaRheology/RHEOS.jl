@@ -753,7 +753,7 @@ function _buildmoduli_ω(G::Expr)
 
     if isconstant     # constant value returned
         @eval return( ( (ω -> $Ge)                             |> FWScaFixed,
-                        (ω -> fill(RheoFloat($Ge), length(t)))  |> FWVecFixed ) ) 
+                        (ω -> fill(RheoFloat($Ge), length(ω)))  |> FWVecFixed ) ) 
 #    elseif islaplace
 #        return()
     elseif true # isexprmultiline
