@@ -496,9 +496,6 @@ rheoconv(t::Vector{RheoFloat}) = t
 
 
 
-invLaplace(f::Function, t::Vector{RheoFloat}) = InverseLaplace.talbotarr(f, t)
-invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
-
 
 # place holder for undefined moduli/compliance functions
 const nanexp = quote NaN end

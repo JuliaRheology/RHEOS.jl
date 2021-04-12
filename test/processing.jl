@@ -337,6 +337,7 @@ function _modelfit_const_ramp_relax(tol)
     modelout = modelfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.9, β=0.9), hi=(α=1.1, β=1.1))
 
     found_params = modelout.params
+    
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
 end
 @test _modelfit_const_ramp_relax(tol)
