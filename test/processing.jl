@@ -2,7 +2,7 @@ println("===============================================")
 println("Testing processing.jl")
 println("===============================================")
 
-
+#=
 function _resample_timeonly()
     d = timeline(t_start=0, t_end=1, step=1//4)
     d = resample(d,dt=0.1)
@@ -329,14 +329,14 @@ function _modelfit_const_ramp_relax(tol)
     ramp_loading = t
 
     modulus = quote α*exp(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.0, β=1.0)
     modelout = modelfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.9, β=0.9), hi=(α=1.1, β=1.1))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
     
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
 end
@@ -349,14 +349,14 @@ function _modelfit_const_ramp_creep(tol)
     ramp_loading = t
 
     modulus = quote α*exp(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.0, β=1.0)
     modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.9, β=0.9), hi=(α=1.1, β=1.1))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
 end
 @test _modelfit_const_ramp_creep(tol)
@@ -368,14 +368,14 @@ function _modelfit_const_ramp_nobounds_relax(tol)
     ramp_loading = t
 
     modulus = quote α*exp(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.0, β=1.0)
     modelout = modelfit(data0, model, strain_imposed, p0=init_params)
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
 end
 @test _modelfit_const_ramp_nobounds_relax(tol)
@@ -387,14 +387,14 @@ function _modelfit_const_ramp_nobounds_creep(tol)
     ramp_loading = t
 
     modulus = quote α*exp(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.0, β=1.0)
     modelout = modelfit(data0, model, stress_imposed, p0=init_params)
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
 end
 @test _modelfit_const_ramp_nobounds_creep(tol)
@@ -406,14 +406,14 @@ function _modelfit_const_ramp_nobounds_singleparam_relax(tol)
     ramp_loading = t
 
     modulus = quote α*exp(-t) end
-    model = RheoModelClass(name = "testmodel", p = [:α], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α,), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.0,)
     modelout = modelfit(data0, model, strain_imposed, p0=init_params)
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
 end
 @test _modelfit_const_ramp_nobounds_singleparam_relax(tol)
@@ -425,14 +425,14 @@ function _modelfit_const_ramp_nobounds_singleparam_creep(tol)
     ramp_loading = t
 
     modulus = quote α*exp(-t) end
-    model = RheoModelClass(name = "testmodel", p = [:α], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α,), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.0,)
     modelout = modelfit(data0, model, stress_imposed, p0=init_params)
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
 end
 @test _modelfit_const_ramp_nobounds_singleparam_creep(tol)
@@ -444,14 +444,14 @@ function _modelfit_const_ramp_nobounds_relax(tol)
     ramp_loading = t
 
     modulus = quote α*exp(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.0, β=1.0)
     modelout = modelfit(data0, model, strain_imposed, p0=init_params)
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
 end
 @test _modelfit_const_ramp_nobounds_relax(tol)
@@ -463,14 +463,14 @@ function _modelfit_const_ramp_nobounds_creep(tol)
     ramp_loading = t
 
     modulus = quote α*exp(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.0, β=1.0)
     modelout = modelfit(data0, model, stress_imposed, p0=init_params)
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
 end
 @test _modelfit_const_ramp_nobounds_creep(tol)
@@ -482,14 +482,14 @@ function _modelfit_var_ramp_nonsing_relax(tol)
     ramp_loading = t
 
     modulus = quote α*exp.(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.5, β=0.5), hi=(α=1.5, β=1.5))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
     actual_params = (α=1.0, β=1.0)
 
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
@@ -503,14 +503,14 @@ function _modelfit_var_ramp_nonsing_creep(tol)
     ramp_loading = t
 
     modulus = quote α*exp.(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.5), hi=(α=1.5, β=1.5))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
     actual_params = (α=1.0, β=1.0)
 
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
@@ -525,14 +525,14 @@ function _modelfit_const_ramp_sing_relax(tol)
     ramp_loading = t
 
     modulus = quote α*t.^(-β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = 5*tol)
 end
@@ -546,14 +546,14 @@ function _modelfit_const_ramp_sing_creep(tol)
     ramp_loading = t
 
     modulus = quote α*t.^(-β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = 5*tol)
 end
@@ -567,14 +567,14 @@ function _modelfit_var_ramp_sing_relax(tol)
     ramp_loading = t
 
     modulus = quote α*t.^(-β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = 5*tol)
 end
@@ -587,7 +587,7 @@ function _modelfit_const_ramp_creep_weighted_selftest(tol)
     ramp_loading = t
 
     modulus = quote α*exp(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
@@ -595,7 +595,7 @@ function _modelfit_const_ramp_creep_weighted_selftest(tol)
     init_params = (α=1.2, β=0.8)
     modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.7, β=0.7), hi=(α=1.5, β=1.5), weights=collect(Integer, 1:length(t)))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
 end
 @test _modelfit_const_ramp_creep_weighted_selftest(tol)
@@ -608,14 +608,14 @@ function _modelfit_const_ramp_sing_creep_weighted_selftest(tol)
     ramp_loading = t
 
     modulus = quote α*t.^(-β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5), weights=collect(Integer, 1:length(t)))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = 5*tol)
 end
@@ -628,7 +628,7 @@ function _modelfit_const_ramp_creep_weighted_downsampled(tol)
     ramp_loading = t
 
     modulus = quote α*exp(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
@@ -638,8 +638,8 @@ function _modelfit_const_ramp_creep_weighted_downsampled(tol)
     modelout_weighted = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.7, β=0.7), hi=(α=1.5, β=1.5), weights=indices)
     modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.7, β=0.7), hi=(α=1.5, β=1.5))
 
-    found_params_weighted = modelout_weighted.params
-    found_params = modelout.params
+    found_params_weighted = modelout_weighted.fixedparams
+    found_params = modelout.fixedparams
     isapprox(collect(values(found_params_weighted)), collect(values(found_params)), atol = tol)
 end
 @test _modelfit_const_ramp_creep_weighted_downsampled(tol)
@@ -652,7 +652,7 @@ function _modelfit_const_ramp_sing_creep_weighted_downsampled(tol)
     ramp_loading = t
 
     modulus = quote α*t.^(-β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
@@ -662,8 +662,8 @@ function _modelfit_const_ramp_sing_creep_weighted_downsampled(tol)
     modelout_weighted = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5), weights=indices)
     modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
 
-    found_params_weighted = modelout_weighted.params
-    found_params = modelout.params
+    found_params_weighted = modelout_weighted.fixedparams
+    found_params = modelout.fixedparams
     isapprox(collect(values(found_params_weighted)), collect(values(found_params)), atol = tol)
 end
 @test _modelfit_const_ramp_sing_creep_weighted_downsampled(tol)
@@ -676,14 +676,14 @@ function _modelfit_var_ramp_sing_creep(tol)
     ramp_loading = t
 
     modulus = quote α*t.^(-β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = 5*tol)
 end
@@ -696,7 +696,7 @@ function _modelpredict_nonsing_const_relax(tol)
     loading = t
 
     modulus = quote α*exp.(-t/β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
@@ -713,7 +713,7 @@ function _modelpredict_nonsing_const_creep(tol)
     loading = t
 
     modulus = quote α*exp.(-t/β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
     data0 = RheoTimeData(t = t, σ = loading)
 
@@ -730,7 +730,7 @@ function _modelpredict_nonsing_var_relax(tol)
     loading = t
 
     modulus = quote α*exp.(-t/β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
@@ -747,7 +747,7 @@ function _modelpredict_nonsing_var_creep(tol)
     loading = t
 
     modulus = quote α*exp.(-t/β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
     data0 = RheoTimeData(t = t, σ = loading)
 
@@ -764,7 +764,7 @@ function _modelpredict_sing_const_relax(tol)
     loading = t
 
     modulus = quote α*t.^(-β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
@@ -781,7 +781,7 @@ function _modelpredict_sing_const_creep(tol)
     loading = t
 
     modulus = quote α*t.^(-β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, σ = loading)
 
@@ -798,7 +798,7 @@ function _modelpredict_sing_var_relax(tol)
     loading = t
 
     modulus = quote α*t.^(-β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
@@ -815,7 +815,7 @@ function _modelpredict_sing_var_creep(tol)
     loading = t
 
     modulus = quote α*t.^(-β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, σ = loading)
 
@@ -833,14 +833,14 @@ function _modelstepfit_nonsing_relax(tol)
     exact_response = loading[1]*actual_params[1]*exp.(-t/actual_params[2])
 
     modulus = quote α*exp.(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = loading, σ = exact_response)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelstepfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
@@ -854,14 +854,14 @@ function _modelstepfit_nonsing_creep(tol)
     exact_response = loading[1]*actual_params[1]*exp.(-t/actual_params[2])
 
     modulus = quote α*exp.(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = loading)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelstepfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
@@ -875,13 +875,13 @@ function _modelstepfit_nonsing_noinitparams_relax(tol)
     exact_response = loading[1]*actual_params[1]*exp.(-t/actual_params[2])
 
     modulus = quote α*exp.(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = loading, σ = exact_response)
 
     modelout = modelstepfit(data0, model, strain_imposed, step=loading[1], lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
@@ -895,13 +895,13 @@ function _modelstepfit_nonsing_noinitparams_creep(tol)
     exact_response = loading[1]*actual_params[1]*exp.(-t/actual_params[2])
 
     modulus = quote α*exp.(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = loading)
 
     modelout = modelstepfit(data0, model, stress_imposed, step=loading[1], lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
@@ -915,14 +915,14 @@ function _modelstepfit_nonsing_nobounds_relax(tol)
     exact_response = loading[1]*actual_params[1]*exp.(-t/actual_params[2])
 
     modulus = quote α*exp.(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = loading, σ = exact_response)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelstepfit(data0, model, strain_imposed, p0=init_params)
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
@@ -936,14 +936,14 @@ function _modelstepfit_nonsing_nobounds_creep(tol)
     exact_response = loading[1]*actual_params[1]*exp.(-t/actual_params[2])
 
     modulus = quote α*exp.(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = loading)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelstepfit(data0, model, stress_imposed, p0=init_params)
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
@@ -957,14 +957,14 @@ function _modelstepfit_sing_relax(tol)
     exact_response = loading[1]*actual_params[1]*t.^(-actual_params[2])
 
     modulus = quote α*t.^(-β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = loading, σ = exact_response)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelstepfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
@@ -978,14 +978,14 @@ function _modelstepfit_sing_creep(tol)
     exact_response = loading[1]*actual_params[1]*t.^(-actual_params[2])
 
     modulus = quote α*t.^(-β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = loading)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelstepfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
@@ -999,14 +999,14 @@ function _modelstepfit_nonsing_nobounds_relax_weighted_selftest(tol)
     exact_response = loading[1]*actual_params[1]*exp.(-t/actual_params[2])
 
     modulus = quote α*exp.(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = loading, σ = exact_response)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelstepfit(data0, model, strain_imposed; p0=init_params, weights=collect(Integer, 1:length(t)))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
@@ -1020,14 +1020,14 @@ function _modelstepfit_sing_relax_weighted_selftest(tol)
     exact_response = loading[1]*actual_params[1]*t.^(-actual_params[2])
 
     modulus = quote α*t.^(-β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = loading, σ = exact_response)
 
     init_params = (α=1.3, β=0.7)
     modelout = modelstepfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5), weights=collect(Integer, 1:length(t)))
 
-    found_params = modelout.params
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(actual_params)), collect(values(found_params)), atol=tol)
 end
@@ -1041,7 +1041,7 @@ function _modelstepfit_nonsing_nobounds_relax_weighted_closeness(tol)
     exact_response = loading[1]*actual_params[1]*exp.(-t/actual_params[2])
 
     modulus = quote α*exp.(-t/β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = loading, σ = exact_response)
     indices = indexweight(data0; elperiods = [-2, 2], time_boundaries = [0.0, 5.0, 20.0])
@@ -1050,8 +1050,8 @@ function _modelstepfit_nonsing_nobounds_relax_weighted_closeness(tol)
     modelout_weighted = modelstepfit(data0, model, strain_imposed; p0=init_params, weights=indices)
     modelout = modelstepfit(data0, model, strain_imposed; p0=init_params)
 
-    found_params_weighted = modelout_weighted.params
-    found_params = modelout.params
+    found_params_weighted = modelout_weighted.fixedparams
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(found_params_weighted)), collect(values(found_params)), atol=tol)
 end
@@ -1065,7 +1065,7 @@ function _modelstepfit_sing_relax_weighted_closeness(tol)
     exact_response = loading[1]*actual_params[1]*t.^(-actual_params[2])
 
     modulus = quote α*t.^(-β) end
-    model = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    model = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
 
     data0 = RheoTimeData(t = t, ϵ = loading, σ = exact_response)
     indices = indexweight(data0; elperiods = [-2, 2], time_boundaries = [0.0, 5.0, 20.0])
@@ -1074,8 +1074,8 @@ function _modelstepfit_sing_relax_weighted_closeness(tol)
     modelout_weighted = modelstepfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5), weights=indices)
     modelout = modelstepfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.2, β=0.2), hi=(α=3.5, β=1.5))
 
-    found_params_weighted = modelout_weighted.params
-    found_params = modelout.params
+    found_params_weighted = modelout_weighted.fixedparams
+    found_params = modelout.fixedparams
 
     isapprox(collect(values(found_params_weighted)), collect(values(found_params)), atol=tol)
 end
@@ -1088,7 +1088,7 @@ function _modelsteppredict_nonsing_relax(tol)
     loading = ones(RheoFloat, length(t))
 
     modulus = quote α*exp.(-t/β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
 
     data0 = RheoTimeData(t = t, ϵ = loading)
@@ -1106,7 +1106,7 @@ function _modelsteppredict_nonsing_creep(tol)
     loading = ones(RheoFloat, length(t))
 
     modulus = quote α*exp.(-t/β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
 
     data0 = RheoTimeData(t = t, σ = loading)
@@ -1124,7 +1124,7 @@ function _modelsteppredict_nonsing_shifted_relax(tol)
     loading = ones(RheoFloat, length(t))
 
     modulus = quote α*exp.(-t/β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
 
     data0 = RheoTimeData(t = t, ϵ = loading)
@@ -1142,7 +1142,7 @@ function _modelsteppredict_nonsing_shifted_creep(tol)
     loading = ones(RheoFloat, length(t))
 
     modulus = quote α*exp.(-t/β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=1.0)
 
     data0 = RheoTimeData(t = t, σ = loading)
@@ -1160,7 +1160,7 @@ function _modelsteppredict_sing_relax(tol)
     loading = ones(RheoFloat, length(t))
 
     modulus = quote α*t.^(-β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
@@ -1177,7 +1177,7 @@ function _modelsteppredict_sing_creep(tol)
     loading = ones(RheoFloat, length(t))
 
     modulus = quote α*t.^(-β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, σ = loading)
 
@@ -1194,7 +1194,7 @@ function _modelsteppredict_sing_shifted_relax(tol)
     loading = ones(RheoFloat, length(t))
 
     modulus = quote α*t.^(-β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], G = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
@@ -1213,7 +1213,7 @@ function _modelsteppredict_sing_shifted_creep(tol)
     loading = ones(RheoFloat, length(t))
 
     modulus = quote α*t.^(-β) end
-    modelclass = RheoModelClass(name = "testmodel", p = [:α, :β], J = modulus, info="none")
+    modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, σ = loading)
 
@@ -1224,6 +1224,10 @@ function _modelsteppredict_sing_shifted_creep(tol)
     all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), 1:length(t))
 end
 @test _modelsteppredict_sing_shifted_creep(tol)
+
+
+=#
+
 
 function _obj_dynamic(tol)
     params = [1.0, 0.1]
@@ -1336,8 +1340,8 @@ function _dynamicmodelfit(tol)
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
     modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="none", rel_tol=1e-6)
 
-    found_params = modelout.params
-    actual_params = actual_model.params
+    found_params = modelout.fixedparams
+    actual_params = actual_model.fixedparams
 
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
 end
@@ -1353,8 +1357,8 @@ function _dynamicmodelfit_noinit(tol)
 
     modelout = dynamicmodelfit(data0, SLS_Zener, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="none", rel_tol=1e-6)
 
-    found_params = modelout.params
-    actual_params = actual_model.params
+    found_params = modelout.fixedparams
+    actual_params = actual_model.fixedparams
 
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
 end
@@ -1371,8 +1375,8 @@ function _dynamicmodelfit_nobounds(tol)
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
     modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, weights="none", rel_tol=1e-6)
 
-    found_params = modelout.params
-    actual_params = actual_model.params
+    found_params = modelout.fixedparams
+    actual_params = actual_model.fixedparams
 
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
 end
@@ -1389,8 +1393,8 @@ function _dynamicmodelfit_mean(tol)
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
     modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="mean", rel_tol=1e-6)
 
-    found_params = modelout.params
-    actual_params = actual_model.params
+    found_params = modelout.fixedparams
+    actual_params = actual_model.fixedparams
 
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
 end
@@ -1407,8 +1411,8 @@ function _dynamicmodelfit_log(tol)
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
     modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="log", rel_tol=1e-6)
 
-    found_params = modelout.params
-    actual_params = actual_model.params
+    found_params = modelout.fixedparams
+    actual_params = actual_model.fixedparams
 
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
 end
@@ -1425,8 +1429,8 @@ function _dynamicmodelfit_local(tol)
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
     modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="local", rel_tol=1e-6)
 
-    found_params = modelout.params
-    actual_params = actual_model.params
+    found_params = modelout.fixedparams
+    actual_params = actual_model.fixedparams
 
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
 end
@@ -1443,8 +1447,8 @@ function _dynamicmodelfit_manualweights(tol)
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
     modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights=[0.5, 1.5], rel_tol=1e-6)
 
-    found_params = modelout.params
-    actual_params = actual_model.params
+    found_params = modelout.fixedparams
+    actual_params = actual_model.fixedparams
 
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
 end

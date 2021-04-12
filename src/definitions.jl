@@ -438,6 +438,16 @@ end
 
 
 
+"""
+    rheoconv(t)
+
+Converts if required the scalar or vector of real number `t` to the type `RheoFloat`.
+"""
+
+rheoconv(t::Real) = RheoFloat(t)
+rheoconv(t::RheoFloat) = t
+rheoconv(t::Vector{T}) where T<:Real = convert(Vector{RheoFloat},t)
+rheoconv(t::Vector{RheoFloat}) = t
 
 
 
@@ -446,6 +456,56 @@ end
 Model related functionality
 ---------------------------
 =#
+
+# Function types for the moduli with free params
+const FWScaFree = FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
+const FWVecFree = FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
+# Function types for the moduli with fixed params
+const FWScaFixed = FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
+const FWVecFixed = FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
+# Function types for the constraint function
+const FWConstraint = FunctionWrapper{Bool,Tuple{Vector{RheoFloat}}}
+
+
+
+# constant NaN functions for default parameters and testing existence of moduli functions
+const fwscafreeNaN = ((t,p)->NaN) |> FWScaFree
+const fwvecfreeNaN = ((t,p)->NaN) |> FWVecFree
+const fwscafixedNaN = (t->NaN) |> FWScaFixed
+const fwvecfixedNaN = (t->NaN) |> FWVecFixed
+
+
+
+struct _RheoModel{TSca,TVec}
+
+	name::String
+	freeparams::Tuple{Vararg{Symbol, N}} where N
+	fixedparams::NamedTuple
+
+	# Moduli functions specialised for scalar and array values
+	_G::TSca
+	_Ga::TVec
+	_J::TSca
+	_Ja::TVec
+	_Gp::TSca
+	_Gpa::TVec
+	_Gpp::TSca
+	_Gppa::TVec
+
+	_constraint::FWConstraint
+	_Gramp::Bool
+	_Jramp::Bool
+
+	info::String
+	expressions::NamedTuple
+
+end
+
+
+const RheoModelClass = _RheoModel{FWScaFree,FWVecFree}
+const RheoModel = _RheoModel{FWScaFixed,FWVecFixed}
+
+
 """
     RheoModelClass(name::String, params::Vector{Symbol}, _G::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, _Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, constraint::FunctionWrapper{Bool,Tuple{Vector{RheoFloat}}}, info::String, expressions::NamedTuple)
 
@@ -458,7 +518,7 @@ Lastly, it also contains additional info about the model which may include a tex
 Generally, users will want to use the `RheoModelClass` constructor function as shown in the 'Create Your Model' section of the documentation
 rather than the default constructor.
 """
-struct RheoModelClass
+#=struct RheoModelClass
 
     name::String
     params::Vector{Symbol}
@@ -478,24 +538,25 @@ struct RheoModelClass
     expressions::NamedTuple
 
 end
+=#
 
-function Base.show(io::IO, m::RheoModelClass)
+
+
+function Base.show(io::IO, m::_RheoModel)
     print(io, "\nModel name: $(m.name)")
-    ps=join([string(s) for s in m.params], ", ", " and ")
+    ps=join([string(s) for s in m.freeparams], ", ", " and ")
     print(io, "\n\nFree parameters: $ps\n")
+    if length(m.fixedparams)>0
+        print(io, "\n\nFixed parameters: $(m.fixedparams)\n")
+    end
     print(io, m.info)
     return
 end
 
 
 
-rheoconv(t::Real) = RheoFloat(t)
-rheoconv(t::RheoFloat) = t
-rheoconv(t::Vector{T}) where T<:Real = convert(Vector{RheoFloat},t)
-rheoconv(t::Vector{RheoFloat}) = t
 
-
-
+#=
 
 # place holder for undefined moduli/compliance functions
 const nanexp = quote NaN end
@@ -530,6 +591,9 @@ function RheoModelClass(;name::String,
         $info, $expressions) )
 end
 
+=#
+
+
 # Cool replacement function inspired from
 # https://stackoverflow.com/questions/29778698/julia-lang-metaprogramming-turn-expression-into-function-with-expression-depend
 # This probably could go in its own module as this is very useful.
@@ -543,9 +607,11 @@ function expr_replace!(ex::Expr, s, v)
     return ex
 end
 
-expr_replace(ex, s, v) = expr_replace!(copy(ex), s, v)
+function expr_replace(ex, s, v)
+    expr_replace!(copy(ex), s, v)
+end
 
-function expr_replace(ex, nt)
+function expr_replace(ex::Expr, nt::NamedTuple)  
     e = copy(ex)
     k=keys(nt)
     v=values(nt)
@@ -555,7 +621,42 @@ function expr_replace(ex, nt)
     return e
 end
 
+function expr_replace(ex::Nothing, nt::NamedTuple)
+	return nothing
+end
 
+
+
+#
+#  Look for a specific symbol in an expression
+#
+expr_search(ex, s) = false
+expr_search(ex::Symbol, s) = s == ex ? true : false
+
+@inline function expr_search(ex::Expr, s)
+        any( expr_search(e, s) for e in ex.args )
+end
+
+
+@inline function _replace_symbols_with_array(e::Expr, psymbs::Tuple)
+    return( expr_replace(e,NamedTuple{psymbs}([Meta.parse(":(p_arr[$i])").args[1] for i in 1:length(psymbs)]) ) )
+end
+
+@inline function _expr_cleanup!(ex::Expr)
+    filter!(e -> typeof(e)!=LineNumberNode,  ex.args)
+    return()
+end
+
+@inline function _expr_cleanup(ex::Expr)
+    e = copy(ex)
+    _expr_cleanup!(e)
+    return(e)
+end
+
+modulusexists(modulus::FWScaFree) =  (modulus !== fwscafreeNaN)
+modulusexists(modulus::FWVecFree) =  (modulus !== fwvecfreeNaN)
+modulusexists(modulus::FWScaFixed) =  (modulus !== fwscafixedNaN)
+modulusexists(modulus::FWVecFixed) =  (modulus !== fwvecfixedNaN)
 
 function modulusexists(modulus_single_input)
    # 5.0 is not meaningful, just an input to check that the function does not return NaN
@@ -566,21 +667,200 @@ end
 
 
 
+#
+#  Create the scalar and vector function wrappers for the moduli.
+#
+function _buildmoduli_t(G::Expr, psymbs::Tuple)
+    # Replace symbols by elements in array
+	Ge = _replace_symbols_with_array(G, psymbs)
+    _expr_cleanup!(Ge)
+    isexprmultiline = (length(Ge.args) > 1)
 
+    # Detect if expression depends on variable or if it is a constant
+    # This is because the @. macro fails to vectorize if there is no vector to iterate on
+    # It also fails on multiline expressions
+    islaplace, isconstant = expr_search(Ge, :t) ? (false, false) : expr_search(Ge, :s) ? (true, false) : (false, true)
+
+    if isconstant  # constant value returned
+        @eval return( (     ((t,p_arr) -> $Ge)      |> FWScaFree,
+                            ((t,p_arr) -> fill(RheoFloat($Ge), length(t)))  |> FWVecFree ) )
+#    elseif islaplace
+#        return()
+    elseif isexprmultiline
+	    @eval return( (     ((t,p_arr) -> $Ge)      |> FWScaFree,
+		    			    ((ta,p_arr) -> [$Ge for t in ta] )  |> FWVecFree ) )
+    else
+	    @eval return( (     ((t,p_arr) -> $Ge)      |> FWScaFree,
+		    			    ((t,p_arr) -> @. $Ge )  |> FWVecFree ) )
+    end
+end
+
+
+
+
+function _buildmoduli_t(G::Expr)
+    Ge = _expr_cleanup(G)
+    isexprmultiline = (length(Ge.args) > 1)
+
+    islaplace, isconstant = expr_search(Ge, :t) ? (false, false) : expr_search(Ge, :s) ? (true, false) : (false, true)
+
+    if isconstant     # constant value returned
+        @eval return( ( (t -> $Ge)                             |> FWScaFixed,
+                        (t -> fill(RheoFloat($Ge), length(t)))  |> FWVecFixed ) ) 
+#    elseif islaplace
+#        return()
+    elseif isexprmultiline
+        @eval return( ( (t -> $Ge)          |> FWScaFixed,
+                (ta -> [$Ge for t in ta] )  	|> FWVecFixed ) )
+    else
+        @eval return( ( (t -> $Ge)          |> FWScaFixed,
+                        (t -> @. $Ge )  	|> FWVecFixed ) ) 
+    end                          
+end
+                
+
+
+function _buildmoduli_ω(G::Expr, psymbs::Tuple)
+    # Replace symbols by elements in array
+	Ge = _replace_symbols_with_array(G, psymbs)
+    _expr_cleanup!(Ge)
+    isexprmultiline = (length(Ge.args) > 1)
+
+    # Detect if expression depends on variable or if it is a constant
+    # This is because the @. macro fails to vectorize if there is no vector to iterate on
+    # It also fails on multiline expressions
+    isconstant = !expr_search(Ge, :ω) 
+
+    if isconstant  # constant value returned
+        @eval return( (     ((ω,p_arr) -> $Ge)      |> FWScaFree,
+                            ((ω,p_arr) -> fill(RheoFloat($Ge), length(ω)))  |> FWVecFree ) )
+    elseif isexprmultiline
+	    @eval return( (     ((ω,p_arr) -> $Ge)      |> FWScaFree,
+		    			    ((ωa,p_arr) -> [$Ge for ω in ωa] )  |> FWVecFree ) )
+    else
+	    @eval return( (     ((ω,p_arr) -> $Ge)      |> FWScaFree,
+		    			    ((ω,p_arr) -> @. $Ge )  |> FWVecFree ) )
+    end
+end
+
+
+
+function _buildmoduli_ω(G::Expr)
+    Ge = _expr_cleanup(G)
+    isexprmultiline = (length(Ge.args) > 1)
+
+    isconstant = !expr_search(Ge, :ω)
+
+    if isconstant     # constant value returned
+        @eval return( ( (ω -> $Ge)                             |> FWScaFixed,
+                        (ω -> fill(RheoFloat($Ge), length(t)))  |> FWVecFixed ) ) 
+#    elseif islaplace
+#        return()
+    elseif true # isexprmultiline
+        @eval return( ( (ω -> $Ge)          |> FWScaFixed,
+                (ωa -> [$Ge for ω in ωa] )  	|> FWVecFixed ) )
+    else
+        @eval return( ( (ω -> $Ge)          |> FWScaFixed,
+                        (ω -> @. $Ge )  	|> FWVecFixed ) ) 
+    end                          
+end
+         
+
+function _buildmoduli_t(G::Nothing, psymbs::Tuple)
+	return( (       fwscafreeNaN, fwvecfreeNaN ) )
+end
+
+function _buildmoduli_t(G::Nothing)
+	return( (       fwscafixedNaN, fwvecfixedNaN ) )
+end
+
+function _buildmoduli_ω(G::Nothing, psymbs::Tuple)
+	return( (       fwscafreeNaN, fwvecfreeNaN ) )
+end
+
+function _buildmoduli_ω(G::Nothing)
+	return( (       fwscafixedNaN, fwvecfixedNaN ) )
+end
+
+
+
+function _buildconstraint(constraint::Expr, psymbs::Tuple)
+    # Replace symbols by elements in array
+	constraint_e = expr_replace(constraint,NamedTuple{psymbs}([Meta.parse(":(p_arr[$i])").args[1] for i in 1:length(psymbs)]) )
+	@eval return( (     (p_arr -> $constraint_e)      |> FWConstraint ) )
+end
+
+function _buildconstraint(constraint::Expr)
+	@eval return( (     (p_arr -> $constraint)      |> FWConstraint ) )
+end
+
+
+
+function RheoModelClass(;name::String,
+    p::Tuple,
+    G = nothing,
+    J = nothing,
+    Gp = nothing,
+    Gpp = nothing,
+    constraint::Expr = quote true end,
+    info="", 
+    # flags to indicate use of integral forms of the relaxation modulus or creep compliance
+           # using the ramp response instead of the step response to avoid singularities
+    G_ramp::Bool = false,
+    J_ramp::Bool = false
+    )
+# Building expressions tuple to store data provided to constructor
+expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint)
+
+return(RheoModelClass(name, p, NamedTuple{}(),
+_buildmoduli_t(G,p)..., _buildmoduli_t(J,p)...,
+_buildmoduli_ω(Gp,p)..., _buildmoduli_ω(Gpp,p)...,
+_buildconstraint(constraint,p),
+G_ramp, J_ramp, info, expressions) )
+end
 
 
 #
 #  Function used to check and convert any named tupple of parameters into an array ordered as expected by the moduli functions of the RheoModelClass
 #
 
+function check_and_reorder_parameters(nt::NamedTuple, params_ordered_list::Tuple; err_string::String="calling function")
+	# check that every parameter in m exists in the named tuple nt
+	@assert all(i->i in keys(nt),params_ordered_list) "Missing parameter(s) in " * err_string
+	# check that no extra parameters have been provided
+	@assert length(params_ordered_list) == length(nt) "Mismatch number of model parameters and parameters provided in " * err_string
 
-function check_and_reorder_parameters(nt::NamedTuple, params_order::Vector{Symbol}; err_string::String="calling function")
-    # check that every parameter in m exists in the named tuple nt
-    @assert all(i->i in keys(nt),params_order) "Missing parameter(s) in " * err_string
-    # check that no extra parameters have been provided
-    @assert length(params_order) == length(nt) "Mismatch number of model parameters and parameters provided in " * err_string
+	p = map(i->RheoFloat(nt[i]), params_ordered_list)
+    rheoconv([p...])
+end
 
-    p = map(i->RheoFloat(nt[i]), params_order)
+
+
+
+function _freeze_params(m::RheoModelClass, nt0::NamedTuple)
+
+	# check that every parameter to fix actually exists in the model
+	@assert all( i-> i in m.freeparams,keys(nt0)) "A parameter to freeze is not involved in the model"
+	# convert values format for consistency
+	nt=NamedTuple{keys(nt0)}([RheoFloat(i) for i in nt0])
+
+	# update list of fixed parameters
+	fixedparams = merge(m.fixedparams, nt)
+
+	# create array of remaining variables
+	freeparams = Tuple( filter(s -> !(s in keys(nt)),m.freeparams) )
+
+	# This section creates moduli expressions with material parameters
+	# replaced by specific values.
+
+	G = expr_replace(m.expressions.G, nt)
+	J = expr_replace(m.expressions.J, nt)
+	Gp = expr_replace(m.expressions.Gp, nt)
+	Gpp = expr_replace(m.expressions.Gpp, nt)
+	constraint = expr_replace(m.expressions.constraint, nt)
+
+	return( (freeparams=freeparams, fixedparams=fixedparams, G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint) )
+
 end
 
 """
@@ -606,6 +886,57 @@ julia> SLS2_mod.G(1,[1,2,3])
 ```
 
 """
+function freeze_params(m::RheoModelClass, nt0::NamedTuple)
+
+	freeparams, fixedparams, G,J,Gp,Gpp,constraint = _freeze_params(m, nt0)
+
+	# Check that some free params remains
+	@assert length(freeparams) > 0  "All parameters are set. Build a RheoModel instead."
+
+	# Building expressions tuple to store data provided to constructor
+	expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint)
+
+	return(RheoModelClass(m.name, freeparams, fixedparams,
+		_buildmoduli_t(G,freeparams)..., _buildmoduli_t(J,freeparams)...,
+		_buildmoduli_ω(Gp,freeparams)..., _buildmoduli_ω(Gpp,freeparams)...,
+		_buildconstraint(constraint,freeparams),
+        m._Gramp, m._Jramp, m.info, expressions) )
+end
+
+
+function freeze_params(m::RheoModelClass; kwargs...)
+    return(freeze_params(m,kwargs.data))
+end
+
+
+
+function RheoModel(m::RheoModelClass, nt0::NamedTuple)
+
+	freeparams, fixedparams, G,J,Gp,Gpp,constraint = _freeze_params(m, nt0)
+	
+	# Check all free params are set
+	@assert length(freeparams) == 0  "Some parameters need to be set: $freeparams"
+
+	# Building expressions tuple to store data provided to constructor
+	expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint)
+
+	return(RheoModel(m.name, freeparams, fixedparams,
+		_buildmoduli_t(G)..., _buildmoduli_t(J)..., 
+        _buildmoduli_ω(Gp)..., _buildmoduli_ω(Gpp)...,
+		_buildconstraint(constraint),
+		m._Gramp, m._Jramp, m.info, expressions) )
+end
+
+
+function RheoModel(m::RheoModelClass; kwargs...)
+    return(RheoModel(m,kwargs.data))
+end
+
+
+
+
+
+#=
 function freeze_params(m::RheoModelClass, nt0::NamedTuple)
 
     # check that every parameter in m exists in the named tuple nt
@@ -646,10 +977,6 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
         $info, $expressions)   )
 end
 
-
-function freeze_params(m::RheoModelClass; kwargs...)
-    return(freeze_params(m,kwargs.data))
-end
 
 
 
@@ -721,7 +1048,7 @@ function Base.show(io::IO, m::RheoModel)
 end
 
 
-
+=#
 
 
 
@@ -786,7 +1113,7 @@ end
 
 function relaxmod(m::RheoModelClass, x, params::NamedTuple)
     # check all parameters are provided and create a well ordered named tuple
-    p = check_and_reorder_parameters(params, m.params, err_string = "relaxmod")
+    p = check_and_reorder_parameters(params, m.freeparams, err_string = "relaxmod")
     relaxmod(m, x, p)
 end
 
@@ -868,7 +1195,7 @@ end
 
 function creepcomp(m::RheoModelClass, x, params::NamedTuple)
     # check all parameters are provided and create a well ordered named tuple
-    p = check_and_reorder_parameters(params, m.params, err_string = "relaxmod")
+    p = check_and_reorder_parameters(params, m.freeparams, err_string = "relaxmod")
     creepcomp(m, x, p)
 end
 
@@ -950,7 +1277,7 @@ end
 
 function storagemod(m::RheoModelClass, x, params::NamedTuple)
     # check all parameters are provided and create a well ordered named tuple
-    p = check_and_reorder_parameters(params, m.params, err_string = "relaxmod")
+    p = check_and_reorder_parameters(params, m.freeparams, err_string = "relaxmod")
     storagemod(m, x, p)
 end
 
@@ -1022,7 +1349,7 @@ end
 
 function lossmod(m::RheoModelClass, x, params::NamedTuple)
     # check all parameters are provided and create a well ordered named tuple
-    p = check_and_reorder_parameters(params, m.params, err_string = "relaxmod")
+    p = check_and_reorder_parameters(params, m.freeparams, err_string = "relaxmod")
     lossmod(m, x, p)
 end
 
@@ -1097,7 +1424,7 @@ end
 
 function dynamicmod(m::RheoModelClass, x, params::NamedTuple)
     # check all parameters are provided and create a well ordered named tuple
-    p = check_and_reorder_parameters(params, m.params, err_string = "relaxmod")
+    p = check_and_reorder_parameters(params, m.freeparams, err_string = "relaxmod")
     dynamicmod(m, x, p)
 end
 

@@ -4,7 +4,7 @@ Fract_Zener = RheoModelClass(
           # Model name
           name="frac_zener",
           # Model parameters,
-          p = [ :cₐ, :a, :cᵦ, :β, :cᵧ, :γ],
+          p = (:cₐ, :a, :cᵦ, :β, :cᵧ, :γ),
           # Relaxation modulus
           G = quote
                  cᵦ*t^(-β)*mittleff(a - β, 1 - β, -cᵦ*t^(a - β)/cₐ) + cᵧ*t^(-γ)/gamma(1 - γ)
@@ -51,7 +51,7 @@ FractSLS_Zener = RheoModelClass(
         # Model name
         name="fracsls_Zener",
         # Model parameters,
-        p = [ :cₐ, :a, :kᵦ, :kᵧ],
+        p = (:cₐ, :a, :kᵦ, :kᵧ),
         # Relaxation modulus
         G = quote
                 kᵦ*mittleff(a, -(kᵦ/cₐ)*t^a) + kᵧ
@@ -95,7 +95,7 @@ SLS_Zener = RheoModelClass(
           # Model name
           name="SLS_Zener",
           # Model parameters,
-          p = [ :η, :kᵦ, :kᵧ],
+          p = (:η, :kᵦ, :kᵧ),
           # Relaxation modulus
           G = quote
                  kᵧ + kᵦ*exp(-t*kᵦ/η)
@@ -109,17 +109,17 @@ SLS_Zener = RheoModelClass(
               end,
           # Storage modulus
           Gp = quote
-                  τ = η/kᵦ
-                  denominator = 1 + τ^2*ω^2
-                  numerator = ω^2*τ^2*kᵦ
-                  numerator/denominator + kᵧ
+#                  τ = η/kᵦ
+#                  denominator = 1 + τ^2*ω^2
+#                  numerator = ω^2*τ^2*kᵦ
+                ((ω*η/kᵦ)^2*kᵦ) / (1 + (ω*η/kᵦ)^2) + kᵧ
                end,
          # Loss modulus
           Gpp = quote
-                  τ = η/kᵦ
-                  denominator = 1 + τ^2*ω^2
-                  numerator = ω*τ*kᵦ
-                  numerator/denominator
+                  #τ = η/kᵦ
+                  #denominator = 1 + τ^2*ω^2
+                  #numerator = ω*τ*kᵦ
+                  ((ω*η/kᵦ)*kᵦ) / (1 + (ω*η/kᵦ)^2)
                 end,
           # Network
           info= "
@@ -138,13 +138,12 @@ FractJeffreys_Zener = RheoModelClass(
                     # Model name
                     name="fjeff_Zener",
                     # Model parameters,
-                    p = [ :ηₐ, :cᵦ, :β, :ηᵧ],
+                    p = (:ηₐ, :cᵦ, :β, :ηᵧ),
                     # Relaxation modulus
                     G = quote
                             diracterm = t!=0.0 ? 0.0 : Inf
                             cᵦ*t^(-β)*mittleff(1-β, 1-β, -cᵦ*t^(1-β)/ηₐ) + ηᵧ*diracterm
                         end,
-                    Ga_safe = false,
                    # Creep modulus
                     J = quote
                             Ĵ(s) = (1/s)*(ηₐ*s + cᵦ*s^β)/(ηₐ*s*cᵦ*s^β + ηᵧ*s*(ηₐ*s + cᵦ*s^β))
@@ -190,7 +189,7 @@ Jeffreys_Zener = RheoModelClass(
                 # Model name
                 name="jeffreys_Zener",
                 # Model parameters,
-                p = [:ηₐ, :k, :ηᵧ],
+                p = (:ηₐ, :k, :ηᵧ),
                 # Relaxation modulus
                 G = quote
                         diracterm = t!=0.0 ? 0.0 : Inf
@@ -231,12 +230,11 @@ FractSolid = RheoModelClass(
         # Model name
         name="fractsolid",
         # Model parameters,
-        p = [:η, :cᵦ, :β, :k],
+        p = (:η, :cᵦ, :β, :k),
         # Relaxation modulus
         G = quote
               k + cᵦ*t^(-β)*mittleff(1 - β, 1 - β, -cᵦ*(t^(1 - β))/η)
             end,
-        Ga_safe = false,
         # Creep modulus
         J = quote
               a = η/cᵦ
