@@ -2,7 +2,7 @@ println("===============================================")
 println("Testing processing.jl")
 println("===============================================")
 
-#=
+
 function _resample_timeonly()
     d = timeline(t_start=0, t_end=1, step=1//4)
     d = resample(d,dt=0.1)
@@ -1226,7 +1226,7 @@ end
 @test _modelsteppredict_sing_shifted_creep(tol)
 
 
-=#
+
 
 
 function _obj_dynamic(tol)
