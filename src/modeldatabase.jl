@@ -12,6 +12,13 @@ end
 end
 
 
+#
+#  These are not useful at the moment
+#
+#invLaplace(f::Function, t::Vector{RheoFloat}) = InverseLaplace.talbotarr(f, t)
+#invLaplace(f::Function, t::RheoFloat) = InverseLaplace.talbot(f, t)
+
+
 
 models_directory = joinpath(@__DIR__, "models")
 

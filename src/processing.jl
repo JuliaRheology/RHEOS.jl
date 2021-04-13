@@ -248,31 +248,31 @@ Fitting and predicting functions
 =#
 function fill_init_params(model::RheoModelClass, p0::Union{NamedTuple,Nothing})
 
-    springpotnumber = length(findall(x->(x==:a)||(x==:β), model.params))
+    springpotnumber = length(findall(x->(x==:a)||(x==:β), model.freeparams))
 
     if isnothing(p0)
         # fill all initial guesses as 0.5, if two springpots then
         # make sure dissipation coefficients conform to constraints
-        p0a = ones(RheoFloat, length(model.params))/2
+        p0a = ones(RheoFloat, length(model.freeparams))/2
         if springpotnumber==2
-            index = findfirst(model.params.==:a)
+            index = findfirst(model.freeparams.==:a)
             p0a[index] = RheoFloat(0.8)
         end
         @warn "Initial values for model parameters are set to $p0a by default"
 
-    elseif length(p0)<length(model.params)
+    elseif length(p0)<length(model.freeparams)
         # check all provided symbols are part of the model, fill all parameters not provided
         for i in keys(p0)
-            @assert (i in model.params) "Incorrect parameter name provided for model initial conditions:" * i
+            @assert (i in model.freeparams) "Incorrect parameter name provided for model initial conditions:" * i
         end
         # propagate list
-        p0a = Vector{RheoFloat}(undef, length(model.params))
-        for (i,p) in enumerate(model.params)
+        p0a = Vector{RheoFloat}(undef, length(model.freeparams))
+        for (i,p) in enumerate(model.freeparams)
             p0a[i] = (p in keys(p0)) ? p0[p] : RheoFloat(1/2)
         end
         # check for second springpot specification
-        indexa = findfirst(model.params.==:a)
-        indexβ = findfirst(model.params.==:β)
+        indexa = findfirst(model.freeparams.==:a)
+        indexβ = findfirst(model.freeparams.==:β)
         if !(:a in keys(p0)) && !(:β in keys(p0))
             p0a[indexa] = RheoFloat(0.8)
         elseif !(:β in keys(p0))
@@ -284,10 +284,10 @@ function fill_init_params(model::RheoModelClass, p0::Union{NamedTuple,Nothing})
         @warn "Unspecified initial guesses filled by default values: $p0a"
 
     else
-        p0a = check_and_reorder_parameters(p0, model.params,  err_string="initial guess")
+        p0a = check_and_reorder_parameters(p0, model.freeparams,  err_string="initial guess")
     end
 
-    @assert model.constraint(p0a)  "Initial guess not feasible"
+    @assert model._constraint(p0a)  "Initial guess not feasible"
 
     return p0a
 end
@@ -296,14 +296,14 @@ function fill_lower_bounds(model::RheoModelClass, lo::Union{NamedTuple,Nothing})
     if isnothing(lo)
         loa = nothing
 
-    elseif length(lo)<length(model.params)
-        loa = Vector{RheoFloat}(undef, length(model.params))
-        for (i,p) in enumerate(model.params)
+    elseif length(lo)<length(model.freeparams)
+        loa = Vector{RheoFloat}(undef, length(model.freeparams))
+        for (i,p) in enumerate(model.freeparams)
             loa[i] = (p in keys(lo)) ? lo[p] : zero(RheoFloat)
         end
 
     else
-        loa = check_and_reorder_parameters(lo, model.params,  err_string="low bounds")
+        loa = check_and_reorder_parameters(lo, model.freeparams,  err_string="low bounds")
     end
 
     return loa
@@ -313,14 +313,14 @@ function fill_upper_bounds(model::RheoModelClass, hi::Union{NamedTuple,Nothing})
     if isnothing(hi)
         hia = nothing
 
-    elseif length(hi)<length(model.params)
-        hia = Vector{RheoFloat}(undef, length(model.params))
-        for (i,p) in enumerate(model.params)
+    elseif length(hi)<length(model.freeparams)
+        hia = Vector{RheoFloat}(undef, length(model.freeparams))
+        for (i,p) in enumerate(model.freeparams)
             hia[i] = (p in keys(hi)) ? hi[p] : RheoFloat(Inf)
         end
 
     else
-        hia = check_and_reorder_parameters(hi, model.params, err_string="high bounds")
+        hia = check_and_reorder_parameters(hi, model.freeparams, err_string="high bounds")
     end
 
     return hia
@@ -428,7 +428,7 @@ function modelfit(data::RheoTimeData,
 
     println("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
 
-    nt = NamedTuple{Tuple(model.params)}(minx)
+    nt = NamedTuple{Tuple(model.freeparams)}(minx)
 
     if data.log !== nothing
         # Preparation of data for log item
@@ -512,7 +512,7 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
 
     log = data.log === nothing ? nothing : [ data.log;
             RheoLogItem( (type=:process, funct=:modelpredict, params=(model::RheoModel,), keywords=(diff_method = diff_method,)),
-                         (comment="Predicted data - modulus: $pred_mod, parameters:$(model.params)",) ) ]
+                         (comment="Predicted data - modulus: $pred_mod, parameters:$(model.fixedparams)",) ) ]
 
     return RheoTimeData(sigma, epsilon, data.t, log)
 
@@ -623,7 +623,7 @@ function modelstepfit(data::RheoTimeData,
                                                     _rel_tol = rel_tol,
                                                     indweights = weights)
 
-    nt = NamedTuple{Tuple(model.params)}(minx)
+    nt = NamedTuple{Tuple(model.freeparams)}(minx)
 
     if data.log !== nothing
         # Preparation of data for log item
@@ -698,7 +698,7 @@ function modelsteppredict(data::RheoTimeData, model::RheoModel; step_on::Real = 
 
     log = data.log === nothing ? nothing : [ data.log;
             RheoLogItem( (type=:process, funct=:modelsteppredict, params=(model::RheoModel,), keywords=(step_on = step_on,)),
-                         (comment="Predicted step response - modulus: $pred_mod, parameters:$(model.params)",) ) ]
+                         (comment="Predicted step response - modulus: $pred_mod, parameters:$(model.fixedparams)",) ) ]
 
 
     return RheoTimeData(sigma,epsilon,time, log)
@@ -848,7 +848,7 @@ function dynamicmodelfit(data::RheoFreqData,
     # timed fitting
     (minf, minx, ret), timetaken, bytes, gctime, memalloc = @timed NLopt.optimize(opt, p0a)
 
-    nt = NamedTuple{Tuple(model.params)}(minx)
+    nt = NamedTuple{Tuple(model.freeparams)}(minx)
 
     if data.log !== nothing
         # Preparation of data for log item
@@ -878,7 +878,7 @@ function dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
 
     log = data.log === nothing ? nothing : [ data.log;
             RheoLogItem( (type=:process, funct=:dynamicmodelpredict, params=(model::RheoModel,), keywords=() ),
-                         (comment="Calculated frequency spectrum - parameters:$(model.params)",) ) ]
+                         (comment="Calculated frequency spectrum - parameters:$(model.fixedparams)",) ) ]
 
     return RheoFreqData(predGp, predGpp, data.ω, log)
 

@@ -3,7 +3,7 @@ BurgersLiquid =  RheoModelClass(
         # Model name
         name="burgerliquid",
         # Model parameters,
-        p = [:η₁ , :k₁, :η₂, :k₂],
+        p = (:η₁ , :k₁, :η₂, :k₂),
         # Relaxation modulus
         G = quote
               p1 = η₁/k₁ + η₁/k₂ + η₂/k₂

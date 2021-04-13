@@ -4,27 +4,24 @@ Fract_Maxwell = RheoModelClass(
           # Model name
           name="fractmaxwell",
           # Model parameters,
-          p = [:cₐ, :a, :cᵦ, :β],
+          p = (:cₐ, :a, :cᵦ, :β),
           # Relaxation modulus
           G = quote
                  cᵦ*t^(-β)*mittleff(a - β, 1 - β, -cᵦ*t^(a - β)/cₐ)
               end,
-          Ga_safe = true,
           # Creep modulus
           J = quote
                 t^(a)/(cₐ*gamma(1 + a)) + t^(β)/(cᵦ*gamma(1 + β))
               end,
           # Storage modulus
           Gp = quote
-                 denominator = (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2)
-                 numerator = ((cᵦ*ω^β)^2)*(cₐ*ω^a)*cos(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*cos(β*π/2)
-                 numerator/denominator
+                denominator = ( (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2) )
+                ( ((cᵦ*ω^β)^2)*(cₐ*ω^a)*cos(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*cos(β*π/2) ) / denominator
                end,
          # Loss modulus
           Gpp = quote
-                  denominator = (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2)
-                  numerator = ((cᵦ*ω^β)^2)*(cₐ*ω^a)*sin(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*sin(β*π/2)
-                  numerator/denominator
+                denominator = ( (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2) )
+                ( ((cᵦ*ω^β)^2)*(cₐ*ω^a)*sin(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*sin(β*π/2) ) / denominator
                 end,
           # Constraints
           constraint = quote
@@ -44,28 +41,28 @@ FractS_Maxwell = RheoModelClass(
         # Model name
         name="fractmaxwell_spring",
         # Model parameters,
-        p = [:cₐ, :a, :k],
+        p = (:cₐ, :a, :k),
         # Relaxation modulus
         G = quote
                 # special case when α==0.0, 2 springs in series
-                a==0.0 ? 1.0/(1.0/cₐ + 1.0/k) : k*mittleff(a, -k*t^a/cₐ) # normal case otherwise
+                # a==0.0 ? 1.0/(1.0/cₐ + 1.0/k) : k*mittleff(a, -k*t^a/cₐ) # normal case otherwise
+                # note from AJK - the special case is in contradiction with the constraint, 
+                # so I think we can remove it from here.
+                k*mittleff(a, -k*t^a/cₐ) # normal case otherwise
             end,
-        Ga_safe = false,
         # Creep modulus
         J = quote
               t^(a)/(cₐ*gamma(1 + a)) + 1/k
             end,
         # Storage modulus
         Gp = quote
-                denominator = (cₐ*ω^a)^2 + k^2 + 2*(cₐ*ω^a)*k*cos(a*π/2)
-                numerator = k^2*(cₐ*ω^a)*cos(a*π/2) + (cₐ*ω^a)^2*k
-                numerator/denominator
+                denominator = ( (cₐ*ω^a)^2 + k^2 + 2*(cₐ*ω^a)*k*cos(a*π/2) )
+                ( k^2*(cₐ*ω^a)*cos(a*π/2) + (cₐ*ω^a)^2*k ) / denominator
              end,
        # Loss modulus
         Gpp = quote
-                denominator = (cₐ*ω^a)^2 + k^2 + 2*(cₐ*ω^a)*k*cos(a*π/2)
-                numerator = k^2*(cₐ*ω^a)*sin(a*π/2)
-                numerator/denominator
+                denominator = ( (cₐ*ω^a)^2 + k^2 + 2*(cₐ*ω^a)*k*cos(a*π/2) )
+                ( k^2*(cₐ*ω^a)*sin(a*π/2) ) / denominator
               end,
         # Constraints
         constraint = quote
@@ -84,27 +81,24 @@ FractD_Maxwell = RheoModelClass(
           # Model name
           name="fractmaxwell_dashpot",
           # Model parameters,
-          p = [:η, :cᵦ, :β],
+          p = (:η, :cᵦ, :β),
           # Relaxation modulus
           G = quote
                 cᵦ*t^(-β)*mittleff(1 - β, 1 - β, -cᵦ*t^(1 - β)/η)
               end,
-          Ga_safe = true,
           # Creep modulus
           J = quote
                 t/η + t^β/(cᵦ*gamma(1 + β))
               end,
           # Storage modulus
           Gp = quote
-                  denominator = (η*ω)^2 + (cᵦ*ω^β)^2 + 2*(η*ω)*(cᵦ*ω^β)*cos((1-β)*π/2)
-                  numerator = ((η*ω)^2)*(cᵦ*ω^β)*cos(β*π/2)
-                  numerator/denominator
+                denominator =  ( (η*ω)^2 + (cᵦ*ω^β)^2 + 2*(η*ω)*(cᵦ*ω^β)*cos((1-β)*π/2) )
+                ( ((η*ω)^2)*(cᵦ*ω^β)*cos(β*π/2) ) /  denominator
                end,
          # Loss modulus
           Gpp = quote
-                  denominator = (η*ω)^2 + (cᵦ*ω^β)^2 + 2*(η*ω)*(cᵦ*ω^β)*cos((1-β)*π/2)
-                  numerator = ((cᵦ*ω^β)^2)*(η*ω) + ((η*ω)^2)*(cᵦ*ω^β)*sin(β*π/2)
-                  numerator/denominator
+                denominator = ( (η*ω)^2 + (cᵦ*ω^β)^2 + 2*(η*ω)*(cᵦ*ω^β)*cos((1-β)*π/2) )
+                ( ((cᵦ*ω^β)^2)*(η*ω) + ((η*ω)^2)*(cᵦ*ω^β)*sin(β*π/2) ) / denominator
                 end,
           # Constraints
           constraint = quote
@@ -124,7 +118,7 @@ Maxwell = RheoModelClass(
         # Model name
         name="maxwell",
         # Model parameters,
-        p = [:η, :k],
+        p = (:η, :k),
         # Relaxation modulus
         G = quote
               k*exp(-k*t/η)
@@ -135,15 +129,11 @@ Maxwell = RheoModelClass(
             end,
         # Storage modulus
         Gp = quote
-                denominator = 1 + η^2*ω^2/k^2
-                numerator = η^2*ω^2/k
-                numerator/denominator
+                ( η^2*ω^2/k ) / ( 1 + η^2*ω^2/k^2 )
              end,
        # Loss modulus
         Gpp = quote
-                denominator = 1 + η^2*ω^2/k^2
-                numerator = η*ω
-                numerator/denominator
+                ( η*ω ) / ( 1 + η^2*ω^2/k^2 )
               end,
         # Network
         info= "

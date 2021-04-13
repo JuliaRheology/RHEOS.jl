@@ -10,7 +10,7 @@ plothelper = pyimport("plothelper")
 
 function plotmodel(modelvect; ymaxG = nothing, ymaxJ = nothing)
 
-    dt = 0.01
+    dt = 0.025
     # Create a time only dataset
     dϵ = timeline(t_start = 0.0, t_end = 10.0, step = dt)
     dσ = timeline(t_start = 0.0, t_end = 10.0, step = dt)

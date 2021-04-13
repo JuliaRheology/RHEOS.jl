@@ -22,7 +22,7 @@ end
 Create and return an `Interface` struct using the Hertz contact model with indenter radius `R`.
 """
 function AFM(R::Real)
-  Interface(:d, :f, (ϵ,σ)->(d = (R*(3. /4.)^(2. /3)) .* ϵ.^(2. /3), f = R^2 .* σ ), (d,f)->(ϵ = 4 /(3 *R^1.5) .* d.^1.5, σ = f./R^2) )
+  Interface(:d, :f, (ϵ,σ)->(d = (R.*(3. /4.).^(2. /3)) .* ϵ.^(2. ./3), f = R^2 .* σ ), (d,f)->(ϵ = 4 ./(3 .*R.^1.5) .* d.^1.5, σ = f./R^2) )
 end
 
 """

@@ -3,7 +3,7 @@ SLS2 = RheoModelClass(
         # Model name
         name="SLS2",
         # Model parameters,
-        p = [:G₀, :G₁, :η₁, :G₂, :η₂],
+        p = (:G₀, :G₁, :η₁, :G₂, :η₂),
         # Relaxation modulus
         G = quote
               G₀ + G₁*exp(-t*G₁/η₁) + G₂*exp(-t*G₂/η₂)
@@ -43,16 +43,16 @@ SLS2 = RheoModelClass(
 
 function G_GSLS(n)
 
-    params=[:k0]
-    G_terms=[:(k0)]
+    params=(:k0,)
+    G_terms=(:(k0),)
 
     for i=1:n
         k=Symbol("k_"*string(i))
         η=Symbol("η_"*string(i))
         e=:($k * exp.( (- $k/$η) * t))
 
-        params=vcat(params, [k,η])
-        G_terms=vcat(G_terms,e)
+        params=merge(params, (k,η))
+        G_terms=merge(G_terms,(e,))
     end
     G_Expr=Expr(:call,:+,G_terms...)
 

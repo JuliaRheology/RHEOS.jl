@@ -4,7 +4,7 @@ Springpot =  RheoModelClass(
         # Model name
         name="springpot",
         # Model parameters,
-        p = [:cᵦ, :β],
+        p = (:cᵦ, :β),
         # Relaxation modulus
         G = quote
               cᵦ*t^(-β)/gamma(1 - β)
@@ -36,7 +36,7 @@ Spring =  RheoModelClass(
         # Model name
         name="spring",
         # Model parameters,
-        p = [:k],
+        p = (:k,),
         # Relaxation modulus
         G = quote
               k
@@ -64,7 +64,7 @@ Dashpot =  RheoModelClass(
         # Model name
         name="dashpot",
         # Model parameters,
-        p = [:η],
+        p = (:η,),
         # Creep modulus
         J = quote
               t/η
