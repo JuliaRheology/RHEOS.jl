@@ -470,9 +470,9 @@ const FWConstraint = FunctionWrapper{Bool,Tuple{Vector{RheoFloat}}}
 
 # constant NaN functions for default parameters and testing existence of moduli functions
 const fwscafreeNaN = ((t,p)->NaN) |> FWScaFree
-const fwvecfreeNaN = ((t,p)->NaN) |> FWVecFree
+const fwvecfreeNaN = ((t,p)->fill(RheoFloat(NaN), length(t))) |> FWVecFree
 const fwscafixedNaN = (t->NaN) |> FWScaFixed
-const fwvecfixedNaN = (t->NaN) |> FWVecFixed
+const fwvecfixedNaN = (t->fill(RheoFloat(NaN), length(t))) |> FWVecFixed
 
 
 
@@ -683,7 +683,7 @@ function _buildmoduli_t(G::Expr, psymbs::Tuple)
 
     if isconstant  # constant value returned
         @eval return( (     ((t,p_arr) -> $Ge)      |> FWScaFree,
-                            ((t,p_arr) -> fill(RheoFloat($Ge), length(t)))  |> FWVecFree ) )
+                            ((t,p_arr) -> fill(rheoconv($Ge), length(t)))  |> FWVecFree ) )
 #    elseif islaplace
 #        return()
     elseif isexprmultiline
@@ -706,7 +706,7 @@ function _buildmoduli_t(G::Expr)
 
     if isconstant     # constant value returned
         @eval return( ( (t -> $Ge)                             |> FWScaFixed,
-                        (t -> fill(RheoFloat($Ge), length(t)))  |> FWVecFixed ) ) 
+                        (t -> fill(rheoconv($Ge), length(t)))  |> FWVecFixed ) ) 
 #    elseif islaplace
 #        return()
     elseif isexprmultiline
@@ -733,7 +733,7 @@ function _buildmoduli_ω(G::Expr, psymbs::Tuple)
 
     if isconstant  # constant value returned
         @eval return( (     ((ω,p_arr) -> $Ge)      |> FWScaFree,
-                            ((ω,p_arr) -> fill(RheoFloat($Ge), length(ω)))  |> FWVecFree ) )
+                            ((ω,p_arr) -> fill(rheoconv($Ge), length(ω)))  |> FWVecFree ) )
     elseif isexprmultiline
 	    @eval return( (     ((ω,p_arr) -> $Ge)      |> FWScaFree,
 		    			    ((ωa,p_arr) -> [$Ge for ω in ωa] )  |> FWVecFree ) )
@@ -753,7 +753,7 @@ function _buildmoduli_ω(G::Expr)
 
     if isconstant     # constant value returned
         @eval return( ( (ω -> $Ge)                             |> FWScaFixed,
-                        (ω -> fill(RheoFloat($Ge), length(ω)))  |> FWVecFixed ) ) 
+                        (ω -> fill(rheoconv($Ge), length(ω)))  |> FWVecFixed ) ) 
 #    elseif islaplace
 #        return()
     elseif true # isexprmultiline
