@@ -522,9 +522,14 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
         modsing = model._G
         
     elseif (check == stress_only)
+        if model.expressions.use_J_integral == true
+            dcontrolled = doublederivCD(data.σ, data.t)
+        else
+            dcontrolled = deriv(data.σ, data.t)
+        end
         modulus = _Ja(model)
         modsing = model._J
-        dcontrolled = deriv(data.σ, data.t)
+    
     end
 
     # get singularity presence

@@ -513,12 +513,13 @@ function RheoModelClass(;name::String,
                          # flags to avoid bugs related to the FunctionWrappers and MittLeff
                          Ga_safe::Bool = true,
                          Ja_safe::Bool = true,
-                         use_G_integral::Bool = false
+                         use_G_integral::Bool = false,
+                         use_J_integral::Bool = false
                          )
 
     # Expression to unpack parameter array into suitably names variables in the moduli expressions
     unpack_expr = Meta.parse(string(join(string.(p), ","), ",=params"))
-    expressions = (G=G ,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint, Ga_safe=Ga_safe, Ja_safe=Ja_safe, use_G_integral=use_G_integral)
+    expressions = (G=G ,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint, Ga_safe=Ga_safe, Ja_safe=Ja_safe, use_G_integral=use_G_integral, use_J_integral=use_J_integral)
 
     @eval return(RheoModelClass($name, $p,
         ((t,params) -> begin $unpack_expr; $G; end)                 |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
@@ -724,7 +725,7 @@ function RheoModel(m::RheoModelClass; kwargs...)
     return(RheoModel(m,kwargs.data))
 end
 
-function RheoModel(m::RheoModelClass, nt0::NamedTuple, flagi::Bool=false)
+function RheoModel(m::RheoModelClass, nt0::NamedTuple)
 
     # check all parameters are provided and create a well ordered named tuple
     p = check_and_reorder_parameters(nt0, m.params, err_string = "model definition")
@@ -738,6 +739,7 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple, flagi::Bool=false)
 
     # If flag is true, use the Gi expression
     use_G_integral = m.expressions.use_G_integral
+    use_J_integral = m.expressions.use_J_integral
 
     # This attaches expressions to the models with parameters substituted by values.
     # Future development: this could be disabled with a key word if processing time is an issue
@@ -747,7 +749,7 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple, flagi::Bool=false)
     Gpp = expr_replace(m.expressions.Gpp, nt)
     
 
-    expressions=NamedTuple{(:G, :J, :Gp, :Gpp, :Ga_safe, :Ja_safe, :use_G_integral)}( ( G, J, Gp, Gpp, m.expressions.Ga_safe, m.expressions.Ja_safe, m.expressions.use_G_integral ) )
+    expressions=NamedTuple{(:G, :J, :Gp, :Gpp, :Ga_safe, :Ja_safe, :use_G_integral, :use_J_integral)}( ( G, J, Gp, Gpp, m.expressions.Ga_safe, m.expressions.Ja_safe, m.expressions.use_G_integral, m.expressions.use_J_integral ) )
 
     @eval return( RheoModel(
     (t -> begin $G; end) |> FunctionWrapper{RheoFloat,Tuple{RheoFloat}},

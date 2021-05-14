@@ -6,9 +6,12 @@ Fract_KelvinVoigt =  RheoModelClass(
         # Model parameters,
         p = [:cₐ, :a, :cᵦ, :β],
         # Relaxation modulus
+        # G = quote
+        #       cₐ*t^(-a)/gamma(1 - a) + cᵦ*t^(-β)/gamma(1 - β)
+        #     end,
         G = quote
-              cₐ*t^(-a)/gamma(1 - a) + cᵦ*t^(-β)/gamma(1 - β)
-            end,
+                cₐ*t^(1-a)/((1-a)*gamma(1 - a)) + cᵦ*t^(1-β)/((1-β)*gamma(1 - β))
+        end,
         # Creep modulus
         J = quote
               (t^(a)/cₐ)*mittleff(a - β, 1 + a, -cᵦ*t^(a - β)/cₐ)
@@ -36,7 +39,8 @@ Fract_KelvinVoigt =  RheoModelClass(
                |                    |
                |________ ╱╲ ________|
                          ╲╱  cᵦ, β
-                "
+                ",
+        use_G_integral = true
         )
 
 

@@ -6,9 +6,12 @@ Springpot =  RheoModelClass(
         # Model parameters,
         p = [:cᵦ, :β],
         # Relaxation modulus
+        # G = quote
+        #       cᵦ*t^(-β)/gamma(1 - β)
+        #     end,
         G = quote
-              cᵦ*t^(-β)/gamma(1 - β)
-            end,
+                cᵦ*t^(1-β)/((1-β)*gamma(1-β))
+        end,
         # Creep modulus
         J = quote
               (t^β)/(cᵦ*gamma(1 + β))
@@ -29,7 +32,9 @@ Springpot =  RheoModelClass(
         info= "
                 ____ ╱╲ ____
                      ╲╱  cᵦ, β
-                "
+                ",
+        use_G_integral = true
+        
         )
 
 Spring =  RheoModelClass(

@@ -11,9 +11,12 @@ Fract_Maxwell = RheoModelClass(
               end,
           Ga_safe = false,
           # Creep modulus
-          J = quote
-                t^(a)/(cₐ*gamma(1 + a)) + t^(β)/(cᵦ*gamma(1 + β))
-              end,
+        #   J = quote
+        #         t^(a)/(cₐ*gamma(1 + a)) + t^(β)/(cᵦ*gamma(1 + β))
+        #       end,
+        J = quote
+                t^(1+a)/(cₐ*(1+a)*gamma(1 + a)) + t^(1+β)/(cᵦ*(1+β)*gamma(1 + β))
+        end,
           # Storage modulus
           Gp = quote
                  denominator = (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2)
@@ -37,7 +40,8 @@ Fract_Maxwell = RheoModelClass(
              ___╱╲__________╱╲____
                 ╲╱          ╲╱
                   cₐ,a         cᵦ, β
-                 "
+                 ",
+        use_J_integral = true
           )
 
 FractS_Maxwell = RheoModelClass(
