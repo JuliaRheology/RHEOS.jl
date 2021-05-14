@@ -52,7 +52,7 @@ export importcsv, exportcsv#, savedata, loaddata, savemodel, loadmodel
 
 # models.jl
 export null_modulus
-export Springpot, Spring, Dashpot
+export Springpot, Springpot_i, Spring, Dashpot
 export Fract_Maxwell, FractS_Maxwell, FractD_Maxwell, Maxwell
 export Fract_KelvinVoigt, FractS_KelvinVoigt, FractD_KelvinVoigt, KelvinVoigt
 export Fract_Zener, FractSLS_Zener, SLS_Zener, FractJeffreys_Zener, Jeffreys_Zener, FractSolid
