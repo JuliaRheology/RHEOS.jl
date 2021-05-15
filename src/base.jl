@@ -642,21 +642,22 @@ function obj_step_nonsing(params, grad, modulus, t, prescribed::Float64, measure
         println("Current Parameters: ", params)
     end
 
+    num_points = size(t, 1)
     mod = (t->modulus(t,params))
     estimated = prescribed*mod(t)
 
-    cost = sum((measured - estimated).^2)
+    cost = sum((measured - estimated).^2)/num_points
 end
 
 function obj_step_weighted(params, grad, modulus, t, prescribed::Float64, measured::Vector{Float64}, weights; _insight=false)
     if _insight
         println("Current Parameters: ", params)
     end
-
+    num_points = size(t, 1)
     mod = (t->modulus(t,params))
     estimated = prescribed*mod(t)
 
-    cost = sum((measured - estimated[weights]).^2)
+    cost = sum((measured - estimated[weights]).^2)/num_points
 end
 
 function leastsquares_stepinit(params_init::Vector{RheoFloat}, low_bounds::RheovecOrNone,
