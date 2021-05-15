@@ -490,7 +490,7 @@ function modelfit(data::RheoTimeData,
     if return_stats == true
         return RheoModel(model, nt), timetaken, ret, minx, minf;
     else
-        return RheoModel(model, nt)
+        return RheoModel(model, nt);
     end
 
 end
