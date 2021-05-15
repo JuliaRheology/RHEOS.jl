@@ -398,7 +398,8 @@ function modelfit(data::RheoTimeData,
                   verbose::Bool = false,
                   rel_tol = 1e-4,
                   diff_method="BD",
-                  weights::Union{Vector{Integer},Nothing} = nothing)
+                  weights::Union{Vector{Integer},Nothing} = nothing,
+                  return_stats::Bool = false) # added this to return the optimisation stats
 
     p0a = fill_init_params(model, p0)
     loa = fill_lower_bounds(model, lo)
@@ -486,7 +487,11 @@ function modelfit(data::RheoTimeData,
         push!(data.log, RheoLogItem( (type=:analysis, funct=:modelfit, params=params, keywords=keywords), info))
     end
 
-    return RheoModel(model, nt);
+    if return_stats == true
+        return RheoModel(model, nt), timetaken, ret, minx, minf;
+    else
+        return RheoModel(model, nt)
+    end
 
 end
 
