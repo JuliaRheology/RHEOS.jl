@@ -474,7 +474,7 @@ function modelfit(data::RheoTimeData,
                                                 _rel_tol = rel_tol,
                                                 indweights = weights)
 
-    println("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
+    println("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf, Numevals: $numevals")
 
     nt = NamedTuple{Tuple(model.params)}(minx)
 
