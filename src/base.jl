@@ -549,8 +549,7 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOr
                            time_series::Vector{RheoFloat}, dt::RheoFloat,
                            prescribed_dot::Vector{RheoFloat}, measured::Vector{RheoFloat};
                            insight::Bool = false, constant_sampling::Bool=true,
-                           singularity::Bool = false, _rel_tol = 1e-4, indweights=nothing,
-                           return_numevals::Bool = false)
+                           singularity::Bool = false, _rel_tol = 1e-4, indweights=nothing)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(:LN_SBPLX, length(params_init))
@@ -631,10 +630,8 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOr
     numevals = opt.numevals
 
     # return all
-    if return_numevals
-        return (convert(RheoFloat,minf), convert(Vector{RheoFloat},minx), ret, numevals)
-    else
-        return (convert(RheoFloat,minf), convert(Vector{RheoFloat},minx), ret)
+    return (convert(RheoFloat,minf), convert(Vector{RheoFloat},minx), ret, numevals)
+
 
 end
 

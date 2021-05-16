@@ -399,7 +399,8 @@ function modelfit(data::RheoTimeData,
                   rel_tol = 1e-4,
                   diff_method="BD",
                   weights::Union{Vector{Integer},Nothing} = nothing,
-                  return_stats::Bool = false) # added this to return the optimisation stats
+                  return_stats::Bool = false,
+                  return_numevals::Bool = false) # added this to return the optimisation stats
 
     p0a = fill_init_params(model, p0)
     loa = fill_lower_bounds(model, lo)
@@ -459,7 +460,7 @@ function modelfit(data::RheoTimeData,
         @warn "Indices weighting not used as variable sample-rate data has been provided"
     end
 
-    (minf, minx, ret), timetaken, bytes, gctime, memalloc =
+    (minf, minx, ret, numevals), timetaken, bytes, gctime, memalloc =
                     @timed leastsquares_init(   p0a,
                                                 loa,
                                                 hia,
@@ -487,8 +488,10 @@ function modelfit(data::RheoTimeData,
         push!(data.log, RheoLogItem( (type=:analysis, funct=:modelfit, params=params, keywords=keywords), info))
     end
 
-    if return_stats == true
+    if return_stats
         return RheoModel(model, nt), timetaken, ret, minx, minf;
+    elseif return_numevals 
+        return RheoModel(model, nt), timetaken, ret, minx, minf, numevals;
     else
         return RheoModel(model, nt);
     end
