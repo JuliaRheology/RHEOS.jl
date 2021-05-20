@@ -32,6 +32,18 @@ const IntOrNone = Union{Integer, Nothing}
 const RheovecOrNone = Union{Vector{RheoFloat}, Nothing}
 
 ######################################################################
+# Additional exports for experiments with modelpredict function
+
+# Base.jl
+export singularitytest, constantcheck
+export derivBD, derivCD
+export doublederivCD
+export boltzconvolve, boltzintegral_sing, boltzintegral_nonsing
+
+# definitions.jl
+export _Ga, _Ja
+
+######################################################################
 export RheoFloat
 
 # definitions.jl
