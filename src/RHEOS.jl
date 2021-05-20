@@ -34,6 +34,8 @@ const RheovecOrNone = Union{Vector{RheoFloat}, Nothing}
 ######################################################################
 # Additional exports for experiments with modelpredict function
 
+export singularity_offset
+
 # Base.jl
 export singularitytest, constantcheck
 export derivBD, derivCD
