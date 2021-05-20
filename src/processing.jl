@@ -575,6 +575,9 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
     log = data.log == nothing ? nothing : [ data.log;
             RheoLogItem( (type=:process, funct=:modelpredict, params=(model::RheoModel,), keywords=(diff_method = diff_method,)),
                          (comment="Predicted data - modulus: $pred_mod, parameters:$(model.params)",) ) ]
+                        
+    println("sing: $sing")
+    println(constantcheck(data.t))
 
     return RheoTimeData(sigma, epsilon, data.t, log)
 
