@@ -24,20 +24,23 @@ function RheoLogItem(;kwargs...)
 end
 
 
-#  There is a bug in julia that prevents the proper use of these functions.
-#
 
-# function Base.show(io::IO, rli::RheoLogItem)
-#     println()
-#     print("action = "); println(rli.action)
-#     print("info   = "); println(rli.info)
-# end
-# function Base.display(io::IO, rl::RheoLog)
-#     println("Hello!")
-#      for rli in rl
-#          print(rli)
-#      end
-# end
+function Base.show(io::IO, ::MIME"text/plain", rli::RheoLogItem)
+    print("action = "); println(rli.action)
+    print("info   = "); println(rli.info)
+end
+
+
+function Base.show(io::IO, ::MIME"text/plain", rl::RheoLog)
+    println("RheoLog structure")
+    println()
+    i=0
+    for rli in rl
+       i+=1
+       println("["*string(i)*"]")
+       display(rli)
+    end
+end
 
 
 #=
@@ -422,15 +425,11 @@ end
 """
     showlog(d::Union{RheoTimeData,RheoFreqData})
 
-shows the record of operations on a rheological data.
+shows the record of operations (`RheoLog`) on rheological data.
 """
 function showlog(d::Union{RheoTimeData,RheoFreqData})
     if d.log !== nothing
-        for idx in 1:length(d.log)
-            println(idx)
-            print("     action = "); println(d.log[idx].action)
-            print("     info   = "); println(d.log[idx].info)
-        end
+        display(d.log)
     else
         println("No log data available")
     end
