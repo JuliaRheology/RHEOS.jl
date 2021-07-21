@@ -4,7 +4,7 @@ Fract_PT = RheoModelClass(
           # Model name
           name="fPT",
           # Model parameters,
-          p = [:cₐ, :a, :cᵦ, :β, :cᵧ, :γ],
+          p = (:cₐ, :a, :cᵦ, :β, :cᵧ, :γ),
           # Relaxation modulus
           G = quote
                   G(s) = (1/s)*(cᵧ*s^γ *(cₐ * s^a + cᵦ * s^β))/(cᵧ*s^γ + cₐ*s^a + cᵦ*s^β)
@@ -14,7 +14,6 @@ Fract_PT = RheoModelClass(
           J = quote
                   t^a/cₐ* mittleff(a - β, 1 + a, -cᵦ*t^(a-β)/cₐ) + t^γ / (cᵧ * gamma(1 + γ))
               end,
-          Ja_safe = false,
          # Storage modulus
           Gp = quote
                   denominator = (cₐ * ω^a)^2 + (cᵦ * ω^β)^2 + (cᵧ * ω^γ)^2 + 2* (cₐ * ω^a) * (cᵦ * ω^β) * cos((a-β)*π/2) + 2* (cₐ * ω^a) * (cᵧ * ω^γ) * cos((a-γ)*π/2) + 2* (cᵦ * ω^β) * (cᵧ * ω^γ)* cos((β-γ)*π/2)
@@ -51,7 +50,7 @@ FractSLS_PT = RheoModelClass(
           # Model name
           name="fSLS_PT",
           # Model parameters,
-          p = [:cₐ, :a, :kᵦ, :kᵧ],
+          p = (:cₐ, :a, :kᵦ, :kᵧ),
           # Relaxation modulus
           G = quote
                 Zkᵦ = (kᵧ)^2/(kᵦ + kᵧ)
@@ -59,12 +58,10 @@ FractSLS_PT = RheoModelClass(
                 Zkᵧ = kᵦ * kᵧ / (kᵦ + kᵧ)
                 Zkᵦ*mittleff(a, -(Zkᵦ/Zcₐ)*t^a) + Zkᵧ
               end,
-          Ga_safe = false,
           # Creep modulus
           J = quote
                   1/kᵧ + t^(a)/cₐ * mittleff(a, 1 + a, -kᵦ*t^(a)/cₐ)
               end,
-          Ja_safe = false,
           # Storage modulus
           Gp = quote
                   Zkᵦ = (kᵧ)^2/(kᵦ + kᵧ)
@@ -104,7 +101,7 @@ SLS_PT = RheoModelClass(
           # Model name
           name="SLS_PT",
           # Model parameters,
-          p = [:η, :kᵦ, :kᵧ],
+          p = (:η, :kᵦ, :kᵧ),
           # Relaxation modulus
           G = quote
                 Zkᵦ = (kᵧ)^2/(kᵦ + kᵧ)
@@ -154,7 +151,7 @@ FractJeffreys_PT = RheoModelClass(
               # Model name
               name="fjeff_PT",
               # Model parameters,
-              p = [ :ηₐ, :cᵦ, :β, :ηᵧ],
+              p = (:ηₐ, :cᵦ, :β, :ηᵧ),
               # Relaxation modulus
               G = quote
                       Zηₐ = (ηᵧ)^2/(ηₐ + ηᵧ)
@@ -163,12 +160,10 @@ FractJeffreys_PT = RheoModelClass(
                       diracterm = t!=0.0 ? 0.0 : Inf
                       Zcᵦ*t^(-β)*mittleff(1-β, 1-β, -Zcᵦ*t^(1-β)/Zηₐ) + Zηᵧ*diracterm
                   end,
-              Ga_safe = false,
               # Creep modulus
               J = quote
                      t/ηₐ * mittleff(1-β, 2, -cᵦ*t^(1-β)/ηₐ) + t/ηᵧ
                   end,
-              Ja_safe = false,
               # Storage modulus
               Gp = quote
                       Zηₐ = (ηᵧ)^2/(ηₐ + ηᵧ)
@@ -214,7 +209,7 @@ Jeffreys_PT = RheoModelClass(
           # Model name
           name="jeffreys_PT",
           # Model parameters,
-          p = [:ηₐ, :k, :ηᵧ],
+          p = (:ηₐ, :k, :ηᵧ),
           # Relaxation modulus
           G = quote
               Zηₐ = (ηᵧ)^2/(ηₐ + ηᵧ)

@@ -14,10 +14,10 @@ PowerLawEmpirical =  RheoModelClass(
                         ## Model name
                         name = "power_empirical",
                         ## Model parameters,
-                        p = [:A, :α],
+                        p = (:A, :α),
                         ## Relaxation modulus
                         G = quote
-                                A*t.^(-α)
+                                A*t^(-α)
                             end,
                         ## Network
                         info = "Empirical model"
@@ -30,7 +30,7 @@ dϵ = timeline(t_start = 1e-2, t_end = 1e1)
 dϵ = strainfunction(dϵ, hstep())
 
 ## Fix model parameters
-powermodel = RheoModel(PowerLawEmpirical, (A = 1, α = 0.8))
+powermodel = RheoModel(PowerLawEmpirical, A = 1, α = 0.8)
 
 ## Evaluate relaxation response
 dpower = modelpredict(dϵ, powermodel)

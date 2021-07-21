@@ -4,7 +4,7 @@ Fract_KelvinVoigt =  RheoModelClass(
         # Model name
         name="fractKV",
         # Model parameters,
-        p = [:cₐ, :a, :cᵦ, :β],
+        p = (:cₐ, :a, :cᵦ, :β),
         # Relaxation modulus
         G = quote
               cₐ*t^(-a)/gamma(1 - a) + cᵦ*t^(-β)/gamma(1 - β)
@@ -13,7 +13,6 @@ Fract_KelvinVoigt =  RheoModelClass(
         J = quote
               (t^(a)/cₐ)*mittleff(a - β, 1 + a, -cᵦ*t^(a - β)/cₐ)
             end,
-        Ja_safe = false,
         # Storage modulus
         Gp = quote
                 cₐ*ω^a*cos(a*π/2) + cᵦ*ω^β*cos(β*π/2)
@@ -44,7 +43,7 @@ FractS_KelvinVoigt =  RheoModelClass(
         # Model name
         name="fractSpringKV",
         # Model parameters,
-        p = [:cₐ, :a, :k],
+        p = (:cₐ, :a, :k),
         # Relaxation modulus
         G = quote
               cₐ*t^(-a)/gamma(1 - a) + k
@@ -53,14 +52,13 @@ FractS_KelvinVoigt =  RheoModelClass(
         J = quote
               (t^(a)/cₐ)*mittleff(a, 1 + a, -k*t^a/cₐ)
             end,
-        Ja_safe = false,
         # Storage modulus
         Gp = quote
-                if a!=1.0
+                #if a!=1.0        #  This is to be removed as the condition contradicts the constraints
                     cₐ*ω^a*cos(a*π/2) + k
-                else
-                    k
-                end
+                #else
+                #    k
+                #end
              end,
         # Loss modulus
         Gpp = quote
@@ -86,16 +84,16 @@ FractD_KelvinVoigt =  RheoModelClass(
         # Model name
         name="fractDashpotKV",
         # Model parameters,
-        p = [:η, :cᵦ, :β],
+        p = (:η, :cᵦ, :β),
         # Relaxation modulus
         G = quote
-              t!=0.0 ? cᵦ*t^(-β)/gamma(1 - β) : Inf
-            end,
+            cᵦ*t^(-β)/gamma(1 - β)
+            #t!=0.0 ? cᵦ*t^(-β)/gamma(1 - β) : Inf
+        end,
         # Creep modulus
         J = quote
               (t/η)*mittleff(1 - β, 1 + 1, -cᵦ*t^(1.0 - β)/η)
             end,
-        Ja_safe = false,
         # Storage modulus
         Gp = quote
                 # cosine floating point error work-around
@@ -127,13 +125,13 @@ FractD_KelvinVoigt =  RheoModelClass(
 
 KelvinVoigt =  RheoModelClass(
         # Model name
-        name="KV",
+        name="KelvinVoigt",
         # Model parameters,
-        p = [:η, :k],
-        # Relaxation modulus
+        p = (:η, :k),
+        # Relaxation modulus  -    Should be singular  
         G = quote
-              t!=0.0 ? k : Inf
-            end,
+            k
+        end,
         # Creep modulus
         J = quote
               (1 - exp(-k*t/η))/k

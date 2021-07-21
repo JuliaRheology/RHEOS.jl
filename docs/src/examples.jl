@@ -55,7 +55,7 @@ ax.set_ylabel("Stress")
 
 # This script is a slight modification of Example 1 to present to the user the possibility of creating new [`RheoModelClass`](@ref) from an existing one with some of the parameters frozen to specific values. As an example, we fix the spring constant of the model above (k) to 2 and we let RHEOS fit the viscosity η.
 
-Maxwell_springFix = freeze_params(Maxwell, (k = 2, ))
+Maxwell_springFix = freeze_params(Maxwell, k = 2)
 #-
 
 maxwellD_model = modelfit(data, Maxwell_springFix, strain_imposed)

@@ -57,16 +57,16 @@ Dashpot
 models = Vector{RheoModel}()
 
 ## Spring
-push!(models, RheoModel(Spring, (k = 1.0,)))
+push!(models, RheoModel(Spring, k = 1.0))
 
 ## plot moduli for varying β
 for beta in [0.2, 0.5, 0.8]
     
-    push!(models, RheoModel(Springpot, (cᵦ = 1.0, β = beta)))
+    push!(models, RheoModel(Springpot, cᵦ = 1.0, β = beta))
  
 end
 
 ## Dashpot
-push!(models, RheoModel(Dashpot, (η = 1.0,)))
+push!(models, RheoModel(Dashpot, η = 1.0))
 
 plotmodel(models, ymaxG = 2.0)
