@@ -439,15 +439,15 @@ end
 
 
 """
-    rheoconv(t)
+    rheoconvert(t)
 
-Converts if required the scalar or vector of real number `t` to the type `RheoFloat`.
+Converts if required the scalar value or vector of real number `t` to the type `RheoFloat`.
 """
 
-rheoconv(t::Real) = RheoFloat(t)
-rheoconv(t::RheoFloat) = t
-rheoconv(t::Vector{T}) where T<:Real = convert(Vector{RheoFloat},t)
-rheoconv(t::Vector{RheoFloat}) = t
+rheoconvert(t::Real) = RheoFloat(t)
+rheoconvert(t::RheoFloat) = t
+rheoconvert(t::Vector{T}) where T<:Real = convert(Vector{RheoFloat},t)
+rheoconvert(t::Vector{RheoFloat}) = t
 
 
 
@@ -683,7 +683,7 @@ function _buildmoduli_t(G::Expr, psymbs::Tuple)
 
     if isconstant  # constant value returned
         @eval return( (     ((t,p_arr) -> $Ge)      |> FWScaFree,
-                            ((t,p_arr) -> fill(rheoconv($Ge), length(t)))  |> FWVecFree ) )
+                            ((t,p_arr) -> fill(rheoconvert($Ge), length(t)))  |> FWVecFree ) )
 #    elseif islaplace
 #        return()
     elseif isexprmultiline
@@ -706,7 +706,7 @@ function _buildmoduli_t(G::Expr)
 
     if isconstant     # constant value returned
         @eval return( ( (t -> $Ge)                             |> FWScaFixed,
-                        (t -> fill(rheoconv($Ge), length(t)))  |> FWVecFixed ) ) 
+                        (t -> fill(rheoconvert($Ge), length(t)))  |> FWVecFixed ) ) 
 #    elseif islaplace
 #        return()
     elseif isexprmultiline
@@ -733,7 +733,7 @@ function _buildmoduli_ω(G::Expr, psymbs::Tuple)
 
     if isconstant  # constant value returned
         @eval return( (     ((ω,p_arr) -> $Ge)      |> FWScaFree,
-                            ((ω,p_arr) -> fill(rheoconv($Ge), length(ω)))  |> FWVecFree ) )
+                            ((ω,p_arr) -> fill(rheoconvert($Ge), length(ω)))  |> FWVecFree ) )
     elseif isexprmultiline
 	    @eval return( (     ((ω,p_arr) -> $Ge)      |> FWScaFree,
 		    			    ((ωa,p_arr) -> [$Ge for ω in ωa] )  |> FWVecFree ) )
@@ -753,7 +753,7 @@ function _buildmoduli_ω(G::Expr)
 
     if isconstant     # constant value returned
         @eval return( ( (ω -> $Ge)                             |> FWScaFixed,
-                        (ω -> fill(rheoconv($Ge), length(ω)))  |> FWVecFixed ) ) 
+                        (ω -> fill(rheoconvert($Ge), length(ω)))  |> FWVecFixed ) ) 
 #    elseif islaplace
 #        return()
     elseif true # isexprmultiline
@@ -831,7 +831,7 @@ function check_and_reorder_parameters(nt::NamedTuple, params_ordered_list::Tuple
 	@assert length(params_ordered_list) == length(nt) "Mismatch number of model parameters and parameters provided in " * err_string
 
 	p = map(i->RheoFloat(nt[i]), params_ordered_list)
-    rheoconv([p...])
+    rheoconvert([p...])
 end
 
 

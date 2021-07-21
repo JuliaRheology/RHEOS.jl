@@ -50,14 +50,14 @@ end
 
 
 
-function _rheoconv()
+function _rheoconvert()
     vi64=Int64(1)
     ai64=[vi64,vi64]
     arf=Vector{RheoFloat}([1,2,3])
-    rheoconv(RheoFloat(1.0))===rheoconv(vi64) && typeof(rheoconv(ai64)) == Vector{RheoFloat} &&
-        arf === rheoconv(arf)  &&  ai64 !== rheoconv(ai64)
+    rheoconvert(RheoFloat(1.0))===rheoconvert(vi64) && typeof(rheoconvert(ai64)) == Vector{RheoFloat} &&
+        arf === rheoconvert(arf)  &&  ai64 !== rheoconvert(ai64)
 end
-@test _rheoconv()
+@test _rheoconvert()
 
 
 function _union_strain1stress2()

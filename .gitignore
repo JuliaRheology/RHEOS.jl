@@ -5,3 +5,4 @@ docs/staging-nb/
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
+docs/src/assets/__pycache__/plothelper.cpython-37.pyc
