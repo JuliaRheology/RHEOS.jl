@@ -33,7 +33,6 @@ end
 
 function Base.show(io::IO, ::MIME"text/plain", rl::RheoLog)
     println("RheoLog structure")
-    println()
     i=0
     for rli in rl
        i+=1

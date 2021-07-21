@@ -5,8 +5,6 @@ module RHEOS
 
 # installed from Julia package repository
 using NLopt
-using JLD2
-using DataStructures
 using FunctionWrappers: FunctionWrapper
 using Dierckx
 
