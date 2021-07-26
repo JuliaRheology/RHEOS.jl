@@ -24,20 +24,22 @@ function RheoLogItem(;kwargs...)
 end
 
 
-#  There is a bug in julia that prevents the proper use of these functions.
-#
 
-# function Base.show(io::IO, rli::RheoLogItem)
-#     println()
-#     print("action = "); println(rli.action)
-#     print("info   = "); println(rli.info)
-# end
-# function Base.display(io::IO, rl::RheoLog)
-#     println("Hello!")
-#      for rli in rl
-#          print(rli)
-#      end
-# end
+function Base.show(io::IO, ::MIME"text/plain", rli::RheoLogItem)
+    print("action = "); println(rli.action)
+    print("info   = "); println(rli.info)
+end
+
+
+function Base.show(io::IO, ::MIME"text/plain", rl::RheoLog)
+    println("RheoLog structure")
+    i=0
+    for rli in rl
+       i+=1
+       println("["*string(i)*"]")
+       display(rli)
+    end
+end
 
 
 #=
@@ -70,7 +72,7 @@ struct RheoTimeData
 
 end
 
-function RheoTimeData(;ϵ::Vector{T1} = RheoFloat[], σ::Vector{T2} = RheoFloat[], t::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoTimeData(;strain = RheoFloat[], ϵ::Vector{T1} = strain, stress = RheoFloat[], σ::Vector{T2} = stress, t::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_time_data_consistency(t,ϵ,σ)
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
                     log === nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
@@ -422,15 +424,11 @@ end
 """
     showlog(d::Union{RheoTimeData,RheoFreqData})
 
-shows the record of operations on a rheological data.
+shows the record of operations (`RheoLog`) on rheological data.
 """
 function showlog(d::Union{RheoTimeData,RheoFreqData})
     if d.log !== nothing
-        for idx in 1:length(d.log)
-            println(idx)
-            print("     action = "); println(d.log[idx].action)
-            print("     info   = "); println(d.log[idx].info)
-        end
+        display(d.log)
     else
         println("No log data available")
     end
@@ -439,15 +437,34 @@ end
 
 
 """
-    rheoconv(t)
+    rheoconvert(t)
 
-Converts if required the scalar or vector of real number `t` to the type `RheoFloat`.
+Converts if required the scalar value or vector of real number `t` to the type `RheoFloat`.
 """
 
-rheoconv(t::Real) = RheoFloat(t)
-rheoconv(t::RheoFloat) = t
-rheoconv(t::Vector{T}) where T<:Real = convert(Vector{RheoFloat},t)
-rheoconv(t::Vector{RheoFloat}) = t
+rheoconvert(t::Real) = RheoFloat(t)
+rheoconvert(t::RheoFloat) = t
+rheoconvert(t::Vector{T}) where T<:Real = convert(Vector{RheoFloat},t)
+rheoconvert(t::Vector{RheoFloat}) = t
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -494,7 +511,6 @@ struct _RheoModel{TSca,TVec}
 
 	_constraint::FWConstraint
 	_Gramp::Bool
-	_Jramp::Bool
 
 	info::String
 	expressions::NamedTuple
@@ -502,44 +518,15 @@ struct _RheoModel{TSca,TVec}
 end
 
 
+#
+#  Specialised forms of _RheoModel
+#  Dediated constructors are defined below
+#
+
+
 const RheoModelClass = _RheoModel{FWScaFree,FWVecFree}
+
 const RheoModel = _RheoModel{FWScaFixed,FWVecFixed}
-
-
-"""
-    RheoModelClass(name::String, params::Vector{Symbol}, _G::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, _Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}, _Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}, constraint::FunctionWrapper{Bool,Tuple{Vector{RheoFloat}}}, info::String, expressions::NamedTuple)
-
-`RheoModelClass` contains a model name, its symbolic parameters and all its moduli (both single-input and array-input versions).
-
-It also contains information about any constraints that must be observed (e.g. the springpot coefficient being inbetween 0 and 1).
-
-Lastly, it also contains additional info about the model which may include a text-art schematic.
-
-Generally, users will want to use the `RheoModelClass` constructor function as shown in the 'Create Your Model' section of the documentation
-rather than the default constructor.
-"""
-#=struct RheoModelClass
-
-    name::String
-    params::Vector{Symbol}
-
-    _G::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
-    _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
-    _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
-    _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
-    _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
-    _Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
-    _Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
-    _Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
-
-    constraint::FunctionWrapper{Bool,Tuple{Vector{RheoFloat}}}
-
-    info::String
-    expressions::NamedTuple
-
-end
-=#
-
 
 
 function Base.show(io::IO, m::_RheoModel)
@@ -556,42 +543,7 @@ end
 
 
 
-#=
 
-# place holder for undefined moduli/compliance functions
-const nanexp = quote NaN end
-
-function RheoModelClass(;name::String,
-                         p::Array{Symbol},
-                         G::Expr = nanexp,
-                         J::Expr = nanexp,
-                         Gp::Expr = nanexp,
-                         Gpp::Expr = nanexp,
-                         constraint::Expr = quote true end,
-                         info="", #name * ": model with parameters " * string(join(string.(p), ", "), "."),
-                         # flags to avoid bugs related to the FunctionWrappers and MittLeff
-                         Ga_safe::Bool = true,
-                         Ja_safe::Bool = true
-                         )
-
-    # Expression to unpack parameter array into suitably names variables in the moduli expressions
-    unpack_expr = Meta.parse(string(join(string.(p), ","), ",=params"))
-    expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint, Ga_safe=Ga_safe, Ja_safe=Ja_safe)
-
-    @eval return(RheoModelClass($name, $p,
-        ((t,params) -> begin $unpack_expr; $G; end)                 |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
-        ((ta,params) -> begin $unpack_expr; [$G for t in ta]; end)  |> FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}},
-        ((t,params) -> begin $unpack_expr; $J; end)                 |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
-        ((ta,params) -> begin $unpack_expr; [$J for t in ta]; end)  |> FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}},
-        ((ω,params) -> begin $unpack_expr; $Gp; end)                |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
-        ((ωa,params) -> begin $unpack_expr; [$Gp for ω in ωa]; end) |> FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}},
-        ((ω,params) -> begin $unpack_expr; $Gpp; end)               |> FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}},
-        ((ωa,params) -> begin $unpack_expr; [$Gpp for ω in ωa]; end) |> FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}},
-        (params -> begin $unpack_expr; $constraint; end)            |> FunctionWrapper{Bool,Tuple{Vector{RheoFloat}}},
-        $info, $expressions) )
-end
-
-=#
 
 
 # Cool replacement function inspired from
@@ -670,6 +622,7 @@ end
 #
 #  Create the scalar and vector function wrappers for the moduli.
 #
+
 function _buildmoduli_t(G::Expr, psymbs::Tuple)
     # Replace symbols by elements in array
 	Ge = _replace_symbols_with_array(G, psymbs)
@@ -683,7 +636,7 @@ function _buildmoduli_t(G::Expr, psymbs::Tuple)
 
     if isconstant  # constant value returned
         @eval return( (     ((t,p_arr) -> $Ge)      |> FWScaFree,
-                            ((t,p_arr) -> fill(rheoconv($Ge), length(t)))  |> FWVecFree ) )
+                            ((t,p_arr) -> fill(rheoconvert($Ge), length(t)))  |> FWVecFree ) )
 #    elseif islaplace
 #        return()
     elseif isexprmultiline
@@ -706,7 +659,7 @@ function _buildmoduli_t(G::Expr)
 
     if isconstant     # constant value returned
         @eval return( ( (t -> $Ge)                             |> FWScaFixed,
-                        (t -> fill(rheoconv($Ge), length(t)))  |> FWVecFixed ) ) 
+                        (t -> fill(rheoconvert($Ge), length(t)))  |> FWVecFixed ) ) 
 #    elseif islaplace
 #        return()
     elseif isexprmultiline
@@ -733,7 +686,7 @@ function _buildmoduli_ω(G::Expr, psymbs::Tuple)
 
     if isconstant  # constant value returned
         @eval return( (     ((ω,p_arr) -> $Ge)      |> FWScaFree,
-                            ((ω,p_arr) -> fill(rheoconv($Ge), length(ω)))  |> FWVecFree ) )
+                            ((ω,p_arr) -> fill(rheoconvert($Ge), length(ω)))  |> FWVecFree ) )
     elseif isexprmultiline
 	    @eval return( (     ((ω,p_arr) -> $Ge)      |> FWScaFree,
 		    			    ((ωa,p_arr) -> [$Ge for ω in ωa] )  |> FWVecFree ) )
@@ -753,7 +706,7 @@ function _buildmoduli_ω(G::Expr)
 
     if isconstant     # constant value returned
         @eval return( ( (ω -> $Ge)                             |> FWScaFixed,
-                        (ω -> fill(rheoconv($Ge), length(ω)))  |> FWVecFixed ) ) 
+                        (ω -> fill(rheoconvert($Ge), length(ω)))  |> FWVecFixed ) ) 
 #    elseif islaplace
 #        return()
     elseif true # isexprmultiline
@@ -795,7 +748,18 @@ function _buildconstraint(constraint::Expr)
 end
 
 
+"""
+    RheoModelClass(;name::String, p::Tuple, G,J,Gp,Gpp, constraint, info, G_ramp)
 
+`RheoModelClass` contains a model name, its symbolic parameters and all its moduli (both single-input and array-input versions).
+
+It also contains information about any constraints that must be observed (e.g. the springpot coefficient being inbetween 0 and 1).
+
+Lastly, it also contains additional info about the model which may include a text-art schematic.
+
+Generally, users will want to use the `RheoModelClass` constructor function as shown in the 'Create Your Model' section of the documentation
+rather than the default constructor.
+"""
 function RheoModelClass(;name::String,
     p::Tuple,
     G = nothing,
@@ -804,10 +768,9 @@ function RheoModelClass(;name::String,
     Gpp = nothing,
     constraint::Expr = quote true end,
     info="", 
-    # flags to indicate use of integral forms of the relaxation modulus or creep compliance
-           # using the ramp response instead of the step response to avoid singularities
+    # flag to indicate use of integral forms of the relaxation modulus.
+           # using the ramp response instead of the step response helps avoid singularities
     G_ramp::Bool = false,
-    J_ramp::Bool = false
     )
 # Building expressions tuple to store data provided to constructor
 expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint)
@@ -816,7 +779,7 @@ return(RheoModelClass(name, p, NamedTuple{}(),
 _buildmoduli_t(G,p)..., _buildmoduli_t(J,p)...,
 _buildmoduli_ω(Gp,p)..., _buildmoduli_ω(Gpp,p)...,
 _buildconstraint(constraint,p),
-G_ramp, J_ramp, info, expressions) )
+G_ramp, info, expressions) )
 end
 
 
@@ -831,7 +794,7 @@ function check_and_reorder_parameters(nt::NamedTuple, params_ordered_list::Tuple
 	@assert length(params_ordered_list) == length(nt) "Mismatch number of model parameters and parameters provided in " * err_string
 
 	p = map(i->RheoFloat(nt[i]), params_ordered_list)
-    rheoconv([p...])
+    rheoconvert([p...])
 end
 
 
@@ -900,7 +863,7 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
 		_buildmoduli_t(G,freeparams)..., _buildmoduli_t(J,freeparams)...,
 		_buildmoduli_ω(Gp,freeparams)..., _buildmoduli_ω(Gpp,freeparams)...,
 		_buildconstraint(constraint,freeparams),
-        m._Gramp, m._Jramp, m.info, expressions) )
+        m._Gramp, m.info, expressions) )
 end
 
 
@@ -909,7 +872,22 @@ function freeze_params(m::RheoModelClass; kwargs...)
 end
 
 
+"""
+    RheoModel(m::RheoModelClass, nt0::NamedTuple)
 
+`RheoModel` is a rheological model with set parameters. They are obtained by fitting a model to data using modelfit, 
+or by specialising a RheoModelClass by prescribing parameters. Parameters can be provided as a named tuple or keyword arguments.
+A RheoModel provides all known moduli functions of the model and can be used to simulate the response of the model to arbitrary inputs.
+
+
+# Example
+```@example
+julia> model = RheoModel(Maxwell, (k=1, η=2.))
+[...]
+
+julia> model = RheoModel(Maxwell, k=1, η=2.)
+[...]
+"""
 function RheoModel(m::RheoModelClass, nt0::NamedTuple)
 
 	freeparams, fixedparams, G,J,Gp,Gpp,constraint = _freeze_params(m, nt0)
@@ -924,7 +902,7 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple)
 		_buildmoduli_t(G)..., _buildmoduli_t(J)..., 
         _buildmoduli_ω(Gp)..., _buildmoduli_ω(Gpp)...,
 		_buildconstraint(constraint),
-		m._Gramp, m._Jramp, m.info, expressions) )
+		m._Gramp, m.info, expressions) )
 end
 
 
@@ -982,15 +960,7 @@ end
 
 
 
-"""
-    RheoModel(_G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Ga::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, _J::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Ja::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, _Gp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Gpa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, _Gpp::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}, _Gppa::FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}, expressions::NamedTuple)
 
-`RheoModel` contains all known moduli of a particular model, as for a `RheoModelClass` model name. However, a `RheoModel`
-has all its parameters fixed to known values.
-
-Generally, users will begin with a defined `RheoModelClass` (e.g. SLS) and then specialise the parameters,
-rather than calling the default constructor explicitly.
-"""
 struct RheoModel
 
     _G::FunctionWrapper{RheoFloat,Tuple{RheoFloat}}

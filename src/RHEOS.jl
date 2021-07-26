@@ -5,8 +5,6 @@ module RHEOS
 
 # installed from Julia package repository
 using NLopt
-using JLD2
-using DataStructures
 using FunctionWrappers: FunctionWrapper
 using Dierckx
 
@@ -47,7 +45,7 @@ export hastime, hasstress, hasstrain
 export TimeDataType, time_only, strain_only, stress_only, strain_and_stress
 export FreqDataType, invalid_freq_data, freq_only, with_modulus
 export RheoModelClass, RheoModel, model_parameters
-export rheoconv, invLaplace
+export rheoconvert, invLaplace
 export freeze_params
 export relaxmod, creepcomp, storagemod, lossmod, dynamicmod
 
@@ -85,6 +83,7 @@ export AFM, Tweezers
 #include(MittLeffLiteDir)
 
 include("base.jl")
+include("symbols.jl")
 include("definitions.jl")
 include("IO.jl")
 include("modeldatabase.jl")
