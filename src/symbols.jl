@@ -6,12 +6,18 @@
 # translation table for symbols. left = symbol use by user, right = symbol used by model declaraction or RHEOS structs.
 const symbol_convertion_table=(
     time = :t,
+    t_col = :t,
     strain = :ϵ,
     epsilon = :ϵ,
+    ϵ_col = :ϵ,
     ε = :ϵ,
     stress = :σ,
     sigma = :σ,
+    σ_col = :σ,
     omega = :ω,
+    ω_col = :ω,
+    Gp_col = :Gp,
+    Gpp_col = :Gpp,
     eta = :η,
     alpha = :α,
     beta = :β,
@@ -21,12 +27,12 @@ const symbol_convertion_table=(
 
 
 function symbol_to_unicode(s::Symbol)    
-	s in keys(symbol_convertion_table) ? symbol_convertion_table[s] : s 
-	end
+    s in keys(symbol_convertion_table) ? symbol_convertion_table[s] : s 
+end
 
 function symbol_to_unicode(nt)    
-	NamedTuple{Tuple([ symbol_to_unicode(s) for s in keys(nt) ])}( values(nt) )
-	end
+    NamedTuple{Tuple([ symbol_to_unicode(s) for s in keys(nt) ])}( values(nt) )
+end
 
 
 

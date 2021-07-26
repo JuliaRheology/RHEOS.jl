@@ -83,6 +83,7 @@ export AFM, Tweezers
 #include(MittLeffLiteDir)
 
 include("base.jl")
+include("symbols.jl")
 include("definitions.jl")
 include("IO.jl")
 include("modeldatabase.jl")

@@ -22,10 +22,30 @@ function nanremove(arr::Array{T,2}) where T<:Real
     arr[notnanlist, :]
 end
 
-"""
-    importcsv(filepath::String; t_col::IntOrNone = nothing, σ_col::IntOrNone = nothing, ϵ_col::IntOrNone = nothing, ω_col::IntOrNone = nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',')
 
-Load data from a CSV file (two/three columns, comma seperated by default but
+
+function look_for_csv_col(var, cols, header_cells, default_options)
+	col = nothing 
+
+	if var in keys(cols)
+		if typeof(cols[var])<:String
+			col = findfirst(e -> e == cols[var], header_cells)
+		elseif typeof(cols[var])<:Integer
+			col = cols[var]
+		end
+
+	else
+		col = findfirst(e -> lowercase(e) in default_options, header_cells)
+	end
+	return(col)
+end
+
+
+
+"""
+    importcsv(filepath::String; t_col::IntOrNone = nothing, σ_col::IntOrNone = nothing, ϵ_col::IntOrNone = nothing, ω_col::IntOrNone = nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',', header=false)
+
+Load data from a CSV file (two/three columns, comma separated by default but
 delimiter can be specified in the `delimiter` keyword argument). Arguments must be
 identified by providing the number of the column in which they are contained.
 
@@ -35,22 +55,40 @@ and proceeds accordingly. For oscillatory data, all three columns (Gp, Gpp, Freq
 must be provided. For regular viscoelastic data only time, or time-stress, or time-strain or
 time-stress-strain data can be provided.
 """
-function importcsv(filepath::String; t_col::IntOrNone = nothing, σ_col::IntOrNone = nothing, ϵ_col::IntOrNone = nothing, ω_col::IntOrNone = nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter = ',', comment = "Imported from csv file", savelog = true)
+function importcsv(filepath::String; cols=nothing, delimiter = ',', header = false, comment = "Imported from csv file", savelog = true, kwargs...)
+# Convert parameter names to standard values.
+	cols=symbol_to_unicode(kwargs.data)
 
-    @assert (!isnothing(t_col) && isnothing(ω_col)) || (isnothing(t_col) && !isnothing(ω_col)) "Data must contain either \"time\" or \"frequency\" "
-    @assert endswith(lowercase(filepath), ".csv") "filepath must point to a .csv file."
+	use_header = header
+	if length(cols)==0
+		use_header = true
+	elseif any([typeof(e)<:String for e in cols])
+		use_header = true
+	end
 
-    if !isnothing(t_col)
+	# read data from file
+    if use_header
+		dataraw,h = readdlm(filepath, delimiter, header=use_header)
+        header_cells = [string(e) for e in [h...]]
+	else
+		dataraw = readdlm(filepath, delimiter)
+        header_cells=[]
+	end
 
-        @assert isnothing(Gp_col) && isnothing(Gpp_col) "Loss and storage modulus not allowed for time data"
-        # read data from file
-        dataraw = readdlm(filepath, delimiter)
 
-        # remove and rows with NaN values in any of the columns
-        data = nanremove(dataraw)
+    # remove and rows with NaN values in any of the columns
+    data = nanremove(dataraw)
 
-        #info=(comment=comment, folder=pwd(), stats=(t_min=data[1,t_col],t_max=data[end,t_col], n_sample=size(data[:,t_col])))
-        #log = RheoLogItem( (type=:source, funct=:importcsv, params=(filepath=filepath,), keywords=(t_col=t_col, σ_col=σ_col, ϵ_col=ϵ_col)), info )
+	# is it time data?
+	t_col = look_for_csv_col(:t, cols, header_cells, ("t", "time"))
+
+	if !isnothing(t_col)
+		σ_col = look_for_csv_col(:σ, cols, header_cells, ("stress", "sigma", "σ"))
+        ϵ_col = look_for_csv_col(:ϵ, cols, header_cells, ("strain", "epsilon", "ϵ"))
+              
+		
+    #  @assert (!isnothing(t_col) && isnothing(ω_col)) || (isnothing(t_col) && !isnothing(ω_col)) "Data must contain either \"time\" or \"frequency\" "
+    #  @assert endswith(lowercase(filepath), ".csv") "filepath must point to a .csv file."
 
         log = if savelog
                 info = (comment=comment, folder=pwd(), stats=(t_min=data[1,t_col],t_max=data[end,t_col], n_sample=size(data[:,t_col])))
@@ -67,18 +105,20 @@ function importcsv(filepath::String; t_col::IntOrNone = nothing, σ_col::IntOrNo
         elseif !isnothing(σ_col) && isnothing(ϵ_col)
             return RheoTimeData(t = data[:, t_col], σ = data[:, σ_col], log = log)
         end
+    end
 
-    elseif !isnothing(ω_col)
+	ω_col = look_for_csv_col(:ω, cols, header_cells, ("ω", "omega", "frequency", "freq"))
+
+    if !isnothing(ω_col)
 
         # check colnames length is correct
-        @assert isnothing(σ_col) || isnothing(ϵ_col) "Stress and strain not allowed for frequency data"
-        @assert !isnothing(Gp_col) && !isnothing(Gpp_col) "\"Gp\" and \"Gpp\" are required."
+        #@assert isnothing(σ_col) || isnothing(ϵ_col) "Stress and strain not allowed for frequency data"
+        #@assert !isnothing(Gp_col) && !isnothing(Gpp_col) "\"Gp\" and \"Gpp\" are required."
+        Gp_col = look_for_csv_col(:Gp, cols, header_cells, ("Gp", "G'", "storage modulus"))
+        Gpp_col = look_for_csv_col(:Gpp, cols, header_cells, ("Gpp", "G''", "loss modulus"))
 
-        # read data from file
-        dataraw = readdlm(filepath, delimiter)
-        # remove and rows with NaN values in any of the columns
-        data = nanremove(dataraw)
-
+        # Add error message for missing loss moduli / error loading
+        
         log = if savelog
                 info = (comment=comment, folder=pwd(), stats=(ω_min=data[1,ω_col],ω_max=data[end,ω_col], n_sample=size(data[:,ω_col])))
                 RheoLogItem( (type=:source, funct=:importcsv, params=(filepath=filepath,), keywords=(ω_col=ω_col, Gp_col=Gp_col, Gpp_col=Gpp_col)), info )
@@ -91,6 +131,12 @@ function importcsv(filepath::String; t_col::IntOrNone = nothing, σ_col::IntOrNo
     end
 end
 
+
+
+
+
+
+
 """
     exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; delimiter=',', colorder=nothing)
 
@@ -102,7 +148,7 @@ order (σ, ϵ, t). As with `importcsv`, the delimiter can be set by keyword argu
 """
 function exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; delimiter=',', colorder=nothing)
 
-    @assert endswith(lowercase(filedir), ".csv") "filedir must be a .csv file."
+    #@assert endswith(lowercase(filedir), ".csv") "filedir must be a .csv file."
 
     # if ordering of columns not provided, get default ordering depending on data contained in struct
     if isnothing(colorder)
@@ -128,7 +174,7 @@ function exportcsv(self::Union{RheoTimeData, RheoFreqData}, filedir::String; del
     dataraw = getfield.((self,), sortedcols)
     dataout = hcat(dataraw...)
     open(filedir, "w") do io
-        writedlm(filedir, dataout, delimiter)
+        writedlm(io, dataout, delimiter)
     end
 end
 

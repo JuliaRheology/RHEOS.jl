@@ -72,7 +72,7 @@ struct RheoTimeData
 
 end
 
-function RheoTimeData(;ϵ::Vector{T1} = RheoFloat[], σ::Vector{T2} = RheoFloat[], t::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoTimeData(;strain = RheoFloat[], ϵ::Vector{T1} = strain, stress = RheoFloat[], σ::Vector{T2} = stress, t::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_time_data_consistency(t,ϵ,σ)
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
                     log === nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
@@ -446,6 +446,25 @@ rheoconvert(t::Real) = RheoFloat(t)
 rheoconvert(t::RheoFloat) = t
 rheoconvert(t::Vector{T}) where T<:Real = convert(Vector{RheoFloat},t)
 rheoconvert(t::Vector{RheoFloat}) = t
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

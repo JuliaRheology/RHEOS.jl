@@ -3,6 +3,14 @@ using Test
 
 const tol = (eps(RHEOS.RheoFloat))^(0.125)
 
+println("===============================================")
+println("Testing RHEOS")
+println("===============================================")
+println("|")
+
+
+
+include("symbols.jl")
 include("definitions.jl")
 include("base.jl")
 include("datagen.jl")
