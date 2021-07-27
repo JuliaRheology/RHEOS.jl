@@ -139,6 +139,43 @@ function hasstrain(d::RheoTimeData)
     return (d.ϵ != RheoFloat[])
 end
 
+
+"""
+    gettime(d::RheoTimeData)
+
+returns the time vector.
+"""
+function gettime(d::RheoTimeData)
+    return (d.t)
+end
+
+
+
+"""
+    getstrain(d::RheoTimeData)
+
+returns the strain vector if d contains strain data.
+"""
+function getstrain(d::RheoTimeData)
+    return (d.ϵ)
+end
+
+
+
+"""
+    getstress(d::RheoTimeData)
+
+returns the stress vector if d contains stress data.
+"""
+function getstress(d::RheoTimeData)
+    return (d.σ)
+end
+
+
+
+
+
+
 @enum LoadingType strain_imposed=1 stress_imposed=2
 
 function Base.show(io::IO, d::RheoTimeData)
@@ -314,11 +351,49 @@ struct RheoFreqData
     log::Union{RheoLog,Nothing}
 end
 
-function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat[], ω::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat[], omega = RheoFloat[], ω::Vector{T3} = omega, comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
+
     typecheck = check_freq_data_consistency(ω,Gp,Gpp)
     RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω),
     log === nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
 end
+
+
+
+"""
+    getomega(d::RheoFreqData)
+
+returns the frequency ω vector.
+"""
+function getfreq(d::RheoFreqData)
+    return (d.ω)
+end
+
+
+"""
+    getstorage(d::RheoFreqData)
+
+returns the storage modulus vector.
+"""
+function getstorage(d::RheoFreqData)
+    return (d.Gp)
+end
+
+
+
+"""
+    getloss(d::RheoFreqData)
+
+returns the loss modulus vector.
+"""
+function getloss(d::RheoFreqData)
+    return (d.Gpp)
+end
+
+
+
+
+
 
 @enum FreqDataType invalid_freq_data=-1 freq_only=0 with_modulus=1
 

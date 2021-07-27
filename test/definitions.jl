@@ -18,10 +18,10 @@ function _RheoTimeData_const_nolog()
     sig = Vector{RheoFloat}(4.0:1.0:6.0)
     t = Vector{RheoFloat}(7.0:1.0:9.0)
 
-    data = RheoTimeData(ϵ=eps, σ=sig, t=t, savelog=false)
+    data = RheoTimeData(strain=eps, stress=sig, t=t, savelog=false)
     showlog(data)
 
-    data.σ==sig && data.ϵ==eps && data.t==t && isnothing(data.log)
+    getstress(data)==sig && getstrain(data)==eps && gettime(data)==t && isnothing(data.log)
 end
 @test _RheoTimeData_const_nolog()
 
@@ -47,6 +47,30 @@ function _operators_logs()
 end
 @test _operators_logs()
 
+
+
+function _RheoFreqData_explicit_nolog()
+    a = Vector{RheoFloat}(1.0:1.0:3.0)
+    b = Vector{RheoFloat}(4.0:1.0:6.0)
+    c = Vector{RheoFloat}(7.0:1.0:9.0)
+
+    data = RheoFreqData(a, b, c, nothing)
+
+    data.Gp==a && data.Gpp==b && data.ω==c && isnothing(data.log)
+end
+@test _RheoFreqData_explicit_nolog()
+
+function _RheoFreqData_const_nolog()
+    a = Vector{RheoFloat}(1.0:1.0:3.0)
+    b = Vector{RheoFloat}(4.0:1.0:6.0)
+    c = Vector{RheoFloat}(7.0:1.0:9.0)
+
+    data = RheoFreqData(omega=a, Gp=b, Gpp=c , savelog=false)
+    showlog(data)
+
+    getfreq(data)==a && getstorage(data)==b && getloss(data)==c && isnothing(data.log)
+end
+@test _RheoFreqData_const_nolog()
 
 
 
