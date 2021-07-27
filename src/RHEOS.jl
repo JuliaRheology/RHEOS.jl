@@ -42,7 +42,7 @@ export RheoTimeData, RheoFreqData
 export rheotimedatatype, rheofreqdatatype, check_time_data_consistency
 export LoadingType, strain_imposed, stress_imposed
 export hastime, hasstress, hasstrain
-export gettime, getstress, getstrain, getfreq, getstorage, getloss
+export gettime, getstress, getstrain, getfreq, getstorage, getloss, getparams
 export TimeDataType, time_only, strain_only, stress_only, strain_and_stress
 export FreqDataType, invalid_freq_data, freq_only, with_modulus
 export RheoModelClass, RheoModel, model_parameters

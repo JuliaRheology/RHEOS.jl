@@ -114,6 +114,12 @@ end
 @test _freeze_params()
 
 
+function _getparams()
+    m = RheoModel(Maxwell, k=1, eta==2)
+    p = getparams(m)
+    (p.k==1.0) && (p.η=2.0)
+end
+@test _getparams()
 
 
 #

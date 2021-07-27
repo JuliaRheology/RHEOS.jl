@@ -986,8 +986,14 @@ function RheoModel(m::RheoModelClass; kwargs...)
 end
 
 
+"""
+    getparams(m::RheoModel)
 
-
+`getparams` return the list of model parameters with their values as a NamedTuple.
+"""
+function getparams(m::RheoModel)
+    return(m.fixedparams)
+end
 
 #=
 function freeze_params(m::RheoModelClass, nt0::NamedTuple)
