@@ -30,9 +30,15 @@ function symbol_to_unicode(s::Symbol)
     s in keys(symbol_convertion_table) ? symbol_convertion_table[s] : s 
 end
 
-function symbol_to_unicode(nt)    
+function symbol_to_unicode(nt::NamedTuple)    
     NamedTuple{Tuple([ symbol_to_unicode(s) for s in keys(nt) ])}( values(nt) )
 end
+
+# Edge case useful for function taking option tuple parameters, e.g. modelfit
+function symbol_to_unicode(nt::Nothing)    
+    nothing 
+end
+
 
 function unicode_to_text(s::Symbol)
     r=findfirst(e->e==s, symbol_convertion_table)    
