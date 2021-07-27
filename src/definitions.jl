@@ -852,25 +852,26 @@ Free parameters: η and k
 ```
 """
 function RheoModelClass(;name::String,
-    p::Tuple,
-    G = nothing,
-    J = nothing,
-    Gp = nothing,
-    Gpp = nothing,
-    constraint::Expr = quote true end,
-    info="", 
-    # flag to indicate use of integral forms of the relaxation modulus.
-           # using the ramp response instead of the step response helps avoid singularities
-    G_ramp::Bool = false,
-    )
-# Building expressions tuple to store data provided to constructor
-expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint)
+        p::Tuple,
+        G = nothing,
+        J = nothing,
+        Gp = nothing,
+        Gpp = nothing,
+        constraint::Expr = quote true end,
+        info="", 
+        # flag to indicate use of integral forms of the relaxation modulus.
+               # using the ramp response instead of the step response helps avoid singularities
+        G_ramp::Bool = false,
+        )
 
-return(RheoModelClass(name, p, NamedTuple{}(),
-_buildmoduli_t(G,p)..., _buildmoduli_t(J,p)...,
-_buildmoduli_ω(Gp,p)..., _buildmoduli_ω(Gpp,p)...,
-_buildconstraint(constraint,p),
-G_ramp, info, expressions) )
+    # Building expressions tuple to store data provided to constructor
+    expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint)
+
+    return(RheoModelClass(name, p, NamedTuple{}(),
+        _buildmoduli_t(G,p)..., _buildmoduli_t(J,p)...,
+        _buildmoduli_ω(Gp,p)..., _buildmoduli_ω(Gpp,p)...,
+        _buildconstraint(constraint,p),
+        G_ramp, info, expressions) )
 end
 
 
@@ -929,7 +930,7 @@ Return a new `RheoModelClass` with some of the parameters frozen to specific val
 
 # Example
 ```@example
-julia> SLS2_mod = freeze_params( SLS2, (G₀=2,η₂=3.5))
+julia> SLS2_mod = freezeparams( SLS2, (G₀=2,η₂=3.5))
 [...]
 
 julia> SLS2.G(1,[2,1,2,3,3.5])
@@ -940,7 +941,7 @@ julia> SLS2_mod.G(1,[1,2,3])
 ```
 
 """
-function freeze_params(m::RheoModelClass, nt0::NamedTuple)
+function freezeparams(m::RheoModelClass, nt0::NamedTuple)
 
 	freeparams, fixedparams, G,J,Gp,Gpp,constraint = _freeze_params(m, nt0)
 
@@ -964,12 +965,12 @@ end
 
 
 function freeze_params(m::RheoModelClass, nt0::NamedTuple)
-    print("freeze_params is deprecated - use freezeparams instead.")
+    println("freeze_params is deprecated - use freezeparams instead.")
     return(freezeparams(m,nt0))
 end
 
 function freeze_params(m::RheoModelClass; kwargs...)
-    print("freeze_params is deprecated - use freezeparams instead.")
+    println("freeze_params is deprecated - use freezeparams instead.")
     return(freezeparams(m,symbol_to_unicode(kwargs.data)))
 end
 
