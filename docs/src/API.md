@@ -1,15 +1,23 @@
 # API
 
-## Main RHEOS Structs
+## Main RHEOS data structures
 ```@docs
 RheoTimeData
 RheoFreqData
-RheoModelClass
-RheoModel
+gettime
+getstress
+getstrain
+getfreq
+getstorage
+getloss
 ```
 
 ## Moduli/compliance functions
 ```@docs
+RheoModelClass
+RheoModel
+getparams
+freezeparams
 relaxmod
 creepcomp
 storagemod
@@ -34,7 +42,6 @@ modelstepfit
 modelsteppredict
 dynamicmodelfit
 dynamicmodelpredict
-freeze_params
 ```
 
 ## Data Generation Functions

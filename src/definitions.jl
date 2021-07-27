@@ -828,11 +828,11 @@ end
  
 `RheoModelClass` is a complex data structure that contains all the relevant data to 
 allow RHEOS to fit models and make predictions once parameters are set.
-Rheos possess already a large number of such data structures to represent common rheological models,
+RHEOS possesses already a large number of such data structures to represent common rheological models,
 such as Maxwell or KelvinVoigt.
 
 Users are not expected to directly manipulate the content of a RheoModelClass object, but will 
-use pass it to relevant functions for fitting and numerically evaluating visco-elastic moduli.
+pass it to relevant functions for fitting and numerically evaluating visco-elastic moduli.
 
 The model name and its parameters can however be printed and display on the REPL.
 
@@ -982,6 +982,7 @@ end
 `RheoModel` represents a rheological model with set parameters. They are obtained by fitting a model to data using `modelfit`, 
 or by specialising the relevant RheoModelClass by prescribing its parameters. Parameters can be provided as a named tuple or keyword arguments.
 
+`RheoModel` objects can then be use to simulate the response to an arbitrary input using `modelpredict`, and access the values of the moduli functions.
 
 # Example
 ```@example
