@@ -357,9 +357,9 @@ function modelfit(data::RheoTimeData,
                   diff_method="BD",
                   weights::Union{Vector{Integer},Nothing} = nothing)
 
-    p0a = fill_init_params(model, p0)
-    loa = fill_lower_bounds(model, lo)
-    hia = fill_upper_bounds(model, hi)
+    p0a = fill_init_params(model, symbol_to_unicode(p0))
+    loa = fill_lower_bounds(model, symbol_to_unicode(lo))
+    hia = fill_upper_bounds(model, symbol_to_unicode(hi))
 
     rel_tol = convert(RheoFloat,rel_tol)
 
@@ -551,9 +551,9 @@ function modelstepfit(data::RheoTimeData,
                   rel_tol = 1e-4,
                   weights::Union{Vector{Integer},Nothing} = nothing)
 
-    p0a = fill_init_params(model, p0)
-    loa = fill_lower_bounds(model, lo)
-    hia = fill_upper_bounds(model, hi)
+    p0a = fill_init_params(model, symbol_to_unicode(p0))
+    loa = fill_lower_bounds(model, symbol_to_unicode(lo))
+    hia = fill_upper_bounds(model, symbol_to_unicode(hi))
 
     rel_tol = convert(RheoFloat, rel_tol)
 
@@ -798,9 +798,9 @@ function dynamicmodelfit(data::RheoFreqData,
                 rel_tol::T = 1e-4,
                 weights::Union{String, Vector{T}}="local") where T<:Real
 
-    p0a = fill_init_params(model, p0)
-    loa = fill_lower_bounds(model, lo)
-    hia = fill_upper_bounds(model, hi)
+    p0a = fill_init_params(model, symbol_to_unicode(p0))
+    loa = fill_lower_bounds(model, symbol_to_unicode(lo))
+    hia = fill_upper_bounds(model, symbol_to_unicode(hi))
 
     # check necessary moduli are defined
     modsingGp = (ω->model._Gp(ω,p0a))
@@ -883,3 +883,4 @@ function dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
     return RheoFreqData(predGp, predGpp, data.ω, log)
 
 end
+
