@@ -825,36 +825,53 @@ end
 
 """
     RheoModelClass(;name::String, p::Tuple, G,J,Gp,Gpp, constraint, info, G_ramp)
+ 
+`RheoModelClass` is a complex data structure that contains all the relevant data to 
+allow RHEOS to fit models and make predictions once parameters are set.
+Rheos possess already a large number of such data structures to represent common rheological models,
+such as Maxwell or KelvinVoigt.
 
-`RheoModelClass` contains a model name, its symbolic parameters and all its moduli (both single-input and array-input versions).
+Users are not expected to directly manipulate the content of a RheoModelClass object, but will 
+use pass it to relevant functions for fitting and numerically evaluating visco-elastic moduli.
 
-It also contains information about any constraints that must be observed (e.g. the springpot coefficient being inbetween 0 and 1).
+The model name and its parameters can however be printed and display on the REPL.
 
-Lastly, it also contains additional info about the model which may include a text-art schematic.
+# Example
+```@example
+julia> Maxwell
 
-Generally, users will want to use the `RheoModelClass` constructor function as shown in the 'Create Your Model' section of the documentation
-rather than the default constructor.
+Model name: maxwell
+
+Free parameters: η and k
+
+                ___
+            _____| |________╱╲  ╱╲  ╱╲  ___
+                _|_|          ╲╱  ╲╱  ╲╱
+                  η                  k
+               
+```
 """
 function RheoModelClass(;name::String,
-    p::Tuple,
-    G = nothing,
-    J = nothing,
-    Gp = nothing,
-    Gpp = nothing,
-    constraint::Expr = quote true end,
-    info="", 
-    # flag to indicate use of integral forms of the relaxation modulus.
-           # using the ramp response instead of the step response helps avoid singularities
-    G_ramp::Bool = false,
-    )
-# Building expressions tuple to store data provided to constructor
-expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint)
+        p::Tuple,
+        G = nothing,
+        J = nothing,
+        Gp = nothing,
+        Gpp = nothing,
+        constraint::Expr = quote true end,
+        info="", 
+        # flag to indicate use of integral forms of the relaxation modulus.
+               # using the ramp response instead of the step response helps avoid singularities
+        G_ramp::Bool = false,
+        )
 
-return(RheoModelClass(name, p, NamedTuple{}(),
-_buildmoduli_t(G,p)..., _buildmoduli_t(J,p)...,
-_buildmoduli_ω(Gp,p)..., _buildmoduli_ω(Gpp,p)...,
-_buildconstraint(constraint,p),
-G_ramp, info, expressions) )
+    # Building expressions tuple to store data provided to constructor
+    expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint)
+
+    return(RheoModelClass(name, p, NamedTuple{}(),
+        _buildmoduli_t(G,p)..., _buildmoduli_t(J,p)...,
+        _buildmoduli_ω(Gp,p)..., _buildmoduli_ω(Gpp,p)...,
+        _buildconstraint(constraint,p),
+        G_ramp, info, expressions) )
 end
 
 
@@ -902,7 +919,7 @@ function _freeze_params(m::RheoModelClass, nt0::NamedTuple)
 end
 
 """
-    freeze_params(m::RheoModelClass, nt0::NamedTuple)
+    freezeparams(m::RheoModelClass, nt0::NamedTuple)
 
 Return a new `RheoModelClass` with some of the parameters frozen to specific values
 
@@ -913,7 +930,7 @@ Return a new `RheoModelClass` with some of the parameters frozen to specific val
 
 # Example
 ```@example
-julia> SLS2_mod = freeze_params( SLS2, (G₀=2,η₂=3.5))
+julia> SLS2_mod = freezeparams( SLS2, (G₀=2,η₂=3.5))
 [...]
 
 julia> SLS2.G(1,[2,1,2,3,3.5])
@@ -924,7 +941,7 @@ julia> SLS2_mod.G(1,[1,2,3])
 ```
 
 """
-function freeze_params(m::RheoModelClass, nt0::NamedTuple)
+function freezeparams(m::RheoModelClass, nt0::NamedTuple)
 
 	freeparams, fixedparams, G,J,Gp,Gpp,constraint = _freeze_params(m, nt0)
 
@@ -942,17 +959,28 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
 end
 
 
-function freeze_params(m::RheoModelClass; kwargs...)
-    return(freeze_params(m,kwargs.data))
+function freezeparams(m::RheoModelClass; kwargs...)
+    return(freezeparams(m,symbol_to_unicode(kwargs.data)))
 end
+
+
+function freeze_params(m::RheoModelClass, nt0::NamedTuple)
+    println("freeze_params is deprecated - use freezeparams instead.")
+    return(freezeparams(m,nt0))
+end
+
+function freeze_params(m::RheoModelClass; kwargs...)
+    println("freeze_params is deprecated - use freezeparams instead.")
+    return(freezeparams(m,symbol_to_unicode(kwargs.data)))
+end
+
 
 
 """
     RheoModel(m::RheoModelClass, nt0::NamedTuple)
 
-`RheoModel` is a rheological model with set parameters. They are obtained by fitting a model to data using modelfit, 
-or by specialising a RheoModelClass by prescribing parameters. Parameters can be provided as a named tuple or keyword arguments.
-A RheoModel provides all known moduli functions of the model and can be used to simulate the response of the model to arbitrary inputs.
+`RheoModel` represents a rheological model with set parameters. They are obtained by fitting a model to data using `modelfit`, 
+or by specialising the relevant RheoModelClass by prescribing its parameters. Parameters can be provided as a named tuple or keyword arguments.
 
 
 # Example
@@ -962,6 +990,7 @@ julia> model = RheoModel(Maxwell, (k=1, η=2.))
 
 julia> model = RheoModel(Maxwell, k=1, η=2.)
 [...]
+```
 """
 function RheoModel(m::RheoModelClass, nt0::NamedTuple)
 
@@ -982,12 +1011,36 @@ end
 
 
 function RheoModel(m::RheoModelClass; kwargs...)
-    return(RheoModel(m,kwargs.data))
+    return(RheoModel(m,symbol_to_unicode(kwargs.data)))
 end
 
 
+"""
+    getparams(m::RheoModel; unicode=true)
+
+`getparams` return the list of model parameters with their values as a NamedTuple.
+If `unicode` is set to `false`, the unicode symbols are converted their text equivalent.
 
 
+# Example
+```@example
+julia> model = RheoModel(Maxwell, k=1, η=2.)
+[...]
+
+julia> getparams(m)
+(k = 1.0, η = 2.0)
+
+julia> getparams(m,unicode=false)
+(k = 1.0, eta = 2.0)
+``` 
+"""
+function getparams(m::RheoModel; unicode=true)
+    if unicode
+        return(m.fixedparams)
+    else
+        return(unicode_to_text(m.fixedparams))
+    end
+end
 
 #=
 function freeze_params(m::RheoModelClass, nt0::NamedTuple)
@@ -1164,12 +1217,12 @@ end
 
 
 function relaxmod(m::RheoModelClass, x; kwargs...)
-    relaxmod(m, x, kwargs.data)
+    relaxmod(m, x, symbol_to_unicode(kwargs.data))
 end
 
 relaxmod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> relaxmod(m, x, params)
 relaxmod(m::RheoModelClass, params::NamedTuple) =  x -> relaxmod(m, x, params)
-relaxmod(m::RheoModelClass; kwargs...) =  x -> relaxmod(m, x, kwargs.data)
+relaxmod(m::RheoModelClass; kwargs...) =  x -> relaxmod(m, x, symbol_to_unicode(kwargs.data))
 
 
 
@@ -1246,12 +1299,12 @@ end
 
 
 function creepcomp(m::RheoModelClass, x; kwargs...)
-    creepcomp(m, x, kwargs.data)
+    creepcomp(m, x, symbol_to_unicode(kwargs.data))
 end
 
 creepcomp(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> creepcomp(m, x, params)
 creepcomp(m::RheoModelClass, params::NamedTuple) =  x -> creepcomp(m, x, params)
-creepcomp(m::RheoModelClass; kwargs...) =  x -> creepcomp(m, x, kwargs.data)
+creepcomp(m::RheoModelClass; kwargs...) =  x -> creepcomp(m, x, symbol_to_unicode(kwargs.data))
 
 
 
@@ -1328,12 +1381,12 @@ end
 
 
 function storagemod(m::RheoModelClass, x; kwargs...)
-    storagemod(m, x, kwargs.data)
+    storagemod(m, x, symbol_to_unicode(kwargs.data))
 end
 
 storagemod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> storagemod(m, x, params)
 storagemod(m::RheoModelClass, params::NamedTuple) =  x -> storagemod(m, x, params)
-storagemod(m::RheoModelClass; kwargs...) =  x -> storagemod(m, x, kwargs.data)
+storagemod(m::RheoModelClass; kwargs...) =  x -> storagemod(m, x, symbol_to_unicode(kwargs.data))
 
 
 
@@ -1400,12 +1453,12 @@ end
 
 
 function lossmod(m::RheoModelClass, x; kwargs...)
-    lossmod(m, x, kwargs.data)
+    lossmod(m, x, symbol_to_unicode(kwargs.data))
 end
 
 lossmod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> lossmod(m, x, params)
 lossmod(m::RheoModelClass, params::NamedTuple) =  x -> lossmod(m, x, params)
-lossmod(m::RheoModelClass; kwargs...) =  x -> lossmod(m, x, kwargs.data)
+lossmod(m::RheoModelClass; kwargs...) =  x -> lossmod(m, x, symbol_to_unicode(kwargs.data))
 
 
 
@@ -1475,9 +1528,10 @@ end
 
 
 function dynamicmod(m::RheoModelClass, x; kwargs...)
-    dynamicmod(m, x, kwargs.data)
+    dynamicmod(m, x, symbol_to_unicode(kwargs.data))
 end
 
 dynamicmod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> dynamicmod(m, x, params)
 dynamicmod(m::RheoModelClass, params::NamedTuple) =  x -> dynamicmod(m, x, params)
-dynamicmod(m::RheoModelClass; kwargs...) =  x -> dynamicmod(m, x, kwargs.data)
+dynamicmod(m::RheoModelClass; kwargs...) =  x -> dynamicmod(m, x, symbol_to_unicode(kwargs.data))
+

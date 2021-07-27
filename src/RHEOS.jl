@@ -45,9 +45,9 @@ export hastime, hasstress, hasstrain
 export gettime, getstress, getstrain, getfreq, getstorage, getloss
 export TimeDataType, time_only, strain_only, stress_only, strain_and_stress
 export FreqDataType, invalid_freq_data, freq_only, with_modulus
-export RheoModelClass, RheoModel, model_parameters
+export RheoModelClass, RheoModel, getparams # , model_parameters
 export rheoconvert, invLaplace
-export freeze_params
+export freezeparams, freeze_params   # freeze_params deprecated
 export relaxmod, creepcomp, storagemod, lossmod, dynamicmod
 
 # IO.jl
