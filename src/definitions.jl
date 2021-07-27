@@ -825,15 +825,31 @@ end
 
 """
     RheoModelClass(;name::String, p::Tuple, G,J,Gp,Gpp, constraint, info, G_ramp)
+ 
+`RheoModelClass` is a complex data structure that contains all the relevant data to 
+allow RHEOS to fit models and make predictions once parameters are set.
+Rheos possess already a large number of such data structures to represent common rheological models,
+such as Maxwell or KelvinVoigt.
 
-`RheoModelClass` contains a model name, its symbolic parameters and all its moduli (both single-input and array-input versions).
+Users are not expected to directly manipulate the content of a RheoModelClass object, but will 
+use pass it to relevant functions for fitting and numerically evaluating visco-elastic moduli.
 
-It also contains information about any constraints that must be observed (e.g. the springpot coefficient being inbetween 0 and 1).
+The model name and its parameters can however be printed and display on the REPL.
 
-Lastly, it also contains additional info about the model which may include a text-art schematic.
+# Example
+```@example
+julia> Maxwell
 
-Generally, users will want to use the `RheoModelClass` constructor function as shown in the 'Create Your Model' section of the documentation
-rather than the default constructor.
+Model name: maxwell
+
+Free parameters: η and k
+
+                ___
+            _____| |________╱╲  ╱╲  ╱╲  ___
+                _|_|          ╲╱  ╲╱  ╲╱
+                  η                  k
+               
+```
 """
 function RheoModelClass(;name::String,
     p::Tuple,
@@ -902,7 +918,7 @@ function _freeze_params(m::RheoModelClass, nt0::NamedTuple)
 end
 
 """
-    freeze_params(m::RheoModelClass, nt0::NamedTuple)
+    freezeparams(m::RheoModelClass, nt0::NamedTuple)
 
 Return a new `RheoModelClass` with some of the parameters frozen to specific values
 
@@ -942,17 +958,28 @@ function freeze_params(m::RheoModelClass, nt0::NamedTuple)
 end
 
 
-function freeze_params(m::RheoModelClass; kwargs...)
-    return(freeze_params(m,symbol_to_unicode(kwargs.data)))
+function freezeparams(m::RheoModelClass; kwargs...)
+    return(freezeparams(m,symbol_to_unicode(kwargs.data)))
 end
+
+
+function freeze_params(m::RheoModelClass, nt0::NamedTuple)
+    print("freeze_params is deprecated - use freezeparams instead.")
+    return(freezeparams(m,nt0))
+end
+
+function freeze_params(m::RheoModelClass; kwargs...)
+    print("freeze_params is deprecated - use freezeparams instead.")
+    return(freezeparams(m,symbol_to_unicode(kwargs.data)))
+end
+
 
 
 """
     RheoModel(m::RheoModelClass, nt0::NamedTuple)
 
-`RheoModel` is a rheological model with set parameters. They are obtained by fitting a model to data using modelfit, 
-or by specialising a RheoModelClass by prescribing parameters. Parameters can be provided as a named tuple or keyword arguments.
-A RheoModel provides all known moduli functions of the model and can be used to simulate the response of the model to arbitrary inputs.
+`RheoModel` represents a rheological model with set parameters. They are obtained by fitting a model to data using `modelfit`, 
+or by specialising the relevant RheoModelClass by prescribing its parameters. Parameters can be provided as a named tuple or keyword arguments.
 
 
 # Example
