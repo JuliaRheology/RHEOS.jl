@@ -21,8 +21,25 @@ const symbol_convertion_table=(
     eta = :η,
     alpha = :α,
     beta = :β,
+    gamma = :γ,
     c_alpha = :cₐ,
-    c_beta= :cᵦ,
+    c_beta = :cᵦ,
+    c_gamma = :cᵧ,
+    k_1 = :k₁,
+    k_2 = :k₂,
+    k_a = :kₐ,
+    k_beta = :kᵦ,
+    k_gamma = :kᵧ,
+    eta_1 = :η₁,
+    eta_2 = :η₂,
+    eta_a = :ηₐ,
+    eta_beta = :ηᵦ,
+    eta_gamma = :ηᵧ,
+    tau = :τ,
+    G_phi = :Gᵩ,
+    G_0 = :G₀,
+    G_1 = :G₁,
+    G_2 = :G₂
     )
 
 
@@ -45,6 +62,6 @@ function unicode_to_text(s::Symbol)
     isnothing(r) ? s : r
 end
 
-function unicode_to_text(nt)
+function unicode_to_text(nt::NamedTuple)
     NamedTuple{Tuple([ unicode_to_text(s) for s in keys(nt) ])}( values(nt) )
 end
