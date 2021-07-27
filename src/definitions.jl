@@ -139,6 +139,43 @@ function hasstrain(d::RheoTimeData)
     return (d.ϵ != RheoFloat[])
 end
 
+
+"""
+    gettime(d::RheoTimeData)
+
+returns the time vector.
+"""
+function gettime(d::RheoTimeData)
+    return (d.t)
+end
+
+
+
+"""
+    getstrain(d::RheoTimeData)
+
+returns the strain vector if d contains strain data.
+"""
+function getstrain(d::RheoTimeData)
+    return (d.ϵ)
+end
+
+
+
+"""
+    getstress(d::RheoTimeData)
+
+returns the stress vector if d contains stress data.
+"""
+function getstress(d::RheoTimeData)
+    return (d.σ)
+end
+
+
+
+
+
+
 @enum LoadingType strain_imposed=1 stress_imposed=2
 
 function Base.show(io::IO, d::RheoTimeData)

@@ -21,7 +21,7 @@ function _RheoTimeData_const_nolog()
     data = RheoTimeData(ϵ=eps, σ=sig, t=t, savelog=false)
     showlog(data)
 
-    data.σ==sig && data.ϵ==eps && data.t==t && isnothing(data.log)
+    getstress(data)==sig && getstrain(data)==eps && gettime(data)==t && isnothing(data.log)
 end
 @test _RheoTimeData_const_nolog()
 
