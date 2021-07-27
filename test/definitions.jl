@@ -116,8 +116,9 @@ end
 
 function _getparams()
     m = RheoModel(Maxwell, k=1, eta=2)
-    p = getparams(m)
-    (p.k==1.0) && (p.η==2.0)
+    p1 = getparams(m)
+    p2 = getparams(m,unicode=false)
+    (p1.k==1.0) && (p1.η==2.0) &&  (p2.k==1.0) && (p2.eta==2.0) 
 end
 @test _getparams()
 
