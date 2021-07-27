@@ -34,6 +34,11 @@ function symbol_to_unicode(nt)
     NamedTuple{Tuple([ symbol_to_unicode(s) for s in keys(nt) ])}( values(nt) )
 end
 
+function unicode_to_text(s::Symbol)
+    r=findfirst(e->e==s, symbol_convertion_table)    
+    isnothing(r) ? s : r
+end
 
-
-
+function unicode_to_text(nt)
+    NamedTuple{Tuple([ unicode_to_text(s) for s in keys(nt) ])}( values(nt) )
+end
