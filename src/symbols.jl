@@ -56,6 +56,12 @@ function symbol_to_unicode(nt::Nothing)
     nothing 
 end
 
+# When called from Python, it is useful to accept Dict rather than NamedTuple which are not supported.
+function symbol_to_unicode(d::Dict)    
+    symbol_to_unicode( NamedTuple{([Symbol(e) for e in keys(d)]...,)}(values(d)) )
+end
+
+
 
 function unicode_to_text(s::Symbol)
     r=findfirst(e->e==s, symbol_convertion_table)    

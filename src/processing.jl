@@ -349,9 +349,9 @@ RHEOS makes use of a local derivative free algorithm, specifically the Tom Rowan
 function modelfit(data::RheoTimeData,
                   model::RheoModelClass,
                   modloading::LoadingType;
-                  p0::Union{NamedTuple,Nothing} = nothing,
-                  lo::Union{NamedTuple,Nothing} = nothing,
-                  hi::Union{NamedTuple,Nothing} = nothing,
+                  p0::Union{NamedTuple,Nothing,Dict} = nothing,
+                  lo::Union{NamedTuple,Nothing,Dict} = nothing,
+                  hi::Union{NamedTuple,Nothing,Dict} = nothing,
                   verbose::Bool = false,
                   rel_tol = 1e-4,
                   diff_method="BD",
