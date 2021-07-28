@@ -125,7 +125,7 @@ end
 function _getparams_dict()
     m = RheoModel(Maxwell, k=1, eta=2)
     p = getparams(m,unicode=false,dict=true)
-    (p[:k]==1.0) && (p[:η]==2.0) 
+    (p[:k]==1.0) && (p[:eta]==2.0) 
 end
 @test _getparams_dict()
 
