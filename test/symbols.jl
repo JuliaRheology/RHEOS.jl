@@ -14,6 +14,14 @@ function _symbol_to_unicode_tuple()
 end
 @test _symbol_to_unicode_tuple()
 
+function _symbol_to_unicode_dict()
+    ds=Dict(:beta=>0.05, :c_beta=>0.05, :eta=>10.0)
+    nt=RHEOS.symbol_to_unicode(ds) 
+    nt.η==10.0
+end
+@test _symbol_to_unicode_dict()
+
+
 println("===============================================")
 
 

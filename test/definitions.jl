@@ -122,6 +122,14 @@ function _getparams()
 end
 @test _getparams()
 
+function _getparams_dict()
+    m = RheoModel(Maxwell, k=1, eta=2)
+    p = getparams(m,unicode=false,dict=true)
+    (p[:k]==1.0) && (p[:η]==2.0) 
+end
+@test _getparams_dict()
+
+
 
 #
 #   The moduli functions on arrays are extensively tested as part of the model tests
