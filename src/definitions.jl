@@ -1017,11 +1017,10 @@ end
 
 
 """
-    getparams(m::RheoModel; unicode=true, dict=false)
+    getparams(m::RheoModel; unicode=true)
 
 `getparams` return the list of model parameters with their values as a NamedTuple.
 If `unicode` is set to `false`, the unicode symbols are converted their text equivalent.
-If `dict` is set to `true`, the output is returned as a dictionary, which is convenient when used with Python.
 
 # Example
 ```@example
@@ -1036,18 +1035,10 @@ julia> getparams(m,unicode=false)
 ``` 
 """
 function getparams(m::RheoModel; unicode=true, dict=false)
-    if dict
-        nt=m.fixedparams
-        if !unicode
-            nt=unicode_to_text(nt)
-        end
-        return(Dict(zip(keys(nt),values(nt))))
+    if unicode
+        return(m.fixedparams)
     else
-        if unicode
-            return(m.fixedparams)
-        else
-            return(unicode_to_text(m.fixedparams))
-        end
+        return(unicode_to_text(m.fixedparams))
     end
 end
 

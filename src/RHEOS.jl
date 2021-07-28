@@ -34,6 +34,7 @@ const IntOrNone = Union{Integer, Nothing}
 const RheovecOrNone = Union{Vector{RheoFloat}, Nothing}
 
 ######################################################################
+export namedtuple, dict
 export RheoFloat
 
 # definitions.jl
