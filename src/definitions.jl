@@ -1,5 +1,12 @@
 #!/usr/bin/env julia
 
+
+#===================================================
+#
+#  Section to transfer to new file rheodata.jl
+#
+===================================================#
+
 #=
 -------------------------
 Log related functionality
@@ -534,7 +541,11 @@ rheoconvert(t::Vector{RheoFloat}) = t
 
 
 
-
+#===================================================
+#
+#  Section to transfer to new file rheomodel.jl
+#
+===================================================#
 
 
 
