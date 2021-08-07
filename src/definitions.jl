@@ -1045,7 +1045,7 @@ julia> getparams(m,unicode=false)
 (k = 1.0, eta = 2.0)
 ``` 
 """
-function getparams(m::RheoModel; unicode=true, dict=false)
+function getparams(m::RheoModel; unicode=true)
     if unicode
         return(m.fixedparams)
     else
