@@ -54,7 +54,7 @@ and proceeds accordingly. For oscillatory data, all three columns (Gp, Gpp, Freq
 must be provided. For regular viscoelastic data only time, or time-stress, or time-strain or
 time-stress-strain data can be provided.
 
-Column can be specified in the csv file by providing their values or header name as keyword parameters. 
+Column can be specified in the csv file by providing their values or header name (case insensitive) as keyword parameters. 
 
 `importcsv("filename.csv", time=1, strain=2, stress=3)` loads a `RheoTimeData` from a csv file with time in the first column, strain in the second, and stress in the third.
 
@@ -101,7 +101,7 @@ function importcsv(filepath::String; delimiter = ',', header = false, comment = 
 
         log = if savelog
                 info = (comment=comment, folder=pwd(), stats=(t_min=data[1,t_col],t_max=data[end,t_col], n_sample=size(data[:,t_col])))
-                RheoLogItem( (type=:source, funct=:importcsv, params=(filepath=filepath,), keywords=(t_col=t_col, σ_col=σ_col, ϵ_col=ϵ_col)), info )
+                RheoLogItem( (type=:source, funct=:importcsv, params=(filepath=filepath,), keywords=(t=t_col, σ=σ_col, ϵ=ϵ_col, header=header)), info )
               else
                 nothing
               end
@@ -130,7 +130,7 @@ function importcsv(filepath::String; delimiter = ',', header = false, comment = 
         
         log = if savelog
                 info = (comment=comment, folder=pwd(), stats=(ω_min=data[1,ω_col],ω_max=data[end,ω_col], n_sample=size(data[:,ω_col])))
-                RheoLogItem( (type=:source, funct=:importcsv, params=(filepath=filepath,), keywords=(ω_col=ω_col, Gp_col=Gp_col, Gpp_col=Gpp_col)), info )
+                RheoLogItem( (type=:source, funct=:importcsv, params=(filepath=filepath,), keywords=(ω=ω_col, Gp=Gp_col, Gpp=Gpp_col, header=header)), info )
               else
                 nothing
               end
