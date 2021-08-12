@@ -30,7 +30,7 @@ const RheoFloat = Float64
 const singularity_offset = 10.0
 
 # convenience data types used as in many function parameters
-const IntOrNone = Union{Integer, Nothing}
+#const IntOrNone = Union{Integer, Nothing}
 const RheovecOrNone = Union{Vector{RheoFloat}, Nothing}
 
 ######################################################################

@@ -110,7 +110,7 @@ function importcsv(filepath::String, interface::Interface; delimiter = ',', head
 
    log = if savelog
 			 info = (comment=comment, folder=pwd(), stats=(t_min=data.t[1],t_max=data.t[end], n_sample=size(data.t[:])))
-			 kwds = NamedTuple{(:t, interface.uϵ, interface.uσ, header),Tuple{IntOrNone,IntOrNone,IntOrNone,Bool}}( (cols.t, uϵ_col, uσ_col, header) )
+			 kwds = NamedTuple{(:t, interface.uϵ, interface.uσ, :header),Tuple{Any,Any,Any,Bool}}( (cols.t, uϵ_col, uσ_col, header) )
 			 RheoLogItem( (type=:source, funct=:importcsv, params=(filepath=filepath, interface=interface), keywords=kwds), info )
 		 else
 			 RheoLogItem(type = nothing, info = "nothing")

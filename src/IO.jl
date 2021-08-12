@@ -78,7 +78,7 @@ function importcsv(filepath::String; delimiter = ',', header = false, comment = 
 	# read data from file
     if use_header
 		dataraw,h = readdlm(filepath, delimiter, header=use_header)
-        header_cells = [string(e) for e in [h...]]
+        header_cells = [strip(string(e)) for e in [h...]]
 	else
 		dataraw = readdlm(filepath, delimiter)
         header_cells=[]
