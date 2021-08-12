@@ -11,9 +11,9 @@ timeline generation function forms the basis of any load-generation workflow
 
 Generate `RheoTimeData` struct with only the time data based on the range provided.
 
-# Example
+# Example:
 
-    timeline(0:0.1:10)   --> 0.  0.1   0.2  ...  9.9  10.
+`timeline(0:0.1:10)` returns a RheoTimeData with only time data, with the following series: [0.  0.1   0.2  ...  9.9  10].
 """
 function timeline(r::R; savelog = true) where R <: AbstractRange
     log = savelog ? [RheoLogItem( (type=:source, funct=:timeline, params=(r,), keywords=()), (comment="timeline created", type=time_only))] : nothing
@@ -23,7 +23,7 @@ end
 """
     timeline(;t_start::Real=0., t_end::Real, step::Real=(t_end - t_start)/250.)
 
-Generate `RheoTimeData` struct with only the time data.
+Generate `RheoTimeData` struct with only the time data based on the keywords provided.
 
 # Arguments
 
@@ -40,7 +40,7 @@ end
 """
     frequencyspec(r::R; logscale=true)
 
-Generate `RheoFreqData` struct with only the frequency data distributed on a linear or log scale
+Generate `RheoFreqData` struct with only the frequency data distributed on a linear or log scale.
 
 # Arguments
 
@@ -61,7 +61,7 @@ end
 """
     frequencyspec(;ω_start::Real, ω_end::Real, logstep::Real= 0.05)
 
-Generate `RheoFreqData` struct with only the frequency data distributed on a log scale
+Generate `RheoFreqData` struct with only the frequency data distributed on a log scale.
 
 # Arguments
 

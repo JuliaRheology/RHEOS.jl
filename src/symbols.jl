@@ -71,3 +71,52 @@ end
 function unicode_to_text(nt::NamedTuple)
     NamedTuple{Tuple([ unicode_to_text(s) for s in keys(nt) ])}( values(nt) )
 end
+
+
+#
+#   Convenience function for python users.
+#
+
+"""
+    function namedtuple(d::Dict)
+    function namedtuple(;kwargs...)
+
+`namedtuple` returns the named tuple formed using keyword arguments or a dictionary passed as parameter.
+
+# Example
+```@example
+julia> nt = namedtuple(x=1,y=2)
+(x = 1, y = 2)
+``` 
+"""
+function namedtuple(d::Dict)
+    NamedTuple{([Symbol(e) for e in keys(d)]...,)}(values(d))
+end
+
+function namedtuple(;kwargs...)
+    kwargs.data
+end
+
+"""
+    function dict(nt::NamedTuple)
+    function dict(;kwargs...)
+
+`dict` returns the dictionary formed using keyword arguments or a named tuple passed as parameter.
+
+# Example
+```@example
+julia> d = dict(x=1,y=2)
+Dict{Symbol, Int64} with 2 entries:
+  :y => 2
+  :x => 1
+``` 
+"""
+function dict(nt::NamedTuple)
+    Dict(zip(keys(nt),values(nt)))
+end
+
+function dict(;kwargs...)
+    dict(kwargs.data)
+end
+
+

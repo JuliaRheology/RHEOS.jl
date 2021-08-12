@@ -18,7 +18,7 @@ Resample the data using 1D spline extrapolation (using the Dierckx.jl package).
 - `dt`: if the array `t` is not provided, the parameter `dt` will set the timestep for a uniform resampling of the data.
 - `scale`: instead of specifying particular time points or timestep, an overall multiplicator on the sampling rate can be provided. This could down-sample (`scale`<1) or upsample (`scale`>1). If timesteps are non uniform, it would interpolate values accordingly.
 
-# Examples:
+# Examples
 
 Assuming `d` is a `RheoTimeData` data set:
 - `resample(d)` keeps the number of sampling points the same but interpolates to set a uniform time step.

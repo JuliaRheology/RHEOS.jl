@@ -1,5 +1,12 @@
 #!/usr/bin/env julia
 
+
+#===================================================
+#
+#  Section to transfer to new file rheodata.jl
+#
+===================================================#
+
 #=
 -------------------------
 Log related functionality
@@ -534,7 +541,11 @@ rheoconvert(t::Vector{RheoFloat}) = t
 
 
 
-
+#===================================================
+#
+#  Section to transfer to new file rheomodel.jl
+#
+===================================================#
 
 
 
@@ -982,7 +993,7 @@ end
 `RheoModel` represents a rheological model with set parameters. They are obtained by fitting a model to data using `modelfit`, 
 or by specialising the relevant RheoModelClass by prescribing its parameters. Parameters can be provided as a named tuple or keyword arguments.
 
-`RheoModel` objects can then be use to simulate the response to an arbitrary input using `modelpredict`, and access the values of the moduli functions.
+`RheoModel` objects can then be used to simulate the response to an arbitrary input using `modelpredict`, and access the values of the moduli functions.
 
 # Example
 ```@example
@@ -1017,11 +1028,10 @@ end
 
 
 """
-    getparams(m::RheoModel; unicode=true, dict=false)
+    getparams(m::RheoModel; unicode=true)
 
 `getparams` return the list of model parameters with their values as a NamedTuple.
 If `unicode` is set to `false`, the unicode symbols are converted their text equivalent.
-If `dict` is set to `true`, the output is returned as a dictionary, which is convenient when used with Python.
 
 # Example
 ```@example
@@ -1035,19 +1045,11 @@ julia> getparams(m,unicode=false)
 (k = 1.0, eta = 2.0)
 ``` 
 """
-function getparams(m::RheoModel; unicode=true, dict=false)
-    if dict
-        nt=m.fixedparams
-        if !unicode
-            nt=unicode_to_text(nt)
-        end
-        return(Dict(zip(keys(nt),values(nt))))
+function getparams(m::RheoModel; unicode=true)
+    if unicode
+        return(m.fixedparams)
     else
-        if unicode
-            return(m.fixedparams)
-        else
-            return(unicode_to_text(m.fixedparams))
-        end
+        return(unicode_to_text(m.fixedparams))
     end
 end
 

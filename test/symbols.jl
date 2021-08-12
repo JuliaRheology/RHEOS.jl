@@ -22,6 +22,18 @@ end
 @test _symbol_to_unicode_dict()
 
 
+function _dictnamedtuple()
+    dict(namedtuple(x=1,y=2))[:x]==namedtuple(dict(x=1,y=2)).x
+end
+@test _dictnamedtuple()
+
+
+
+
+
+
+
+
 println("===============================================")
 
 
