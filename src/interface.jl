@@ -65,66 +65,24 @@ function RheoTimeData(interface::Interface ; t::Vector{T} = RheoFloat[], comment
 
 end
 
+
+
+
 """
-    importcsv(filepath::String, interface::Interface; t_col::IntOrNone = nothing, delimiter = ',', comment = "Imported from csv file", savelog = true, kwargs...)
+    importcsv(filepath::String, interface::Interface; delimiter = ',', header = false, comment = "Imported from csv file", savelog = true, kwargs...)
 
 Import function for raw data to be transformed to stress and strain using an `Interface`.
-Column numbers in the csv containging the force/displacement data need to be indicated as keyword arguments.
+Column numbers in the csv containging the force/displacement data need to be indicated as keyword arguments using the corresponding symbols in the `interface`..
 
 # Examples
 ```julia-repl
-julia> importcsv("myfile.csv", AFM(2e-6), t_col=1, d_col=2, f_col=3)
+julia> importcsv("myfile.csv", AFM(2e-6), t=1, d=2, f=3)
 ```
 """
-function importcsv(filepath::String, interface::Interface; t_col::IntOrNone = nothing, delimiter = ',', comment = "Imported from csv file", savelog = true, kwargs...)
-   cols = kwargs.data   # should contain column numbers for the strain and stress equivalent data
-   uϵ_col_sym = Symbol(string(interface.uϵ) * "_col")
-   uσ_col_sym = Symbol(string(interface.uσ) * "_col")
-
-
-   if uϵ_col_sym in keys(cols)
-	  uϵ_col = cols[uϵ_col_sym]
-   else
-	  uϵ_col = nothing
-   end
-
-   if uσ_col_sym in keys(cols)
-	  uσ_col = cols[uσ_col_sym]
-   else
-	  uσ_col = nothing
-   end
-
-   data = importcsv(filepath, t_col = t_col, σ_col = uσ_col, ϵ_col = uϵ_col, delimiter = delimiter, comment = comment, savelog = savelog)
-
-   # need to make sure that missing columns are properly transfered.
-   ϵ,σ = interface.to_ϵσ(data.ϵ, data.σ)
-
-	 log = if savelog
-			 info = (comment=comment, folder=pwd(), stats=(t_min=data.t[1],t_max=data.t[end], n_sample=size(data.t[:])))
-			 kwds = NamedTuple{(:t_col, uϵ_col_sym, uσ_col_sym),Tuple{IntOrNone,IntOrNone,IntOrNone}}( (t_col, uϵ_col, uσ_col) )
-			 RheoLogItem( (type=:source, funct=:importcsv, params=(filepath=filepath, interface=interface), keywords=kwds), info )
-		   else
-			 RheoLogItem(type = nothing, info = "nothing")
-		   end
-
-   return RheoTimeData(σ, ϵ, data.t, [log])
-
-end
-
-"""
-    importcsv(filepath::String, interface::Interface; t_col::IntOrNone = nothing, delimiter = ',', comment = "Imported from csv file", savelog = true, kwargs...)
-
-Import function for raw data to be transformed to stress and strain using an `Interface`.
-Column numbers in the csv containging the force/displacement data need to be indicated as keyword arguments.
-
-# Examples
-```julia-repl
-julia> importcsv("myfile.csv", AFM(2e-6), t_col=1, d_col=2, f_col=3)
-```
-"""
-function importcsv_tmp(filepath::String, interface::Interface; delimiter = ',', header = false, comment = "Imported from csv file", savelog = true, kwargs...)
+function importcsv(filepath::String, interface::Interface; delimiter = ',', header = false, comment = "Imported from csv file", savelog = true, kwargs...)
    cols=symbol_to_unicode(kwargs.data)
 
+    # legacy keyword arguments in place until v 1.0
    uϵ_col_sym = Symbol(string(interface.uϵ) * "_col")
    uσ_col_sym = Symbol(string(interface.uσ) * "_col")
 
@@ -144,23 +102,19 @@ function importcsv_tmp(filepath::String, interface::Interface; delimiter = ',', 
 	  uσ_col = nothing
    end
 
-   # TODO 
-   # detect t_col 
-
-
 
    data = importcsv(filepath, t = cols.t, σ = uσ_col, ϵ = uϵ_col, delimiter = delimiter, header = header, comment = comment, savelog = false)
 
    # need to make sure that missing columns are properly transfered.
    ϵ,σ = interface.to_ϵσ(data.ϵ, data.σ)
 
-	 log = if savelog
+   log = if savelog
 			 info = (comment=comment, folder=pwd(), stats=(t_min=data.t[1],t_max=data.t[end], n_sample=size(data.t[:])))
 			 kwds = NamedTuple{(:t, interface.uϵ, interface.uσ, header),Tuple{IntOrNone,IntOrNone,IntOrNone,Bool}}( (cols.t, uϵ_col, uσ_col, header) )
 			 RheoLogItem( (type=:source, funct=:importcsv, params=(filepath=filepath, interface=interface), keywords=kwds), info )
-		   else
+		 else
 			 RheoLogItem(type = nothing, info = "nothing")
-		   end
+		 end
 
    return RheoTimeData(σ, ϵ, data.t, [log])
 

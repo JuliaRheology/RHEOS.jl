@@ -49,3 +49,22 @@ function _interface_Tweezers_d()
     isapprox(data[itf].d[21], 2, atol=tol)
 end
 @test _interface_Tweezers_d()
+
+function _interface_importcsv()
+    fildir = joinpath(@__DIR__, "testdata", "interfacetest.csv")
+    itf = Interface(:d, :f, (ϵ,σ)->(d = 2 .* ϵ, f = 2 .* σ ), (d,f)->(ϵ = 0.5 .* d, σ = 0.5 .* f) )
+    data = importcsv(fildir, itf, d="d", f="f", t="t")
+
+    # check expected displacement for d = 0.2
+    isapprox(data.ϵ[3], 0.1, atol=tol)
+end
+@test _interface_importcsv()
+
+
+
+
+
+
+
+
+
