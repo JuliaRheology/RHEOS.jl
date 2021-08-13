@@ -85,3 +85,15 @@ Note that meta-documentation on running tests and building documentation locally
 + S. G. Johnson. *The NLopt nonlinear-optimization package*, https://github.com/stevengj/nlopt
 
 + J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah (2017). *Julia: A Fresh Approach to Numerical Computing*, SIAM Review, doi: 10.1137/141000671.
+
+
+
+
+
+
+
+
+
+```@meta
+EditURL = "https://github.com/JuliaRheology/RHEOS.jl"
+```
