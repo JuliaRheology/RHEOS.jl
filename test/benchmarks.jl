@@ -107,6 +107,10 @@ nothing
 
 #=
 
+Hardware:
+Intel Core i5-7200U Processor (3MB Cache, up to 3.1Ghz)
+8GB LPDDR3 1866
+
 =========================
 Test on maths functions 
 =========================
@@ -114,23 +118,23 @@ Test on maths functions
 Test on the MittalgLeffler function
 
 Version from Julia repo
-  58.545 ns (1 allocation: 16 bytes)
+  57.567 ns (1 allocation: 16 bytes)
 Version from RHEOS (should be the same as above)
-  58.453 ns (1 allocation: 16 bytes)
+  58.195 ns (1 allocation: 16 bytes)
 
 
 
 Test on the inverse Laplace transform
 
 Talbot algorithm on FractSLS_Zener creep function
-  scalar value:   20.937 μs (642 allocations: 18.75 KiB)
-  vector using talbot.:   21.988 ms (642143 allocations: 18.33 MiB)
-  vector using talbotarr:   3.649 ms (173413 allocations: 3.61 MiB)
+  scalar value:   21.206 μs (642 allocations: 18.75 KiB)
+  vector using talbot.:   21.383 ms (642143 allocations: 18.33 MiB)
+  vector using talbotarr:   3.418 ms (173413 allocations: 3.61 MiB)
 
 Weeks (80) algorithm on FractSLS_Zener creep function
-  Initialisation:   106.554 μs (2634 allocations: 110.75 KiB)
-  Scalar value:   1.720 μs (1 allocation: 16 bytes)
-  Vector values:   1.641 ms (2 allocations: 8.03 KiB)
+  Initialisation:   105.563 μs (2634 allocations: 110.75 KiB)
+  Scalar value:   1.616 μs (1 allocation: 16 bytes)
+  Vector values:   1.596 ms (2 allocations: 8.03 KiB)
 
 
 =========================
@@ -139,36 +143,37 @@ Test on Moduli functions
 
 Test on the Maxwell model
 
-  67.570 ns (2 allocations: 112 bytes)
-  7.409 μs (3 allocations: 8.12 KiB)
-  33.446 ns (1 allocation: 16 bytes)
-  7.451 μs (1 allocation: 8.00 KiB)
+  67.185 ns (2 allocations: 112 bytes)
+  7.559 μs (2 allocations: 8.09 KiB)
+  33.592 ns (1 allocation: 16 bytes)
+  8.153 μs (1 allocation: 8.00 KiB)
 
 Test on the FractSLS_Zener model relaxation modulus - with mittleff
 
 Direct function evaluation
-  209.077 ns (7 allocations: 112 bytes)
-  68.211 μs (15 allocations: 8.53 KiB)
+  207.000 ns (7 allocations: 112 bytes)
+  68.707 μs (15 allocations: 8.53 KiB)
 From the RheoModelClass
-  168.912 ns (4 allocations: 160 bytes)
-  64.546 μs (3 allocations: 8.16 KiB)
+  166.950 ns (4 allocations: 160 bytes)
+  64.459 μs (2 allocations: 8.11 KiB)
 From the RheoModel
-  105.382 ns (1 allocation: 16 bytes)
-  59.494 μs (1 allocation: 8.00 KiB)
+  104.457 ns (1 allocation: 16 bytes)
+  59.557 μs (1 allocation: 8.00 KiB)
 
 Test on the FractSLS_Zener model creep compliance - with inverse laplace
 
 
 function wrappers using Weeks
-  62.336 μs (71 allocations: 30.80 KiB)
-  1.708 ms (72 allocations: 38.81 KiB)
-  1.720 μs (1 allocation: 16 bytes)
-  1.654 ms (5 allocations: 8.12 KiB)
+  62.121 μs (71 allocations: 30.80 KiB)
+  1.660 ms (72 allocations: 38.81 KiB)
+  1.636 μs (1 allocation: 16 bytes)
+  1.610 ms (5 allocations: 8.12 KiB)
 
 From the RheoModelClass
-  10.712 μs (101 allocations: 3.67 KiB)
-  10.987 ms (99102 allocations: 3.48 MiB)
+  10.674 μs (101 allocations: 2.64 KiB)
+  10.721 ms (99102 allocations: 2.47 MiB)
 From the RheoModel
-  9.578 μs (1 allocation: 16 bytes)
-  9.682 ms (1 allocation: 8.00 KiB)
+  9.535 μs (1 allocation: 16 bytes)
+  9.580 ms (1 allocation: 8.00 KiB)
+
 =#
