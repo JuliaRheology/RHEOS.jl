@@ -43,7 +43,7 @@ end
 
 
 """
-    importcsv(filepath::String; t_col::IntOrNone = nothing, σ_col::IntOrNone = nothing, ϵ_col::IntOrNone = nothing, ω_col::IntOrNone = nothing, Gp_col::IntOrNone = nothing, Gpp_col::IntOrNone = nothing, delimiter=',', header=false)
+    importcsv(filepath::String; delimiter=',', header=false, comment = "Imported from csv file", savelog = true, kwargs...)
 
 Load data from a CSV file (two/three columns, comma separated by default but
 delimiter can be specified in the `delimiter` keyword argument). 
