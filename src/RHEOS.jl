@@ -72,7 +72,7 @@ export frequencyspec
 
 # processing.jl
 export resample, indexweight, cutting, smooth
-export onlytime, onlystrain, onlystess, onlyfreq, extract
+export onlytime, onlystrain, onlystress, onlyfreq, extract
 export modelfit, modelpredict, modelstepfit, modelsteppredict
 export dynamicmodelfit, dynamicmodelpredict
 
