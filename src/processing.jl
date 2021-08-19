@@ -241,6 +241,58 @@ function extract(self::RheoFreqData, type::Union{FreqDataType,Integer})
         return RheoFreqData([], [], self.ω,log)
 end
 
+
+
+"""
+    onlytime(d::RheoTimeData)
+
+Return a `RheoTimeData` object with only the timeline of the parameter `d`.
+
+"""
+function onlytime(d::RheoTimeData)
+  extract(d,time_only)       
+end
+
+
+
+"""
+    onlystress(d::RheoTimeData)
+
+Return a `RheoTimeData` object with only the time and stress data of the parameter `d`.
+
+"""
+function onlystress(d::RheoTimeData)
+  extract(d,stress_only)       
+end
+
+
+
+"""
+    onlystrain(d::RheoTimeData)
+
+Return a `RheoTimeData` object with only the time and strain data of the parameter `d`.
+
+"""
+function onlystrain(d::RheoTimeData)
+  extract(d,strain_only)       
+end
+
+
+
+"""
+    onlyfreq(d::RheoFreqData)
+
+Return a `RheoFreqData` object with only the frequency data of the parameter `d`.
+
+"""
+function onlyfreq(d::RheoFreqData)
+  extract(d,freq_only)       
+end
+
+
+
+
+
 #=
 --------------------------------
 Fitting and predicting functions

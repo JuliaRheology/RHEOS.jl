@@ -208,7 +208,7 @@ function _extract_timefromtimedata()
 
     data0 = RheoTimeData(t = t0, ϵ = ϵ0, σ = σ0)
 
-    dataout = extract(data0, time_only)
+    dataout = onlytime(data0)
 
     data0.t==dataout.t && dataout.σ==[] && dataout.ϵ==[]
 end
@@ -223,7 +223,7 @@ function _extract_timestressfromtimedata()
 
     data0 = RheoTimeData(t = t0, ϵ = ϵ0, σ = σ0)
 
-    dataout = extract(data0, stress_only)
+    dataout = onlystress(data0)
 
     data0.t==dataout.t && data0.σ==dataout.σ && dataout.ϵ==[]
 end
@@ -238,7 +238,7 @@ function _extract_timestrainfromtimedata()
 
     data0 = RheoTimeData(t = t0, ϵ = ϵ0, σ = σ0)
 
-    dataout = extract(data0, strain_only)
+    dataout = onlystrain(data0)
 
     data0.t==dataout.t && dataout.σ==[] && data0.ϵ==dataout.ϵ
 end
@@ -251,7 +251,7 @@ function _extract_freqfromfreqdata()
 
     data0 = RheoFreqData(ω = ω0, Gp = Gp0, Gpp = Gpp0)
 
-    dataout = extract(data0, freq_only)
+    dataout = onlyfreq(data0)
 
     data0.ω==dataout.ω && dataout.Gp==[] && dataout.Gpp==[]
 end

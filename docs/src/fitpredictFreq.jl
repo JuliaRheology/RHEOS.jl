@@ -49,7 +49,7 @@ FractKV_model = dynamicmodelfit(data, Fract_KelvinVoigt, weights = "log", lo = L
 
 # The ability of predicting model's response is first exploited to assess the quality of the fits above. The incomplete [`RheoFreqData`](@ref) variable is defined by extracting the frequency from the original data or by defining a new frequency vector.
 
-data_ext = extract(data, freq_only)
+data_ext = onlyfreq(data)
 ## Alternatively, a RheoFreqData with only frequency data can be generated as
 ## data_ext = frequencyspec(ω_start = 1.0e-2, ω_end = 1.0e2, logstep = 0.1)
 
