@@ -38,7 +38,7 @@ maxwell_model = modelfit(data, Maxwell, strain_imposed)
 
 # We now want to calculate the stress values predicted by the model given the experimental strain data. Let's create a new data set with the strain profile.
 
-maxwell_predict = extract(data, strain_only)
+maxwell_predict = onlystrain(data)
 ## and calculate the stress based on the model
 maxwell_predict = modelpredict(maxwell_predict, maxwell_model)
 ## Now we can plot data and model together for comparison
@@ -59,7 +59,7 @@ Maxwell_springFix = freeze_params(Maxwell, k = 2)
 #-
 
 maxwellD_model = modelfit(data, Maxwell_springFix, strain_imposed)
-maxwellD_predict = extract(data, strain_only)
+maxwellD_predict = onlystrain(data)
 ## and calculate the stress based on the model
 maxwellD_predict = modelpredict(maxwellD_predict, maxwellD_model)
 ## Now we can plot data and model together for comparison

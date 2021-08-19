@@ -67,7 +67,7 @@ Fmaxwell_model = modelfit(data, FractS_Maxwell, strain_imposed, lo = Lo, hi = Hi
 
 # The ability of predicting model's response is first exploited to assess the quality of the fits above. The incomplete [`RheoTimeData`](@ref) variable is defined by extracting the time and the imposed variable (for the current example, the strain).
 
-data_ext = extract(data, strain_only)
+data_ext = onlystrain(data)
 ## alternatively: data_ext = extract(data, 1);
 
 rheotimedatatype(data_ext)
