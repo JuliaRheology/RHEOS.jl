@@ -71,7 +71,8 @@ export hstep, ramp, stairs, square, sawtooth, triangle
 export frequencyspec
 
 # processing.jl
-export resample, indexweight, cutting, smooth, extract
+export resample, indexweight, cutting, smooth
+export onlytime, onlystrain, onlystess, onlyfreq, extract
 export modelfit, modelpredict, modelstepfit, modelsteppredict
 export dynamicmodelfit, dynamicmodelpredict
 
