@@ -34,6 +34,10 @@ resample
 indexweight
 cutting
 smooth
+onlytime
+onlystrain
+onlystress
+onlyfreq
 extract
 ```
 
