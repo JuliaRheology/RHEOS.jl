@@ -495,16 +495,21 @@ Initialise then begin a least squares fitting of the supplied data.
 - `insight`: Declare whether insight info should be shown when this function is called, true or false
 - `singularity`: Presence of singularity in model
 - `indweight`: indices weighting, see `modelfit` for more discussion
+- `optmethod`: optimisation algorithm used by NLOpt. 
 """
 function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOrNone,
                            hi_bounds::RheovecOrNone, modulus,
                            time_series::Vector{RheoFloat}, dt::RheoFloat,
                            prescribed_dot::Vector{RheoFloat}, measured::Vector{RheoFloat};
                            insight::Bool = false, constant_sampling::Bool=true,
-                           singularity::Bool = false, _rel_tol = 1e-4, indweights=nothing)
+                           singularity::Bool = false, _rel_tol = 1e-4, indweights=nothing
+                           optmethod::Symbol = :LN_SBPLX)
+                           
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
-    opt = Opt(:LN_SBPLX, length(params_init))
+    opt = Opt(optmethod, length(params_init))
+    # opt = Opt(:LN_BOBYQA, length(params_init))    # Passing tests
+    # opt = Opt(:LN_COBYLA, length(params_init))    # Failing test - not precise enough?
 
     # set lower bounds and upper bounds unless they take null value
     if !isnothing(low_bounds)
