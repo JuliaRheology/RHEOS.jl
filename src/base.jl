@@ -502,7 +502,7 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOr
                            time_series::Vector{RheoFloat}, dt::RheoFloat,
                            prescribed_dot::Vector{RheoFloat}, measured::Vector{RheoFloat};
                            insight::Bool = false, constant_sampling::Bool=true,
-                           singularity::Bool = false, _rel_tol = 1e-4, indweights=nothing
+                           singularity::Bool = false, _rel_tol = 1e-4, indweights=nothing,
                            optmethod::Symbol = :LN_SBPLX)
                            
 
