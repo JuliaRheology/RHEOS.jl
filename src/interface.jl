@@ -29,7 +29,7 @@ end
 
 Create and return an `Interface` struct for a spherical probe of radius `R` embeded in a material, with probe/material viscosity ratio `slip`.
 """
-function Tweezers(R::Real, slip::Real)
+function Tweezers(R::Real, slip::Real=Inf)
   # slip can go between 0 and Inf 
   # no slip is at Inf, frictionless slip is at 0
   R >= 0 || error("sphere must have a positive radius")
@@ -38,10 +38,10 @@ function Tweezers(R::Real, slip::Real)
   if slip == Inf
     hadamard = 3. / 2.
   else
-    hadamard = (((3 .* slip) + 2)./ (2 .* (slip + 1)))
+    hadamard = (((3 * slip) + 2) / (2 * (slip + 1)))
   end
 
-  stress_conversion = hadamard .* 4 .* π .* R^2
+  stress_conversion = hadamard * 4 * π * R^2
 
   Interface(:d, :f, (ϵ,σ)->(d = R .* ϵ, f = stress_conversion .* σ ), (d,f)->(ϵ = d ./ R, σ = f ./ stress_conversion) )
 end
