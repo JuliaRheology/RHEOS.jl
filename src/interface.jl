@@ -25,16 +25,26 @@ function AFM(R::Real)
 end
 
 """
-    Tweezers(R::Real)
+    Tweezers(R::Real, slip::Real)
 
-Create and return an `Interface` struct for a spherical probe of radius `R` embeded in a material.
+Create and return an `Interface` struct for a spherical probe of radius `R` embeded in a material, with probe/material viscosity ratio `slip`.
 """
-function Tweezers(R::Real)
-  Interface(:d, :f, (ϵ,σ)->(d = R .* ϵ, f = R^2 .* σ ), (d,f)->(ϵ = d ./ R, σ = f ./ R^2) )
+function Tweezers(R::Real, slip::Real=Inf)
+  # slip can go between 0 and Inf 
+  # no slip is at Inf, frictionless slip is at 0
+  R >= 0 || error("sphere must have a positive radius")
+  slip >= 0 || error("slip less than 0 is not physical")
+
+  if slip == Inf
+    hadamard = 3. / 2.
+  else
+    hadamard = (((3 * slip) + 2) / (2 * (slip + 1)))
+  end
+
+  stress_conversion = hadamard * 4 * π * R^2
+
+  Interface(:d, :f, (ϵ,σ)->(d = R .* ϵ, f = stress_conversion .* σ ), (d,f)->(ϵ = d ./ R, σ = f ./ stress_conversion) )
 end
-
-
-
 
 
 function Base.getindex(d::RheoTimeData, i::Interface)
