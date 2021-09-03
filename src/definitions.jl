@@ -493,6 +493,25 @@ end
 
 
 
+"""
+    hasfreq(d::RheoFreqData)
+
+returns 'true' if d contains a frequency array
+"""
+function hasfreq(d::RheoFreqData)
+    return (d.ω != RheoFloat[])
+end
+
+"""
+    hasmodulus(d::RheoFreqData)
+
+returns 'true' if d contains a frequency array
+"""
+function hasmodulus(d::RheoFreqData)
+    (d.Gp != RheoFloat[]) && (d.Gpp != RheoFloat[])
+end
+
+
 
 """
     getomega(d::RheoFreqData)
@@ -527,6 +546,25 @@ end
 
 
 
+# Utilities for in-place functions
+#
+# Internal - Not be exposed to the user.
+
+function _setfreq!(data::RheoTimeData, ω::Vector{T}) where {T<:Real}
+    if hasfreq(data)
+      empty!(data.ω)
+    end
+    append!(data.ω, rheoconvert(ω))
+end
+
+function _setmodulus!(data::RheoTimeData, Gp::Vector{T1}, Gpp::Vector{T2}) where {T1<:Real,T2<:Real}
+    if hasmodulus(data)
+      empty!(data.Gp)
+      empty!(data.Gpp)
+    end
+    append!(data.Gp, rheoconvert(Gp))
+    append!(data.Gpp, rheoconvert(Gpp))
+end
 
 
 
