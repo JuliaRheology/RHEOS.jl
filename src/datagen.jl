@@ -96,6 +96,24 @@ function strainfunction(data::RheoTimeData, f::T) where T<:Function
     return RheoTimeData(data.σ, convert(Vector{RheoFloat}, map(f, data.t)), data.t, log)
 end
 
+function strainfunction(f::T, data::RheoTimeData) where T<:Function
+    strainfunction(data,f)
+end
+
+function strainfunction!(data::RheoTimeData, f::T) where T<:Function
+    data.log === nothing ? nothing : push!(data.log, RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
+                                    (comment="strain function applied to timeline",) ) )
+    if d.ϵ!=RheoFloat[]
+      empty!(d.ϵ)
+    end
+    append!(d.ϵ, convert(Vector{RheoFloat}, map(f, data.t)))
+    return d
+end
+
+function strainfunction!(f::T, data::RheoTimeData) where T<:Function
+    strainfunction!(data,f)
+end
+
 """
     stressfunction(data::RheoTimeData, f::T) where T<:Function
 
