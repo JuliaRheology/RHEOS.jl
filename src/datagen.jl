@@ -103,11 +103,11 @@ end
 function strainfunction!(data::RheoTimeData, f::T) where T<:Function
     data.log === nothing ? nothing : push!(data.log, RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
                                     (comment="strain function applied to timeline",) ) )
-    if d.ϵ!=RheoFloat[]
-      empty!(d.ϵ)
+    if data.ϵ!=RheoFloat[]
+      empty!(data.ϵ)
     end
-    append!(d.ϵ, convert(Vector{RheoFloat}, map(f, data.t)))
-    return d
+    append!(data.ϵ, convert(Vector{RheoFloat}, map(f, data.t)))
+    return data
 end
 
 function strainfunction!(f::T, data::RheoTimeData) where T<:Function
