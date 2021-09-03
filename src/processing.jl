@@ -191,6 +191,34 @@ function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
 
 end
 
+
+function _smooth(x::Vector, window_len::Int=7, window::Symbol=:lanczos)
+    w = getfield(Windows, window)(window_len)
+    return filtfilt(w ./ sum(w), [1.0], x)
+end
+
+function smooth2(data, τ::Real; window::Symbol=:lanczos)
+
+    # get sample-rate and Gaussian kernel (std. dev)
+    # available from base.jl
+    samplerate = 1.0/getsampleperiod(data.t)
+    Σ = Int(floor(getsigma(τ, samplerate)))
+
+    ϵ = hasstrain(data) ? _smooth(data.ϵ, Σ, window) : RheoFloat[] 
+    σ = hasstress(data) ? _smooth(data.σ, Σ, window) : RheoFloat[] 
+
+    log = data.log === nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:smooth2, params=(τ = τ,), keywords=(window = window,) ),
+                                        (comment="Smooth data with timescale $τ",) ) ]
+
+    RheoTimeData(σ, ϵ, data.t, log)
+
+end
+
+
+
+
+
+
 """
     extract(self::Union{RheoTimeData,RheoFreqData}, type::Union{TimeDataType,FreqDataType,Integer})
 

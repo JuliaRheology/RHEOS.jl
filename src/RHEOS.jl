@@ -13,7 +13,7 @@ using InverseLaplace
 import MittagLeffler: mittleff as mittlefforiginal
 import SpecialFunctions: gamma
 
-import DSP.conv
+import DSP: conv, filtfilt, Windows
 
 # Base and stdlib imports
 import Base: +, -, *,|
