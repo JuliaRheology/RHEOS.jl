@@ -49,6 +49,34 @@ function Base.show(io::IO, ::MIME"text/plain", rl::RheoLog)
 end
 
 
+
+
+
+
+
+
+# ----------
+# Utilities
+# ----------
+
+
+"""
+    rheoconvert(t)
+
+Converts if required the scalar value or vector of real number `t` to the type `RheoFloat`.
+"""
+rheoconvert(t::Real) = RheoFloat(t)
+rheoconvert(t::RheoFloat) = t
+rheoconvert(t::Vector{T}) where T<:Real = convert(Vector{RheoFloat},t)
+rheoconvert(t::Vector{RheoFloat}) = t
+
+
+
+
+
+
+
+
 #=
 -------------------------------
 Time data related functionality
@@ -177,6 +205,18 @@ returns the stress vector if d contains stress data.
 function getstress(d::RheoTimeData)
     return (d.σ)
 end
+
+
+
+# Utilities for in-place functions
+
+function _setstrain!(data::RheoTimeData, ϵ::Vector{T}) where {T<:Real}
+    if hasstrain(data)
+      empty!(data.ϵ)
+    end
+    append!(data.ϵ, rheoconvert(ϵ))
+end
+
 
 
 
@@ -330,6 +370,11 @@ function |(d1::RheoTimeData, d2::RheoTimeData)
 
     return RheoTimeData(d1.σ, d2.ϵ, d1.t, log)
 end
+
+
+
+
+
 #=
 ------------------------------------
 Frequency data related functionality
@@ -453,6 +498,9 @@ function Base.show(io::IO, d::RheoFreqData)
     end
 end
 
+
+
+
 #=
 ---------------------------------------
 Log-based data generation functionality
@@ -516,18 +564,6 @@ function showlog(d::Union{RheoTimeData,RheoFreqData})
     end
 end
 
-
-
-"""
-    rheoconvert(t)
-
-Converts if required the scalar value or vector of real number `t` to the type `RheoFloat`.
-"""
-
-rheoconvert(t::Real) = RheoFloat(t)
-rheoconvert(t::RheoFloat) = t
-rheoconvert(t::Vector{T}) where T<:Real = convert(Vector{RheoFloat},t)
-rheoconvert(t::Vector{RheoFloat}) = t
 
 
 

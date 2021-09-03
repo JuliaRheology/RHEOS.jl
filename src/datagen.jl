@@ -82,6 +82,7 @@ generate the appropriate loading.
 =#
 """
     strainfunction(data::RheoTimeData, f::T) where T<:Function
+    strainfunction(f::T, data::RheoTimeData) where T<:Function
 
 Accepts a `RheoTimeData` and outputs a new `RheoTimeData` with a strain imposed.
 The strain signal is determined by the function provided, which should take
@@ -93,20 +94,23 @@ function strainfunction(data::RheoTimeData, f::T) where T<:Function
     log = data.log === nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
                                     (comment="strain function applied to timeline",) ) ]
 
-    return RheoTimeData(data.σ, convert(Vector{RheoFloat}, map(f, data.t)), data.t, log)
+    return RheoTimeData(data.σ, rheoconvert(map(f, data.t)), data.t, log)
 end
 
 function strainfunction(f::T, data::RheoTimeData) where T<:Function
     strainfunction(data,f)
 end
 
+"""
+    strainfunction!(data::RheoTimeData, f::T) where T<:Function
+    strainfunction!(f::T, data::RheoTimeData) where T<:Function
+
+In-place version of `strainfunction`.
+"""
 function strainfunction!(data::RheoTimeData, f::T) where T<:Function
     data.log === nothing ? nothing : push!(data.log, RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
                                     (comment="strain function applied to timeline",) ) )
-    if data.ϵ!=RheoFloat[]
-      empty!(data.ϵ)
-    end
-    append!(data.ϵ, convert(Vector{RheoFloat}, map(f, data.t)))
+    _setstrain!(data, map(f, data.t))
     return data
 end
 
