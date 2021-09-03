@@ -47,6 +47,19 @@ function _stressfunction()
 end
 @test _stressfunction()
 
+function _stressfunction!()
+    data = timeline(t_start=0.0, t_end=15.0, step=0.1)
+
+    # check both first assignment and replacement
+    stressfunction!(t->2*t, data)
+    b = data.σ==(0.0:0.2:30.0)
+    stressfunction!(t->t, data)
+
+    b && data.σ==(0.0:0.1:15.0)
+end
+@test _stressfunction!()
+
+
 function _hstep()
     time_instance = timeline(t_start=0.0, t_end=15.0, step=0.1)
     imposed = stressfunction(time_instance, hstep(offset=1.0, amp=2.0))

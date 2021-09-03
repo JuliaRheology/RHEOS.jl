@@ -120,6 +120,7 @@ end
 
 """
     stressfunction(data::RheoTimeData, f::T) where T<:Function
+    stressfunction(f::T, data::RheoTimeData) where T<:Function
 
 Accepts a `RheoTimeData` and outputs a new `RheoTimeData` with a stress imposed.
 The stress signal is determined by the function provided, which should take
@@ -132,6 +133,28 @@ function stressfunction(data::RheoTimeData, f::T) where T<:Function
                                     (comment="stress function applied to timeline",) ) ]
     return RheoTimeData(convert(Vector{RheoFloat}, map(f, data.t)), data.ϵ, data.t, log)
 end
+
+function stressfunction(f::T, data::RheoTimeData) where T<:Function
+    stressfunction(data,f)
+end
+
+"""
+    stressfunction!(data::RheoTimeData, f::T) where T<:Function
+    stressfunction!(f::T, data::RheoTimeData) where T<:Function
+
+In-place version of `stressfunction`.
+"""
+function stressfunction!(data::RheoTimeData, f::T) where T<:Function
+    data.log === nothing ? nothing : push!(data.log, RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
+                                    (comment="stress function applied to timeline",) ) )
+    _setstress!(data, map(f, data.t))
+    return data
+end
+
+function stressfunction!(f::T, data::RheoTimeData) where T<:Function
+    stressfunction!(data,f)
+end
+
 
 #=
 ------------------------------------------------------------------------------
