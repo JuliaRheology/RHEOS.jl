@@ -106,6 +106,34 @@ function _union_stress1strain2()
 end
 @test _union_stress1strain2()
 
+
+
+function __setdata!()
+  t=timeline(0:0.1:1)
+  RHEOS._setdata!(t.ϵ,t.t)
+  b = t.ϵ==t.t
+  RHEOS._setdata!(t.ϵ,2 .* t.t)
+  b && (t.ϵ== 2 .* t.t)
+end
+@test __setdata!()
+
+
+function __mapdata!()
+  t=timeline(0:0.1:1)
+  RHEOS._mapdata!(x->x,t.ϵ,t.t)
+  b = t.ϵ==t.t
+  RHEOS._mapdata!(x->2*x, t.ϵ, t.t)
+  b && (t.ϵ== 2 .* t.t)
+end
+@test __mapdata!()
+
+
+
+
+
+
+
+
 function _freeze_params()
     SLS2_mod = freeze_params( SLS2, G₀=2, η₂=3.5)
 

@@ -537,7 +537,7 @@ function _setdata!(a::Vector{RheoFloat}, t::Vector{T}) where {T<:Real}
     if length(a) == 0
         append!(a,t)
     elseif length(a) == length(t)
-        a .= b
+        a .= t
     else
         empty!(a)
         append!(a,t)
