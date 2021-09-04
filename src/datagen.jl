@@ -110,7 +110,6 @@ In-place version of `strainfunction`.
 function strainfunction!(data::RheoTimeData, f::T) where T<:Function
     data.log === nothing ? nothing : push!(data.log, RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
                                     (comment="strain function applied to timeline",) ) )
-    # _setstrain!(data, map(f, data.t))
     _mapdata!(f,data.ϵ,data.t) 
     return data
 end
@@ -130,8 +129,9 @@ time as its only argument. The original data's time signal is used.
 Normally used with a `RheoTimeData` generated using the `timeline` function.
 """
 function stressfunction(data::RheoTimeData, f::T) where T<:Function
-    log = data.log === nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
-                                    (comment="stress function applied to timeline",) ) ]
+    log = logadd_process(data, :stressfunction, params=(f=f,), comment="Stress function applied to timeline" )
+    # log = data.log === nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
+    #                                 (comment="stress function applied to timeline",) ) ]
     return RheoTimeData(convert(Vector{RheoFloat}, map(f, data.t)), data.ϵ, data.t, log)
 end
 
@@ -146,9 +146,9 @@ end
 In-place version of `stressfunction`.
 """
 function stressfunction!(data::RheoTimeData, f::T) where T<:Function
-    data.log === nothing ? nothing : push!(data.log, RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
-                                    (comment="stress function applied to timeline",) ) )
-    # _setstress!(data, map(f, data.t))
+    logadd_process!(data, :stressfunction, params=(f=f,), comment="Stress function applied to timeline" )
+    # data.log === nothing ? nothing : push!(data.log, RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
+    #                                 (comment="stress function applied to timeline",) ) )
     _mapdata!(f,data.σ,data.t) 
     return data
 end

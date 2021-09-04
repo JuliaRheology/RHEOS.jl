@@ -51,6 +51,31 @@ end
 
 
 
+function loginit(savelog, action, info)
+    if savelog
+        RheoLogItem( (type=:source, action...), info )
+    else
+        nothing
+    end
+end
+
+
+function logadd_process(d, funct::Symbol; params=NamedTuple(), keywords=NamedTuple(), comment="Process added", info=(comment=comment,))
+    d.log === nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=funct, params=params, keywords=keywords), info ) ]
+end
+
+function logadd_process!(d, funct::Symbol; params=NamedTuple(), keywords=NamedTuple(), comment="Process added", info=(comment=comment,))
+    if d.log !== nothing
+        push!(d.log, RheoLogItem( (type=:process, funct=funct, params=params, keywords=keywords), info) )
+    end
+end
+
+
+function logadd_analysis!(d, funct::Symbol; params=NamedTuple(), keywords=NamedTuple(), comment="Process added", info=(comment=comment,))
+    if d.log !== nothing
+        push!(d.log, RheoLogItem( (type=:analysis, funct=funct, params=params, keywords=keywords), info) )
+    end
+end
 
 
 
