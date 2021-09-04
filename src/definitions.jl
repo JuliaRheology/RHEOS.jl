@@ -240,36 +240,15 @@ end
 
 
 
-# Utilities for in-place functions
-#
-# Internal - Not be exposed to the user.
-
-function _settime!(data::RheoTimeData, t::Vector{T}) where {T<:Real}
-    if hastime(data)
-      empty!(data.t)
-    end
-    append!(data.t, rheoconvert(t))
-end
-
-function _setstrain!(data::RheoTimeData, ϵ::Vector{T}) where {T<:Real}
-    if hasstrain(data)
-      empty!(data.ϵ)
-    end
-    append!(data.ϵ, rheoconvert(ϵ))
-end
-
-function _setstress!(data::RheoTimeData, σ::Vector{T}) where {T<:Real}
-    if hasstress(data)
-      empty!(data.σ)
-    end
-    append!(data.σ, rheoconvert(σ))
-end
-
-
 
 
 # Constants that are useful for certain processing function to determine which module to use.
 @enum LoadingType strain_imposed=1 stress_imposed=2
+
+
+
+
+
 
 
 
@@ -546,25 +525,38 @@ end
 
 
 
+
+
+#
 # Utilities for in-place functions
 #
 # Internal - Not be exposed to the user.
+#
 
-function _setfreq!(data::RheoTimeData, ω::Vector{T}) where {T<:Real}
-    if hasfreq(data)
-      empty!(data.ω)
+function _setdata!(a::Vector{RheoFloat}, t::Vector{T}) where {T<:Real}
+    if length(a) == 0
+        append!(a,t)
+    elseif length(a) == length(t)
+        a .= b
+    else
+        empty!(a)
+        append!(a,t)
     end
-    append!(data.ω, rheoconvert(ω))
 end
 
-function _setmodulus!(data::RheoTimeData, Gp::Vector{T1}, Gpp::Vector{T2}) where {T1<:Real,T2<:Real}
-    if hasmodulus(data)
-      empty!(data.Gp)
-      empty!(data.Gpp)
+function _mapdata!(f::Function, a::Vector{RheoFloat}, t::Vector{RheoFloat})
+    if length(a) != length(t)
+        resize!(a,length(t))
     end
-    append!(data.Gp, rheoconvert(Gp))
-    append!(data.Gpp, rheoconvert(Gpp))
+    map!(f,a,t)
 end
+
+
+
+
+
+
+
 
 
 
@@ -1436,7 +1428,7 @@ creepcomp(m::RheoModelClass; kwargs...) =  x -> creepcomp(m, x, symbol_to_unicod
 
 """
     storagemod(m[, ω, params])
-
+Je viens de lire le proposal. Mon commentaire princi
 provide access to the storage modulus (G') of a given model m.
 
 * When a frequency value is provided (or an array of frequency values), the function returns the corresponding value(s) of the storage modulus.
@@ -1606,8 +1598,8 @@ Examples:
 Examples:
 
     m = RheoModel(Maxwell, k=1., η=1)
-    Gpp = dynamicmod(m)
-    Gpp([0,1,2])
+    Gd = dynamicmod(m)
+    Gd([0,1,2])
 
 Note: use abs() and angle() to get the magnitude and phase of the complex modulus.
 """

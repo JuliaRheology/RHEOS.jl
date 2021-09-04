@@ -110,7 +110,8 @@ In-place version of `strainfunction`.
 function strainfunction!(data::RheoTimeData, f::T) where T<:Function
     data.log === nothing ? nothing : push!(data.log, RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
                                     (comment="strain function applied to timeline",) ) )
-    _setstrain!(data, map(f, data.t))
+    # _setstrain!(data, map(f, data.t))
+    _mapdata!(f,data.ϵ,data.t) 
     return data
 end
 
@@ -147,7 +148,8 @@ In-place version of `stressfunction`.
 function stressfunction!(data::RheoTimeData, f::T) where T<:Function
     data.log === nothing ? nothing : push!(data.log, RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
                                     (comment="stress function applied to timeline",) ) )
-    _setstress!(data, map(f, data.t))
+    # _setstress!(data, map(f, data.t))
+    _mapdata!(f,data.σ,data.t) 
     return data
 end
 
