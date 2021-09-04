@@ -51,9 +51,9 @@ end
 
 
 
-function loginit(savelog, action, info)
+function loginit(savelog, funct::Symbol; params=NamedTuple(), keywords=NamedTuple(), comment="Process added", info=(comment=comment,))
     if savelog
-        RheoLogItem( (type=:source, action...), info )
+        [ RheoLogItem( (type=:source, funct=funct, params=params, keywords=keywords), info ) ]
     else
         nothing
     end
@@ -80,6 +80,8 @@ end
 
 
 
+
+
 # ----------
 # Utilities
 # ----------
@@ -94,6 +96,44 @@ rheoconvert(t::Real) = RheoFloat(t)
 rheoconvert(t::RheoFloat) = t
 rheoconvert(t::Vector{T}) where T<:Real = convert(Vector{RheoFloat},t)
 rheoconvert(t::Vector{RheoFloat}) = t
+
+
+
+#
+# Utilities for in-place functions
+#
+# Internal - Not be exposed to the user.
+#
+
+"""
+   _setdata!(a::Vector{RheoFloat}, t::Vector{T}) where {T<:Real}
+ 
+In place replacement of the values of a vector `a` with the values of another one.
+"""
+function _setdata!(a::Vector{RheoFloat}, t::Vector{T}) where {T<:Real}
+    if length(a) == 0
+        append!(a,t)
+    elseif length(a) == length(t)
+        a .= t
+    else
+        empty!(a)
+        append!(a,t)
+    end
+end
+
+"""
+    _mapdata!(f::Function, a::Vector{RheoFloat}, t::Vector{T} where {T<:Real})
+
+In place application of a function to the elements of a vector.
+Useful for data generation through strainfunctions and related.
+"""
+function _mapdata!(f::Function, a::Vector{RheoFloat}, t::Vector{T} where {T<:Real})
+    if length(a) != length(t)
+        resize!(a,length(t))
+    end
+    map!(f,a,t)
+end
+
 
 
 
@@ -132,11 +172,23 @@ struct RheoTimeData
 
 end
 
-function RheoTimeData(;strain = RheoFloat[], ϵ::Vector{T1} = strain, stress = RheoFloat[], σ::Vector{T2} = stress, t::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoTimeData(;strain = RheoFloat[], ϵ::Vector{T1} = strain, stress = RheoFloat[], σ::Vector{T2} = stress, t::Vector{T3} = RheoFloat[], 
+                      comment="Created from generic constructor", savelog = true, log = nothing)  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_time_data_consistency(t,ϵ,σ)
-    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
-                    log === nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
+         
+    RheoTimeData(rheoconvert(σ), rheoconvert(ϵ), rheoconvert(t),
+                 isnothing(log) ? loginit(savelog, :RheoTimeData, params = NamedTuple(), keywords = (ϵ=ϵ,σ=σ,t=t,comment=comment),
+                                          info=(comment=comment, type=typecheck) )    
+                                  : log ) 
 end
+
+
+# function RheoTimeData(;strain = RheoFloat[], ϵ::Vector{T1} = strain, stress = RheoFloat[], σ::Vector{T2} = stress, t::Vector{T3} = RheoFloat[], 
+#                       comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
+#     typecheck = check_time_data_consistency(t,ϵ,σ)
+#     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
+#                     log === nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
+# end
 
 
 
@@ -548,44 +600,6 @@ function getloss(d::RheoFreqData)
 end
 
 
-
-
-
-
-#
-# Utilities for in-place functions
-#
-# Internal - Not be exposed to the user.
-#
-
-"""
-   _setdata!(a::Vector{RheoFloat}, t::Vector{T}) where {T<:Real}
- 
-In place replacement of the values of a vector `a` with the values of another one.
-"""
-function _setdata!(a::Vector{RheoFloat}, t::Vector{T}) where {T<:Real}
-    if length(a) == 0
-        append!(a,t)
-    elseif length(a) == length(t)
-        a .= t
-    else
-        empty!(a)
-        append!(a,t)
-    end
-end
-
-"""
-    _mapdata!(f::Function, a::Vector{RheoFloat}, t::Vector{T} where {T<:Real})
-
-In place application of a function to the elements of a vector.
-Useful for data generation through strainfunctions and related.
-"""
-function _mapdata!(f::Function, a::Vector{RheoFloat}, t::Vector{T} where {T<:Real})
-    if length(a) != length(t)
-        resize!(a,length(t))
-    end
-    map!(f,a,t)
-end
 
 
 
