@@ -53,7 +53,7 @@ end
 
 function loginit(savelog, funct::Symbol; params=NamedTuple(), keywords=NamedTuple(), comment="Process added", info=(comment=comment,))
     if savelog
-        [ RheoLogItem( (type=:source, funct=funct, params=params, keywords=keywords), info ) ]
+        [RheoLogItem( (type=:source, funct=funct, params=params, keywords=keywords), info )]
     else
         nothing
     end
@@ -178,8 +178,8 @@ function RheoTimeData(;strain = RheoFloat[], ϵ::Vector{T1} = strain, stress = R
          
     RheoTimeData(rheoconvert(σ), rheoconvert(ϵ), rheoconvert(t),
                  isnothing(log) ? loginit(savelog, :RheoTimeData, params = NamedTuple(), keywords = (ϵ=ϵ,σ=σ,t=t,comment=comment),
-                                          info=(comment=comment, type=typecheck) )    
-                                  : log ) 
+                                           info=(comment=comment, type=typecheck) )  
+                                : log ) 
 end
 
 
@@ -473,11 +473,14 @@ struct RheoFreqData
     log::Union{RheoLog,Nothing}
 end
 
-function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat[], omega = RheoFloat[], ω::Vector{T3} = omega, comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat[], omega = RheoFloat[], ω::Vector{T3} = omega, 
+                       comment="Created from generic constructor", savelog = true, log = nothing)  where {T1<:Real, T2<:Real, T3<:Real}
 
     typecheck = check_freq_data_consistency(ω,Gp,Gpp)
-    RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω),
-    log === nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
+    RheoFreqData(rheoconvert(Gp), rheoconvert(Gpp), rheoconvert(ω),
+                 isnothing(log) ? loginit(savelog, :RheoFreqData, params = NamedTuple(), keywords = (ω=ω,Gp=Gp,Gpp=Gpp,comment=comment),
+                                           info=(comment=comment, type=typecheck) )  
+                                : log ) 
 end
 
 

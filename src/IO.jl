@@ -99,12 +99,8 @@ function importcsv(filepath::String; delimiter = ',', header = false, comment = 
     #  @assert (!isnothing(t_col) && isnothing(ω_col)) || (isnothing(t_col) && !isnothing(ω_col)) "Data must contain either \"time\" or \"frequency\" "
     #  @assert endswith(lowercase(filepath), ".csv") "filepath must point to a .csv file."
 
-        log = if savelog
-                info = (comment=comment, folder=pwd(), stats=(t_min=data[1,t_col],t_max=data[end,t_col], n_sample=size(data[:,t_col])))
-                RheoLogItem( (type=:source, funct=:importcsv, params=(filepath=filepath,), keywords=(t=t_col, σ=σ_col, ϵ=ϵ_col, header=header)), info )
-              else
-                nothing
-              end
+        log = loginit(savelog, :importcsv, params=(filepath=filepath,), keywords=(t=t_col, σ=σ_col, ϵ=ϵ_col, header=header),
+                      info = (comment=comment, folder=pwd(), stats=(t_min=data[1,t_col],t_max=data[end,t_col], n_sample=size(data[:,t_col]))))
 
         # generate RheologyData struct and output
         if !isnothing(ϵ_col) && !isnothing(σ_col)
@@ -127,14 +123,11 @@ function importcsv(filepath::String; delimiter = ',', header = false, comment = 
         Gpp_col = look_for_csv_col(:Gpp, cols, header_cells, ("Gpp", "G''", "loss modulus"))
 
         # Add error message for missing loss moduli / error loading
-        
-        log = if savelog
-                info = (comment=comment, folder=pwd(), stats=(ω_min=data[1,ω_col],ω_max=data[end,ω_col], n_sample=size(data[:,ω_col])))
-                RheoLogItem( (type=:source, funct=:importcsv, params=(filepath=filepath,), keywords=(ω=ω_col, Gp=Gp_col, Gpp=Gpp_col, header=header)), info )
-              else
-                nothing
-              end
+ 
+        log = loginit(savelog, :importcsv, params=(filepath=filepath,), keywords=(ω=ω_col, Gp=Gp_col, Gpp=Gpp_col, header=header),
+                      info = (comment=comment, folder=pwd(), stats=(ω_min=data[1,ω_col],ω_max=data[end,ω_col], n_sample=size(data[:,ω_col]))))
 
+      
         return RheoFreqData(ω = data[:,ω_col], Gp = data[:,Gp_col], Gpp = data[:,Gpp_col], log = log)
 
     end
