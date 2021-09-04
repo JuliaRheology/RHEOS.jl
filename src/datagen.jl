@@ -16,7 +16,7 @@ Generate `RheoTimeData` struct with only the time data based on the range provid
 `timeline(0:0.1:10)` returns a RheoTimeData with only time data, with the following series: [0.  0.1   0.2  ...  9.9  10].
 """
 function timeline(r::R; savelog = true) where R <: AbstractRange
-    log = savelog ? [RheoLogItem( (type=:source, funct=:timeline, params=(r,), keywords=()), (comment="timeline created", type=time_only))] : nothing
+    log = loginit(savelog,:timeline, params=(r,), info=(comment="timeline created", type=time_only))
     RheoTimeData([], [], Vector{RheoFloat}(r), log)
 end
 
@@ -53,7 +53,7 @@ function frequencyspec(r::R; logscale=true, savelog = true) where R <: AbstractR
     else
         ω=Vector{RheoFloat}(r)
     end
-    log = savelog ? [RheoLogItem( (type=:source, funct=:frequencyspec, params=(r,), keywords=(logscale=logscale,)), (comment="frequency range created", type=freq_only))] : nothing
+    log = loginit(savelog, :frequencyspec, params=(r,), keywords=(logscale=logscale,), info=(comment="frequency range created", type=freq_only))
     RheoFreqData([], [], ω, log)
 end
 
@@ -91,9 +91,7 @@ time as its only argument. The original data's time signal is used.
 Normally used with a RheoTimeData generated using the `timeline` function.
 """
 function strainfunction(data::RheoTimeData, f::T) where T<:Function
-    log = data.log === nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
-                                    (comment="strain function applied to timeline",) ) ]
-
+    log = logadd_process(data, :strainfunction, params=(f=f,), comment="Strain function applied to timeline" )
     return RheoTimeData(data.σ, rheoconvert(map(f, data.t)), data.t, log)
 end
 
@@ -108,8 +106,7 @@ end
 In-place version of `strainfunction`.
 """
 function strainfunction!(data::RheoTimeData, f::T) where T<:Function
-    data.log === nothing ? nothing : push!(data.log, RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
-                                    (comment="strain function applied to timeline",) ) )
+    logadd_process!(data, :strainfunction, params=(f=f,), comment="Strain function applied to timeline" )
     _mapdata!(f,data.ϵ,data.t) 
     return data
 end
@@ -130,8 +127,6 @@ Normally used with a `RheoTimeData` generated using the `timeline` function.
 """
 function stressfunction(data::RheoTimeData, f::T) where T<:Function
     log = logadd_process(data, :stressfunction, params=(f=f,), comment="Stress function applied to timeline" )
-    # log = data.log === nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
-    #                                 (comment="stress function applied to timeline",) ) ]
     return RheoTimeData(convert(Vector{RheoFloat}, map(f, data.t)), data.ϵ, data.t, log)
 end
 
@@ -147,8 +142,6 @@ In-place version of `stressfunction`.
 """
 function stressfunction!(data::RheoTimeData, f::T) where T<:Function
     logadd_process!(data, :stressfunction, params=(f=f,), comment="Stress function applied to timeline" )
-    # data.log === nothing ? nothing : push!(data.log, RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
-    #                                 (comment="stress function applied to timeline",) ) )
     _mapdata!(f,data.σ,data.t) 
     return data
 end

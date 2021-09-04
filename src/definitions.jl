@@ -183,13 +183,6 @@ function RheoTimeData(;strain = RheoFloat[], ϵ::Vector{T1} = strain, stress = R
 end
 
 
-# function RheoTimeData(;strain = RheoFloat[], ϵ::Vector{T1} = strain, stress = RheoFloat[], σ::Vector{T2} = stress, t::Vector{T3} = RheoFloat[], 
-#                       comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
-#     typecheck = check_time_data_consistency(t,ϵ,σ)
-#     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
-#                     log === nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
-# end
-
 
 
 function Base.show(io::IO, d::RheoTimeData)
