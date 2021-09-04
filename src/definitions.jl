@@ -533,6 +533,11 @@ end
 # Internal - Not be exposed to the user.
 #
 
+"""
+   _setdata!(a::Vector{RheoFloat}, t::Vector{T}) where {T<:Real}
+ 
+In place replacement of the values of a vector `a` with the values of another one.
+"""
 function _setdata!(a::Vector{RheoFloat}, t::Vector{T}) where {T<:Real}
     if length(a) == 0
         append!(a,t)
@@ -544,7 +549,13 @@ function _setdata!(a::Vector{RheoFloat}, t::Vector{T}) where {T<:Real}
     end
 end
 
-function _mapdata!(f::Function, a::Vector{RheoFloat}, t::Vector{RheoFloat})
+"""
+    _mapdata!(f::Function, a::Vector{RheoFloat}, t::Vector{T} where {T<:Real})
+
+In place application of a function to the elements of a vector.
+Useful for data generation through strainfunctions and related.
+"""
+function _mapdata!(f::Function, a::Vector{RheoFloat}, t::Vector{T} where {T<:Real})
     if length(a) != length(t)
         resize!(a,length(t))
     end
