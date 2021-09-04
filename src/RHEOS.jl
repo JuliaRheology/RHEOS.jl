@@ -13,7 +13,7 @@ using InverseLaplace
 import MittagLeffler: mittleff as mittlefforiginal
 import SpecialFunctions: gamma
 
-import DSP.conv
+import DSP: conv, filtfilt, Windows
 
 # Base and stdlib imports
 import Base: +, -, *,|
@@ -66,7 +66,7 @@ export SLS2, PowerLawPlateau
 
 # datagen.jl
 export timeline
-export strainfunction, stressfunction
+export strainfunction, strainfunction!, stressfunction, stressfunction!
 export hstep, ramp, stairs, square, sawtooth, triangle
 export frequencyspec
 

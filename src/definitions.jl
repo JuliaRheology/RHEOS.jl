@@ -49,6 +49,34 @@ function Base.show(io::IO, ::MIME"text/plain", rl::RheoLog)
 end
 
 
+
+
+
+
+
+
+# ----------
+# Utilities
+# ----------
+
+
+"""
+    rheoconvert(t)
+
+Converts if required the scalar value or vector of real number `t` to the type `RheoFloat`.
+"""
+rheoconvert(t::Real) = RheoFloat(t)
+rheoconvert(t::RheoFloat) = t
+rheoconvert(t::Vector{T}) where T<:Real = convert(Vector{RheoFloat},t)
+rheoconvert(t::Vector{RheoFloat}) = t
+
+
+
+
+
+
+
+
 #=
 -------------------------------
 Time data related functionality
@@ -84,6 +112,38 @@ function RheoTimeData(;strain = RheoFloat[], ϵ::Vector{T1} = strain, stress = R
     RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
                     log === nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
 end
+
+
+
+function Base.show(io::IO, d::RheoTimeData)
+    b = length(d.t) > 10
+    n = b ? 10 : length(d.t)
+
+    if d.t != RheoFloat[]
+        print("t =\t")
+        for i = 1:n
+            print("$(d.t[i])\t")
+        end
+        println( b ? "..." : "")
+    end
+    if d.ϵ != RheoFloat[]
+        print("ϵ =\t")
+        for i = 1:n
+            print("$(d.ϵ[i])\t")
+        end
+        println( b ? "..." : "")
+    end
+    if d.σ != RheoFloat[]
+        print("σ =\t")
+        for i = 1:n
+            print("$(d.σ[i])\t")
+        end
+        println( b ? "..." : "")
+    end
+end
+
+
+
 
 @enum TimeDataType invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
 
@@ -180,37 +240,38 @@ end
 
 
 
+# Utilities for in-place functions
+#
+# Internal - Not be exposed to the user.
+
+function _settime!(data::RheoTimeData, t::Vector{T}) where {T<:Real}
+    if hastime(data)
+      empty!(data.t)
+    end
+    append!(data.t, rheoconvert(t))
+end
+
+function _setstrain!(data::RheoTimeData, ϵ::Vector{T}) where {T<:Real}
+    if hasstrain(data)
+      empty!(data.ϵ)
+    end
+    append!(data.ϵ, rheoconvert(ϵ))
+end
+
+function _setstress!(data::RheoTimeData, σ::Vector{T}) where {T<:Real}
+    if hasstress(data)
+      empty!(data.σ)
+    end
+    append!(data.σ, rheoconvert(σ))
+end
 
 
 
+
+# Constants that are useful for certain processing function to determine which module to use.
 @enum LoadingType strain_imposed=1 stress_imposed=2
 
-function Base.show(io::IO, d::RheoTimeData)
-    b = length(d.t) > 10
-    n = b ? 10 : length(d.t)
 
-    if d.t != RheoFloat[]
-        print("t =\t")
-        for i = 1:n
-            print("$(d.t[i])\t")
-        end
-        println( b ? "..." : "")
-    end
-    if d.ϵ != RheoFloat[]
-        print("ϵ =\t")
-        for i = 1:n
-            print("$(d.ϵ[i])\t")
-        end
-        println( b ? "..." : "")
-    end
-    if d.σ != RheoFloat[]
-        print("σ =\t")
-        for i = 1:n
-            print("$(d.σ[i])\t")
-        end
-        println( b ? "..." : "")
-    end
-end
 
 function +(d1::RheoTimeData, d2::RheoTimeData)
 
@@ -330,6 +391,11 @@ function |(d1::RheoTimeData, d2::RheoTimeData)
 
     return RheoTimeData(d1.σ, d2.ϵ, d1.t, log)
 end
+
+
+
+
+
 #=
 ------------------------------------
 Frequency data related functionality
@@ -367,6 +433,86 @@ end
 
 
 
+
+function Base.show(io::IO, d::RheoFreqData)
+    b = length(d.ω) > 10
+    n = b ? 10 : length(d.ω)
+
+    if d.ω != RheoFloat[]
+        print("ω =\t")
+        for i = 1:n
+            print("$(d.ω[i])\t")
+        end
+        println( b ? "..." : "")
+    end
+    if d.Gp != RheoFloat[]
+        print("Gp =\t")
+        for i = 1:n
+            print("$(d.Gp[i])\t")
+        end
+        println( b ? "..." : "")
+    end
+    if d.Gpp != RheoFloat[]
+        print("Gpp =\t")
+        for i = 1:n
+            print("$(d.Gpp[i])\t")
+        end
+        println( b ? "..." : "")
+    end
+end
+
+
+
+
+
+
+@enum FreqDataType invalid_freq_data=-1 freq_only=0 with_modulus=1
+
+function check_freq_data_consistency(o,gp,gpp)
+    @assert (length(o)>0)  "Freq data empty"
+
+    gpdef=(gp != RheoFloat[])
+    gppdef=(gpp != RheoFloat[])
+    if (gpdef && gppdef)
+        @assert (length(gp)==length(o)) && (length(gpp)==length(o)) "Data length inconsistent"
+        return with_modulus
+    end
+
+    if ((!gpdef) && (!gppdef))
+        return freq_only
+    end
+
+    return invalid_freq_data
+
+end
+
+function rheofreqdatatype(d::RheoFreqData)
+    return check_freq_data_consistency(d.ω,d.Gp,d.Gpp)
+end
+
+
+
+
+"""
+    hasfreq(d::RheoFreqData)
+
+returns 'true' if d contains a frequency array
+"""
+function hasfreq(d::RheoFreqData)
+    return (d.ω != RheoFloat[])
+end
+
+"""
+    hasmodulus(d::RheoFreqData)
+
+returns 'true' if d contains a frequency array
+"""
+function hasmodulus(d::RheoFreqData)
+    (d.Gp != RheoFloat[]) && (d.Gpp != RheoFloat[])
+end
+
+
+
 """
     getomega(d::RheoFreqData)
 
@@ -400,58 +546,27 @@ end
 
 
 
+# Utilities for in-place functions
+#
+# Internal - Not be exposed to the user.
 
-
-@enum FreqDataType invalid_freq_data=-1 freq_only=0 with_modulus=1
-
-function check_freq_data_consistency(o,gp,gpp)
-    @assert (length(o)>0)  "Freq data empty"
-
-    gpdef=(gp != RheoFloat[])
-    gppdef=(gpp != RheoFloat[])
-    if (gpdef && gppdef)
-        @assert (length(gp)==length(o)) && (length(gpp)==length(o)) "Data length inconsistent"
-        return with_modulus
+function _setfreq!(data::RheoTimeData, ω::Vector{T}) where {T<:Real}
+    if hasfreq(data)
+      empty!(data.ω)
     end
-
-    if ((!gpdef) && (!gppdef))
-        return freq_only
-    end
-
-    return invalid_freq_data
-
+    append!(data.ω, rheoconvert(ω))
 end
 
-function rheofreqdatatype(d::RheoFreqData)
-    return check_freq_data_consistency(d.ω,d.Gp,d.Gpp)
+function _setmodulus!(data::RheoTimeData, Gp::Vector{T1}, Gpp::Vector{T2}) where {T1<:Real,T2<:Real}
+    if hasmodulus(data)
+      empty!(data.Gp)
+      empty!(data.Gpp)
+    end
+    append!(data.Gp, rheoconvert(Gp))
+    append!(data.Gpp, rheoconvert(Gpp))
 end
 
-function Base.show(io::IO, d::RheoFreqData)
-    b = length(d.ω) > 10
-    n = b ? 10 : length(d.ω)
 
-    if d.ω != RheoFloat[]
-        print("ω =\t")
-        for i = 1:n
-            print("$(d.ω[i])\t")
-        end
-        println( b ? "..." : "")
-    end
-    if d.Gp != RheoFloat[]
-        print("Gp =\t")
-        for i = 1:n
-            print("$(d.Gp[i])\t")
-        end
-        println( b ? "..." : "")
-    end
-    if d.Gpp != RheoFloat[]
-        print("Gpp =\t")
-        for i = 1:n
-            print("$(d.Gpp[i])\t")
-        end
-        println( b ? "..." : "")
-    end
-end
 
 #=
 ---------------------------------------
@@ -516,18 +631,6 @@ function showlog(d::Union{RheoTimeData,RheoFreqData})
     end
 end
 
-
-
-"""
-    rheoconvert(t)
-
-Converts if required the scalar value or vector of real number `t` to the type `RheoFloat`.
-"""
-
-rheoconvert(t::Real) = RheoFloat(t)
-rheoconvert(t::RheoFloat) = t
-rheoconvert(t::Vector{T}) where T<:Real = convert(Vector{RheoFloat},t)
-rheoconvert(t::Vector{RheoFloat}) = t
 
 
 

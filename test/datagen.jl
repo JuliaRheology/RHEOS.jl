@@ -19,11 +19,24 @@ end
 function _strainfunction()
     time_instance = timeline(t_start=0.0, t_end=15.0, step=0.1)
 
-    strain_imposed = strainfunction(time_instance, t -> t)
+    strain_imposed = strainfunction(t->t, time_instance)
 
     typeof(strain_imposed)==RheoTimeData && strain_imposed.t==(0.0:0.1:15.0) && strain_imposed.ϵ==(0.0:0.1:15.0)
 end
 @test _strainfunction()
+
+function _strainfunction!()
+    data = timeline(t_start=0.0, t_end=15.0, step=0.1)
+
+    # check both first assignment and replacement
+    strainfunction!(t->2*t, data)
+    b = data.ϵ==(0.0:0.2:30.0)
+    strainfunction!(t->t, data)
+
+    b && data.ϵ==(0.0:0.1:15.0)
+end
+@test _strainfunction!()
+
 
 function _stressfunction()
     time_instance = timeline(t_start=0.0, t_end=15.0, step=0.1)
@@ -33,6 +46,19 @@ function _stressfunction()
     typeof(stress_imposed)==RheoTimeData && stress_imposed.t==(0.0:0.1:15.0) && stress_imposed.σ==(0.0:0.1:15.0)
 end
 @test _stressfunction()
+
+function _stressfunction!()
+    data = timeline(t_start=0.0, t_end=15.0, step=0.1)
+
+    # check both first assignment and replacement
+    stressfunction!(t->2*t, data)
+    b = data.σ==(0.0:0.2:30.0)
+    stressfunction!(t->t, data)
+
+    b && data.σ==(0.0:0.1:15.0)
+end
+@test _stressfunction!()
+
 
 function _hstep()
     time_instance = timeline(t_start=0.0, t_end=15.0, step=0.1)
