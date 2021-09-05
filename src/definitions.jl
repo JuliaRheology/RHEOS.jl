@@ -261,6 +261,11 @@ function check_time_data_consistency(t,e,s)
 
 end
 
+"""
+    rheotimedatatype(d::RheoTimeData)
+
+check the validity of the data and return information about the type of data (time only, with strain, with stress, or both.
+"""
 function rheotimedatatype(d::RheoTimeData)
     return check_time_data_consistency(d.t,d.ϵ,d.σ)
 end
