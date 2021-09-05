@@ -219,22 +219,33 @@ end
 
 
 
-@enum TimeDataType invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
+@enum TimeDataType invalid=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
 
+
+
+@enum RheosExceptionType timedata_invalid freqdata_invalid uniform_sampling_required model_parameters_invalid
 
 struct RheosException <: Exception
-        var::String
+    type::RheosExceptionType
+    var::String
 end
 
 function Base.showerror(io::IO, err::RheosException)
-    print(io, "RheosException: $(err.var)")
+    if err.type==timedata_invalid
+        print(io, "Rheos Exception - Invalid Time data: $(err.var)")
+    elseif err.type==freqdata_invalid 
+        print(io, "Rheos Exception - Invalid Frequency data: $(err.var)")
+    else
+        print(io, "Rheos Exception: $(err.var)")
+    end
+       
 end
 
 # throw(RheosException("this code"))
 
 function check_time_data_consistency(t,e,s)
     # @assert (length(t)>0)  "Time data empty"
-    length(t)>0 || throw(RheosException("Time data empty"))
+    length(t)>0 || throw(RheosException(timedata_invalid,"Time data empty"))
 
     sdef=(s != RheoFloat[])
     edef=(e != RheoFloat[])
@@ -244,12 +255,12 @@ function check_time_data_consistency(t,e,s)
     end
 
     if (sdef && (!edef))
-        (length(s)==length(t))  || throw(RheosException("Time data length inconsistent"))
+        (length(s)==length(t))  || throw(RheosException(timedata_invalid,"Time data length inconsistent"))
         return stress_only
     end
 
     if (edef && (!sdef))
-        (length(e)==length(t))  || throw(RheosException("Time data length inconsistent"))
+        (length(e)==length(t))  || throw(RheosException(timedata_invalid,"Time data length inconsistent"))
         return strain_only
     end
 
@@ -257,7 +268,7 @@ function check_time_data_consistency(t,e,s)
         return time_only
     end
 
-    return invalid_time_data
+    return invalid
 
 end
 
@@ -347,8 +358,8 @@ function +(d1::RheoTimeData, d2::RheoTimeData)
 
     type1 = rheotimedatatype(d1)
     type2 = rheotimedatatype(d2)
-    @assert (type1!=invalid_time_data) "Addition error: first parameter invalid"
-    @assert (type2!=invalid_time_data) "Addition error: second parameter invalid"
+    @assert (type1!=invalid) "Addition error: first parameter invalid"
+    @assert (type2!=invalid) "Addition error: second parameter invalid"
     @assert (type1==type2) "Addition error: parameters inconsistent"
     @assert (type1!=time_only) "Addition error: time only data cannot be added"
     @assert (d1.t == d2.t) "Addition error: timelines inconsistent"
@@ -378,8 +389,8 @@ function -(d1::RheoTimeData, d2::RheoTimeData)
 
     type1 = rheotimedatatype(d1)
     type2 = rheotimedatatype(d2)
-    @assert (type1!=invalid_time_data) "Subtraction error: first parameter invalid"
-    @assert (type2!=invalid_time_data) "Subtraction error: second parameter invalid"
+    @assert (type1!=invalid) "Subtraction error: first parameter invalid"
+    @assert (type2!=invalid) "Subtraction error: second parameter invalid"
     @assert (type1==type2) "Subtraction error: parameters inconsistent"
     @assert (type1!=time_only) "Subtraction error: time only data cannot be added"
     @assert (d1.t == d2.t) "Subtraction error: timelines inconsistent"
@@ -408,7 +419,7 @@ end
 function -(d::RheoTimeData)
 
     type = rheotimedatatype(d)
-    @assert (type!=invalid_time_data) "unary - error: parameter invalid"
+    @assert (type!=invalid) "unary - error: parameter invalid"
     @assert (type!=time_only) "unary - error: time only data cannot be manipulated this way"
 
     log = d.log === nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:-, params=(), keywords=() ), () ) ]
@@ -432,7 +443,7 @@ end
 function *(operand::Real, d::RheoTimeData)
 
     type = rheotimedatatype(d)
-    @assert (type!=invalid_time_data) "* error: parameter invalid"
+    @assert (type!=invalid) "* error: parameter invalid"
     @assert (type!=time_only) "* error: time only data cannot be manipulated this way"
 
     log = d.log === nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:*, params=(operand = operand), keywords=() ), () ) ]

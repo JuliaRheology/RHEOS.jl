@@ -235,8 +235,8 @@ function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
 
         type = typeof(type)==Int ? TimeDataType(type) : type
         @assert (typeof(type)==TimeDataType) || (typeof(type)==Int) "Cannot extract frequency data from RheoTimeData"
-        @assert (type!= strain_and_stress) && (type!= invalid_time_data) "Cannot extract both stress and strain"
-        @assert (type!= invalid_time_data) "Cannot extract information from invalid time data"
+        @assert (type!= strain_and_stress) && (type!= invalid) "Cannot extract both stress and strain"
+        @assert (type!= invalid) "Cannot extract information from invalid time data"
         check = rheotimedatatype(self)
 
 
@@ -244,7 +244,7 @@ function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
 
 
         if type == time_only
-            @assert check!= invalid_time_data "Time not available"
+            @assert check!= invalid "Time not available"
             return RheoTimeData([], [], self.t,log)
         elseif type == strain_only
             @assert (check == strain_and_stress) || (check == strain_only) "Strain not available"
