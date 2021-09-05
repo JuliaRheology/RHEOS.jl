@@ -49,7 +49,11 @@ function Base.show(io::IO, ::MIME"text/plain", rl::RheoLog)
 end
 
 
-
+#
+# Internal functions to help manage logs
+#
+# not exported to users
+#
 
 function loginit(savelog, funct::Symbol; params=NamedTuple(), keywords=NamedTuple(), comment="Process added", info=(comment=comment,))
     if savelog
@@ -217,23 +221,35 @@ end
 
 @enum TimeDataType invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
 
+
+struct RheosException <: Exception
+        var::String
+end
+
+function Base.showerror(io::IO, err::RheosException)
+    print(io, "RheosException: $(err.var)")
+end
+
+# throw(RheosException("this code"))
+
 function check_time_data_consistency(t,e,s)
-    @assert (length(t)>0)  "Time data empty"
+    # @assert (length(t)>0)  "Time data empty"
+    length(t)>0 || throw(RheosException("Time data empty"))
 
     sdef=(s != RheoFloat[])
     edef=(e != RheoFloat[])
     if (sdef && edef)
-        @assert (length(s)==length(t)) && (length(e)==length(t)) "Time data length inconsistent"
+        (length(s)==length(t)) && (length(e)==length(t))  || throw(RheosException("Time data length inconsistent"))
         return strain_and_stress
     end
 
     if (sdef && (!edef))
-        @assert (length(s)==length(t)) "Time data length inconsistent"
+        (length(s)==length(t))  || throw(RheosException("Time data length inconsistent"))
         return stress_only
     end
 
     if (edef && (!sdef))
-        @assert (length(e)==length(t)) "Time data length inconsistent"
+        (length(e)==length(t))  || throw(RheosException("Time data length inconsistent"))
         return strain_only
     end
 
