@@ -50,8 +50,9 @@ function resample(d::RheoTimeData; t::Union{Vector{T},R}=RheoFloat[], scale::T1=
     end
     σr = hasstress(d) ? Spline1D(d.t,d.σ)(t) : d.σ
     ϵr = hasstrain(d) ? Spline1D(d.t,d.ϵ)(t) : d.ϵ
-    log = d.log === nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=NamedTuple(), keywords=keywords ),
-                                                             (comment="Resample the data",) ) ]
+
+    log = logadd_process(d, funct=:resample, keywords=keywords, comment="Resample the data" ) 
+
     return RheoTimeData(σr, ϵr, t, log)
 
 end
@@ -183,9 +184,7 @@ function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
         epsilon = Base.invokelatest(imfilter, self.ϵ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
     end
 
-
-    log = self.log === nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:smooth, params=(τ = τ,), keywords=(pad = pad,) ),
-                                        (comment="Smooth data with timescale $τ",) ) ]
+    log = logadd_process(d, funct=:smooth, params=(τ = τ,), keywords=(pad = pad,), comment="Smooth data with timescale $τ" ) 
 
     RheoTimeData(sigma, epsilon, self.t, log)
 
@@ -241,8 +240,8 @@ function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
         check = rheotimedatatype(self)
 
 
-        log = self.log === nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
-                                            (comment="Data field extraction, $type from $check",) ) ]
+        log = logadd_process(self, :process, funct=:extract, params=(type=type,),
+                             init=(comment="Data field extraction, $type from $check",) ) 
 
 
         if type == time_only
@@ -266,8 +265,8 @@ function extract(self::RheoFreqData, type::Union{FreqDataType,Integer})
         check = rheofreqdatatype(self)
         @assert (check == with_modulus) "Frequency and modulii required"
 
-        log = self.log === nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
-                                            (comment="Frequency field extraction",) ) ]
+        log = logadd_process(self, :process, funct=:extract, params=(type=type,),
+                             init=(comment="Frequency field extraction",) ) 
         return RheoFreqData([], [], self.ω,log)
 end
 
