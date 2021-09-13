@@ -496,6 +496,7 @@ Initialise then begin a least squares fitting of the supplied data.
 - `singularity`: Presence of singularity in model
 - `indweight`: indices weighting, see `modelfit` for more discussion
 - `optmethod`: optimisation algorithm used by NLOpt. 
+- `opttimeout`: allows user to set a wall clock timeout on optimisation 
 """
 function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOrNone,
                            hi_bounds::RheovecOrNone, modulus,
@@ -503,13 +504,16 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOr
                            prescribed_dot::Vector{RheoFloat}, measured::Vector{RheoFloat};
                            insight::Bool = false, constant_sampling::Bool=true,
                            singularity::Bool = false, _rel_tol = 1e-4, indweights=nothing,
-                           optmethod::Symbol = :LN_SBPLX)
+                           optmethod::Symbol = :LN_SBPLX, opttimeout::Real)
                            
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(optmethod, length(params_init))
     # opt = Opt(:LN_BOBYQA, length(params_init))    # Passing tests
     # opt = Opt(:LN_COBYLA, length(params_init))    # Failing test - not precise enough?
+
+    # set optimiser timeout
+    maxtime!(opt, opttimeout)
 
     # set lower bounds and upper bounds unless they take null value
     if !isnothing(low_bounds)
