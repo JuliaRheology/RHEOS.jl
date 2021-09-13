@@ -438,8 +438,8 @@ function modelfit(data::RheoTimeData,
                   verbose::Bool = false,
                   rel_tol = 1e-4,
                   diff_method="BD",
-                  weights::Union{Vector{Integer},Nothing,Vector{Int64}} = nothing,
-                  optmethod::Union{Symbol,String}= :LN_SBPLX)
+                  weights::Union{Nothing, Vector{T}} = nothing,
+                  optmethod::Union{Symbol,String}= :LN_SBPLX) where T <: Integer
 
     p0a = fill_init_params(model, symbol_to_unicode(p0))
     loa = fill_lower_bounds(model, symbol_to_unicode(lo))
