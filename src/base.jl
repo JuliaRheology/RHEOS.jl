@@ -504,7 +504,7 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOr
                            prescribed_dot::Vector{RheoFloat}, measured::Vector{RheoFloat};
                            insight::Bool = false, constant_sampling::Bool=true,
                            singularity::Bool = false, _rel_tol = 1e-4, indweights=nothing,
-                           optmethod::Symbol = :LN_SBPLX, opttimeout::Real)
+                           optmethod::Symbol = :LN_SBPLX, opttimeout::Real = -1)
                            
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
