@@ -512,7 +512,7 @@ function modelfit(data::RheoTimeData,
                                                 _rel_tol = rel_tol,
                                                 indweights = weights,
                                                 optmethod = Symbol(optmethod),
-                                                opttimeout = timeout)
+                                                opttimeout = opttimeout)
 
     println("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
 
