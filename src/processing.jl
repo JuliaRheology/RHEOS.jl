@@ -441,7 +441,8 @@ function modelfit(data::RheoTimeData,
                   diff_method="BD",
                   weights::Union{Nothing, Vector{T}} = nothing,
                   optmethod::Union{Symbol,String}= :LN_SBPLX, 
-                  opttimeout::Real = -1) where T <: Integer
+                  opttimeout::Real = -1
+                  optmaxeval::Integer = -1) where T <: Integer
 
     p0a = fill_init_params(model, symbol_to_unicode(p0))
     loa = fill_lower_bounds(model, symbol_to_unicode(lo))
@@ -512,7 +513,8 @@ function modelfit(data::RheoTimeData,
                                                 _rel_tol = rel_tol,
                                                 indweights = weights,
                                                 optmethod = Symbol(optmethod),
-                                                opttimeout = opttimeout)
+                                                opttimeout = opttimeout,
+                                                optmaxeval = optmaxeval)
 
     println("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
 
@@ -637,7 +639,10 @@ function modelstepfit(data::RheoTimeData,
                   hi::Union{NamedTuple,Nothing} = nothing,
                   verbose::Bool = false,
                   rel_tol = 1e-4,
-                  weights::Union{Vector{Integer},Nothing} = nothing)
+                  weights::Union{Nothing, Vector{T}} = nothing,
+                  optmethod::Union{Symbol,String}= :LN_SBPLX, 
+                  opttimeout::Real = -1
+                  optmaxeval::Integer = -1) where T <: Integer
 
     p0a = fill_init_params(model, symbol_to_unicode(p0))
     loa = fill_lower_bounds(model, symbol_to_unicode(lo))
@@ -709,7 +714,10 @@ function modelstepfit(data::RheoTimeData,
                                                     insight = verbose,
                                                     singularity = sing,
                                                     _rel_tol = rel_tol,
-                                                    indweights = weights)
+                                                    indweights = weights,
+                                                    optmethod = Symbol(optmethod),
+                                                    opttimeout = opttimeout,
+                                                    optmaxeval = optmaxeval)
 
     nt = NamedTuple{Tuple(model.freeparams)}(minx)
 
@@ -884,7 +892,10 @@ function dynamicmodelfit(data::RheoFreqData,
                 hi::Union{NamedTuple,Nothing} = nothing,
                 verbose::Bool = false,
                 rel_tol::T = 1e-4,
-                weights::Union{String, Vector{T}}="local") where T<:Real
+                weights::Union{String, Vector{T}}="local",
+                optmethod::Union{Symbol,String}= :LN_SBPLX, 
+                opttimeout::Real = -1
+                optmaxeval::Integer = -1) where T<:Real
 
     p0a = fill_init_params(model, symbol_to_unicode(p0))
     loa = fill_lower_bounds(model, symbol_to_unicode(lo))
@@ -897,7 +908,12 @@ function dynamicmodelfit(data::RheoFreqData,
     @assert modulusexists(modsingGpp) "Loss modulus not defined for this model"
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
-    opt = Opt(:LN_SBPLX, length(p0a))
+    opt = Opt(optmethod, length(p0a))
+
+    maxtime!(opt, opttimeout)
+
+    # set optimiser evaluation ceiling
+    maxeval!(opt, optmaxeval)
 
     if !isnothing(loa)
        lower_bounds!(opt, loa)
