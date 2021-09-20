@@ -498,13 +498,23 @@ Initialise then begin a least squares fitting of the supplied data.
 - `optmethod`: optimisation algorithm used by NLOpt. 
 - `opttimeout`: allows user to set a wall clock timeout on optimisation 
 """
-function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOrNone,
-                           hi_bounds::RheovecOrNone, modulus,
-                           time_series::Vector{RheoFloat}, dt::RheoFloat,
-                           prescribed_dot::Vector{RheoFloat}, measured::Vector{RheoFloat};
-                           insight::Bool = false, constant_sampling::Bool=true,
-                           singularity::Bool = false, _rel_tol = 1e-4, indweights=nothing,
-                           optmethod::Symbol = :LN_SBPLX, opttimeout::Real = -1, optmaxeval::Integer = -1)
+function leastsquares_init(params_init::Vector{RheoFloat},
+                            low_bounds::RheovecOrNone,
+                            hi_bounds::RheovecOrNone, 
+                            modulus,
+                            time_series::Vector{RheoFloat},
+                            dt::RheoFloat,
+                            prescribed_dot::Vector{RheoFloat},
+                            measured::Vector{RheoFloat};
+                            insight::Bool = false,
+                            constant_sampling::Bool=true,
+                            singularity::Bool = false,
+                            _rel_tol::Union{Real,Nothing} = 1e-4,
+                            _rel_tol_f::Union{Real,Nothing} = nothing,
+                            indweights = nothing,
+                            optmethod::Symbol = :LN_SBPLX,
+                            opttimeout::Union{Real,Nothing} = nothing,
+                            optmaxeval::Union{Integer,Nothing} = nothing)
                            
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
@@ -512,11 +522,15 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOr
     # opt = Opt(:LN_BOBYQA, length(params_init))    # Passing tests
     # opt = Opt(:LN_COBYLA, length(params_init))    # Failing test - not precise enough?
 
-    # set optimiser timeout
-    maxtime!(opt, opttimeout)
+    # set optimiser timeout if it has been passed
+    if !isnothing(opttimeout)
+        maxtime!(opt, opttimeout)
+    end
 
-    # set optimiser evaluation ceiling
-    maxeval!(opt, optmaxeval)
+    # set optimiser evaluation ceiling if one has been passed
+    if !isnothing(optmaxeval)
+        maxeval!(opt, optmaxeval)
+    end
 
     # set lower bounds and upper bounds unless they take null value
     if !isnothing(low_bounds)
@@ -529,8 +543,13 @@ function leastsquares_init(params_init::Vector{RheoFloat}, low_bounds::RheovecOr
         upper_bounds!(opt, hi_bounds)
     end
 
-    # set relative tolerance
-    xtol_rel!(opt, _rel_tol)
+    # set optimiser stopping criterion
+    # if ftol_rel is given, use that, otherwise use xtol_rel by default
+    if !isnothing(_rel_tol_f)
+        ftol_rel!(opt, _rel_tol_f)
+    else
+        xtol_rel!(opt, _rel_tol)
+    end
 
     # Convert to float64 to avoid conversion by NLOpt
     params_init = convert(Vector{Float64},params_init)
@@ -623,21 +642,34 @@ function obj_step_weighted(params, grad, modulus, t, prescribed::Float64, measur
     cost = sum((measured - estimated[weights]).^2)
 end
 
-function leastsquares_stepinit(params_init::Vector{RheoFloat}, low_bounds::RheovecOrNone,
-                           hi_bounds::RheovecOrNone, modulus,
-                           time_series::Vector{RheoFloat}, prescribed::RheoFloat,
-                           measured::Vector{RheoFloat}; insight::Bool = false,
-                           singularity::Bool = false, _rel_tol = 1e-4, indweights=nothing,
-                           optmethod::Symbol = :LN_SBPLX, opttimeout::Real = -1, optmaxeval::Integer = -1)
+function leastsquares_stepinit(params_init::Vector{RheoFloat},
+                                low_bounds::RheovecOrNone,
+                                hi_bounds::RheovecOrNone,
+                                modulus,
+                                time_series::Vector{RheoFloat},
+                                prescribed::RheoFloat,
+                                measured::Vector{RheoFloat};
+                                insight::Bool = false,
+                                singularity::Bool = false,
+                                _rel_tol::Union{Real,Nothing} = 1e-4,
+                                _rel_tol_f::Union{Real,Nothing} = nothing,
+                                indweights=nothing,
+                                optmethod::Symbol = :LN_SBPLX,
+                                opttimeout::Union{Real,Nothing} = nothing,
+                                optmaxeval::Union{Integer,Nothing} = nothing)
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(optmethod, length(params_init))
 
-    # set optimiser timeout
-    maxtime!(opt, opttimeout)
+    # set optimiser timeout if it has been passed
+    if !isnothing(opttimeout)
+        maxtime!(opt, opttimeout)
+    end
 
-    # set optimiser evaluation ceiling
-    maxeval!(opt, optmaxeval)
+    # set optimiser evaluation ceiling if one has been passed
+    if !isnothing(optmaxeval)
+        maxeval!(opt, optmaxeval)
+    end
 
     # set lower bounds and upper bounds unless they take null value
     if !isnothing(low_bounds)
@@ -650,8 +682,13 @@ function leastsquares_stepinit(params_init::Vector{RheoFloat}, low_bounds::Rheov
         upper_bounds!(opt, hi_bounds)
     end
 
-    # set relative tolerance
-    xtol_rel!(opt, _rel_tol)
+    # set optimiser stopping criterion
+    # if ftol_rel is given, use that, otherwise use xtol_rel by default
+    if !isnothing(_rel_tol_f)
+        ftol_rel!(opt, _rel_tol_f)
+    else
+        xtol_rel!(opt, _rel_tol)
+    end
 
     # set Opt object as a minimisation objective. Use a closure for additional
     # arguments sent to object objectivefunc
