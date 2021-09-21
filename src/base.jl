@@ -509,7 +509,7 @@ function leastsquares_init(params_init::Vector{RheoFloat},
                             insight::Bool = false,
                             constant_sampling::Bool=true,
                             singularity::Bool = false,
-                            _rel_tol::Union{Real,Nothing} = 1e-4,
+                            _rel_tol::Union{Real,Nothing} = nothing,
                             _rel_tol_f::Union{Real,Nothing} = nothing,
                             indweights = nothing,
                             optmethod::Symbol = :LN_SBPLX,
@@ -522,14 +522,29 @@ function leastsquares_init(params_init::Vector{RheoFloat},
     # opt = Opt(:LN_BOBYQA, length(params_init))    # Passing tests
     # opt = Opt(:LN_COBYLA, length(params_init))    # Failing test - not precise enough?
 
-    # set optimiser timeout if it has been passed
+    # set optimiser stopping criteria
+
+    # wall clock timeout
     if !isnothing(opttimeout)
+        opttimeout = convert(RheoFloat, opttimeout)
         maxtime!(opt, opttimeout)
     end
 
-    # set optimiser evaluation ceiling if one has been passed
+    # evaluation cycle ceiling
     if !isnothing(optmaxeval)
         maxeval!(opt, optmaxeval)
+    end
+
+    # input parameter change tolerance
+    if !isnothing(rel_tol)
+        rel_tol = convert(RheoFloat, rel_tol)
+        xtol_rel!(opt, rel_tol)
+    end
+
+    # objective function change tolerance 
+    if !isnothing(rel_tol_f)
+        rel_tol = convert(RheoFloat, rel_tol_f)
+        xtol_rel!(opt, rel_tol_f)
     end
 
     # set lower bounds and upper bounds unless they take null value
@@ -541,14 +556,6 @@ function leastsquares_init(params_init::Vector{RheoFloat},
     if !isnothing(hi_bounds)
         hi_bounds = convert(Vector{Float64}, hi_bounds)
         upper_bounds!(opt, hi_bounds)
-    end
-
-    # set optimiser stopping criterion
-    # if ftol_rel is given, use that, otherwise use xtol_rel by default
-    if !isnothing(_rel_tol_f)
-        ftol_rel!(opt, _rel_tol_f)
-    else
-        xtol_rel!(opt, _rel_tol)
     end
 
     # Convert to float64 to avoid conversion by NLOpt
@@ -651,7 +658,7 @@ function leastsquares_stepinit(params_init::Vector{RheoFloat},
                                 measured::Vector{RheoFloat};
                                 insight::Bool = false,
                                 singularity::Bool = false,
-                                _rel_tol::Union{Real,Nothing} = 1e-4,
+                                _rel_tol::Union{Real,Nothing} = nothing,
                                 _rel_tol_f::Union{Real,Nothing} = nothing,
                                 indweights=nothing,
                                 optmethod::Symbol = :LN_SBPLX,
@@ -661,14 +668,29 @@ function leastsquares_stepinit(params_init::Vector{RheoFloat},
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
     opt = Opt(optmethod, length(params_init))
 
-    # set optimiser timeout if it has been passed
+    # set optimiser stopping criteria
+
+    # wall clock timeout
     if !isnothing(opttimeout)
+        opttimeout = convert(RheoFloat, opttimeout)
         maxtime!(opt, opttimeout)
     end
 
-    # set optimiser evaluation ceiling if one has been passed
+    # evaluation cycle ceiling
     if !isnothing(optmaxeval)
         maxeval!(opt, optmaxeval)
+    end
+
+    # input parameter change tolerance
+    if !isnothing(rel_tol)
+        rel_tol = convert(RheoFloat, rel_tol)
+        xtol_rel!(opt, rel_tol)
+    end
+
+    # objective function change tolerance 
+    if !isnothing(rel_tol_f)
+        rel_tol = convert(RheoFloat, rel_tol_f)
+        xtol_rel!(opt, rel_tol_f)
     end
 
     # set lower bounds and upper bounds unless they take null value
@@ -680,14 +702,6 @@ function leastsquares_stepinit(params_init::Vector{RheoFloat},
     if !isnothing(hi_bounds)
         hi_bounds = convert(Vector{Float64}, hi_bounds)
         upper_bounds!(opt, hi_bounds)
-    end
-
-    # set optimiser stopping criterion
-    # if ftol_rel is given, use that, otherwise use xtol_rel by default
-    if !isnothing(_rel_tol_f)
-        ftol_rel!(opt, _rel_tol_f)
-    else
-        xtol_rel!(opt, _rel_tol)
     end
 
     # set Opt object as a minimisation objective. Use a closure for additional
