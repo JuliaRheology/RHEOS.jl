@@ -509,7 +509,7 @@ function leastsquares_init(params_init::Vector{RheoFloat},
                             insight::Bool = false,
                             constant_sampling::Bool=true,
                             singularity::Bool = false,
-                            rel_tol::Union{Real,Nothing} = nothing,
+                            rel_tol_x::Union{Real,Nothing} = nothing,
                             rel_tol_f::Union{Real,Nothing} = nothing,
                             indweights = nothing,
                             optmethod::Symbol = :LN_SBPLX,
@@ -536,15 +536,15 @@ function leastsquares_init(params_init::Vector{RheoFloat},
     end
 
     # input parameter change tolerance
-    if !isnothing(rel_tol)
-        rel_tol = convert(RheoFloat, rel_tol)
-        xtol_rel!(opt, rel_tol)
+    if !isnothing(rel_tol_x)
+        rel_tol = convert(RheoFloat, rel_tol_x)
+        xtol_rel!(opt, rel_tol_x)
     end
 
     # objective function change tolerance 
     if !isnothing(rel_tol_f)
-        rel_tol = convert(RheoFloat, rel_tol_f)
-        xtol_rel!(opt, rel_tol_f)
+        rel_tol_f = convert(RheoFloat, rel_tol_f)
+        ftol_rel!(opt, rel_tol_f)
     end
 
     # set lower bounds and upper bounds unless they take null value
@@ -658,7 +658,7 @@ function leastsquares_stepinit(params_init::Vector{RheoFloat},
                                 measured::Vector{RheoFloat};
                                 insight::Bool = false,
                                 singularity::Bool = false,
-                                rel_tol::Union{Real,Nothing} = nothing,
+                                rel_tol_x::Union{Real,Nothing} = nothing,
                                 rel_tol_f::Union{Real,Nothing} = nothing,
                                 indweights=nothing,
                                 optmethod::Symbol = :LN_SBPLX,
@@ -682,15 +682,15 @@ function leastsquares_stepinit(params_init::Vector{RheoFloat},
     end
 
     # input parameter change tolerance
-    if !isnothing(rel_tol)
-        rel_tol = convert(RheoFloat, rel_tol)
-        xtol_rel!(opt, rel_tol)
+    if !isnothing(rel_tol_x)
+        rel_tol = convert(RheoFloat, rel_tol_x)
+        xtol_rel!(opt, rel_tol_x)
     end
 
     # objective function change tolerance 
     if !isnothing(rel_tol_f)
         rel_tol = convert(RheoFloat, rel_tol_f)
-        xtol_rel!(opt, rel_tol_f)
+        ftol_rel!(opt, rel_tol_f)
     end
 
     # set lower bounds and upper bounds unless they take null value

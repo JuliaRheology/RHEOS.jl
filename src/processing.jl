@@ -440,7 +440,7 @@ function modelfit(data::RheoTimeData,
                     hi::Union{NamedTuple,Nothing,Dict} = nothing,
                     verbose::Bool = false,
                     rel_tol_f::Union{Real,Nothing} = nothing,
-                    rel_tol::Union{Real,Nothing} = isnothing(rel_tol_f) ? 1e-4 : nothing,
+                    rel_tol_x::Union{Real,Nothing} = isnothing(rel_tol_f) ? 1e-4 : nothing,
                     diff_method="BD",
                     weights::Union{Nothing,Vector{T}} = nothing,
                     optmethod::Union{Symbol,String}= :LN_SBPLX, 
@@ -511,8 +511,8 @@ function modelfit(data::RheoTimeData,
                                                 insight = verbose,
                                                 constant_sampling = is_constant,
                                                 singularity = sing,
-                                                _rel_tol = rel_tol,
-                                                _rel_tol_f = rel_tol_f,
+                                                rel_tol_x = rel_tol_x,
+                                                rel_tol_f = rel_tol_f,
                                                 indweights = weights,
                                                 optmethod = Symbol(optmethod),
                                                 opttimeout = opttimeout,
@@ -644,7 +644,7 @@ function modelstepfit(data::RheoTimeData,
                         hi::Union{NamedTuple,Nothing} = nothing,
                         verbose::Bool = false,
                         rel_tol_f::Union{Real,Nothing} = nothing,
-                        rel_tol::Union{Real,Nothing} = isnothing(rel_tol_f) ? 1e-4 : nothing,
+                        rel_tol_x::Union{Real,Nothing} = isnothing(rel_tol_f) ? 1e-4 : nothing,
                         weights::Union{Nothing, Vector{T}} = nothing,
                         optmethod::Union{Symbol,String}= :LN_SBPLX, 
                         opttimeout::Union{Real,Nothing} = nothing,
@@ -717,8 +717,8 @@ function modelstepfit(data::RheoTimeData,
                                                     measured;
                                                     insight = verbose,
                                                     singularity = sing,
-                                                    _rel_tol = rel_tol,
-                                                    _rel_tol_f = rel_tol_f,
+                                                    rel_tol_x = rel_tol_x,
+                                                    rel_tol_f = rel_tol_f,
                                                     indweights = weights,
                                                     optmethod = Symbol(optmethod),
                                                     opttimeout = opttimeout,
@@ -897,7 +897,7 @@ function dynamicmodelfit(data::RheoFreqData,
                 hi::Union{NamedTuple,Nothing} = nothing,
                 verbose::Bool = false,
                 rel_tol_f::Union{Real,Nothing} = nothing,
-                rel_tol::Union{Real,Nothing} = isnothing(rel_tol_f) ? 1e-4 : nothing,
+                rel_tol_x::Union{Real,Nothing} = isnothing(rel_tol_f) ? 1e-4 : nothing,
                 weights::Union{String, Vector{T}}="local",
                 optmethod::Union{Symbol,String}= :LN_SBPLX, 
                 opttimeout::Union{Real, Nothing} = nothing,
@@ -938,15 +938,15 @@ function dynamicmodelfit(data::RheoFreqData,
     end
 
     # input parameter change tolerance
-    if !isnothing(rel_tol)
-        rel_tol = convert(RheoFloat, rel_tol)
-        xtol_rel!(opt, rel_tol)
+    if !isnothing(rel_tol_x)
+        rel_tol = convert(RheoFloat, rel_tol_x)
+        xtol_rel!(opt, rel_tol_x)
     end
 
     # objective function change tolerance 
     if !isnothing(rel_tol_f)
         rel_tol = convert(RheoFloat, rel_tol_f)
-        xtol_rel!(opt, rel_tol_f)
+        ftol_rel!(opt, rel_tol_f)
     end
 
     # set objective/cost function
