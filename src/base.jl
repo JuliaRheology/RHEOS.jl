@@ -537,7 +537,7 @@ function leastsquares_init(params_init::Vector{RheoFloat},
 
     # input parameter change tolerance
     if !isnothing(rel_tol_x)
-        rel_tol = convert(RheoFloat, rel_tol_x)
+        rel_tol_x = convert(RheoFloat, rel_tol_x)
         xtol_rel!(opt, rel_tol_x)
     end
 
@@ -683,13 +683,13 @@ function leastsquares_stepinit(params_init::Vector{RheoFloat},
 
     # input parameter change tolerance
     if !isnothing(rel_tol_x)
-        rel_tol = convert(RheoFloat, rel_tol_x)
+        rel_tol_x = convert(RheoFloat, rel_tol_x)
         xtol_rel!(opt, rel_tol_x)
     end
 
     # objective function change tolerance 
     if !isnothing(rel_tol_f)
-        rel_tol = convert(RheoFloat, rel_tol_f)
+        rel_tol_f = convert(RheoFloat, rel_tol_f)
         ftol_rel!(opt, rel_tol_f)
     end
 

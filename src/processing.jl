@@ -526,7 +526,7 @@ function modelfit(data::RheoTimeData,
         # Preparation of data for log item
         info=(comment="Fiting rheological model to data", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
         params=(model=model, modloading=modloading)
-        keywords=(p0=p0, lo=lo, hi=hi, rel_tol=rel_tol, diff_method=diff_method)
+        keywords=(p0=p0, lo=lo, hi=hi, rel_tol_x=rel_tol_x, diff_method=diff_method)
         # Add data to the log
         push!(data.log, RheoLogItem( (type=:analysis, funct=:modelfit, params=params, keywords=keywords), info))
     end
@@ -730,7 +730,7 @@ function modelstepfit(data::RheoTimeData,
         # Preparation of data for log item
         info=(comment="Fiting rheological model to data (step input assumed)", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
         params = (model = model, modloading = modloading)
-        keywords = (step = step, p0 = p0, lo = lo, hi = hi, rel_tol = rel_tol)
+        keywords = (step = step, p0 = p0, lo = lo, hi = hi, rel_tol_x = rel_tol_x)
         # Add data to the log
         push!(data.log, RheoLogItem( (type=:analysis, funct=:modelstepfit, params=params, keywords=keywords), info))
     end
@@ -939,13 +939,13 @@ function dynamicmodelfit(data::RheoFreqData,
 
     # input parameter change tolerance
     if !isnothing(rel_tol_x)
-        rel_tol = convert(RheoFloat, rel_tol_x)
+        rel_tol_x = convert(RheoFloat, rel_tol_x)
         xtol_rel!(opt, rel_tol_x)
     end
 
     # objective function change tolerance 
     if !isnothing(rel_tol_f)
-        rel_tol = convert(RheoFloat, rel_tol_f)
+        rel_tol_f = convert(RheoFloat, rel_tol_f)
         ftol_rel!(opt, rel_tol_f)
     end
 
@@ -980,7 +980,7 @@ function dynamicmodelfit(data::RheoFreqData,
         # Preparation of data for log item
         info = (comment="Fiting rheological model to frequency spectrum", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
         params = (model=model, )
-        keywords = (p0=p0, lo=lo, hi=hi, rel_tol=rel_tol, weights=weights)
+        keywords = (p0=p0, lo=lo, hi=hi, rel_tol_x=rel_tol_x, weights=weights)
         # Add data to the log
         push!(data.log, RheoLogItem( (type=:analysis, funct=:dynamicmodelfit, params=params, keywords=keywords), info))
     end
