@@ -610,9 +610,8 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
 
     sigma, epsilon, pred_mod = _modelpredict(data, modulus, modsing, diff_method, check)
 
-    log = data.log === nothing ? nothing : [ data.log;
-            RheoLogItem( (type=:process, funct=:modelpredict, params=(model,), keywords=(diff_method = diff_method,)),
-                         (comment="Predicted data - modulus: $pred_mod, parameters:$(model.fixedparams)",) ) ]
+    log = logadd_process(data, :modelpredict, params=(model,), keywords=(diff_method = diff_method,), 
+                         comment="Predicted data - modulus: $pred_mod, parameters:$(model.fixedparams)" ) 
 
     return RheoTimeData(sigma, epsilon, data.t, log)
 
@@ -633,9 +632,8 @@ function modelpredict(data::RheoTimeData, model::RheoModelClass; diff_method="BD
 
     sigma, epsilon, pred_mod = _modelpredict(data, modulus, modsing, diff_method, check)
 
-    log = data.log === nothing ? nothing : [ data.log;
-            RheoLogItem( (type=:process, funct=:modelpredict, params=(model,), keywords=(diff_method = diff_method, kwargs...)),
-                         (comment="Predicted data - modulus: $pred_mod, parameters:$(kwargs...)",) ) ]
+    log = logadd_process(data, :modelpredict, params=(model,), keywords=(diff_method = diff_method, kwargs...), 
+                         comment="Predicted data - modulus: $pred_mod, parameters:$(model.fixedparams)" ) 
 
     return RheoTimeData(sigma, epsilon, data.t, log)
 
