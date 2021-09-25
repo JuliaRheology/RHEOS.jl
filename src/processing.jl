@@ -535,17 +535,8 @@ function modelfit(data::RheoTimeData,
 
 end
 
-"""
-    modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
 
-Given an incomplete data set (only either stress or strain missing) and model with values substituted into
-parameters (`RheoModel`), return a new dataset based on the model.
-If data is type of `stress_only`, then creep modulus (`:J`) is used; if data type is `strain_only` relaxation modulus (`:G`).
-A complete `RheoTimeData` of type `strain_and_stress` is returned.
-`diff_method` sets finite difference for calculating the derivative used in the hereditary integral and
-can be either backwards difference (`"BD"`) or central difference (`"CD"`).
-"""
-function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
+function _modelpredict(data::RheoTimeData, modulus, modsing, diff_method, check)
 
     # use correct method for derivative
     if diff_method=="BD"
@@ -554,17 +545,10 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
         deriv = derivCD
     end
 
-    check = rheotimedatatype(data)
-    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
-
     if (check == strain_only)
-        modulus = model._Ga
-        modsing = model._G
-        dcontrolled = deriv(data.ϵ, data.t)
+       dcontrolled = deriv(data.ϵ, data.t)
     elseif (check == stress_only)
-        modulus = model._Ja
-        modsing = model._J
-        dcontrolled = deriv(data.σ, data.t)
+       dcontrolled = deriv(data.σ, data.t)
     end
 
     # get singularity presence
@@ -593,22 +577,70 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
     end
 
     if (check == stress_only)
-        sigma = data.σ
-        epsilon = convolved
-        pred_mod = "creep function J"
+      return(sigma = data.σ, epsilon = convolved, pred_mod = "creep function J")
     elseif (check == strain_only)
-        sigma = convolved
-        epsilon = data.ϵ
-        pred_mod = "relaxation function G"
+      return(sigma = convolved, epsilon = data.ϵ, pred_mod = "relaxation function G")
+    end
+         
+end
+
+
+"""
+    modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
+
+Given an incomplete data set (only either stress or strain missing) and model with values substituted into
+parameters (`RheoModel`), return a new dataset based on the model.
+If data is type of `stress_only`, then the creep modulus is used; if data type is `strain_only`, the relaxation modulus is used.
+A complete `RheoTimeData` of type `strain_and_stress` is returned.
+`diff_method` sets finite difference for calculating the derivative used in the hereditary integral and
+can be either backwards difference (`"BD"`) or central difference (`"CD"`).
+"""
+function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
+
+    check = rheotimedatatype(data)
+    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
+
+    if (check == strain_only)
+        modulus = model._Ga
+        modsing = model._G
+    elseif (check == stress_only)
+        modulus = model._Ja
+        modsing = model._J
     end
 
+    sigma, epsilon, pred_mod = _modelpredict(data, modulus, modsing, diff_method, check)
+
     log = data.log === nothing ? nothing : [ data.log;
-            RheoLogItem( (type=:process, funct=:modelpredict, params=(model::RheoModel,), keywords=(diff_method = diff_method,)),
+            RheoLogItem( (type=:process, funct=:modelpredict, params=(model,), keywords=(diff_method = diff_method,)),
                          (comment="Predicted data - modulus: $pred_mod, parameters:$(model.fixedparams)",) ) ]
 
     return RheoTimeData(sigma, epsilon, data.t, log)
 
 end
+
+function modelpredict(data::RheoTimeData, model::RheoModelClass; diff_method="BD", kwargs...)
+
+    check = rheotimedatatype(data)
+    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
+
+    if (check == strain_only)
+        modulus = relaxmod(model, symbol_to_unicode(kwargs.data))
+        modsing = relaxmod(model, symbol_to_unicode(kwargs.data))
+    elseif (check == stress_only)
+        modulus = creepcomp(model, symbol_to_unicode(kwargs.data))
+        modsing = creepcomp(model, symbol_to_unicode(kwargs.data))
+    end
+
+    sigma, epsilon, pred_mod = _modelpredict(data, modulus, modsing, diff_method, check)
+
+    log = data.log === nothing ? nothing : [ data.log;
+            RheoLogItem( (type=:process, funct=:modelpredict, params=(model,), keywords=(diff_method = diff_method, kwargs...)),
+                         (comment="Predicted data - modulus: $pred_mod, parameters:$(kwargs...)",) ) ]
+
+    return RheoTimeData(sigma, epsilon, data.t, log)
+
+end
+
 
 """
     modelstepfit(data::RheoTimeData, model::RheoModelClass, modloading::Union{LoadingType,Integer}; step=nothing, p0::Union{NamedTuple,Nothing} = nothing, lo::Union{NamedTuple,Nothing} = nothing, hi::Union{NamedTuple,Nothing} = nothing, verbose::Bool = false, rel_tol_x = 1e-4, weights::Union{Vector{Integer},Nothing} = nothing)

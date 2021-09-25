@@ -697,10 +697,10 @@ function _modelpredict_nonsing_const_relax(tol)
 
     modulus = quote α*exp.(-t/β) end
     modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
-    model = RheoModel(modelclass, α=1.0, β=1.0)
+    # model = RheoModel(modelclass, α=1.0, β=1.0)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
-    computed_response = modelpredict(data0, model)
+    computed_response = modelpredict(data0, modelclass, α=1.0, β=1.0)
 
     all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), eachindex(exact_response))
 end
@@ -714,10 +714,10 @@ function _modelpredict_nonsing_const_creep(tol)
 
     modulus = quote α*exp.(-t/β) end
     modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
-    model = RheoModel(modelclass, α=1.0, β=1.0)
+    # model = RheoModel(modelclass, α=1.0, β=1.0)
     data0 = RheoTimeData(t = t, σ = loading)
 
-    computed_response = modelpredict(data0, model)
+    computed_response = modelpredict(data0, modelclass, α=1.0, β=1.0)
 
     all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), eachindex(exact_response))
 end
