@@ -526,7 +526,7 @@ function leastsquares_init(params_init::Vector{RheoFloat},
 
     # wall clock timeout
     if !isnothing(opttimeout)
-        opttimeout = convert(RheoFloat, opttimeout)
+        opttimeout = convert(Float64, opttimeout)
         maxtime!(opt, opttimeout)
     end
 
@@ -537,13 +537,13 @@ function leastsquares_init(params_init::Vector{RheoFloat},
 
     # input parameter change tolerance
     if !isnothing(rel_tol_x)
-        rel_tol_x = convert(RheoFloat, rel_tol_x)
+        rel_tol_x = convert(Float64, rel_tol_x)
         xtol_rel!(opt, rel_tol_x)
     end
 
     # objective function change tolerance 
     if !isnothing(rel_tol_f)
-        rel_tol_f = convert(RheoFloat, rel_tol_f)
+        rel_tol_f = convert(Float64, rel_tol_f)
         ftol_rel!(opt, rel_tol_f)
     end
 
@@ -672,7 +672,7 @@ function leastsquares_stepinit(params_init::Vector{RheoFloat},
 
     # wall clock timeout
     if !isnothing(opttimeout)
-        opttimeout = convert(RheoFloat, opttimeout)
+        opttimeout = convert(Float64, opttimeout)
         maxtime!(opt, opttimeout)
     end
 
@@ -683,13 +683,13 @@ function leastsquares_stepinit(params_init::Vector{RheoFloat},
 
     # input parameter change tolerance
     if !isnothing(rel_tol_x)
-        rel_tol_x = convert(RheoFloat, rel_tol_x)
+        rel_tol_x = convert(Float64, rel_tol_x)
         xtol_rel!(opt, rel_tol_x)
     end
 
     # objective function change tolerance 
     if !isnothing(rel_tol_f)
-        rel_tol_f = convert(RheoFloat, rel_tol_f)
+        rel_tol_f = convert(Float64, rel_tol_f)
         ftol_rel!(opt, rel_tol_f)
     end
 
