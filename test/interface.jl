@@ -10,7 +10,7 @@ function _interface_Hertz_f()
     data = modelpredict(ramp,model)
 
     # check expected force for d = 1.0
-    isapprox(data[itf].f[21], 16/3., atol=tol)
+    isapprox(data[itf].f[21], 2*16/3., atol=tol)
 end
 @test _interface_Hertz_f()
 
@@ -22,7 +22,7 @@ function _interface_Hertz_d()
     data = modelpredict(ramp,model)
 
     # check expected displacement for f = 1.0
-    isapprox(data[itf].d[21], 2*(0.75^(2/3)), atol=tol)
+    isapprox(data[itf].d[21], 2*((3/8)^(2/3)), atol=tol)
 end
 @test _interface_Hertz_d()
 

@@ -134,12 +134,12 @@ end
 
 
 
-function _freeze_params()
-    SLS2_mod = freeze_params( SLS2, G₀=2, η₂=3.5)
+function _freezeparams()
+    SLS2_mod = freezeparams( SLS2, G₀=2, η₂=3.5)
 
     relaxmod(SLS2, 1, [2,1,2,3,3.5]) == relaxmod(SLS2_mod, 1, [1,2,3])
 end
-@test _freeze_params()
+@test _freezeparams()
 
 
 function _getparams()
