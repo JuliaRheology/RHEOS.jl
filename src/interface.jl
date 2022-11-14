@@ -19,11 +19,9 @@ end
     AFM(R::Real)
 
 Create and return an `Interface` struct using the Hertz contact model with indenter radius `R`.
-The AFM Interface model assumes an incompressible material (Poisson's ratio = 0.5) and it returns the shear modulus, 
-where the relationship between elastic and shear modulus is E = 3G.
 """
 function AFM(R::Real)
-  Interface(:d, :f, (ϵ,σ)->(d = (R.*(3. /8.).^(2. /3)) .* ϵ.^(2. ./3), f = R^2 .* σ ), (d,f)->(ϵ = 8 ./(3 .*R.^1.5) .* d.^1.5, σ = f./R^2) )
+  Interface(:d, :f, (ϵ,σ)->(d = (R.*(3. /4.).^(2. /3)) .* ϵ.^(2. ./3), f = R^2 .* σ ), (d,f)->(ϵ = 4 ./(3 .*R.^1.5) .* d.^1.5, σ = f./R^2) )
 end
 
 """
