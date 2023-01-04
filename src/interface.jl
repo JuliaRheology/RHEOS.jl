@@ -91,7 +91,7 @@ julia> importcsv("myfile.csv", AFM(2e-6), t=1, d=2, f=3)
 ```
 """
 function importcsv(filepath::String, interface::Interface; delimiter = ',', header = false, comment = "Imported from csv file", savelog = true, kwargs...)
-   cols=symbol_to_unicode(kwargs.data)
+    cols=symbol_to_unicode(values(kwargs))
 
     # legacy keyword arguments in place until v 1.0
    uϵ_col_sym = Symbol(string(interface.uϵ) * "_col")

@@ -1144,7 +1144,7 @@ end
 
 
 function freezeparams(m::RheoModelClass; kwargs...)
-    return(freezeparams(m,symbol_to_unicode(kwargs.data)))
+  return(freezeparams(m,symbol_to_unicode(values(kwargs))))
 end
 
 
@@ -1155,7 +1155,7 @@ end
 
 function freeze_params(m::RheoModelClass; kwargs...)
     println("freeze_params is deprecated - use freezeparams instead.")
-    return(freezeparams(m,symbol_to_unicode(kwargs.data)))
+    return(freezeparams(m,symbol_to_unicode(values(kwargs))))
 end
 
 
@@ -1196,7 +1196,7 @@ end
 
 
 function RheoModel(m::RheoModelClass; kwargs...)
-    return(RheoModel(m,symbol_to_unicode(kwargs.data)))
+    return(RheoModel(m,symbol_to_unicode(values(kwargs))))
 end
 
 
@@ -1401,12 +1401,12 @@ end
 
 
 function relaxmod(m::RheoModelClass, x; kwargs...)
-    relaxmod(m, x, symbol_to_unicode(kwargs.data))
+    relaxmod(m, x, symbol_to_unicode(values(kwargs)))
 end
 
 relaxmod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> relaxmod(m, x, params)
 relaxmod(m::RheoModelClass, params::NamedTuple) =  x -> relaxmod(m, x, params)
-relaxmod(m::RheoModelClass; kwargs...) =  x -> relaxmod(m, x, symbol_to_unicode(kwargs.data))
+relaxmod(m::RheoModelClass; kwargs...) =  x -> relaxmod(m, x, symbol_to_unicode(values(kwargs)))
 
 
 
@@ -1483,12 +1483,12 @@ end
 
 
 function creepcomp(m::RheoModelClass, x; kwargs...)
-    creepcomp(m, x, symbol_to_unicode(kwargs.data))
+  creepcomp(m, x, symbol_to_unicode(values(kwargs)))
 end
 
 creepcomp(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> creepcomp(m, x, params)
 creepcomp(m::RheoModelClass, params::NamedTuple) =  x -> creepcomp(m, x, params)
-creepcomp(m::RheoModelClass; kwargs...) =  x -> creepcomp(m, x, symbol_to_unicode(kwargs.data))
+creepcomp(m::RheoModelClass; kwargs...) =  x -> creepcomp(m, x, symbol_to_unicode(values(kwargs)))
 
 
 
@@ -1565,12 +1565,12 @@ end
 
 
 function storagemod(m::RheoModelClass, x; kwargs...)
-    storagemod(m, x, symbol_to_unicode(kwargs.data))
+    storagemod(m, x, symbol_to_unicode(values(kwargs)))
 end
 
 storagemod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> storagemod(m, x, params)
 storagemod(m::RheoModelClass, params::NamedTuple) =  x -> storagemod(m, x, params)
-storagemod(m::RheoModelClass; kwargs...) =  x -> storagemod(m, x, symbol_to_unicode(kwargs.data))
+storagemod(m::RheoModelClass; kwargs...) =  x -> storagemod(m, x, symbol_to_unicode(values(kwargs)))
 
 
 
@@ -1637,12 +1637,12 @@ end
 
 
 function lossmod(m::RheoModelClass, x; kwargs...)
-    lossmod(m, x, symbol_to_unicode(kwargs.data))
+    lossmod(m, x, symbol_to_unicode(values(kwargs)))
 end
 
 lossmod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> lossmod(m, x, params)
 lossmod(m::RheoModelClass, params::NamedTuple) =  x -> lossmod(m, x, params)
-lossmod(m::RheoModelClass; kwargs...) =  x -> lossmod(m, x, symbol_to_unicode(kwargs.data))
+lossmod(m::RheoModelClass; kwargs...) =  x -> lossmod(m, x, symbol_to_unicode(values(kwargs)))
 
 
 
@@ -1712,10 +1712,10 @@ end
 
 
 function dynamicmod(m::RheoModelClass, x; kwargs...)
-    dynamicmod(m, x, symbol_to_unicode(kwargs.data))
+    dynamicmod(m, x, symbol_to_unicode(values(kwargs)))
 end
 
 dynamicmod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> dynamicmod(m, x, params)
 dynamicmod(m::RheoModelClass, params::NamedTuple) =  x -> dynamicmod(m, x, params)
-dynamicmod(m::RheoModelClass; kwargs...) =  x -> dynamicmod(m, x, symbol_to_unicode(kwargs.data))
+dynamicmod(m::RheoModelClass; kwargs...) =  x -> dynamicmod(m, x, symbol_to_unicode(values(kwargs)))
 

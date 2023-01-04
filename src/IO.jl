@@ -66,7 +66,7 @@ If the csv file contains headers, but it is prefered to indicate columns by thei
 """
 function importcsv(filepath::String; delimiter = ',', header = false, comment = "Imported from csv file", savelog = true, kwargs...)
 # Convert parameter names to standard values.
-	cols=symbol_to_unicode(kwargs.data)
+cols=symbol_to_unicode(values(kwargs))
 
 	use_header = header
 	if length(cols)==0

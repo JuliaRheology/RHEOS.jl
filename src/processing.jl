@@ -623,11 +623,11 @@ function modelpredict(data::RheoTimeData, model::RheoModelClass; diff_method="BD
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
 
     if (check == strain_only)
-        modulus = relaxmod(model, symbol_to_unicode(kwargs.data))
-        modsing = relaxmod(model, symbol_to_unicode(kwargs.data))
+        modulus = relaxmod(model, symbol_to_unicode(values(kwargs)))
+        modsing = relaxmod(model, symbol_to_unicode(values(kwargs)))
     elseif (check == stress_only)
-        modulus = creepcomp(model, symbol_to_unicode(kwargs.data))
-        modsing = creepcomp(model, symbol_to_unicode(kwargs.data))
+        modulus = creepcomp(model, symbol_to_unicode(values(kwargs)))
+        modsing = creepcomp(model, symbol_to_unicode(values(kwargs)))
     end
 
     sigma, epsilon, pred_mod = _modelpredict(data, modulus, modsing, diff_method, check)
