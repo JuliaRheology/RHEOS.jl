@@ -16,7 +16,8 @@ jobs:
       strategy:
         fail-fast: false
         matrix:
-          version: # test on Latest and nightly
+          version: # test on beta and nightly
+            - 1.9
             - nightly
           arch: # only test 64 bit 
             - x64
