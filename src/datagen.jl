@@ -84,9 +84,7 @@ generate the appropriate loading.
     strainfunction(data::RheoTimeData, f::T) where T<:Function
     strainfunction(f::T, data::RheoTimeData) where T<:Function
 
-Accepts a `RheoTimeData` and outputs a new `RheoTimeData` with the strain imposed.
-The strain signal is determined by the function provided, which should take
-time as its only argument. The original data's time signal is used.
+Returns a new `RheoTimeData` with strain values calculated by applying the function 'f' to the time data of the parameter data.
 
 Normally used with a RheoTimeData generated using the `timeline` function.
 """
@@ -119,9 +117,7 @@ end
     stressfunction(data::RheoTimeData, f::T) where T<:Function
     stressfunction(f::T, data::RheoTimeData) where T<:Function
 
-Accepts a `RheoTimeData` and outputs a new `RheoTimeData` with a stress imposed.
-The stress signal is determined by the function provided, which should take
-time as its only argument. The original data's time signal is used.
+Returns a new `RheoTimeData` with stress values calculated by applying the function 'f' to the time data of the parameter data.
 
 Normally used with a `RheoTimeData` generated using the `timeline` function.
 """
@@ -271,7 +267,7 @@ end
     modulusfunction(data::RheoFreqData, Gp::T1, Gpp::T2) where {T1<:Function, T2<:Function}
     modulusfunction(Gp::T1, Gpp::T2, data::RheoFreqData) where {T1<:Function, T2<:Function}
 
-Returns a new `RheoFreqData` with a modulus calculated using the function 'f' provided, 
+Returns a new `RheoFreqData` with a modulus calculated using the functions 'Gp' and 'Gpp' provided, 
 applied to freqency values present in the input 'data'.
 
 Normally used with a `RheoFreqData` generated using the `frequencyspec` function.
