@@ -86,7 +86,6 @@ function _exportcsv_timestrain()
     rheotimedataIN = importcsv(fildir; t_col = 1, ϵ_col = 2)
 
     # default column ordering for full time data is (t, ϵ)
-    # testdir = joinpath(@__DIR__, "testdata", "testloop.csv")
     testdir = tempname()
     exportcsv(rheotimedataIN, testdir)
     rheotimedataOUT = importcsv(testdir; t_col = 1, ϵ_col = 2)
@@ -101,7 +100,6 @@ function _exportcsv_timefull()
     rheotimedataIN = importcsv(fildir; t_col = 1, σ_col = 2, ϵ_col = 3)
 
     # default column ordering for full time data is (t, σ, ϵ)
-    # testdir = joinpath(@__DIR__, "testdata", "testloop.csv")
     testdir = tempname()
     exportcsv(rheotimedataIN, testdir)
     rheotimedataOUT = importcsv(testdir; t_col = 1, ϵ_col = 3, σ_col = 2)
@@ -116,7 +114,6 @@ function _exportcsv_freqfull()
     rheofreqdataIN = importcsv(fildir; ω_col = 1, Gp_col = 2, Gpp_col = 3)
 
     # default column ordering for full time data is (ω, Gp, Gpp)
-    # testdir = joinpath(@__DIR__, "testdata", "testloop.csv")
     testdir = tempname()
     exportcsv(rheofreqdataIN, testdir)
     rheofreqdataOUT = importcsv(testdir; ω_col = 1, Gp_col = 2, Gpp_col = 3)
@@ -131,10 +128,11 @@ end
 #     rheotimedataIN = importcsv(fildir; t_col = 1, σ_col = 2, ϵ_col = 3)
 
 #     # default column ordering for full time data is (σ, ϵ, t)
-#     testdir = joinpath(@__DIR__, "testdata", "testbinaryloop.jld2")
+    # testdir = tempname()
 #     savedata(rheotimedataIN, testdir)
 #     rheotimedataOUT = loaddata(testdir)
 
+    # rm(testdir)
 #     rheotimedataIN.σ == rheotimedataOUT.σ && rheotimedataIN.ϵ == rheotimedataOUT.ϵ && rheotimedataIN.t == rheotimedataOUT.t
 # end
 # @test _saveload_timefull()
@@ -145,10 +143,11 @@ end
 #     rheofreqdataIN = importcsv(fildir; ω_col = 1, Gp_col = 2, Gpp_col = 3)
 
 #     # default column ordering for full time data is (Gp, Gpp, ω)
-#     testdir = joinpath(@__DIR__, "testdata", "testbinaryloop.jld2")
+    # testdir = tempname()
 #     savedata(rheofreqdataIN, testdir)
 #     rheofreqdataOUT = loaddata(testdir)
 
+    # rm(testdir)
 #     rheofreqdataIN.ω == rheofreqdataOUT.ω && rheofreqdataIN.Gp == rheofreqdataOUT.Gp && rheofreqdataIN.Gpp == rheofreqdataOUT.Gpp
 # end
 # @test _saveload_freqfull()
