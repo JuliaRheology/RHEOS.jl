@@ -137,7 +137,7 @@ end
 function _modulusfunction()
     freq_instance = frequencyspec(1:1:10, logscale=false)
 
-    with_modulus = modulusfunction(freq_instance, ω -> 2*ω, ω -> 1)
+    with_modulus = modulusfunction(ω -> 2*ω, ω -> 1,freq_instance)
 
     typeof(with_modulus)==RheoFreqData && with_modulus.ω==(1:1:10) && with_modulus.Gp==(2:2:20) && with_modulus.Gpp==ones(10)
 
