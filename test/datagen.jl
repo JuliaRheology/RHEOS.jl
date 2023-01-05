@@ -129,3 +129,28 @@ function _triangle()
     all(v -> v==0, imposed.σ[imposed.t.<_offset]) && all(v -> v==0.0, imposed.σ[imposed.t.%1.0.==0.0]) && all(v -> v==_amp, imposed.σ[((imposed.t.%1.0).==0.5) .& (imposed.t.>_offset)])
 end
 @test _triangle()
+
+
+
+
+
+function _modulusfunction()
+    freq_instance = frequencyspec(1:1:10, logscale=false)
+
+    with_modulus = modulusfunction(freq_instance, ω -> 2*ω, ω -> 1)
+
+    typeof(with_modulus)==RheoFreqData && with_modulus.ω==(1:1:10) && with_modulus.Gp==(2:2:20) && with_modulus.Gpp==ones(10)
+
+end
+@test _modulusfunction()
+
+function _modulusfunction!()
+    data = frequencyspec(1:1:10, logscale=false)
+
+    modulusfunction!(ω -> 2*ω, ω -> 1, data)
+
+    data.Gp==(2:2:20) && data.Gpp==ones(10)
+end
+@test _modulusfunction!()
+
+

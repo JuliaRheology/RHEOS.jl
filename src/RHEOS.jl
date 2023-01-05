@@ -66,9 +66,10 @@ export SLS2, PowerLawPlateau
 
 # datagen.jl
 export timeline
+export frequencyspec
 export strainfunction, strainfunction!, stressfunction, stressfunction!
 export hstep, ramp, stairs, square, sawtooth, triangle
-export frequencyspec
+export modulusfunction, modulusfunction!
 
 # processing.jl
 export resample, indexweight, cutting, smooth

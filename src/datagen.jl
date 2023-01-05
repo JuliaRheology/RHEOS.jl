@@ -84,7 +84,7 @@ generate the appropriate loading.
     strainfunction(data::RheoTimeData, f::T) where T<:Function
     strainfunction(f::T, data::RheoTimeData) where T<:Function
 
-Accepts a `RheoTimeData` and outputs a new `RheoTimeData` with a strain imposed.
+Accepts a `RheoTimeData` and outputs a new `RheoTimeData` with the strain imposed.
 The strain signal is determined by the function provided, which should take
 time as its only argument. The original data's time signal is used.
 
@@ -259,6 +259,65 @@ end
 function triangle(; kwargs...)
     return t -> triangle(t; kwargs...)
 end
+
+
+
+
+
+
+
+
+"""
+    modulusfunction(data::RheoFreqData, Gp::T1, Gpp::T2) where {T1<:Function, T2<:Function}
+    modulusfunction(Gp::T1, Gpp::T2, data::RheoFreqData) where {T1<:Function, T2<:Function}
+
+Returns a new `RheoFreqData` with a modulus calculated using the function 'f' provided, 
+applied to freqency values present in the input 'data'.
+
+Normally used with a `RheoFreqData` generated using the `frequencyspec` function.
+"""
+function modulusfunction(data::RheoFreqData, Gp::T1, Gpp::T2) where {T1<:Function, T2<:Function}
+    log = logadd_process(data, :modulusfunction, params=(Gp=Gp,Gpp=Gpp), comment="Modulus function applied to frequency range" )
+    return RheoFreqData(convert(Vector{RheoFloat}, map(Gp, data.ω)), convert(Vector{RheoFloat}, map(Gpp, data.ω)),  data.ω, log)
+end
+
+function modulusfunction(Gp::T1, Gpp::T2, data::RheoFreqData) where {T1<:Function, T2<:Function}
+    modulusfunction(data,Gp,Gpp)
+end
+
+"""
+    modulusfunction!(data::RheoFreqData, f::T) where T<:Function
+    modulusfunction!(f::T, data::RheoFreqData) where T<:Function
+
+In-place version of `modulusfunction`.
+"""
+function modulusfunction!(data::RheoFreqData, Gp::T1, Gpp::T2) where {T1<:Function, T2<:Function}
+    logadd_process!(data, :modulusfunction, params=(Gp=Gp,Gpp=Gpp), comment="Modulus function applied to frequency range" )
+    _mapdata!(Gp,data.Gp,data.ω) 
+    _mapdata!(Gpp,data.Gpp,data.ω) 
+    return data
+end
+
+function modulusfunction!(Gp::T1, Gpp::T2, data::RheoFreqData) where {T1<:Function, T2<:Function}
+    modulusfunction!(data,Gp,Gpp)
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #=
 ------------------------------------------------------------------------------------
