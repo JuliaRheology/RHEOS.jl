@@ -49,6 +49,37 @@ function Base.show(io::IO, ::MIME"text/plain", rl::RheoLog)
 end
 
 
+#
+# Internal functions to help manage logs
+#
+# not exported to users
+#
+
+function loginit(savelog, funct::Symbol; params=NamedTuple(), keywords=NamedTuple(), comment="Process added", info=(comment=comment,))
+    if savelog
+        [RheoLogItem( (type=:source, funct=funct, params=params, keywords=keywords), info )]
+    else
+        nothing
+    end
+end
+
+
+function logadd_process(d, funct::Symbol; params=NamedTuple(), keywords=NamedTuple(), comment="Process added", info=(comment=comment,))
+    d.log === nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=funct, params=params, keywords=keywords), info ) ]
+end
+
+function logadd_process!(d, funct::Symbol; params=NamedTuple(), keywords=NamedTuple(), comment="Process added", info=(comment=comment,))
+    if d.log !== nothing
+        push!(d.log, RheoLogItem( (type=:process, funct=funct, params=params, keywords=keywords), info) )
+    end
+end
+
+
+function logadd_analysis!(d, funct::Symbol; params=NamedTuple(), keywords=NamedTuple(), comment="Process added", info=(comment=comment,))
+    if d.log !== nothing
+        push!(d.log, RheoLogItem( (type=:analysis, funct=funct, params=params, keywords=keywords), info) )
+    end
+end
 
 
 
@@ -69,6 +100,44 @@ rheoconvert(t::Real) = RheoFloat(t)
 rheoconvert(t::RheoFloat) = t
 rheoconvert(t::Vector{T}) where T<:Real = convert(Vector{RheoFloat},t)
 rheoconvert(t::Vector{RheoFloat}) = t
+
+
+
+#
+# Utilities for in-place functions
+#
+# Internal - Not be exposed to the user.
+#
+
+"""
+   _setdata!(a::Vector{RheoFloat}, t::Vector{T}) where {T<:Real}
+ 
+In place replacement of the values of a vector `a` with the values of another one.
+"""
+function _setdata!(a::Vector{RheoFloat}, t::Vector{T}) where {T<:Real}
+    if length(a) == 0
+        append!(a,t)
+    elseif length(a) == length(t)
+        a .= t
+    else
+        empty!(a)
+        append!(a,t)
+    end
+end
+
+"""
+    _mapdata!(f::Function, a::Vector{RheoFloat}, t::Vector{T} where {T<:Real})
+
+In place application of a function to the elements of a vector.
+Useful for data generation through strainfunctions and related.
+"""
+function _mapdata!(f::Function, a::Vector{RheoFloat}, t::Vector{T} where {T<:Real})
+    if length(a) != length(t)
+        resize!(a,length(t))
+    end
+    map!(f,a,t)
+end
+
 
 
 
@@ -107,11 +176,16 @@ struct RheoTimeData
 
 end
 
-function RheoTimeData(;strain = RheoFloat[], ϵ::Vector{T1} = strain, stress = RheoFloat[], σ::Vector{T2} = stress, t::Vector{T3} = RheoFloat[], comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoTimeData(;strain = RheoFloat[], ϵ::Vector{T1} = strain, stress = RheoFloat[], σ::Vector{T2} = stress, t::Vector{T3} = RheoFloat[], 
+                      comment="Created from generic constructor", savelog = true, log = nothing)  where {T1<:Real, T2<:Real, T3<:Real}
     typecheck = check_time_data_consistency(t,ϵ,σ)
-    RheoTimeData(convert(Vector{RheoFloat},σ), convert(Vector{RheoFloat},ϵ), convert(Vector{RheoFloat},t),
-                    log === nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
+         
+    RheoTimeData(rheoconvert(σ), rheoconvert(ϵ), rheoconvert(t),
+                 isnothing(log) ? loginit(savelog, :RheoTimeData, params = NamedTuple(), keywords = (ϵ=ϵ,σ=σ,t=t,comment=comment),
+                                           info=(comment=comment, type=typecheck) )  
+                                : log ) 
 end
+
 
 
 
@@ -145,25 +219,48 @@ end
 
 
 
-@enum TimeDataType invalid_time_data=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
+@enum TimeDataType invalid=-1 time_only=0 strain_only=1 stress_only=2 strain_and_stress=3
+
+
+
+@enum RheosExceptionType timedata_invalid freqdata_invalid uniform_sampling_required model_parameters_invalid
+
+struct RheosException <: Exception
+    type::RheosExceptionType
+    var::String
+end
+
+function Base.showerror(io::IO, err::RheosException)
+    if err.type==timedata_invalid
+        print(io, "Rheos Exception - Invalid Time data: $(err.var)")
+    elseif err.type==freqdata_invalid 
+        print(io, "Rheos Exception - Invalid Frequency data: $(err.var)")
+    else
+        print(io, "Rheos Exception: $(err.var)")
+    end
+       
+end
+
+# throw(RheosException("this code"))
 
 function check_time_data_consistency(t,e,s)
-    @assert (length(t)>0)  "Time data empty"
+    # @assert (length(t)>0)  "Time data empty"
+    length(t)>0 || throw(RheosException(timedata_invalid,"Time data empty"))
 
     sdef=(s != RheoFloat[])
     edef=(e != RheoFloat[])
     if (sdef && edef)
-        @assert (length(s)==length(t)) && (length(e)==length(t)) "Time data length inconsistent"
+        (length(s)==length(t)) && (length(e)==length(t))  || throw(RheosException("Time data length inconsistent"))
         return strain_and_stress
     end
 
     if (sdef && (!edef))
-        @assert (length(s)==length(t)) "Time data length inconsistent"
+        (length(s)==length(t))  || throw(RheosException(timedata_invalid,"Time data length inconsistent"))
         return stress_only
     end
 
     if (edef && (!sdef))
-        @assert (length(e)==length(t)) "Time data length inconsistent"
+        (length(e)==length(t))  || throw(RheosException(timedata_invalid,"Time data length inconsistent"))
         return strain_only
     end
 
@@ -171,10 +268,15 @@ function check_time_data_consistency(t,e,s)
         return time_only
     end
 
-    return invalid_time_data
+    return invalid
 
 end
 
+"""
+    rheotimedatatype(d::RheoTimeData)
+
+check the validity of the data and return information about the type of data (time only, with strain, with stress, or both.
+"""
 function rheotimedatatype(d::RheoTimeData)
     return check_time_data_consistency(d.t,d.ϵ,d.σ)
 end
@@ -240,32 +342,6 @@ end
 
 
 
-# Utilities for in-place functions
-#
-# Internal - Not be exposed to the user.
-
-function _settime!(data::RheoTimeData, t::Vector{T}) where {T<:Real}
-    if hastime(data)
-      empty!(data.t)
-    end
-    append!(data.t, rheoconvert(t))
-end
-
-function _setstrain!(data::RheoTimeData, ϵ::Vector{T}) where {T<:Real}
-    if hasstrain(data)
-      empty!(data.ϵ)
-    end
-    append!(data.ϵ, rheoconvert(ϵ))
-end
-
-function _setstress!(data::RheoTimeData, σ::Vector{T}) where {T<:Real}
-    if hasstress(data)
-      empty!(data.σ)
-    end
-    append!(data.σ, rheoconvert(σ))
-end
-
-
 
 
 # Constants that are useful for certain processing function to determine which module to use.
@@ -273,12 +349,17 @@ end
 
 
 
+
+
+
+
+
 function +(d1::RheoTimeData, d2::RheoTimeData)
 
     type1 = rheotimedatatype(d1)
     type2 = rheotimedatatype(d2)
-    @assert (type1!=invalid_time_data) "Addition error: first parameter invalid"
-    @assert (type2!=invalid_time_data) "Addition error: second parameter invalid"
+    @assert (type1!=invalid) "Addition error: first parameter invalid"
+    @assert (type2!=invalid) "Addition error: second parameter invalid"
     @assert (type1==type2) "Addition error: parameters inconsistent"
     @assert (type1!=time_only) "Addition error: time only data cannot be added"
     @assert (d1.t == d2.t) "Addition error: timelines inconsistent"
@@ -308,8 +389,8 @@ function -(d1::RheoTimeData, d2::RheoTimeData)
 
     type1 = rheotimedatatype(d1)
     type2 = rheotimedatatype(d2)
-    @assert (type1!=invalid_time_data) "Subtraction error: first parameter invalid"
-    @assert (type2!=invalid_time_data) "Subtraction error: second parameter invalid"
+    @assert (type1!=invalid) "Subtraction error: first parameter invalid"
+    @assert (type2!=invalid) "Subtraction error: second parameter invalid"
     @assert (type1==type2) "Subtraction error: parameters inconsistent"
     @assert (type1!=time_only) "Subtraction error: time only data cannot be added"
     @assert (d1.t == d2.t) "Subtraction error: timelines inconsistent"
@@ -338,7 +419,7 @@ end
 function -(d::RheoTimeData)
 
     type = rheotimedatatype(d)
-    @assert (type!=invalid_time_data) "unary - error: parameter invalid"
+    @assert (type!=invalid) "unary - error: parameter invalid"
     @assert (type!=time_only) "unary - error: time only data cannot be manipulated this way"
 
     log = d.log === nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:-, params=(), keywords=() ), () ) ]
@@ -362,7 +443,7 @@ end
 function *(operand::Real, d::RheoTimeData)
 
     type = rheotimedatatype(d)
-    @assert (type!=invalid_time_data) "* error: parameter invalid"
+    @assert (type!=invalid) "* error: parameter invalid"
     @assert (type!=time_only) "* error: time only data cannot be manipulated this way"
 
     log = d.log === nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:*, params=(operand = operand), keywords=() ), () ) ]
@@ -424,11 +505,14 @@ struct RheoFreqData
     log::Union{RheoLog,Nothing}
 end
 
-function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat[], omega = RheoFloat[], ω::Vector{T3} = omega, comment="Created from generic constructor", savelog = true, log = savelog ? RheoLogItem(comment) : nothing)  where {T1<:Real, T2<:Real, T3<:Real}
+function RheoFreqData(;Gp::Vector{T1} = RheoFloat[], Gpp::Vector{T2} = RheoFloat[], omega = RheoFloat[], ω::Vector{T3} = omega, 
+                       comment="Created from generic constructor", savelog = true, log = nothing)  where {T1<:Real, T2<:Real, T3<:Real}
 
     typecheck = check_freq_data_consistency(ω,Gp,Gpp)
-    RheoFreqData(convert(Vector{RheoFloat},Gp), convert(Vector{RheoFloat},Gpp), convert(Vector{RheoFloat},ω),
-    log === nothing ? nothing : [ RheoLogItem(log.action,merge(log.info, (type=typecheck,)))]     )
+    RheoFreqData(rheoconvert(Gp), rheoconvert(Gpp), rheoconvert(ω),
+                 isnothing(log) ? loginit(savelog, :RheoFreqData, params = NamedTuple(), keywords = (ω=ω,Gp=Gp,Gpp=Gpp,comment=comment),
+                                           info=(comment=comment, type=typecheck) )  
+                                : log ) 
 end
 
 
@@ -546,25 +630,11 @@ end
 
 
 
-# Utilities for in-place functions
-#
-# Internal - Not be exposed to the user.
 
-function _setfreq!(data::RheoTimeData, ω::Vector{T}) where {T<:Real}
-    if hasfreq(data)
-      empty!(data.ω)
-    end
-    append!(data.ω, rheoconvert(ω))
-end
 
-function _setmodulus!(data::RheoTimeData, Gp::Vector{T1}, Gpp::Vector{T2}) where {T1<:Real,T2<:Real}
-    if hasmodulus(data)
-      empty!(data.Gp)
-      empty!(data.Gpp)
-    end
-    append!(data.Gp, rheoconvert(Gp))
-    append!(data.Gpp, rheoconvert(Gpp))
-end
+
+
+
 
 
 
@@ -1074,7 +1144,7 @@ end
 
 
 function freezeparams(m::RheoModelClass; kwargs...)
-    return(freezeparams(m,symbol_to_unicode(kwargs.data)))
+  return(freezeparams(m,symbol_to_unicode(values(kwargs))))
 end
 
 
@@ -1085,7 +1155,7 @@ end
 
 function freeze_params(m::RheoModelClass; kwargs...)
     println("freeze_params is deprecated - use freezeparams instead.")
-    return(freezeparams(m,symbol_to_unicode(kwargs.data)))
+    return(freezeparams(m,symbol_to_unicode(values(kwargs))))
 end
 
 
@@ -1126,7 +1196,7 @@ end
 
 
 function RheoModel(m::RheoModelClass; kwargs...)
-    return(RheoModel(m,symbol_to_unicode(kwargs.data)))
+    return(RheoModel(m,symbol_to_unicode(values(kwargs))))
 end
 
 
@@ -1331,12 +1401,12 @@ end
 
 
 function relaxmod(m::RheoModelClass, x; kwargs...)
-    relaxmod(m, x, symbol_to_unicode(kwargs.data))
+    relaxmod(m, x, symbol_to_unicode(values(kwargs)))
 end
 
 relaxmod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> relaxmod(m, x, params)
 relaxmod(m::RheoModelClass, params::NamedTuple) =  x -> relaxmod(m, x, params)
-relaxmod(m::RheoModelClass; kwargs...) =  x -> relaxmod(m, x, symbol_to_unicode(kwargs.data))
+relaxmod(m::RheoModelClass; kwargs...) =  x -> relaxmod(m, x, symbol_to_unicode(values(kwargs)))
 
 
 
@@ -1413,12 +1483,12 @@ end
 
 
 function creepcomp(m::RheoModelClass, x; kwargs...)
-    creepcomp(m, x, symbol_to_unicode(kwargs.data))
+  creepcomp(m, x, symbol_to_unicode(values(kwargs)))
 end
 
 creepcomp(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> creepcomp(m, x, params)
 creepcomp(m::RheoModelClass, params::NamedTuple) =  x -> creepcomp(m, x, params)
-creepcomp(m::RheoModelClass; kwargs...) =  x -> creepcomp(m, x, symbol_to_unicode(kwargs.data))
+creepcomp(m::RheoModelClass; kwargs...) =  x -> creepcomp(m, x, symbol_to_unicode(values(kwargs)))
 
 
 
@@ -1436,7 +1506,7 @@ creepcomp(m::RheoModelClass; kwargs...) =  x -> creepcomp(m, x, symbol_to_unicod
 
 """
     storagemod(m[, ω, params])
-
+Je viens de lire le proposal. Mon commentaire princi
 provide access to the storage modulus (G') of a given model m.
 
 * When a frequency value is provided (or an array of frequency values), the function returns the corresponding value(s) of the storage modulus.
@@ -1495,12 +1565,12 @@ end
 
 
 function storagemod(m::RheoModelClass, x; kwargs...)
-    storagemod(m, x, symbol_to_unicode(kwargs.data))
+    storagemod(m, x, symbol_to_unicode(values(kwargs)))
 end
 
 storagemod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> storagemod(m, x, params)
 storagemod(m::RheoModelClass, params::NamedTuple) =  x -> storagemod(m, x, params)
-storagemod(m::RheoModelClass; kwargs...) =  x -> storagemod(m, x, symbol_to_unicode(kwargs.data))
+storagemod(m::RheoModelClass; kwargs...) =  x -> storagemod(m, x, symbol_to_unicode(values(kwargs)))
 
 
 
@@ -1567,12 +1637,12 @@ end
 
 
 function lossmod(m::RheoModelClass, x; kwargs...)
-    lossmod(m, x, symbol_to_unicode(kwargs.data))
+    lossmod(m, x, symbol_to_unicode(values(kwargs)))
 end
 
 lossmod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> lossmod(m, x, params)
 lossmod(m::RheoModelClass, params::NamedTuple) =  x -> lossmod(m, x, params)
-lossmod(m::RheoModelClass; kwargs...) =  x -> lossmod(m, x, symbol_to_unicode(kwargs.data))
+lossmod(m::RheoModelClass; kwargs...) =  x -> lossmod(m, x, symbol_to_unicode(values(kwargs)))
 
 
 
@@ -1606,8 +1676,8 @@ Examples:
 Examples:
 
     m = RheoModel(Maxwell, k=1., η=1)
-    Gpp = dynamicmod(m)
-    Gpp([0,1,2])
+    Gd = dynamicmod(m)
+    Gd([0,1,2])
 
 Note: use abs() and angle() to get the magnitude and phase of the complex modulus.
 """
@@ -1642,10 +1712,10 @@ end
 
 
 function dynamicmod(m::RheoModelClass, x; kwargs...)
-    dynamicmod(m, x, symbol_to_unicode(kwargs.data))
+    dynamicmod(m, x, symbol_to_unicode(values(kwargs)))
 end
 
 dynamicmod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> dynamicmod(m, x, params)
 dynamicmod(m::RheoModelClass, params::NamedTuple) =  x -> dynamicmod(m, x, params)
-dynamicmod(m::RheoModelClass; kwargs...) =  x -> dynamicmod(m, x, symbol_to_unicode(kwargs.data))
+dynamicmod(m::RheoModelClass; kwargs...) =  x -> dynamicmod(m, x, symbol_to_unicode(values(kwargs)))
 

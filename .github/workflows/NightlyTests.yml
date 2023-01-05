@@ -3,7 +3,6 @@ name: nightly
 on:
   push:
     branches: # add more branches as necessary
-      - master
       - dev
     tags: "*"
   pull_request:
@@ -16,7 +15,8 @@ jobs:
       strategy:
         fail-fast: false
         matrix:
-          version: # test on Latest and nightly
+          version: # test on beta and nightly
+            - ~1.9.0-0
             - nightly
           arch: # only test 64 bit 
             - x64

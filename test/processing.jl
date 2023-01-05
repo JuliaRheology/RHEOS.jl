@@ -697,10 +697,10 @@ function _modelpredict_nonsing_const_relax(tol)
 
     modulus = quote α*exp.(-t/β) end
     modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), G = modulus, info="none")
-    model = RheoModel(modelclass, α=1.0, β=1.0)
+    # model = RheoModel(modelclass, α=1.0, β=1.0)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
-    computed_response = modelpredict(data0, model)
+    computed_response = modelpredict(data0, modelclass, α=1.0, β=1.0)
 
     all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), eachindex(exact_response))
 end
@@ -714,10 +714,10 @@ function _modelpredict_nonsing_const_creep(tol)
 
     modulus = quote α*exp.(-t/β) end
     modelclass = RheoModelClass(name = "testmodel", p = (:α, :β), J = modulus, info="none")
-    model = RheoModel(modelclass, α=1.0, β=1.0)
+    # model = RheoModel(modelclass, α=1.0, β=1.0)
     data0 = RheoTimeData(t = t, σ = loading)
 
-    computed_response = modelpredict(data0, model)
+    computed_response = modelpredict(data0, modelclass, α=1.0, β=1.0)
 
     all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), eachindex(exact_response))
 end
@@ -1338,7 +1338,7 @@ function _dynamicmodelfit(tol)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
-    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="none", rel_tol=1e-6)
+    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="none", rel_tol_x=1e-6)
 
     found_params = modelout.fixedparams
     actual_params = actual_model.fixedparams
@@ -1355,7 +1355,7 @@ function _dynamicmodelfit_noinit(tol)
     dataGpp = lossmod(actual_model,ω)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
-    modelout = dynamicmodelfit(data0, SLS_Zener, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="none", rel_tol=1e-6)
+    modelout = dynamicmodelfit(data0, SLS_Zener, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="none", rel_tol_x=1e-6)
 
     found_params = modelout.fixedparams
     actual_params = actual_model.fixedparams
@@ -1373,7 +1373,7 @@ function _dynamicmodelfit_nobounds(tol)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
-    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, weights="none", rel_tol=1e-6)
+    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, weights="none", rel_tol_x=1e-6)
 
     found_params = modelout.fixedparams
     actual_params = actual_model.fixedparams
@@ -1391,7 +1391,7 @@ function _dynamicmodelfit_mean(tol)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
-    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="mean", rel_tol=1e-6)
+    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="mean", rel_tol_x=1e-6)
 
     found_params = modelout.fixedparams
     actual_params = actual_model.fixedparams
@@ -1409,7 +1409,7 @@ function _dynamicmodelfit_log(tol)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
-    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="log", rel_tol=1e-6)
+    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="log", rel_tol_x=1e-6)
 
     found_params = modelout.fixedparams
     actual_params = actual_model.fixedparams
@@ -1427,7 +1427,7 @@ function _dynamicmodelfit_local(tol)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
-    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="local", rel_tol=1e-6)
+    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights="local", rel_tol_x=1e-6)
 
     found_params = modelout.fixedparams
     actual_params = actual_model.fixedparams
@@ -1445,7 +1445,7 @@ function _dynamicmodelfit_manualweights(tol)
     data0 = RheoFreqData(ω = ω, Gp = dataGp, Gpp = dataGpp)
 
     init_params = (η=2.0, kᵦ=10.5, kᵧ=3.0)
-    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights=[0.5, 1.5], rel_tol=1e-6)
+    modelout = dynamicmodelfit(data0, SLS_Zener, p0=init_params, lo=(η=0.1, kᵦ=0.2, kᵧ=0.3), hi=(η=12.0, kᵦ=Inf, kᵧ=27.0), weights=[0.5, 1.5], rel_tol_x=1e-6)
 
     found_params = modelout.fixedparams
     actual_params = actual_model.fixedparams

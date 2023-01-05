@@ -1,5 +1,4 @@
 #!/usr/bin/env julia
-
 # This file contains data and functions helping with the translation of symbols for the use of RHEOS without unicode symbols.
 
 
@@ -94,7 +93,7 @@ function namedtuple(d::Dict)
 end
 
 function namedtuple(;kwargs...)
-    kwargs.data
+    values(kwargs)
 end
 
 """
@@ -116,7 +115,7 @@ function dict(nt::NamedTuple)
 end
 
 function dict(;kwargs...)
-    dict(kwargs.data)
+    dict(values(kwargs))
 end
 
 

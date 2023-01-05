@@ -16,7 +16,7 @@ Generate `RheoTimeData` struct with only the time data based on the range provid
 `timeline(0:0.1:10)` returns a RheoTimeData with only time data, with the following series: [0.  0.1   0.2  ...  9.9  10].
 """
 function timeline(r::R; savelog = true) where R <: AbstractRange
-    log = savelog ? [RheoLogItem( (type=:source, funct=:timeline, params=(r,), keywords=()), (comment="timeline created", type=time_only))] : nothing
+    log = loginit(savelog,:timeline, params=(r,), info=(comment="timeline created", type=time_only))
     RheoTimeData([], [], Vector{RheoFloat}(r), log)
 end
 
@@ -53,7 +53,7 @@ function frequencyspec(r::R; logscale=true, savelog = true) where R <: AbstractR
     else
         ω=Vector{RheoFloat}(r)
     end
-    log = savelog ? [RheoLogItem( (type=:source, funct=:frequencyspec, params=(r,), keywords=(logscale=logscale,)), (comment="frequency range created", type=freq_only))] : nothing
+    log = loginit(savelog, :frequencyspec, params=(r,), keywords=(logscale=logscale,), info=(comment="frequency range created", type=freq_only))
     RheoFreqData([], [], ω, log)
 end
 
@@ -84,16 +84,12 @@ generate the appropriate loading.
     strainfunction(data::RheoTimeData, f::T) where T<:Function
     strainfunction(f::T, data::RheoTimeData) where T<:Function
 
-Accepts a `RheoTimeData` and outputs a new `RheoTimeData` with a strain imposed.
-The strain signal is determined by the function provided, which should take
-time as its only argument. The original data's time signal is used.
+Returns a new `RheoTimeData` with strain values calculated by applying the function `f` to the time data of the parameter data.
 
-Normally used with a RheoTimeData generated using the `timeline` function.
+Normally used with a `RheoTimeData` generated using the `timeline` function.
 """
 function strainfunction(data::RheoTimeData, f::T) where T<:Function
-    log = data.log === nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
-                                    (comment="strain function applied to timeline",) ) ]
-
+    log = logadd_process(data, :strainfunction, params=(f=f,), comment="Strain function applied to timeline" )
     return RheoTimeData(data.σ, rheoconvert(map(f, data.t)), data.t, log)
 end
 
@@ -108,9 +104,8 @@ end
 In-place version of `strainfunction`.
 """
 function strainfunction!(data::RheoTimeData, f::T) where T<:Function
-    data.log === nothing ? nothing : push!(data.log, RheoLogItem( (type=:process, funct=:strainfunction, params=(f=f,), keywords=()),
-                                    (comment="strain function applied to timeline",) ) )
-    _setstrain!(data, map(f, data.t))
+    logadd_process!(data, :strainfunction, params=(f=f,), comment="Strain function applied to timeline" )
+    _mapdata!(f,data.ϵ,data.t) 
     return data
 end
 
@@ -122,15 +117,12 @@ end
     stressfunction(data::RheoTimeData, f::T) where T<:Function
     stressfunction(f::T, data::RheoTimeData) where T<:Function
 
-Accepts a `RheoTimeData` and outputs a new `RheoTimeData` with a stress imposed.
-The stress signal is determined by the function provided, which should take
-time as its only argument. The original data's time signal is used.
+Returns a new `RheoTimeData` with stress values calculated by applying the function `f` to the time data of the parameter data.
 
 Normally used with a `RheoTimeData` generated using the `timeline` function.
 """
 function stressfunction(data::RheoTimeData, f::T) where T<:Function
-    log = data.log === nothing ? nothing : [data.log; RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
-                                    (comment="stress function applied to timeline",) ) ]
+    log = logadd_process(data, :stressfunction, params=(f=f,), comment="Stress function applied to timeline" )
     return RheoTimeData(convert(Vector{RheoFloat}, map(f, data.t)), data.ϵ, data.t, log)
 end
 
@@ -145,9 +137,8 @@ end
 In-place version of `stressfunction`.
 """
 function stressfunction!(data::RheoTimeData, f::T) where T<:Function
-    data.log === nothing ? nothing : push!(data.log, RheoLogItem( (type=:process, funct=:stressfunction, params=(f=f,), keywords=()),
-                                    (comment="stress function applied to timeline",) ) )
-    _setstress!(data, map(f, data.t))
+    logadd_process!(data, :stressfunction, params=(f=f,), comment="Stress function applied to timeline" )
+    _mapdata!(f,data.σ,data.t) 
     return data
 end
 
@@ -264,6 +255,65 @@ end
 function triangle(; kwargs...)
     return t -> triangle(t; kwargs...)
 end
+
+
+
+
+
+
+
+
+"""
+    modulusfunction(data::RheoFreqData, Gp::T1, Gpp::T2) where {T1<:Function, T2<:Function}
+    modulusfunction(Gp::T1, Gpp::T2, data::RheoFreqData) where {T1<:Function, T2<:Function}
+
+Returns a new `RheoFreqData` with a modulus calculated using the functions `Gp` and `Gpp` provided, 
+applied to freqency values present in the input `data`.
+
+Normally used with a `RheoFreqData` generated using the `frequencyspec` function.
+"""
+function modulusfunction(data::RheoFreqData, Gp::T1, Gpp::T2) where {T1<:Function, T2<:Function}
+    log = logadd_process(data, :modulusfunction, params=(Gp=Gp,Gpp=Gpp), comment="Modulus function applied to frequency range" )
+    return RheoFreqData(convert(Vector{RheoFloat}, map(Gp, data.ω)), convert(Vector{RheoFloat}, map(Gpp, data.ω)),  data.ω, log)
+end
+
+function modulusfunction(Gp::T1, Gpp::T2, data::RheoFreqData) where {T1<:Function, T2<:Function}
+    modulusfunction(data,Gp,Gpp)
+end
+
+"""
+    modulusfunction!(data::RheoFreqData, f::T) where T<:Function
+    modulusfunction!(f::T, data::RheoFreqData) where T<:Function
+
+In-place version of `modulusfunction`.
+"""
+function modulusfunction!(data::RheoFreqData, Gp::T1, Gpp::T2) where {T1<:Function, T2<:Function}
+    logadd_process!(data, :modulusfunction, params=(Gp=Gp,Gpp=Gpp), comment="Modulus function applied to frequency range" )
+    _mapdata!(Gp,data.Gp,data.ω) 
+    _mapdata!(Gpp,data.Gpp,data.ω) 
+    return data
+end
+
+function modulusfunction!(Gp::T1, Gpp::T2, data::RheoFreqData) where {T1<:Function, T2<:Function}
+    modulusfunction!(data,Gp,Gpp)
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #=
 ------------------------------------------------------------------------------------

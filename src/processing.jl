@@ -50,8 +50,9 @@ function resample(d::RheoTimeData; t::Union{Vector{T},R}=RheoFloat[], scale::T1=
     end
     σr = hasstress(d) ? Spline1D(d.t,d.σ)(t) : d.σ
     ϵr = hasstrain(d) ? Spline1D(d.t,d.ϵ)(t) : d.ϵ
-    log = d.log === nothing ? nothing : [d.log; RheoLogItem( (type=:process, funct=:resample, params=NamedTuple(), keywords=keywords ),
-                                                             (comment="Resample the data",) ) ]
+
+    log = logadd_process(d, :resample, keywords=keywords, comment="Resample the data" ) 
+
     return RheoTimeData(σr, ϵr, t, log)
 
 end
@@ -183,9 +184,7 @@ function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
         epsilon = Base.invokelatest(imfilter, self.ϵ, Base.invokelatest(Kernel.reflect, Base.invokelatest(Kernel.gaussian, (Σ,))), pad)
     end
 
-
-    log = self.log === nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:smooth, params=(τ = τ,), keywords=(pad = pad,) ),
-                                        (comment="Smooth data with timescale $τ",) ) ]
+    log = logadd_process(self, :smooth, params=(τ = τ,), keywords=(pad = pad,), comment="Smooth data with timescale $τ" ) 
 
     RheoTimeData(sigma, epsilon, self.t, log)
 
@@ -236,17 +235,16 @@ function extract(self::RheoTimeData, type::Union{TimeDataType,Integer})
 
         type = typeof(type)==Int ? TimeDataType(type) : type
         @assert (typeof(type)==TimeDataType) || (typeof(type)==Int) "Cannot extract frequency data from RheoTimeData"
-        @assert (type!= strain_and_stress) && (type!= invalid_time_data) "Cannot extract both stress and strain"
-        @assert (type!= invalid_time_data) "Cannot extract information from invalid time data"
+        @assert (type!= strain_and_stress) && (type!= invalid) "Cannot extract both stress and strain"
+        @assert (type!= invalid) "Cannot extract information from invalid time data"
         check = rheotimedatatype(self)
 
 
-        log = self.log === nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
-                                            (comment="Data field extraction, $type from $check",) ) ]
+        log = logadd_process(self, :extract, params=(type=type,), comment="Data field extraction, $type from $check") 
 
 
         if type == time_only
-            @assert check!= invalid_time_data "Time not available"
+            @assert check!= invalid "Time not available"
             return RheoTimeData([], [], self.t,log)
         elseif type == strain_only
             @assert (check == strain_and_stress) || (check == strain_only) "Strain not available"
@@ -266,8 +264,7 @@ function extract(self::RheoFreqData, type::Union{FreqDataType,Integer})
         check = rheofreqdatatype(self)
         @assert (check == with_modulus) "Frequency and modulii required"
 
-        log = self.log === nothing ? nothing : [self.log; RheoLogItem( (type=:process, funct=:extract, params=(type=type,), keywords=() ),
-                                            (comment="Frequency field extraction",) ) ]
+        log = logadd_process(self, :extract, params=(type=type,), comment="Frequency field extraction")  
         return RheoFreqData([], [], self.ω,log)
 end
 
@@ -409,7 +406,7 @@ function fill_upper_bounds(model::RheoModelClass, hi::Union{NamedTuple,Nothing})
 end
 
 """
-    modelfit(data::RheoTimeData, model::RheoModelClass, modloading::Symbol; p0::Union{NamedTuple,Nothing} = nothing, lo::Union{NamedTuple,Nothing} = nothing, hi::Union{NamedTuple,Nothing} = nothing, verbose::Bool = false, rel_tol = 1e-4, diff_method="BD", weights::Union{Vector{Integer},Nothing}=nothing)
+    modelfit(data::RheoTimeData, model::RheoModelClass, modloading::Symbol; p0::Union{NamedTuple,Nothing} = nothing, lo::Union{NamedTuple,Nothing} = nothing, hi::Union{NamedTuple,Nothing} = nothing, verbose::Bool = false, rel_tol_x = 1e-4, diff_method="BD", weights::Union{Vector{Integer},Nothing}=nothing)
 
 Fit `RheologyData` struct to model and return a fitted model as a `RheologyModel` object.
 For the fitting process RHEOS relies on the optimistion package [NLopt](https://nlopt.readthedocs.io/en/latest/).
@@ -423,32 +420,36 @@ Suitable options include `:LN_SBPLX` (default),  `:LN_COBYLA`, `:LN_BOBYQA` for 
 - `data`: `RheoTimeData` struct containing all data
 - `model`: `RheoModelClass` containing moduli functions and named tuple parameters
 - `modloading`: `strain_imposed` or `1`, `stress_imposed` or `2`
-- `p0`: Initial parameters to use in fit (uses 0.5 for all parameters if not defined), provided as a named tupple
-- `lo`: Lower bounds for parameters, provided as a named tupple
-- `hi`: Upper bounds for parameters, provided as a named tupple
+- `p0`: Initial parameters to use in fit (uses 0.5 for all parameters if not defined), provided as a named tuple
+- `lo`: Lower bounds for parameters, provided as a named tuple
+- `hi`: Upper bounds for parameters, provided as a named tuple
 - `verbose`: If true, prints parameters on each optimisation iteration
-- `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
+- `rel_tol_x`: Relative tolerance of optimization as a function of input parameter values, see NLOpt docs for more details
+- `rel_tol_f`: If given, sets a criterion based directly on changes of the function value
 - `diff_method`: Set finite difference formula to use for derivative, currently `"BD"` or `"CD"`
 - `weights`: Vector of indices weighted according to importance, can be generated by `indexweight` function
-- `optmethod`: optimisation algorithm used by NLOpt 
+- `optmethod`: optimisation algorithm used by NLOpt (passed as symbol or string) 
+- `opttimeout`: allows user to set a wall clock timeout on optimisation, used to halt a failing optimisation and return safely
+- `optmaxeval`: allows user to set a maximum number of evaluations during optimisation, used when repeatability is required
 """
 function modelfit(data::RheoTimeData,
-                  model::RheoModelClass,
-                  modloading::LoadingType;
-                  p0::Union{NamedTuple,Nothing,Dict} = nothing,
-                  lo::Union{NamedTuple,Nothing,Dict} = nothing,
-                  hi::Union{NamedTuple,Nothing,Dict} = nothing,
-                  verbose::Bool = false,
-                  rel_tol = 1e-4,
-                  diff_method="BD",
-                  weights::Union{Vector{Integer},Nothing} = nothing,
-                  optmethod::Symbol = :LN_SBPLX)
+                    model::RheoModelClass,
+                    modloading::LoadingType;
+                    p0::Union{NamedTuple,Nothing,Dict} = nothing,
+                    lo::Union{NamedTuple,Nothing,Dict} = nothing,
+                    hi::Union{NamedTuple,Nothing,Dict} = nothing,
+                    verbose::Bool = false,
+                    rel_tol_f::Union{Real,Nothing} = nothing,
+                    rel_tol_x::Union{Real,Nothing} = isnothing(rel_tol_f) ? 1e-4 : nothing,
+                    diff_method="BD",
+                    weights::Union{Nothing,Vector{T}} = nothing,
+                    optmethod::Union{Symbol,String}= :LN_SBPLX, 
+                    opttimeout::Union{Real,Nothing} = nothing,
+                    optmaxeval::Union{Integer,Nothing} = nothing) where T <: Integer
 
     p0a = fill_init_params(model, symbol_to_unicode(p0))
     loa = fill_lower_bounds(model, symbol_to_unicode(lo))
     hia = fill_upper_bounds(model, symbol_to_unicode(hi))
-
-    rel_tol = convert(RheoFloat,rel_tol)
 
     check = rheotimedatatype(data)
     @assert (check == strain_and_stress) "Both stress and strain are required"
@@ -510,9 +511,12 @@ function modelfit(data::RheoTimeData,
                                                 insight = verbose,
                                                 constant_sampling = is_constant,
                                                 singularity = sing,
-                                                _rel_tol = rel_tol,
+                                                rel_tol_x = rel_tol_x,
+                                                rel_tol_f = rel_tol_f,
                                                 indweights = weights,
-                                                optmethod = optmethod)
+                                                optmethod = Symbol(optmethod),
+                                                opttimeout = opttimeout,
+                                                optmaxeval = optmaxeval)
 
     println("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
 
@@ -522,7 +526,7 @@ function modelfit(data::RheoTimeData,
         # Preparation of data for log item
         info=(comment="Fiting rheological model to data", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
         params=(model=model, modloading=modloading)
-        keywords=(p0=p0, lo=lo, hi=hi, rel_tol=rel_tol, diff_method=diff_method)
+        keywords=(p0=p0, lo=lo, hi=hi, rel_tol_x=rel_tol_x, diff_method=diff_method)
         # Add data to the log
         push!(data.log, RheoLogItem( (type=:analysis, funct=:modelfit, params=params, keywords=keywords), info))
     end
@@ -531,17 +535,8 @@ function modelfit(data::RheoTimeData,
 
 end
 
-"""
-    modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
 
-Given an incomplete data set (only either stress or strain missing) and model with values substituted into
-parameters (`RheoModel`), return a new dataset based on the model.
-If data is type of `stress_only`, then creep modulus (`:J`) is used; if data type is `strain_only` relaxation modulus (`:G`).
-A complete `RheoTimeData` of type `strain_and_stress` is returned.
-`diff_method` sets finite difference for calculating the derivative used in the hereditary integral and
-can be either backwards difference (`"BD"`) or central difference (`"CD"`).
-"""
-function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
+function _modelpredict(data::RheoTimeData, modulus, modsing, diff_method, check)
 
     # use correct method for derivative
     if diff_method=="BD"
@@ -550,17 +545,10 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
         deriv = derivCD
     end
 
-    check = rheotimedatatype(data)
-    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provide: " * string(check)
-
     if (check == strain_only)
-        modulus = model._Ga
-        modsing = model._G
-        dcontrolled = deriv(data.ϵ, data.t)
+       dcontrolled = deriv(data.ϵ, data.t)
     elseif (check == stress_only)
-        modulus = model._Ja
-        modsing = model._J
-        dcontrolled = deriv(data.σ, data.t)
+       dcontrolled = deriv(data.σ, data.t)
     end
 
     # get singularity presence
@@ -589,25 +577,76 @@ function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
     end
 
     if (check == stress_only)
-        sigma = data.σ
-        epsilon = convolved
-        pred_mod = "creep function J"
+      return(sigma = data.σ, epsilon = convolved, pred_mod = "creep function J")
     elseif (check == strain_only)
-        sigma = convolved
-        epsilon = data.ϵ
-        pred_mod = "relaxation function G"
+      return(sigma = convolved, epsilon = data.ϵ, pred_mod = "relaxation function G")
+    end
+         
+end
+
+
+"""
+    modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
+
+Given an incomplete data set (only either stress or strain missing) and model with values substituted into
+parameters (`RheoModel`), return a new dataset based on the model.
+If data is type of `stress_only`, then the creep modulus is used; if data type is `strain_only`, the relaxation modulus is used.
+A complete `RheoTimeData` of type `strain_and_stress` is returned.
+`diff_method` sets finite difference for calculating the derivative used in the hereditary integral and
+can be either backwards difference (`"BD"`) or central difference (`"CD"`).
+"""
+function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
+
+    check = rheotimedatatype(data)
+    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
+
+    if (check == strain_only)
+        modulus = model._Ga
+        modsing = model._G
+    elseif (check == stress_only)
+        modulus = model._Ja
+        modsing = model._J
     end
 
-    log = data.log === nothing ? nothing : [ data.log;
-            RheoLogItem( (type=:process, funct=:modelpredict, params=(model::RheoModel,), keywords=(diff_method = diff_method,)),
-                         (comment="Predicted data - modulus: $pred_mod, parameters:$(model.fixedparams)",) ) ]
+    sigma, epsilon, pred_mod = _modelpredict(data, modulus, modsing, diff_method, check)
+
+    log = logadd_process(data, :modelpredict, params=(model,), keywords=(diff_method = diff_method,), 
+                         comment="Predicted data - modulus: $pred_mod, parameters:$(model.fixedparams)" ) 
 
     return RheoTimeData(sigma, epsilon, data.t, log)
 
 end
 
 """
-    modelstepfit(data::RheoTimeData, model::RheoModelClass, modloading::Union{LoadingType,Integer}; step=nothing, p0::Union{NamedTuple,Nothing} = nothing, lo::Union{NamedTuple,Nothing} = nothing, hi::Union{NamedTuple,Nothing} = nothing, verbose::Bool = false, rel_tol = 1e-4, weights::Union{Vector{Integer},Nothing} = nothing)
+    modelpredict(data::RheoTimeData, model::RheoModelClass; diff_method="BD", kwargs...)
+
+Variation of `modelpredict` that takes a `RheoModelClass` and parameter values rather than an already created model. This speeds up the analysis when a large number of different parameter values need to be screened, as only the relevant modulus function is created for the purpose of model prediction.
+"""
+function modelpredict(data::RheoTimeData, model::RheoModelClass; diff_method="BD", kwargs...)
+
+    check = rheotimedatatype(data)
+    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
+
+    if (check == strain_only)
+        modulus = relaxmod(model, symbol_to_unicode(values(kwargs)))
+        modsing = relaxmod(model, symbol_to_unicode(values(kwargs)))
+    elseif (check == stress_only)
+        modulus = creepcomp(model, symbol_to_unicode(values(kwargs)))
+        modsing = creepcomp(model, symbol_to_unicode(values(kwargs)))
+    end
+
+    sigma, epsilon, pred_mod = _modelpredict(data, modulus, modsing, diff_method, check)
+
+    log = logadd_process(data, :modelpredict, params=(model,), keywords=(diff_method = diff_method, kwargs...), 
+                         comment="Predicted data - modulus: $pred_mod, parameters:$(model.fixedparams)" ) 
+
+    return RheoTimeData(sigma, epsilon, data.t, log)
+
+end
+
+
+"""
+    modelstepfit(data::RheoTimeData, model::RheoModelClass, modloading::Union{LoadingType,Integer}; step=nothing, p0::Union{NamedTuple,Nothing} = nothing, lo::Union{NamedTuple,Nothing} = nothing, hi::Union{NamedTuple,Nothing} = nothing, verbose::Bool = false, rel_tol_x = 1e-4, weights::Union{Vector{Integer},Nothing} = nothing)
 
 Same as `modelfit` except assumes a step loading. If this assumption is appropriate for the data
 then fitting can be sped up greatly by use of this function. If modloading is `strain_imposed`, relaxation modulus is used,
@@ -625,25 +664,30 @@ Alternatively, it is possible to define the value of the step by defining the op
 - `lo`: Named tuple of lower bounds for parameters
 - `hi`: Named tuple of upper bounds for parameters
 - `verbose`: If true, prints parameters on each optimisation iteration
-- `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
+- `rel_tol_x`: Relative tolerance of optimization as a function of input parameter values, see NLOpt docs for more details
+- `rel_tol_f`: If given, overrides the default optimisation stopping criterion and sets a criterion based directly on changes of the function value
 - `weights`: Vector of indices weighted according to importance, can be generated by `indexweight` function
+- `opttimeout`: allows user to set a wall clock timeout on optimisation, used to halt a failing optimisation and return safely
+- `optmaxeval`: allows user to set a maximum number of evaluations during optimisation, used when repeatability is required
 """
 function modelstepfit(data::RheoTimeData,
-                  model::RheoModelClass,
-                  modloading::Union{LoadingType,Integer};
-                  step = nothing,
-                  p0::Union{NamedTuple,Nothing} = nothing,
-                  lo::Union{NamedTuple,Nothing} = nothing,
-                  hi::Union{NamedTuple,Nothing} = nothing,
-                  verbose::Bool = false,
-                  rel_tol = 1e-4,
-                  weights::Union{Vector{Integer},Nothing} = nothing)
+                        model::RheoModelClass,
+                        modloading::Union{LoadingType,Integer};
+                        step = nothing,
+                        p0::Union{NamedTuple,Nothing} = nothing,
+                        lo::Union{NamedTuple,Nothing} = nothing,
+                        hi::Union{NamedTuple,Nothing} = nothing,
+                        verbose::Bool = false,
+                        rel_tol_f::Union{Real,Nothing} = nothing,
+                        rel_tol_x::Union{Real,Nothing} = isnothing(rel_tol_f) ? 1e-4 : nothing,
+                        weights::Union{Nothing, Vector{T}} = nothing,
+                        optmethod::Union{Symbol,String}= :LN_SBPLX, 
+                        opttimeout::Union{Real,Nothing} = nothing,
+                        optmaxeval::Union{Integer,Nothing} = nothing) where T <: Integer
 
     p0a = fill_init_params(model, symbol_to_unicode(p0))
     loa = fill_lower_bounds(model, symbol_to_unicode(lo))
     hia = fill_upper_bounds(model, symbol_to_unicode(hi))
-
-    rel_tol = convert(RheoFloat, rel_tol)
 
     # get data type provided
     check = rheotimedatatype(data)
@@ -708,8 +752,12 @@ function modelstepfit(data::RheoTimeData,
                                                     measured;
                                                     insight = verbose,
                                                     singularity = sing,
-                                                    _rel_tol = rel_tol,
-                                                    indweights = weights)
+                                                    rel_tol_x = rel_tol_x,
+                                                    rel_tol_f = rel_tol_f,
+                                                    indweights = weights,
+                                                    optmethod = Symbol(optmethod),
+                                                    opttimeout = opttimeout,
+                                                    optmaxeval = optmaxeval)
 
     nt = NamedTuple{Tuple(model.freeparams)}(minx)
 
@@ -717,7 +765,7 @@ function modelstepfit(data::RheoTimeData,
         # Preparation of data for log item
         info=(comment="Fiting rheological model to data (step input assumed)", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
         params = (model = model, modloading = modloading)
-        keywords = (step = step, p0 = p0, lo = lo, hi = hi, rel_tol = rel_tol)
+        keywords = (step = step, p0 = p0, lo = lo, hi = hi, rel_tol_x = rel_tol_x, rel_tol_f = rel_tol_f)
         # Add data to the log
         push!(data.log, RheoLogItem( (type=:analysis, funct=:modelstepfit, params=params, keywords=keywords), info))
     end
@@ -874,7 +922,8 @@ RHEOS offers a number of data transforms which can be used by changing `weights`
 - `lo`: Lower bounds for parameters
 - `hi`: Upper bounds for parameters
 - `verbose`: If true, prints parameters on each optimisation iteration
-- `rel_tol`: Relative tolerance of optimization, see NLOpt docs for more details
+- `rel_tol_x`: Relative tolerance of optimization for the vector of parameters, see NLOpt docs for more details
+- `rel_tol_f`: Relative tolerance of optimization for the objective function, see NLOpt docs for more details
 - `weights`: Weighting mode for storage and loss modulus (`"none"`, `"mean"`, `"log"`, `"local"` or manually specified)
 """
 function dynamicmodelfit(data::RheoFreqData,
@@ -883,8 +932,12 @@ function dynamicmodelfit(data::RheoFreqData,
                 lo::Union{NamedTuple,Nothing} = nothing,
                 hi::Union{NamedTuple,Nothing} = nothing,
                 verbose::Bool = false,
-                rel_tol::T = 1e-4,
-                weights::Union{String, Vector{T}}="local") where T<:Real
+                rel_tol_f::Union{Real,Nothing} = nothing,
+                rel_tol_x::Union{Real,Nothing} = isnothing(rel_tol_f) ? 1e-4 : nothing,
+                weights::Union{String, Vector{T}}="local",
+                optmethod::Union{Symbol,String}= :LN_SBPLX, 
+                opttimeout::Union{Real, Nothing} = nothing,
+                optmaxeval::Union{Integer, Nothing} = nothing) where T<:Real
 
     p0a = fill_init_params(model, symbol_to_unicode(p0))
     loa = fill_lower_bounds(model, symbol_to_unicode(lo))
@@ -897,7 +950,7 @@ function dynamicmodelfit(data::RheoFreqData,
     @assert modulusexists(modsingGpp) "Loss modulus not defined for this model"
 
     # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
-    opt = Opt(:LN_SBPLX, length(p0a))
+    opt = Opt(optmethod, length(p0a))
 
     if !isnothing(loa)
        lower_bounds!(opt, loa)
@@ -907,9 +960,30 @@ function dynamicmodelfit(data::RheoFreqData,
        upper_bounds!(opt, hia)
     end
 
-    # set relative tolerance
-    rel_tol = convert(RheoFloat, rel_tol)
-    xtol_rel!(opt, rel_tol)
+    # set optimiser stopping criteria
+
+    # wall clock timeout
+    if !isnothing(opttimeout)
+        opttimeout = convert(RheoFloat, opttimeout)
+        maxtime!(opt, opttimeout)
+    end
+
+    # evaluation cycle ceiling
+    if !isnothing(optmaxeval)
+        maxeval!(opt, optmaxeval)
+    end
+
+    # input parameter change tolerance
+    if !isnothing(rel_tol_x)
+        rel_tol_x = convert(Float64, rel_tol_x)
+        xtol_rel!(opt, rel_tol_x)
+    end
+
+    # objective function change tolerance 
+    if !isnothing(rel_tol_f)
+        rel_tol_f = convert(Float64, rel_tol_f)
+        ftol_rel!(opt, rel_tol_f)
+    end
 
     # set objective/cost function
     if weights=="none"
@@ -942,7 +1016,7 @@ function dynamicmodelfit(data::RheoFreqData,
         # Preparation of data for log item
         info = (comment="Fiting rheological model to frequency spectrum", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
         params = (model=model, )
-        keywords = (p0=p0, lo=lo, hi=hi, rel_tol=rel_tol, weights=weights)
+        keywords = (p0=p0, lo=lo, hi=hi, rel_tol_f=rel_tol_f, rel_tol_x=rel_tol_x, weights=weights)
         # Add data to the log
         push!(data.log, RheoLogItem( (type=:analysis, funct=:dynamicmodelfit, params=params, keywords=keywords), info))
     end
