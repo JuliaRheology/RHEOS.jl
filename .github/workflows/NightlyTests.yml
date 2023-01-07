@@ -3,6 +3,7 @@ name: nightly
 on:
   push:
     branches: # add more branches as necessary
+      - master
       - dev
     tags: "*"
   pull_request:
