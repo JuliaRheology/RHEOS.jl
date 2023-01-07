@@ -82,11 +82,18 @@ rheotimedatatype(data_ext)
 maxwell_predict = modelpredict(data_ext, maxwell_model)
 
 ## Now we can plot data and model together for comparison
-using Plots
+using PyPlot
 
-plot(data.t, data.σ)
-plot(maxwell_predict.t, maxwell_predict.σ)
+
+## Plot data
+fig, ax = subplots(1, 1, figsize = (7, 5))
+ax.plot(data.t, data.σ, ".", color = "green")
+ax.plot(maxwell_predict.t, maxwell_predict.σ, "-", color = "blue")
+ax.set_ylabel("Stress (blue - fit, green - data)")
+ax.set_xlabel("Time")
 #!nb fig #hide
+#-
+
 
 
 
