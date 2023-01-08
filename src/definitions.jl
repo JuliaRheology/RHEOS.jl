@@ -580,7 +580,7 @@ end
 """
     hasfreq(d::RheoFreqData)
 
-returns 'true' if d contains a frequency array
+returns `true` if d contains a frequency array
 """
 function hasfreq(d::RheoFreqData)
     return (d.ω != RheoFloat[])
@@ -589,7 +589,7 @@ end
 """
     hasmodulus(d::RheoFreqData)
 
-returns 'true' if d contains a frequency array
+returns `true` if d contains a complex modulus function
 """
 function hasmodulus(d::RheoFreqData)
     (d.Gp != RheoFloat[]) && (d.Gpp != RheoFloat[])
@@ -598,7 +598,7 @@ end
 
 
 """
-    getomega(d::RheoFreqData)
+    getfreq(d::RheoFreqData)
 
 returns the frequency ω vector.
 """
@@ -1345,7 +1345,7 @@ end
 
 provide access to the relaxation modulus (G) of a given model m. It can be used with a broad range of inputs.
 
-* When a time value is provided (or an array of time values), the function returns the corresponding value(s) of the relaxation modulus.
+When a time value is provided (or an array of time values), the function returns the corresponding value(s) of the relaxation modulus.
 
     relaxmod(m::RheoModel, time (single value or array))
 
@@ -1358,7 +1358,7 @@ Examples:
     relaxmod(Maxwell, [1,2,3], [1,1])
 
 
-* When no time value is provided, relaxmod returns the relaxation function itself.
+When no time value is provided, relaxmod returns the relaxation function itself.
 
     relaxmod(m::RheoModel)
 
@@ -1427,7 +1427,7 @@ relaxmod(m::RheoModelClass; kwargs...) =  x -> relaxmod(m, x, symbol_to_unicode(
 
 provide access to the creep compliance (J) of a given model m. It can be used with a broad range of inputs.
 
-* When a time value is provided (or an array of time values), the function returns the corresponding value(s) of the creep compliance.
+When a time value is provided (or an array of time values), the function returns the corresponding value(s) of the creep compliance.
 
     creepcomp(m::RheoModel, time (single value or array))
 
@@ -1440,7 +1440,7 @@ Examples:
     creepcomp(Maxwell, [1,2,3], [1,1])
 
 
-* When no time value is provided, creepcomp returns the creep compliance function itself.
+When no time value is provided, creepcomp returns the creep compliance function itself.
 
     creepcomp(m::RheoModel)
 
@@ -1506,10 +1506,10 @@ creepcomp(m::RheoModelClass; kwargs...) =  x -> creepcomp(m, x, symbol_to_unicod
 
 """
     storagemod(m[, ω, params])
-Je viens de lire le proposal. Mon commentaire princi
+
 provide access to the storage modulus (G') of a given model m.
 
-* When a frequency value is provided (or an array of frequency values), the function returns the corresponding value(s) of the storage modulus.
+When a frequency value is provided (or an array of frequency values), the function returns the corresponding value(s) of the storage modulus.
 
     storagemod(m::RheoModel, frequency (single value or array))
 
@@ -1522,7 +1522,7 @@ Examples:
     storagemod(Maxwell, [1,2,3], [1,1])
 
 
-* When no time value is provided, storagemod returns the storage modulus function itself.
+When no time value is provided, storagemod returns the storage modulus function itself.
 
     storagemod(m::RheoModel)
 
@@ -1581,7 +1581,7 @@ storagemod(m::RheoModelClass; kwargs...) =  x -> storagemod(m, x, symbol_to_unic
 
 provide access to the loss modulus (G'') of a given model m.
 
-* When a frequency value is provided (or an array of frequency values), the function returns the corresponding value(s) of the loss modulus.
+When a frequency value is provided (or an array of frequency values), the function returns the corresponding value(s) of the loss modulus.
 
     lossmod(m::RheoModel, frequency (single value or array))
 
@@ -1594,7 +1594,7 @@ Examples:
     lossmod(Maxwell, [1,2,3], [1,1])
 
 
-* When no time value is provided, lossmod returns the loss modulus function itself.
+When no time value is provided, lossmod returns the loss modulus function itself.
 
     lossmod(m::RheoModel)
 
