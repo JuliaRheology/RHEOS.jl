@@ -53,6 +53,6 @@ for k in [0.5, 1.0, 2.0]
  
 end
 
-# plotmodel(models)
+plotmodel(models)
 
 # **Reference**: Findley, William N., and Francis A. Davis. Creep and relaxation of nonlinear viscoelastic materials. Courier Corporation, 2013.
