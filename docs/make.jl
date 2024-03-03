@@ -44,7 +44,7 @@ function notebookprepare()
 
     for file in readdir("docs/src")
         if endswith(file, "jl")
-            Literate.notebook("docs/src/$file", "docs/staging-docs/notebooks/")
+            Literate.notebook("docs/src/$file", "docs/staging-docs/notebooks/"; execute=false)
         end
     end
 end
