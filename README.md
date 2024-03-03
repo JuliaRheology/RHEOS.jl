@@ -15,7 +15,7 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 
 - Stress/Strain/Time data can be easily be fitted to a viscoelastic model
 
-- G'/G''/Frequency data can easily be fitted to a viscoelastic model
+- Complex modulus G'/G''/Frequency data can easily be fitted to a viscoelastic model
 
 - Many standard and fractional viscoelastic models have already been implemented within RHEOS new ones can easily be added by users
 
