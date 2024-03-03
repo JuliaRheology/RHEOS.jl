@@ -1,12 +1,12 @@
 using PyPlot
-using PyCall
+# using PyCall
 
 # need a separate Python helper file for
 # centered lower figure as colon operator 
 # not implemented fully implemented in PyCall
-gs = pyimport("matplotlib.gridspec")
-pushfirst!(PyVector(pyimport("sys")."path"), joinpath("assets"))
-plothelper = pyimport("plothelper")
+# gs = pyimport("matplotlib.gridspec")
+# pushfirst!(PyVector(pyimport("sys")."path"), joinpath("assets"))
+# plothelper = pyimport("plothelper")
 
 function plotmodel(modelvect; ymaxG = nothing, ymaxJ = nothing)
 
@@ -21,13 +21,14 @@ function plotmodel(modelvect; ymaxG = nothing, ymaxJ = nothing)
 
     colplot = ["red", "#dc7633", "#229954", "#d4ac0d", "blue"]
 
-    fig, spec, ax1, ax2, ax3 = plothelper.get_fig_axes()
-    spec.update(wspace = 0.25,
-                hspace = 0.25,
-                top = 0.96,
-                bottom = 0.07,
-                left = 0.07,
-                right = 0.98)
+    fig, axs = subplots(3,1, figsize=(7,20))
+    ax1, ax2, ax3 = axs
+    # spec.update(wspace = 0.25,
+    #             hspace = 0.25,
+    #             top = 0.96,
+    #             bottom = 0.07,
+    #             left = 0.07,
+    #             right = 0.98)
 
     for i = 1:1:length(modelvect)
         #Relaxation modulus
