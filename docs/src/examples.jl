@@ -4,7 +4,7 @@
 
 # [PyPlot](https://github.com/JuliaPy/PyPlot.jl) needs to be installed to run these examples and display plots of the data.
 
-using PyPlot
+using PyPlot;
 
 using RHEOS
 
