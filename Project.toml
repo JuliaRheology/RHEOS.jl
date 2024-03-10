@@ -1,7 +1,7 @@
 name = "RHEOS"
 uuid = "728860ae-c896-11e8-0b91-0f38ecad5046"
 authors = ["J Louis Kaplan <jonathanlouiskaplan@outlook.com>", "Alessandra Bonfanti <bonfantiale.ab@gmail.com>", "Alexandre Kabla <ajk61@cam.ac.uk>"]
-version = "0.9.4"
+version = "0.9.5"
 
 [deps]
 DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
@@ -29,4 +29,4 @@ InverseLaplace = "0.3"
 MittagLeffler = "0.2"
 NLopt = "0.6"
 SpecialFunctions = "0.10,1.5"
-julia = "1.6"
+julia = "1.10"

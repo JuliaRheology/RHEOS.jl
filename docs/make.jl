@@ -2,6 +2,11 @@ using Documenter
 using Literate
 using RHEOS
 
+using Pkg
+ENV["PYTHON"]=""
+Pkg.build("PyCall")
+using PyCall
+pyimport_conda("matplotlib.pyplot", "matplotlib")
 
 """
     docprepare()
