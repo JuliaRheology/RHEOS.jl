@@ -2,6 +2,12 @@ using Documenter
 using Literate
 using RHEOS
 
+using Pkg
+ENV["PYTHON"]=""
+Pkg.build("PyCall")
+using PyCall
+pyimport_conda("matplotlib.pyplot", "matplotlib")
+
 """
     docprepare()
 
@@ -44,7 +50,7 @@ function notebookprepare()
 
     for file in readdir("docs/src")
         if endswith(file, "jl")
-            Literate.notebook("docs/src/$file", "docs/staging-docs/notebooks/")
+            Literate.notebook("docs/src/$file", "docs/staging-docs/notebooks/"; execute=false)
         end
     end
 end

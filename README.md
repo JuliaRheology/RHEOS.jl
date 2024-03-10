@@ -1,6 +1,6 @@
 ﻿<a name="logo"/>
 <div align="center">
-<img src="https://raw.githubusercontent.com/JuliaRheology/RHEOS.jl/master/docs/src/assets/logo.png" height="130"></img>
+<img src="https://raw.githubusercontent.com/JuliaRheology/RHEOS.jl/master/docs/src/assets/logo_white.png" height="130"></img>
 </a>
 </div>
 <!-- delim -->
@@ -15,7 +15,7 @@ RHEOS, an abbreviation of Rheology Open Source, is a software package written in
 
 - Stress/Strain/Time data can be easily be fitted to a viscoelastic model
 
-- G'/G''/Frequency data can easily be fitted to a viscoelastic model
+- Complex modulus G'/G''/Frequency data can easily be fitted to a viscoelastic model
 
 - Many standard and fractional viscoelastic models have already been implemented within RHEOS new ones can easily be added by users
 
@@ -85,6 +85,7 @@ Note that meta-documentation on running tests and building documentation locally
 + S. G. Johnson. *The NLopt nonlinear-optimization package*, https://github.com/stevengj/nlopt
 
 + J. Bezanson, A. Edelman, S. Karpinski, V. B. Shah (2017). *Julia: A Fresh Approach to Numerical Computing*, SIAM Review, doi: 10.1137/141000671.
+
 
 
 
