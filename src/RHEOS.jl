@@ -88,7 +88,8 @@ export AFM, Tweezers
 
 include("base.jl")
 include("symbols.jl")
-include("definitions.jl")
+include("rheodata.jl")
+include("rheomodel.jl")
 include("IO.jl")
 include("modeldatabase.jl")
 include("datagen.jl")
