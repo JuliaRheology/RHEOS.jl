@@ -11,7 +11,8 @@ println("|")
 
 
 include("symbols.jl")
-include("definitions.jl")
+include("rheodata.jl")
+include("rheomodel.jl")
 include("base.jl")
 include("datagen.jl")
 include("IO.jl")
