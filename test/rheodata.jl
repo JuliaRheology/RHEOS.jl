@@ -128,3 +128,80 @@ function __mapdata!()
 end
 @test __mapdata!()
 
+
+using RHEOS
+
+# Step 1: Generate Timeline
+datat = timeline(t_start = 0, t_end = 20.0, step = 0.02)  # Create a timeline from 0 to 20 seconds with a step size of 0.02 seconds
+rheotimedatatype(datat)  # Ensure the timeline data type is correct for RHEOS
+
+# Step 2: Generate Strain Data (Ramp & hold)
+dramp_strain = strainfunction(datat, ramp(offset = 1.0, gradient = 0.8))  # Generate a ramp strain function with offset 1.0 and gradient 0.8
+dhold_strain = dramp_strain - strainfunction(datat, ramp(offset = 3.0, gradient = 0.8))  # Generate a hold strain function by subtracting a shifted ramp
+
+# Step 3: Generate Stress Data (Ramp & hold)
+dramp_stress = stressfunction(datat, ramp(offset = 4.0, gradient = 0.8))  # Generate a ramp stress function with offset 4.0 and gradient 0.8
+dhold_stress = dramp_stress - stressfunction(datat, ramp(offset = 5.0, gradient = 0.8))  # Generate a hold stress function by subtracting a shifted ramp
+
+# Define the rheological model
+model = RheoModel(SLS_Zener, (η = 1, kᵦ = 1, kᵧ = 1))
+data_ext = dhold_stress
+rheotimedatatype(data_ext)
+SLS_predict = modelpredict(data_ext, model)
+data = SLS_predict
+
+# Fit the model to the data
+SLS_Zener_model = modelfit(data, SLS_Zener, strain_imposed)
+
+# Define the test function
+function _test_extractfitdata()
+    # Call the extractfitdata function with data.log
+    extracted_data = extractfitdata(data.log)
+    all_tests_passed = true
+    
+    # Iterate through data.log to dynamically verify modelfit entries
+    for (index, log_entry) in enumerate(data.log)
+        if log_entry.action.funct == :modelfit
+            model_name = log_entry.info.model_name
+            expected_params = log_entry.info.model_params
+            expected_info = log_entry.info
+
+            if haskey(extracted_data, model_name)
+                model_entries = extracted_data[model_name]
+
+                # Find the corresponding entry in the extracted data
+                matching_entries = filter(x -> x.index == index, model_entries)
+
+                if length(matching_entries) == 1
+                    extracted_entry = matching_entries[1]
+
+                    if extracted_entry.params == expected_params && extracted_entry.info == expected_info && extracted_entry.index == index
+                        println("Test passed for entry $index: Extracted data matches expected data.")
+                    else
+                        println("Test failed for entry $index: Extracted data does not match expected data.")
+                        println("Extracted params: $(extracted_entry.params)")
+                        println("Expected params: $expected_params")
+                        println("Extracted info: $(extracted_entry.info)")
+                        println("Expected info: $expected_info")
+                        println("Extracted index: $(extracted_entry.index)")
+                        println("Expected index: $index")
+                        all_tests_passed = false
+                    end
+                else
+                    println("Test failed for entry $index: Number of matching entries does not match expected.")
+                    println("Matching entries: $matching_entries")
+                    all_tests_passed = false
+                end
+            else
+                println("Test failed for entry $index: $model_name model not found in extracted data.")
+                println("Extracted data: $extracted_data")
+                all_tests_passed = false
+            end
+        end
+    end
+    
+    return all_tests_passed
+end
+
+# Run the test function
+@test _test_extractfitdata()
