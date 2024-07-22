@@ -705,20 +705,20 @@ end
 
 
 """
-    extractfitdata(log)
-Parse a log of actions and extract model fitting entries into a dictionary.
+    extractfitdata(data)
+Parse a log of actions from a `RheoTimeData` instance and extract model fitting entries into a dictionary.
 # Arguments
-- `log`: A list of tuples representing log entries.
+- `data`: A `RheoTimeData` instance containing the log of actions.
 # Returns
 A dictionary where keys are model names and values are lists of named tuples,
 each containing model parameters, error, info, and index from the log.
 # Example
 ```julia
 data.log = [...]  # Define your log data
-models_data = extractfitdata(data.log)
+models_data = extractfitdata(data)
 println(models_data)
 """
-function extractfitdata(log)
+function extractfitdata(data)
     models_dict = Dict{String, Vector{NamedTuple{(:params, :info, :index), Tuple{Any, Any, Int}}}}()
 
     for (idx, entry) in enumerate(log)
