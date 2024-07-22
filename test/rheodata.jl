@@ -129,36 +129,26 @@ end
 @test __mapdata!()
 
 
-using RHEOS
-
-# Step 1: Generate Timeline
-datat = timeline(t_start = 0, t_end = 20.0, step = 0.02)  # Create a timeline from 0 to 20 seconds with a step size of 0.02 seconds
-rheotimedatatype(datat)  # Ensure the timeline data type is correct for RHEOS
-
-# Step 2: Generate Strain Data (Ramp & hold)
-dramp_strain = strainfunction(datat, ramp(offset = 1.0, gradient = 0.8))  # Generate a ramp strain function with offset 1.0 and gradient 0.8
-dhold_strain = dramp_strain - strainfunction(datat, ramp(offset = 3.0, gradient = 0.8))  # Generate a hold strain function by subtracting a shifted ramp
-
-# Step 3: Generate Stress Data (Ramp & hold)
-dramp_stress = stressfunction(datat, ramp(offset = 4.0, gradient = 0.8))  # Generate a ramp stress function with offset 4.0 and gradient 0.8
-dhold_stress = dramp_stress - stressfunction(datat, ramp(offset = 5.0, gradient = 0.8))  # Generate a hold stress function by subtracting a shifted ramp
-
-# Define the rheological model
-model = RheoModel(SLS_Zener, (η = 1, kᵦ = 1, kᵧ = 1))
-data_ext = dhold_stress
-rheotimedatatype(data_ext)
-SLS_predict = modelpredict(data_ext, model)
-data = SLS_predict
-
-# Fit the model to the data
-SLS_Zener_model = modelfit(data, SLS_Zener, strain_imposed)
-
-# Define the test function
 function _test_extractfitdata()
-    # Call the extractfitdata function with data.log
-    extracted_data = extractfitdata(data.log)
+    # Step 1: Generate Timeline
+    datat = timeline(t_start = 0, t_end = 20.0, step = 0.02)  # Create a timeline from 0 to 20 seconds with a step size of 0.02 seconds
+
+    # Step 2: Generate Stress Data (Ramp & hold)
+    dramp_stress = stressfunction(datat, ramp(offset = 4.0, gradient = 0.8))  # Generate a ramp stress function with offset 4.0 and gradient 0.8
+    dhold_stress = dramp_stress - stressfunction(datat, ramp(offset = 5.0, gradient = 0.8))  # Generate a hold stress function by subtracting a shifted ramp
+
+    # Define the rheological model
+    model = RheoModel(SLS_Zener, (η = 1, kᵦ = 1, kᵧ = 1))
+    SLS_predict = modelpredict(dhold_stress, model)
+    data = SLS_predict
+
+    # Fit the model to the data
+    SLS_Zener_model = modelfit(data, SLS_Zener, strain_imposed)
+
+    # Call the extractfitdata function with data
+    extracted_data = extractfitdata(data)
     all_tests_passed = true
-    
+
     # Iterate through data.log to dynamically verify modelfit entries
     for (index, log_entry) in enumerate(data.log)
         if log_entry.action.funct == :modelfit
@@ -199,9 +189,9 @@ function _test_extractfitdata()
             end
         end
     end
-    
+
     return all_tests_passed
 end
 
 # Run the test function
-@test _test_extractfitdata()
+_test_extractfitdata()
