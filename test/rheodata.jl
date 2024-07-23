@@ -129,7 +129,7 @@ end
 @test __mapdata!()
 
 
-function _test_extractfitdata()
+function _extractfitdata()
     # Step 1: Generate Timeline
     datat = timeline(t_start = 0, t_end = 20.0, step = 0.02)  # Create a timeline from 0 to 20 seconds with a step size of 0.02 seconds
 
@@ -194,4 +194,4 @@ function _test_extractfitdata()
 end
 
 # Run the test function
-_test_extractfitdata()
+@test _extractfitdata()
