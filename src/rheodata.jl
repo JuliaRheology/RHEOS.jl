@@ -719,6 +719,7 @@ models_data = extractfitdata(data)
 println(models_data)
 """
 function extractfitdata(data)
+    log = data.log                                         
     models_dict = Dict{String, Vector{NamedTuple{(:params, :info, :index), Tuple{Any, Any, Int}}}}()
 
     for (idx, entry) in enumerate(log)
