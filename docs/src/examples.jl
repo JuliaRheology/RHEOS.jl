@@ -100,6 +100,8 @@ ax.set_ylabel("Stress")
 ax.grid("on")
 #!nb fig #hide
 
+
+
 # ## Example 4
 
 # This example demonstrates generating a timeline and stress data, fitting multiple models to the data,
@@ -115,28 +117,28 @@ dhold_stress = dramp_stress - stressfunction(datat, ramp(offset = 5.0, gradient 
 
 # Define the rheological model and predict
 model = RheoModel(SLS_Zener, (η = 1, kᵦ = 1, kᵧ = 1))
-SLS_predict = modelpredict(dhold_stress, model)
-data = SLS_predict
+data = modelpredict(dhold_stress, model)
 
 # Fit three models to the data
-SLS_Zener_model = modelfit(data, SLS_Zener, strain_imposed)
-Maxwell_model = modelfit(data, Maxwell, strain_imposed)
-BurgersLiquid_model = modelfit(data, BurgersLiquid, strain_imposed)
+SLS_Zener_model = modelfit(data, SLS_Zener, stress_imposed)
+Maxwell_model = modelfit(data, Maxwell, stress_imposed)
+BurgersLiquid_model = modelfit(data, BurgersLiquid, stress_imposed)
 
 # Call the extractfitdata function to extract fitting data
 extracted_data = extractfitdata(data)
 
 # Determine which model fits best by comparing errors
 best_model = ""
-min_error = Inf
+error = Inf
 
-for (model_name, entries) in extracted_data
+for (model_name, fitdata) in extracted_data
+    error = fitdata.info.error
     total_error = sum(entry.info.error for entry in entries)
 
-    println("Model: $model_name, Total Error: $total_error")
+    println("Model: $model_name, Total Error: $error")
 
-    if total_error < min_error
-        min_error = total_error
+    if error < min_error
+        min_error = error
         best_model = model_name
     end
 end
@@ -144,21 +146,21 @@ end
 println("Best fitting model: $best_model with total error: $min_error")
 
 # Create strain-only data for model predictions
-strain_only_data = onlystrain(data)
+stress_only_data = onlystress(data)
 
 # Get model predictions for plotting
-SLS_Zener_predict = modelpredict(strain_only_data, SLS_Zener_model)
-Maxwell_predict = modelpredict(strain_only_data, Maxwell_model)
-BurgersLiquid_predict = modelpredict(strain_only_data, BurgersLiquid_model)
+SLS_Zener_predict = modelpredict(stress_only_data, SLS_Zener_model)
+Maxwell_predict = modelpredict(stress_only_data, Maxwell_model)
+BurgersLiquid_predict = modelpredict(stress_only_data, BurgersLiquid_model)
 
 # Plot data and fitted models
 fig, ax = subplots(1, 1, figsize = (7, 5))
-ax.plot(data.t, data.σ, ".", color = "green", label = "Original Data")
-ax.plot(SLS_Zener_predict.t, SLS_Zener_predict.σ, "-", color = "red", label = "SLS_Zener Model")
-ax.plot(Maxwell_predict.t, Maxwell_predict.σ, "--", color = "blue", label = "Maxwell Model")
-ax.plot(BurgersLiquid_predict.t, BurgersLiquid_predict.σ, ":", color = "purple", label = "BurgersLiquid Model")
+ax.plot(data.t, data.ϵ, ".", color = "green", label = "Original Data")
+ax.plot(SLS_Zener_predict.t, SLS_Zener_predict.ϵ, "-", color = "red", label = "SLS_Zener Model")
+ax.plot(Maxwell_predict.t, Maxwell_predict.ϵ, "--", color = "blue", label = "Maxwell Model")
+ax.plot(BurgersLiquid_predict.t, BurgersLiquid_predict.ϵ, ":", color = "purple", label = "BurgersLiquid Model")
 ax.set_xlabel("Time")
-ax.set_ylabel("Stress")
+ax.set_ylabel("Strain")
 ax.legend()
 ax.grid("on")
 #!nb fig #hide
