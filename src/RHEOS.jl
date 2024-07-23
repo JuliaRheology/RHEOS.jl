@@ -36,6 +36,7 @@ const RheovecOrNone = Union{Vector{RheoFloat}, Nothing}
 ######################################################################
 export namedtuple, dict
 export RheoFloat
+export extractfitdata
 
 # definitions.jl
 export RheoLogItem, RheoLog, rheologrun, showlog
