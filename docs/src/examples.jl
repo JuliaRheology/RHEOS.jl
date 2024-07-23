@@ -105,7 +105,6 @@ ax.grid("on")
 # This example demonstrates generating a timeline and stress data, fitting multiple models to the data,
 # calling the `extractfitdata` function, listing the errors, and determining which model fits the best.
 
-using RHEOS
 
 # Generate Timeline
 datat = timeline(t_start = 0, t_end = 20.0, step = 0.02)  # Create a timeline from 0 to 20 seconds with a step size of 0.02 seconds
