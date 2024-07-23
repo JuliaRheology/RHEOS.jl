@@ -133,7 +133,6 @@ error = Inf
 
 for (model_name, fitdata) in extracted_data
     error = fitdata.info.error
-    total_error = sum(entry.info.error for entry in entries)
 
     println("Model: $model_name, Total Error: $error")
 
