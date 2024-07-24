@@ -129,15 +129,15 @@ extracted_data = extractfitdata(data)
 
 # Determine which model fits best by comparing errors
 best_model = ""
-error = Inf
+min_error = Inf
 
 for (model_name, fitdata) in extracted_data
-    error = fitdata.info.error
+    err = fitdata[1].info.error
 
-    println("Model: $model_name, Total Error: $error")
+    println("Model: $model_name, Total Error: $err")
 
-    if error < min_error
-        min_error = error
+    if err < min_error
+        min_error = err
         best_model = model_name
     end
 end
