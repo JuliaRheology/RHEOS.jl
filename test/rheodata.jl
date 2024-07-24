@@ -1,6 +1,7 @@
 println("===============================================")
-println("Testing definition.jl")
+println("Testing rheodata.jl")
 println("===============================================")
+
 
 function _RheoTimeData_explicit_nolog()
     a = Vector{RheoFloat}(1.0:1.0:3.0)
@@ -128,48 +129,69 @@ end
 @test __mapdata!()
 
 
+function _extractfitdata()
+    # Step 1: Generate Timeline
+    datat = timeline(t_start = 0, t_end = 20.0, step = 0.02)  # Create a timeline from 0 to 20 seconds with a step size of 0.02 seconds
 
+    # Step 2: Generate Stress Data (Ramp & hold)
+    dramp_stress = stressfunction(datat, ramp(offset = 4.0, gradient = 0.8))  # Generate a ramp stress function with offset 4.0 and gradient 0.8
+    dhold_stress = dramp_stress - stressfunction(datat, ramp(offset = 5.0, gradient = 0.8))  # Generate a hold stress function by subtracting a shifted ramp
 
+    # Define the rheological model
+    model = RheoModel(SLS_Zener, (η = 1, kᵦ = 1, kᵧ = 1))
+    SLS_predict = modelpredict(dhold_stress, model)
+    data = SLS_predict
 
+    # Fit the model to the data
+    SLS_Zener_model = modelfit(data, SLS_Zener, strain_imposed)
 
+    # Call the extractfitdata function with data
+    extracted_data = extractfitdata(data)
+    all_tests_passed = true
 
+    # Iterate through data.log to dynamically verify modelfit entries
+    for (index, log_entry) in enumerate(data.log)
+        if log_entry.action.funct == :modelfit
+            model_name = log_entry.info.model_name
+            expected_params = log_entry.info.model_params
+            expected_info = log_entry.info
 
-function _freezeparams()
-    SLS2_mod = freezeparams( SLS2, G₀=2, η₂=3.5)
+            if haskey(extracted_data, model_name)
+                model_entries = extracted_data[model_name]
 
-    relaxmod(SLS2, 1, [2,1,2,3,3.5]) == relaxmod(SLS2_mod, 1, [1,2,3])
+                # Find the corresponding entry in the extracted data
+                matching_entries = filter(x -> x.index == index, model_entries)
+
+                if length(matching_entries) == 1
+                    extracted_entry = matching_entries[1]
+
+                    if extracted_entry.params == expected_params && extracted_entry.info == expected_info && extracted_entry.index == index
+                        println("Test passed for entry $index: Extracted data matches expected data.")
+                    else
+                        println("Test failed for entry $index: Extracted data does not match expected data.")
+                        println("Extracted params: $(extracted_entry.params)")
+                        println("Expected params: $expected_params")
+                        println("Extracted info: $(extracted_entry.info)")
+                        println("Expected info: $expected_info")
+                        println("Extracted index: $(extracted_entry.index)")
+                        println("Expected index: $index")
+                        all_tests_passed = false
+                    end
+                else
+                    println("Test failed for entry $index: Number of matching entries does not match expected.")
+                    println("Matching entries: $matching_entries")
+                    all_tests_passed = false
+                end
+            else
+                println("Test failed for entry $index: $model_name model not found in extracted data.")
+                println("Extracted data: $extracted_data")
+                all_tests_passed = false
+            end
+        end
+    end
+
+    return all_tests_passed
 end
-@test _freezeparams()
 
-
-function _getparams()
-    m = RheoModel(Maxwell, k=1, eta=2)
-    p1 = getparams(m)
-    p2 = getparams(m,unicode=false)
-    (p1.k==1.0) && (p1.η==2.0) &&  (p2.k==1.0) && (p2.eta==2.0) 
-end
-@test _getparams()
-
-function _getparams_dict()
-    m = RheoModel(Maxwell, k=1, eta=2)
-    p = dict(getparams(m,unicode=false))
-    (p[:k]==1.0) && (p[:eta]==2.0) 
-end
-@test _getparams_dict()
-
-
-
-#
-#   The moduli functions on arrays are extensively tested as part of the model tests
-#
-
-
-function _scalar_moduli()
-    m=RheoModel(Spring, k=2)
-    (relaxmod(m))(1) == relaxmod(m, 1) == relaxmod(Spring, k=2, 1) == 2. &&
-        (creepcomp(m))(1) == creepcomp(m, 1) == creepcomp(Spring, k=2, 1) == 0.5 &&
-        (storagemod(m))(1) == storagemod(m, 1) == storagemod(Spring, k=2, 1) == 2. &&
-        (lossmod(m))(1) == lossmod(m, 1) == lossmod(Spring, k=2, 1) == 0.0 &&
-        (dynamicmod(m))(1) == dynamicmod(m, 1) == dynamicmod(Spring, k=2, 1) == 2.0 + 0.0*im 
-end
-@test _scalar_moduli()
+# Run the test function
+@test _extractfitdata()
