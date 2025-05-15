@@ -84,7 +84,6 @@ cols=symbol_to_unicode(values(kwargs))
         header_cells=[]
 	end
 
-
     # remove and rows with NaN values in any of the columns
     data = nanremove(dataraw)
 

@@ -25,6 +25,11 @@ function AFM(R::Real)
   Interface(:d, :f, (ϵ,σ)->(d = (R.*(3. /8.).^(2. /3)) .* ϵ.^(2 ./3), f = R^2 .* σ ), (d,f)->(ϵ = 8 ./(3 .*R.^1.5) .* d.^1.5, σ = f./R^2) )
 end
 
+
+# function AFM_correction(R::Real, h::Real)
+#   Interface(:d, :f, (ϵ,σ,d)->(d = (R.*(3. /8.).^(2. /3)) .* ϵ.^(2 ./3), f = R^2 .* σ ), (d,f)->(ϵ = 8 ./(3 .*R.^1.5) .* d.^1.5, σ = f./R^2) )
+# end
+
 """
     Tweezers(R::Real, slip::Real)
 

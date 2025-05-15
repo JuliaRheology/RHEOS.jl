@@ -1046,3 +1046,31 @@ function dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
 
 end
 
+
+
+
+
+
+
+#-------------------- work in progress for MicroMechModels
+
+function modelupdate!(data::RheoTimeData, model::RheoModel, ptr; diff_method="BD")
+
+
+    modulus = model._Ga
+    modsing = model._G
+    check = strain_only
+
+    data_temp = RheoTimeData(σ = data.σ[1:ptr], ϵ=data.ϵ[1:ptr], t = data.t[1:ptr])
+   # print(data_temp)
+
+    sigma, epsilon, pred_mod = _modelpredict(data_temp, modulus, modsing, diff_method, check)
+    #print(sigma)
+
+    #data.σ[ptr] = sigma[ptr]
+
+    return sigma[ptr]
+
+
+
+end
