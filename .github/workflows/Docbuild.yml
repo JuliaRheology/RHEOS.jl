@@ -2,8 +2,8 @@ name: Documentation
 
 on:
   push:
-    branches: # add more branches as necessary
-      - master
+    branches:
+      - master   
     tags: "*"
   pull_request:
 
@@ -12,15 +12,26 @@ jobs:
     name: Documentation Build
     if: "! contains(toJSON(github.event.commits.*.message), '[skip-ci]')"
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@latest
+      - uses: actions/checkout@v4
+
+      - uses: julia-actions/setup-julia@v1
         with:
-          version: 1
+          version: '1'
+
       - name: Install dependencies
-        run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate(); ENV["PYTHON"]=""; Pkg.build("PyCall")'
+        run: |
+          julia --project=docs/ -e '
+            using Pkg;
+            Pkg.develop(PackageSpec(path=pwd()));
+            Pkg.instantiate();
+          '
+
       - name: Build and deploy
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For authentication with GitHub Actions token
-          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }} # For authentication with SSH deploy key
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: julia --project=docs/ docs/make.jl
