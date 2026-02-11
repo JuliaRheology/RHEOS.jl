@@ -19,6 +19,9 @@ import DSP: conv, filtfilt, Windows
 import Base: +, -, *,|
 import DelimitedFiles: readdlm, writedlm
 
+# Processing imports
+import ImageFiltering: imfilter, Kernel
+
 ######################################################################
 
 # This defines the data type for all arrays, parameters and processing

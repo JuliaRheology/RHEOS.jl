@@ -165,7 +165,6 @@ between pixels), `"reflect"` (the image reflects relative to the edge itself).
 """
 function smooth(self::RheoTimeData, τ::Real; pad::String="reflect")
 
-    @eval import ImageFiltering: imfilter, Kernel
 
     # get sample-rate and Gaussian kernel (std. dev)
     samplerate = 1.0/getsampleperiod(self.t)
