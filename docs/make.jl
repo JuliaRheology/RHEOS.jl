@@ -42,7 +42,7 @@ function docprepare()
                 )
         end
     end
-end
+end 
 
 function notebookprepare()
     # create notebook staging dir
@@ -99,8 +99,7 @@ function maindocbuilder()
     deploydocs(repo = "github.com/JuliaRheology/RHEOS.jl.git",
                deps = nothing,
                make = nothing,
-               branch="fix-docs",      # deploys from this branch
-               target = "build-fixdocs")
+               target = "build")
 
 end
 
