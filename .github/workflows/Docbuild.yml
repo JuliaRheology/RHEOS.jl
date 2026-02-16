@@ -35,4 +35,6 @@ jobs:
       - name: Build and deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOY_BRANCH: ${{ github.ref_name }}
+        run: julia --project=docs/ docs/make.jl
         run: julia --project=docs/ docs/make.jl
