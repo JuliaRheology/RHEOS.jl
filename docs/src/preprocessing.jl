@@ -5,7 +5,7 @@
 # RHEOS offers several functions for sampling and filtering data; this page is intended to be a brief tutorial of their use. For detailed descriptions of functions and their optional arguments, see the [API](@ref) section.
 
 using RHEOS
-using PyPlot
+using Plots
 
 # ## Upsampling and Downsampling
 
@@ -14,9 +14,18 @@ using PyPlot
 ## Generate a sinusoidal data set
 foo = timeline(t_start = 0, t_end = 10, step = 0.4)
 foo = strainfunction(foo, t -> sin(t))
-fig, ax = subplots(1, 1, figsize = (5, 5))
-ax.plot(foo.t, foo.ϵ, "--", marker = "o", markersize = 8, color = "blue")
-#!nb fig #hide
+plt = plot(size = (500, 500))
+plot!(plt, foo.t, foo.ϵ,
+      linestyle=:dash,
+      marker=:circle,
+      markersize=8,
+      color=:blue,
+      label="")  # empty label if no legend desired
+
+# Optional: add axes labels
+xlabel!("Time")
+ylabel!("Strain")
+#!nb plt #hide
 
 # To downsample the full data set , the function [`resample`](@ref) is used with a `scale` argument less than 1. Similarly, to increase the sample rate, the `scale` argument should be greater than 1.
 
@@ -31,14 +40,21 @@ foo_dsamp = resample(foo, scale = 1//2)
 foo_usamp = resample(foo, scale = 2)
 
 ## Plotting
-fig, ax = subplots(1, 2, figsize = (10, 5))
-ax[1].set_title("Downsampling")
-ax[1].plot(foo.t, foo.ϵ, "--", marker = "o", markersize = 8, color = "blue")
-ax[1].plot(foo_dsamp.t, foo_dsamp.ϵ, "--", marker = "x", markersize = 10, markeredgewidth = 2, color = "orange")
-ax[2].set_title("Upsampling")
-ax[2].plot(foo.t, foo.ϵ, "--", marker = "o", markersize = 8, color = "blue")
-ax[2].plot(foo_usamp.t, foo_usamp.ϵ, "--", marker = "x", markersize = 10, markeredgewidth = 2, color = "orange")
-#!nb fig #hide
+# Create a 1x2 layout
+plt = plot(layout = (1,2), size=(1000,500))
+
+plot!(plt[1], foo.t, foo.ϵ,
+      label="Original", linestyle=:dash, marker=:o, markersize=8, color=:blue)
+plot!(plt[1], foo_dsamp.t, foo_dsamp.ϵ,
+      label="Downsampled", linestyle=:dash, marker=:x, markersize=10, markerstrokewidth=2, color=:orange)
+title!(plt[1], "Downsampling")
+
+plot!(plt[2], foo.t, foo.ϵ,
+      label="Original", linestyle=:dash, marker=:o, markersize=8, color=:blue)
+plot!(plt[2], foo_usamp.t, foo_usamp.ϵ,
+      label="Upsampled", linestyle=:dash, marker=:x, markersize=10, markerstrokewidth=2, color=:orange)
+title!(plt[2], "Upsampling")
+#!nb plt #hide
 
 # ## Cutting
 
@@ -47,10 +63,23 @@ ax[2].plot(foo_usamp.t, foo_usamp.ϵ, "--", marker = "x", markersize = 10, marke
 foo_cut = cutting(foo, 2.0, 8.0)
 
 ## Plotting
-fig, ax = subplots(1, 1, figsize = (5, 5))
-ax.plot(foo.t, foo.ϵ, "--", marker = "o", markersize = 8, color = "blue")
-ax.plot(foo_cut.t, foo_cut.ϵ, "--", marker = "x", markersize = 10, markeredgewidth = 2, color = "orange")
-#!nb fig #hide
+plt = plot(size=(500,500))
+
+plot!(plt, foo.t, foo.ϵ,
+      label="Original",
+      linestyle=:dash,
+      marker=:o,
+      markersize=8,
+      color=:blue)
+
+plot!(plt, foo_cut.t, foo_cut.ϵ,
+      label="Cut",
+      linestyle=:dash,
+      marker=:x,
+      markersize=10,
+      markerstrokewidth=2,
+      color=:orange)
+#!nb plt #hide
 
 # ## Smoothing
 
@@ -63,7 +92,11 @@ noise = strainfunction(foo_s, t -> rand())
 foo_noisy = foo_s + noise
 foo_smooth = smooth(foo_noisy, 1)
 
-fig, ax = subplots(1, 1, figsize = (5, 5))
-ax.plot(foo_noisy.t, foo_noisy.ϵ, color = "blue")
-ax.plot(foo_smooth.t, foo_smooth.ϵ, color = "orange")
-#!nb fig #hide
+plt = plot(size=(500,500))
+plot!(plt, foo_noisy.t, foo_noisy.ϵ,
+      label="Noisy",
+      color=:blue)
+plot!(plt, foo_smooth.t, foo_smooth.ϵ,
+      label="Smoothed",
+      color=:orange)
+#!nb plt #hide
