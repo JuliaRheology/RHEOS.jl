@@ -7,7 +7,7 @@
 # The [`RheoModelClass`](@ref) constructor does not need to contain all moduli functions, depending on what variables are fitted and predicted down the line (relaxation modulus G for stress, creep function J for strain, and complex moduli Gp and Gpp for frequency domain data). As an example, we will assume that only the relaxation modulus is known.
 
 using RHEOS
-using PyPlot
+using Plots
 #-
 
 PowerLawEmpirical =  RheoModelClass(
@@ -35,12 +35,18 @@ powermodel = RheoModel(PowerLawEmpirical, A = 1, α = 0.8)
 ## Evaluate relaxation response
 dpower = modelpredict(dϵ, powermodel)
 
-fig, ax = subplots(1, 1, figsize = (3, 3))
-ax.loglog(dpower.t, dpower.σ)
-ax.set_xlabel("Time")
-ax.set_ylabel("Stress")
-ax.set_ylim(bottom = 0.1, top = 20)
-ax.grid("on")
-#!nb fig #hide
+# Create a log-log plot
+p = plot(
+    dpower.t, dpower.σ,
+    xscale = :log10,
+    yscale = :log10,
+    xlabel = "Time",
+    ylabel = "Stress",
+    ylims = (0.1, 20),
+    grid = true,
+    legend = false,
+    size = (300, 300)  # equivalent to figsize=(3,3)
+)
+#!nb p #hide
 
 # In a similar way, it is possible to define a model with only creep modulus. In this case, only strain can be fitted/predicted.

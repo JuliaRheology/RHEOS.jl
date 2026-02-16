@@ -3,10 +3,7 @@ using Literate
 using RHEOS
 
 using Pkg
-ENV["PYTHON"]=""
-Pkg.build("PyCall")
-using PyCall
-pyimport_conda("matplotlib.pyplot", "matplotlib")
+using Plots
 
 """
     docprepare()
@@ -36,10 +33,16 @@ function docprepare()
         if endswith(file, "md")
             cp("docs/src/$file", "docs/staging-docs/$file")
         elseif endswith(file, "jl")
-            Literate.markdown("docs/src/$file", "docs/staging-docs/"; documenter=true)
+                Literate.markdown(
+                    "docs/src/$file",
+                    "docs/staging-docs/";
+                    documenter = true,
+                    repo_root_url = "https://github.com/JuliaRheology/RHEOS.jl", 
+
+                )
         end
     end
-end
+end 
 
 function notebookprepare()
     # create notebook staging dir
@@ -50,7 +53,12 @@ function notebookprepare()
 
     for file in readdir("docs/src")
         if endswith(file, "jl")
-            Literate.notebook("docs/src/$file", "docs/staging-docs/notebooks/"; execute=false)
+                Literate.notebook(
+                    "docs/src/$file",
+                    "docs/staging-docs/notebooks/";
+                    execute = false,
+                    repo = "https://github.com/JuliaRheology/RHEOS.jl"
+                )
         end
     end
 end
@@ -64,7 +72,8 @@ function maindocbuilder()
 
     # build docs from staging area
     makedocs(modules=[RHEOS],
-            doctest = false, clean=true,
+            repo = "https://github.com/JuliaRheology/RHEOS.jl",
+            doctest = false, clean=true, checkdocs = :none, 
             format = Documenter.HTML(),
             sitename ="RHEOS.jl",
             source = "staging-docs",

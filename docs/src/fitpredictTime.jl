@@ -1,4 +1,4 @@
-# # Fitting and Predicting - Time Data
+# # Fitting and Predicting - Time Data {#time-data}
 #md # [![](https://mybinder.org/badge_logo.svg)](@__BINDER_ROOT_URL__/notebooks/fitpredictTime.ipynb)
 #md # [![](https://img.shields.io/badge/show-nbviewer-579ACA.svg)](@__NBVIEWER_ROOT_URL__/notebooks/fitpredictTime.ipynb)
 
@@ -77,14 +77,25 @@ rheotimedatatype(data_ext)
 maxwell_predict = modelpredict(data_ext, maxwell_model)
 
 ## Now we can plot data and model together for comparison
-using PyPlot
+using Plots
 
-fig, ax = subplots(1, 1, figsize = (7, 5))
-ax.plot(data.t, data.σ, "o", markersize = 5)
-ax.plot(maxwell_predict.t, maxwell_predict.σ, color = "red")
-ax.set_xlabel("Time")
-ax.set_ylabel("Stress")
-#!nb fig #hide
+p = plot(size = (700, 500))
+plot!(p , data.t, data.σ,
+    seriestype = :scatter,      # "o" markers
+    markersize = 5,
+    label = "Data",
+    xlabel = "Time",
+    ylabel = "Stress",
+    legend = :topright
+)
+
+# Overlay the model prediction
+plot!(p, maxwell_predict.t, maxwell_predict.σ,
+    color = :red,
+    label = "Maxwell Model"
+)
+
+#!nb p #hide
 
 # #### Simulate different model behaviours
 
@@ -101,15 +112,23 @@ dσ = stressfunction(dσ, hstep())
 maxwell_creepPredict = modelsteppredict(dσ, maxwell_model)
 
 ## Init plot figure
-fig, ax = subplots(1, 1, figsize = (7, 5))
+p = plot(size = (700, 500))
 
 ## Visualisation of the imposed loading
-ax.plot(maxwell_creepPredict.t, maxwell_creepPredict.σ, "--")
+plot!(p, maxwell_creepPredict.t,
+    maxwell_creepPredict.σ,
+    linestyle = :dash,
+    label = "Applied Stress",
+    xlabel = "Time",
+    ylabel = "Strain"
+)
 ## Visualisation of the simulated response
-ax.plot(maxwell_creepPredict.t, maxwell_creepPredict.ϵ)
-ax.set_xlabel("Time")
-ax.set_ylabel("Strain")
-#!nb fig #hide
+plot!(p, maxwell_creepPredict.t,
+    maxwell_creepPredict.ϵ,
+    linestyle = :solid,
+    label = "Simulated Strain"
+)
+#!nb p #hide
 
 #md # !!! warning "Important"
 #md #     As for the fitting procedure, if an ideal step loading is assumed, RHEOS provides a dedicated function [`modelsteppredict`](@ref) that requires the same parameters as [`modelpredict`](@ref) which significantly reduces the computation time.
@@ -126,9 +145,17 @@ dσ = stressfunction(dσ, stairs())
 ## we can now predict the stairs response of the Maxwell model 
 maxwell_creepPredict = modelpredict(dσ, maxwell_model)
 ## Plotting
-fig, ax = subplots(1, 1, figsize = (7, 5))
-ax.plot(maxwell_creepPredict.t, maxwell_creepPredict.σ, "--")
-ax.plot(maxwell_creepPredict.t, maxwell_creepPredict.ϵ)
-ax.set_xlabel("Time")
-ax.set_ylabel("Strain")
-#!nb fig #hide
+p = plot(size = (700, 500) )
+plot!(p, maxwell_creepPredict.t, maxwell_creepPredict.σ,
+    linestyle = :dash,
+    label = "Applied Stress",
+    xlabel = "Time",
+    ylabel = "Strain"
+)
+
+# Overlay the simulated strain response
+plot!(p, maxwell_creepPredict.t, maxwell_creepPredict.ϵ,
+    linestyle = :solid,
+    label = "Simulated Strain"
+)
+#!nb p #hide

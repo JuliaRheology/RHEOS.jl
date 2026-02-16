@@ -1,4 +1,4 @@
-# # Fitting and Predicting - Frequency Data
+# # Fitting and Predicting - Frequency Data {#freq-data}
 #md # [![](https://mybinder.org/badge_logo.svg)](@__BINDER_ROOT_URL__/notebooks/fitpredictFreq.ipynb)
 #md # [![](https://img.shields.io/badge/show-nbviewer-579ACA.svg)](@__NBVIEWER_ROOT_URL__/notebooks/fitpredictFreq.ipynb)
 
@@ -60,15 +60,26 @@ rheofreqdatatype(data_ext)
 fractKV_predict = dynamicmodelpredict(data_ext, FractKV_model)
 
 ## Now we can plot data and model together for comparison
-using PyPlot
-fig, ax = subplots(1, 1, figsize = (7, 5))
-ax.loglog(data.ω, data.Gp, "o", markersize = 5, color = "blue")
-ax.loglog(data.ω, data.Gpp, "o", markersize = 5, color = "red")
-ax.loglog(fractKV_predict.ω, fractKV_predict.Gp, "--", color = "blue")
-ax.loglog(fractKV_predict.ω, fractKV_predict.Gpp, "--", color = "red")
-ax.set_xlabel("Frequency")
-ax.set_ylabel("Storage and Loss moduli")
-#!nb fig #hide
+using Plots
+
+# Create the plot
+p = plot(
+    xaxis = :log10, 
+    yaxis = :log10, 
+    xlabel = "Frequency", 
+    ylabel = "Storage and Loss moduli",
+    legend = :topright
+)
+
+# Plot data points
+scatter!(p, data.ω, data.Gp, markersize = 5, color = :blue, label = "Gp data")
+scatter!(p, data.ω, data.Gpp, markersize = 5, color = :red, label = "Gpp data")
+
+# Plot model predictions
+plot!(p, fractKV_predict.ω, fractKV_predict.Gp, linestyle = :dash, color = :blue, label = "Gp model")
+plot!(p, fractKV_predict.ω, fractKV_predict.Gpp, linestyle = :dash, color = :red, label = "Gpp model")
+
+#!nb p #hide
 
 # #### Simulate Different Model Behaviours
 
@@ -84,10 +95,15 @@ dσ = stressfunction(dσ, hstep())
 ## we can now predict the creep response of the Maxwell model 
 FractKV_creepPredict = modelsteppredict(dσ, FractKV_model)
 ## Visualisation of the simulated response
-fig, ax = subplots(1, 1, figsize = (7, 5))
-ax.plot(FractKV_creepPredict.t, FractKV_creepPredict.ϵ)
-ax.set_xlabel("Time")
-ax.set_ylabel("Strain")
-#!nb fig #hide
+using Plots
+
+p = plot(size = (700, 500) )
+plot!(p, FractKV_creepPredict.t,
+    FractKV_creepPredict.ϵ,
+    xlabel = "Time",
+    ylabel = "Strain",
+    legend = false,
+)
+#!nb p #hide
 
 # **Reference frequency data**: Deng, Linhong, et al. "Fast and slow dynamics of the cytoskeleton." Nature materials 5.8 (2006): 636.
