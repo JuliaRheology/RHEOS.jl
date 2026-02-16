@@ -2,9 +2,7 @@
 #md # [![](https://mybinder.org/badge_logo.svg)](@__BINDER_ROOT_URL__/notebooks/examples.ipynb)
 #md # [![](https://img.shields.io/badge/show-nbviewer-579ACA.svg)](@__NBVIEWER_ROOT_URL__/notebooks/examples.ipynb)
 
-# [PyPlot](https://github.com/JuliaPy/PyPlot.jl) needs to be installed to run these examples and display plots of the data.
 using Plots
-
 using RHEOS
 
 

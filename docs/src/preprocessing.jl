@@ -20,9 +20,8 @@ plot!(plt, foo.t, foo.ϵ,
       marker=:circle,
       markersize=8,
       color=:blue,
-      label="")  # empty label if no legend desired
-
-# Optional: add axes labels
+      label="", 
+      framestyle = :box) 
 xlabel!("Time")
 ylabel!("Strain")
 #!nb plt #hide
@@ -40,19 +39,17 @@ foo_dsamp = resample(foo, scale = 1//2)
 foo_usamp = resample(foo, scale = 2)
 
 ## Plotting
-# Create a 1x2 layout
 plt = plot(layout = (1,2), size=(1000,500))
-
 plot!(plt[1], foo.t, foo.ϵ,
-      label="Original", linestyle=:dash, marker=:o, markersize=8, color=:blue)
+      label="Original", linestyle=:dash, marker=:o, markersize=8, color=:blue, linewidth=4, framestyle = :box)
 plot!(plt[1], foo_dsamp.t, foo_dsamp.ϵ,
-      label="Downsampled", linestyle=:dash, marker=:x, markersize=10, markerstrokewidth=2, color=:orange)
+      label="Downsampled", linestyle=:dash, marker=:x, markersize=10, markerstrokewidth=2, linewidth=4, color=:orange)
 title!(plt[1], "Downsampling")
 
 plot!(plt[2], foo.t, foo.ϵ,
-      label="Original", linestyle=:dash, marker=:o, markersize=8, color=:blue)
+      label="Original", linestyle=:dash, marker=:o, markersize=8, color=:blue, linewidth=4, framestyle = :box)
 plot!(plt[2], foo_usamp.t, foo_usamp.ϵ,
-      label="Upsampled", linestyle=:dash, marker=:x, markersize=10, markerstrokewidth=2, color=:orange)
+      label="Upsampled", linestyle=:dash, marker=:x, markersize=10, markerstrokewidth=2, linewidth=4, color=:orange)
 title!(plt[2], "Upsampling")
 #!nb plt #hide
 
@@ -64,21 +61,8 @@ foo_cut = cutting(foo, 2.0, 8.0)
 
 ## Plotting
 plt = plot(size=(500,500))
-
-plot!(plt, foo.t, foo.ϵ,
-      label="Original",
-      linestyle=:dash,
-      marker=:o,
-      markersize=8,
-      color=:blue)
-
-plot!(plt, foo_cut.t, foo_cut.ϵ,
-      label="Cut",
-      linestyle=:dash,
-      marker=:x,
-      markersize=10,
-      markerstrokewidth=2,
-      color=:orange)
+plot!(plt, foo.t, foo.ϵ, label="Original", linestyle=:dash, marker=:o, markersize=8, color=:blue, linewidth=4, framestyle = :box)
+plot!(plt, foo_cut.t, foo_cut.ϵ, label="Cut", linestyle=:dash, marker=:x, markersize=10, markerstrokewidth=2, color=:orange, linewidth=4, framestyle = :box)
 #!nb plt #hide
 
 # ## Smoothing
@@ -94,9 +78,7 @@ foo_smooth = smooth(foo_noisy, 1)
 
 plt = plot(size=(500,500))
 plot!(plt, foo_noisy.t, foo_noisy.ϵ,
-      label="Noisy",
-      color=:blue)
+      label="Noisy", color=:blue, linewidth=3, framestyle = :box)
 plot!(plt, foo_smooth.t, foo_smooth.ϵ,
-      label="Smoothed",
-      color=:orange)
+      label="Smoothed", color=:orange, linewidth=4, framestyle = :box)
 #!nb plt #hide
