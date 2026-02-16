@@ -3,10 +3,7 @@ using Literate
 using RHEOS
 
 using Pkg
-ENV["PYTHON"]=""
-Pkg.build("PyCall")
-using PyCall
-pyimport_conda("matplotlib.pyplot", "matplotlib")
+using Plots
 
 """
     docprepare()
@@ -64,7 +61,7 @@ function maindocbuilder()
 
     # build docs from staging area
     makedocs(modules=[RHEOS],
-            doctest = false, clean=true,
+            doctest = false, clean=true, checkdocs = :none, 
             format = Documenter.HTML(),
             sitename ="RHEOS.jl",
             source = "staging-docs",

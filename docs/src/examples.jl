@@ -3,7 +3,7 @@
 #md # [![](https://img.shields.io/badge/show-nbviewer-579ACA.svg)](@__NBVIEWER_ROOT_URL__/notebooks/examples.ipynb)
 
 # [PyPlot](https://github.com/JuliaPy/PyPlot.jl) needs to be installed to run these examples and display plots of the data.
-using PyPlot
+using Plots
 
 using RHEOS
 
@@ -21,12 +21,18 @@ using RHEOS
 data = importcsv("assets/example1_data.csv", t_col = 1, ϵ_col = 2, σ_col = 3)
 
 ## Plot data
-fig, ax = subplots(1, 1, figsize = (7, 5))
-ax.plot(data.t, data.σ, ".", color = "green")
-ax.plot(data.t, data.ϵ, "-", color = "blue")
-ax.set_ylabel("Strain (blue), Stress (green)")
-ax.set_xlabel("Time")
-#!nb fig #hide
+p = plot(data.t, data.σ,
+    seriestype = :scatter,
+    color = :green,
+    label = "Stress",
+    xlabel = "Time",
+    ylabel = "Strain (blue), Stress (green)",
+    legend = :topright,
+    markersize = 4
+)
+
+plot!(p, data.t, data.ϵ, color = :blue, label = "Strain", linewidth = 2)
+#!nb p #hide
 #-
 
 ## We now fit a Maxwell model
@@ -44,12 +50,18 @@ maxwell_predict = modelpredict(maxwell_predict, maxwell_model)
 ## Now we can plot data and model together for comparison
 
 ## Plot data
-fig, ax = subplots(1, 1, figsize = (7, 5))
-ax.plot(data.t, data.σ, ".", color = "green")
-ax.plot(maxwell_predict.t, maxwell_predict.σ, color = "red")
-ax.set_xlabel("Time")
-ax.set_ylabel("Stress")
-#!nb fig #hide
+p = plot(data.t, data.σ,
+    seriestype = :scatter, 
+    color = :green,
+    label = "Data",
+    xlabel = "Time",
+    ylabel = "Stress",
+    legend = :topright,
+    markersize = 4
+)
+
+plot!(p, maxwell_predict.t, maxwell_predict.σ, color = :red, label = "Maxwell fit", linewidth = 2)
+#!nb p #hide
 
 # ## Example 2
 
@@ -65,12 +77,18 @@ maxwellD_predict = modelpredict(maxwellD_predict, maxwellD_model)
 ## Now we can plot data and model together for comparison
 
 ## Plot data
-fig, ax = subplots(1, 1, figsize = (7, 5))
-ax.plot(data.t, data.σ, ".", color = "green")
-ax.plot(maxwellD_predict.t, maxwellD_predict.σ, color = "red")
-ax.set_xlabel("Time")
-ax.set_ylabel("Stress")
-#!nb fig #hide
+p = plot(data.t, data.σ,
+    seriestype = :scatter,      
+    color = :green,
+    label = "Data",
+    xlabel = "Time",
+    ylabel = "Stress",
+    legend = :topright,
+    markersize = 4
+)
+
+plot!(p, maxwellD_predict.t, maxwellD_predict.σ, color = :red, label = "MaxwellD fit", linewidth = 2)
+#!nb p #hide
 
 # ## Example 3
 
@@ -85,22 +103,24 @@ dϵ = timeline(t_end = 10)
 dϵ = strainfunction(dϵ, t -> sin(t))
 
 ## Plot strain data
-fig, ax = subplots(1, 1, figsize = (7, 5))
-ax.plot(dϵ.t, dϵ.ϵ, "--b")
+p = plot(dϵ.t, dϵ.ϵ,
+    linestyle = :dash,
+    color = :blue,
+    label = "Input strain",
+    xlabel = "Time",
+    ylabel = "Stress",
+    legend = :topright
+)
 
 ## we can now simulate various models based on this strain only dataset
 ## Let's study the role of the dashpot strength in the MAxwell model
 for η in [0.1, 0.3, 1, 3, 10]
-    maxwell_model = RheoModel(Maxwell, k = 2., η = η)
+    maxwell_model = RheoModel(Maxwell, k = 2.0, η = η)
     d_maxwell = modelpredict(dϵ, maxwell_model)
-    ax.plot(d_maxwell.t, d_maxwell.σ)
+    plot!(p, d_maxwell.t, d_maxwell.σ, label = "η = $η")
 end
-ax.set_xlabel("Time")
-ax.set_ylabel("Stress")
-ax.grid("on")
-#!nb fig #hide
-
-
+plot!(p, grid = true)
+#!nb p #hide
 
 # ## Example 4
 
@@ -128,21 +148,25 @@ BurgersLiquid_model = modelfit(data, BurgersLiquid, stress_imposed)
 extracted_data = extractfitdata(data)
 
 # Determine which model fits best by comparing errors
-best_model = ""
-min_error = Inf
+function find_best_model(extracted_data)
+    best_model = ""
+    min_error = Inf
 
-for (model_name, fitdata) in extracted_data
-    err = fitdata[1].info.error
+    for (model_name, fitdata) in extracted_data
+        err = fitdata[1].info.error
+        println("Model: $model_name, Total Error: $err")
 
-    println("Model: $model_name, Total Error: $err")
-
-    if err < min_error
-        min_error = err
-        best_model = model_name
+        if err < min_error
+            min_error = err
+            best_model = model_name
+        end
     end
+
+    println("Best fitting model: $best_model with total error: $min_error")
+    return best_model, min_error
 end
 
-println("Best fitting model: $best_model with total error: $min_error")
+best_model, min_error = find_best_model(extracted_data)
 
 # Create strain-only data for model predictions
 stress_only_data = onlystress(data)
@@ -153,13 +177,19 @@ Maxwell_predict = modelpredict(stress_only_data, Maxwell_model)
 BurgersLiquid_predict = modelpredict(stress_only_data, BurgersLiquid_model)
 
 # Plot data and fitted models
-fig, ax = subplots(1, 1, figsize = (7, 5))
-ax.plot(data.t, data.ϵ, ".", color = "green", label = "Original Data")
-ax.plot(SLS_Zener_predict.t, SLS_Zener_predict.ϵ, "-", color = "red", label = "SLS_Zener Model")
-ax.plot(Maxwell_predict.t, Maxwell_predict.ϵ, "--", color = "blue", label = "Maxwell Model")
-ax.plot(BurgersLiquid_predict.t, BurgersLiquid_predict.ϵ, ":", color = "purple", label = "BurgersLiquid Model")
-ax.set_xlabel("Time")
-ax.set_ylabel("Strain")
-ax.legend()
-ax.grid("on")
-#!nb fig #hide
+p = plot(data.t, data.ϵ,
+    seriestype = :scatter,
+    color = :green,
+    label = "Original Data",
+    xlabel = "Time",
+    ylabel = "Strain",
+    legend = :topright, 
+    grid = true
+)
+
+# Overlay fitted models
+plot!(p, SLS_Zener_predict.t, SLS_Zener_predict.ϵ, color = :red, linestyle = :solid, label = "SLS_Zener Model")
+plot!(p, Maxwell_predict.t, Maxwell_predict.ϵ, color = :blue, linestyle = :dash, label = "Maxwell Model")
+plot!(p, BurgersLiquid_predict.t, BurgersLiquid_predict.ϵ, color = :purple, linestyle = :dot, label = "BurgersLiquid Model")
+
+#!nb p #hide
