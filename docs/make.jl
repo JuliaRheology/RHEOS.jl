@@ -37,7 +37,8 @@ function docprepare()
                     "docs/src/$file",
                     "docs/staging-docs/";
                     documenter = true,
-                    repo = "https://github.com/JuliaRheology/RHEOS.jl"
+                    repo_root_url = "https://github.com/JuliaRheology/RHEOS.jl", 
+
                 )
         end
     end
@@ -54,7 +55,7 @@ function notebookprepare()
         if endswith(file, "jl")
                 Literate.notebook(
                     "docs/src/$file",
-                    "notebooks/";
+                    "docs/staging-docs/notebooks/";
                     execute = false,
                     repo = "https://github.com/JuliaRheology/RHEOS.jl"
                 )
@@ -98,7 +99,7 @@ function maindocbuilder()
     deploydocs(repo = "github.com/JuliaRheology/RHEOS.jl.git",
                deps = nothing,
                make = nothing,
-               target = "build")
+               target = "build-fixdocs")
 
 end
 
