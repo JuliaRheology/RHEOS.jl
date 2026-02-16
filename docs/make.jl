@@ -99,6 +99,7 @@ function maindocbuilder()
     deploydocs(repo = "github.com/JuliaRheology/RHEOS.jl.git",
                deps = nothing,
                make = nothing,
+               branch="fix-docs",      # deploys from this branch
                target = "build-fixdocs")
 
 end
