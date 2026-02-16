@@ -14,7 +14,7 @@ datat = timeline(t_start = 0, t_end = 20.0, step = 0.02)
 rheotimedatatype(datat)
 
 #md # !!! note "Note"
-#md #     The same functionality is provided to generate a frequency spectrum by using [`frequencyspec`](@ref) (see an example of its usage in the [Fitting and Predicting - Frequency data](@ref) section).
+#md #     The same functionality is provided to generate a frequency spectrum by using [`frequencyspec`](@ref) (see an example of its usage in the [Fitting and Predicting - Frequency data](#freq-data) section).
 
 #nb # Note that the same functionality is provided to generate a frequency spectrum by using frequencyspec (see an example of its usage in the 'Fitting and Predicting - Frequency data' section).
 

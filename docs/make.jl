@@ -33,7 +33,12 @@ function docprepare()
         if endswith(file, "md")
             cp("docs/src/$file", "docs/staging-docs/$file")
         elseif endswith(file, "jl")
-            Literate.markdown("docs/src/$file", "docs/staging-docs/"; documenter=true)
+                Literate.markdown(
+                    "docs/src/$file",
+                    "docs/staging-docs/";
+                    documenter = true,
+                    repo = "https://github.com/JuliaRheology/RHEOS.jl"
+                )
         end
     end
 end
@@ -47,7 +52,12 @@ function notebookprepare()
 
     for file in readdir("docs/src")
         if endswith(file, "jl")
-            Literate.notebook("docs/src/$file", "docs/staging-docs/notebooks/"; execute=false)
+                Literate.notebook(
+                    "docs/src/$file",
+                    "notebooks/";
+                    execute = false,
+                    repo = "https://github.com/JuliaRheology/RHEOS.jl"
+                )
         end
     end
 end
@@ -61,6 +71,7 @@ function maindocbuilder()
 
     # build docs from staging area
     makedocs(modules=[RHEOS],
+            repo = "https://github.com/JuliaRheology/RHEOS.jl",
             doctest = false, clean=true, checkdocs = :none, 
             format = Documenter.HTML(),
             sitename ="RHEOS.jl",

@@ -24,7 +24,7 @@ weightings = [1, 1, 2, 2, 3, 3, 4, 6];
 
 # In words, the elements in the time region we are particularly concerned about (0 ≤ t ≤ 0.2) are considered twice in the final fitting cost function, whereas we only consider every other element for times after 0.2 seconds.
 
-# For practical situations, when working with data embedded in [`RheoTimeData`](@ref) structs, RHEOS has a convenience function [`indexweight`](@ref) which makes it easy to generate a weightings array that can then be passed to either [`modelfit`](@ref) or [`modelstepfit`](@ref). The full description of [`indexweight`](@ref) can be found in the [API](@ref) section. Below, we include a typical example of its use, based on the same data used in [Fitting and Predicting - Time Data](@ref). 
+# For practical situations, when working with data embedded in [`RheoTimeData`](@ref) structs, RHEOS has a convenience function [`indexweight`](@ref) which makes it easy to generate a weightings array that can then be passed to either [`modelfit`](@ref) or [`modelstepfit`](@ref). The full description of [`indexweight`](@ref) can be found in the [API](@ref) section. Below, we include a typical example of its use, based on the same data used in [Fitting and Predicting - Time Data](#time-data). 
 
 ## As in original example, load in the data
 data = importcsv("assets/data_time.csv", t_col = 1, ϵ_col = 2, σ_col = 3)
@@ -39,4 +39,4 @@ weightings = indexweight(data; elperiods = [2, 3, -2], time_boundaries = [0.0, 0
 ## fit model with weighted array
 modelfit(data, Maxwell, strain_imposed, weights = weightings)
 
-# We note that the results are slightly different from the original example in [Fitting and Predicting - Time Data](@ref) due to the element weighting provided to the fitting function.
+# We note that the results are slightly different from the original example in [Fitting and Predicting - Time Data](#time-data) due to the element weighting provided to the fitting function.
