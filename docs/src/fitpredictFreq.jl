@@ -58,7 +58,6 @@ rheofreqdatatype(data_ext)
 # For the prediction, RHEOS' function [`dynamicmodelpredict`](@ref) requires the incomplete data set and a model with fixed parameters ([`RheoModel`](@ref)). For the assessment of the fitting quality the [`RheoModel`](@ref) is the output of the fitting function.
 
 fractKV_predict = dynamicmodelpredict(data_ext, FractKV_model)
-
 # Now we can plot data and model together for comparison
 using Plots
 ## Create the plot
