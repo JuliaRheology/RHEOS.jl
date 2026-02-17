@@ -14,19 +14,19 @@ function plotmodel(modelvect::Vector{RheoModel}; ymaxG=nothing, ymaxJ=nothing)
     dσ = stressfunction(tstress, hstep()) - stressfunction(tstress, hstep(offset=5.0))
 
     # Initialize Plots layout
-    plt = plot(layout=(3,1), size=(700,2000), left_margin = 15Plots.mm)
+    plt = plot(layout=(3,1), size=(700,1500), left_margin = 15Plots.mm)
 
     # --- Relaxation & Creep ---
     for i in 1:length(modelvect)
         # Relaxation modulus
         dG = modelpredict(dϵ, modelvect[i])
         plot!(plt[1], dG.t, dG.σ, color=colplot[i], label="model $i", grid = true, linewidth = 3, framestyle = :box)
-        plot!(plt[1], [-5*dt,0,dG.t[1]], [0.0,0.0,dG.σ[1]], color=colplot[i], label="")
+        plot!(plt[1], [-5*dt,0,dG.t[1]], [0.0,0.0,dG.σ[1]], color=colplot[i], linewidth = 3, label="")
 
         # Creep modulus
         dJ = modelpredict(dσ, modelvect[i,1])
         plot!(plt[2], dJ.t, dJ.ϵ, color=colplot[i], label="model $i", grid = true, linewidth = 3, framestyle = :box)
-        plot!(plt[2], [-5*dt,0,dJ.t[1]], [0.0,0.0,dJ.ϵ[1]], color=colplot[i], label="")
+        plot!(plt[2], [-5*dt,0,dJ.t[1]], [0.0,0.0,dJ.ϵ[1]], color=colplot[i], linewidth = 3, label="")
     end
 
     # Set y-limits safely
@@ -60,7 +60,7 @@ function plotmodel(modelvect::Vector{RheoModel}; ymaxG=nothing, ymaxJ=nothing)
     xlabel!(plt[3], "Frequency")
     ylabel!(plt[3], "Storage (—) and Loss (- -) moduli")
     title!(plt[3], "Frequency response")
-    xlims!(plt[3], 1e-2, 1e2)
+    xlims!(plt[3], 0.9e-2, 1.2e2)
 
     return plt
 end
