@@ -47,7 +47,7 @@ plot!(p, dstep.t, dstep.ϵ,
       subplot = 1,
       ylim = (-0.1, 5.4),
       title = "Step",
-      lable = "", linewidth=4, framestyle = :box)
+      label = "", linewidth=4, framestyle = :box)
 
 ## Ramp generation
 dramp = strainfunction(datat, ramp(offset = 2.0, gradient = 0.8))
@@ -55,7 +55,7 @@ plot!(p, dramp.t, dramp.ϵ,
       subplot = 2,
       ylim = (-0.1, :auto),
       title = "Ramp",
-      lable = "", linewidth=4, framestyle = :box)
+      label = "", linewidth=4, framestyle = :box)
 
 ## Stairs generation
 dstairs = strainfunction(datat, stairs(offset = 5.0, amp = 0.1, width = 1))
@@ -63,7 +63,7 @@ plot!(p, dstairs.t, dstairs.ϵ,
       subplot = 3,
       ylim = (-0.1, :auto),
       title = "Stairs",
-      lable = "", linewidth=4, framestyle = :box)
+      label = "", linewidth=4, framestyle = :box)
 
 ## Square generation
 dsquare = strainfunction(datat, square(offset = 5.0, amp = 0.5, period = 4, width = 1))
@@ -71,7 +71,7 @@ plot!(p, dsquare.t, dsquare.ϵ,
       subplot = 4,
       ylim = (-0.05, 0.6),
       title = "Square",
-      lable = "", linewidth=4, framestyle = :box)
+      label = "", linewidth=4, framestyle = :box)
 
 ## Sawtooth generation
 dsawtooth = strainfunction(datat, sawtooth(offset = 5.0, amp = 2, period = 5))
@@ -79,7 +79,7 @@ plot!(p, dsawtooth.t, dsawtooth.ϵ,
       subplot = 5,
       ylim = (-0.1, 2.2),
       title = "Sawtooth",
-      lable = "", linewidth=4, framestyle = :box)
+      label = "", linewidth=4, framestyle = :box)
 
 ## Triangle generation
 dtriangle = strainfunction(datat, triangle(offset = 4.0, amp = 1, period = 4))
@@ -87,7 +87,7 @@ plot!(p, dtriangle.t, dtriangle.ϵ,
       subplot = 6,
       ylim = (-0.1, 1.2),
       title = "Triangle",
-      lable = "", linewidth=4, framestyle = :box)
+      label = "", linewidth=4, framestyle = :box)
 
 #!nb p #hide
 
@@ -106,7 +106,7 @@ plot!(p, dhold.t, dhold.ϵ,
       subplot = 2,
       ylim = (-0.1, 2.8),
       title = "Ramp & hold",
-      lable = "", linewidth=4, framestyle = :box)
+      label = "", linewidth=4, framestyle = :box)
 
 ## Step with oscillatory loading
 doscil = dstep + dsquare
@@ -114,7 +114,7 @@ plot!(p, doscil.t, doscil.ϵ,
       subplot = 1,
       ylim = (-0.5, 6),
       title = "Oscillations",
-      lable = "", linewidth=4, framestyle = :box)
+      label = "", linewidth=4, framestyle = :box)
 
 ## Ramp & hold & oscillation
 dcomplex = dhold + dsquare
@@ -122,6 +122,6 @@ plot!(p, dcomplex.t, dcomplex.ϵ,
       subplot = 3,
       ylim = (-0.1, 3.2),
       title = "Ramp & hold & oscillations",
-      lable = "", linewidth=4, framestyle = :box)
+      label = "", linewidth=4, framestyle = :box)
 
 #!nb p #hide

@@ -45,7 +45,9 @@ p = plot(
     ylims = (0.1, 20),
     grid = true,
     legend = false,
-    size = (300, 300)  # equivalent to figsize=(3,3)
+    size = (400, 400), 
+    framestyle = :box, 
+    linewidth = 4
 )
 #!nb p #hide
 

@@ -26,10 +26,10 @@ p = plot(data.t, data.σ,
     xlabel = "Time",
     ylabel = "Strain (blue), Stress (green)",
     legend = :topright,
-    markersize = 4
+    markersize = 4, 
+    framestyle = :box
 )
-
-plot!(p, data.t, data.ϵ, color = :blue, label = "Strain", linewidth = 2)
+plot!(p, data.t, data.ϵ, color = :blue, label = "Strain", linewidth = 3)
 #!nb p #hide
 #-
 
@@ -55,10 +55,11 @@ p = plot(data.t, data.σ,
     xlabel = "Time",
     ylabel = "Stress",
     legend = :topright,
-    markersize = 4
+    markersize = 4, 
+    framestyle = :box
 )
 
-plot!(p, maxwell_predict.t, maxwell_predict.σ, color = :red, label = "Maxwell fit", linewidth = 2)
+plot!(p, maxwell_predict.t, maxwell_predict.σ, color = :red, label = "Maxwell fit", linewidth = 3)
 #!nb p #hide
 
 # ## Example 2
@@ -82,10 +83,11 @@ p = plot(data.t, data.σ,
     xlabel = "Time",
     ylabel = "Stress",
     legend = :topright,
-    markersize = 4
+    markersize = 4, 
+    framestyle = :box
 )
 
-plot!(p, maxwellD_predict.t, maxwellD_predict.σ, color = :red, label = "MaxwellD fit", linewidth = 2)
+plot!(p, maxwellD_predict.t, maxwellD_predict.σ, color = :red, label = "MaxwellD fit", linewidth = 3)
 #!nb p #hide
 
 # ## Example 3
@@ -107,7 +109,9 @@ p = plot(dϵ.t, dϵ.ϵ,
     label = "Input strain",
     xlabel = "Time",
     ylabel = "Stress",
-    legend = :topright
+    linewidth = 3,
+    legend = :bottomright, 
+    framestyle = :box
 )
 
 ## we can now simulate various models based on this strain only dataset
@@ -115,7 +119,7 @@ p = plot(dϵ.t, dϵ.ϵ,
 for η in [0.1, 0.3, 1, 3, 10]
     maxwell_model = RheoModel(Maxwell, k = 2.0, η = η)
     d_maxwell = modelpredict(dϵ, maxwell_model)
-    plot!(p, d_maxwell.t, d_maxwell.σ, label = "η = $η")
+    plot!(p, d_maxwell.t, d_maxwell.σ, label = "η = $η", linewidth = 2)
 end
 plot!(p, grid = true)
 #!nb p #hide
@@ -168,26 +172,25 @@ best_model, min_error = find_best_model(extracted_data)
 
 # Create strain-only data for model predictions
 stress_only_data = onlystress(data)
-
 # Get model predictions for plotting
 SLS_Zener_predict = modelpredict(stress_only_data, SLS_Zener_model)
 Maxwell_predict = modelpredict(stress_only_data, Maxwell_model)
 BurgersLiquid_predict = modelpredict(stress_only_data, BurgersLiquid_model)
-
 # Plot data and fitted models
-p = plot(data.t, data.ϵ,
-    seriestype = :scatter,
+p = scatter(data.t, data.ϵ,
     color = :green,
     label = "Original Data",
     xlabel = "Time",
     ylabel = "Strain",
-    legend = :topright, 
-    grid = true
+    legend = :bottomright, 
+    markersize = 3, 
+    markerstrokewidth = 1,
+    grid = true, 
+    framestyle = :box
 )
-
-# Overlay fitted models
-plot!(p, SLS_Zener_predict.t, SLS_Zener_predict.ϵ, color = :red, linestyle = :solid, label = "SLS_Zener Model")
-plot!(p, Maxwell_predict.t, Maxwell_predict.ϵ, color = :blue, linestyle = :dash, label = "Maxwell Model")
-plot!(p, BurgersLiquid_predict.t, BurgersLiquid_predict.ϵ, color = :purple, linestyle = :dot, label = "BurgersLiquid Model")
+## Overlay fitted models
+plot!(p, SLS_Zener_predict.t, SLS_Zener_predict.ϵ, color = :red, linestyle = :solid, linewidth = 3, label = "SLS_Zener Model")
+plot!(p, Maxwell_predict.t, Maxwell_predict.ϵ, color = :blue, linestyle = :dash, linewidth = 3, label = "Maxwell Model")
+plot!(p, BurgersLiquid_predict.t, BurgersLiquid_predict.ϵ, color = :purple, linestyle = :dot, linewidth = 3, label = "BurgersLiquid Model")
 
 #!nb p #hide

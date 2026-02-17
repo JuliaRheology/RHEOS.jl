@@ -67,14 +67,14 @@ p = plot(
     yaxis = :log10, 
     xlabel = "Frequency", 
     ylabel = "Storage and Loss moduli",
-    legend = :topright, linewidth=4, framestyle = :box
+    legend = :bottomright, linewidth=4, framestyle = :box
 )
 ## Plot data points
-scatter!(p, data.ω, data.Gp, markersize = 5, color = :blue, label = "Gp data")
-scatter!(p, data.ω, data.Gpp, markersize = 5, color = :red, label = "Gpp data")
+scatter!(p, data.ω, data.Gp, markersize = 6, color = :blue, label = "Gp data")
+scatter!(p, data.ω, data.Gpp, markersize = 6, color = :red, label = "Gpp data")
 ## Plot model predictions
-plot!(p, fractKV_predict.ω, fractKV_predict.Gp, linestyle = :dash, color = :blue, label = "Gp model")
-plot!(p, fractKV_predict.ω, fractKV_predict.Gpp, linestyle = :dash, color = :red, label = "Gpp model")
+plot!(p, fractKV_predict.ω, fractKV_predict.Gp, linestyle = :dash, color = :blue, linewidth = 3, label = "Gp model")
+plot!(p, fractKV_predict.ω, fractKV_predict.Gpp, linestyle = :dash, color = :red, linewidth = 3, label = "Gpp model")
 #!nb p #hide
 
 # #### Simulate Different Model Behaviours
