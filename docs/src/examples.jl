@@ -132,23 +132,18 @@ plot!(p, grid = true)
 
 # Generate Timeline
 datat = timeline(t_start = 0, t_end = 20.0, step = 0.02)  # Create a timeline from 0 to 20 seconds with a step size of 0.02 seconds
-
 # Generate Stress Data (Ramp & hold)
 dramp_stress = stressfunction(datat, ramp(offset = 4.0, gradient = 0.8))  # Generate a ramp stress function with offset 4.0 and gradient 0.8
 dhold_stress = dramp_stress - stressfunction(datat, ramp(offset = 5.0, gradient = 0.8))  # Generate a hold stress function by subtracting a shifted ramp
-
 # Define the rheological model and predict
 model = RheoModel(SLS_Zener, (η = 1, kᵦ = 1, kᵧ = 1))
 data = modelpredict(dhold_stress, model)
-
 # Fit three models to the data
 SLS_Zener_model = modelfit(data, SLS_Zener, stress_imposed)
 Maxwell_model = modelfit(data, Maxwell, stress_imposed)
 BurgersLiquid_model = modelfit(data, BurgersLiquid, stress_imposed)
-
 # Call the extractfitdata function to extract fitting data
 extracted_data = extractfitdata(data)
-
 # Determine which model fits best by comparing errors
 function find_best_model(extracted_data)
     best_model = ""
