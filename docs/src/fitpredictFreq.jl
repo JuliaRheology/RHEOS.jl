@@ -59,26 +59,22 @@ rheofreqdatatype(data_ext)
 
 fractKV_predict = dynamicmodelpredict(data_ext, FractKV_model)
 
-## Now we can plot data and model together for comparison
+# Now we can plot data and model together for comparison
 using Plots
-
-# Create the plot
+## Create the plot
 p = plot(
     xaxis = :log10, 
     yaxis = :log10, 
     xlabel = "Frequency", 
     ylabel = "Storage and Loss moduli",
-    legend = :topright
+    legend = :topright, linewidth=4, framestyle = :box
 )
-
-# Plot data points
+## Plot data points
 scatter!(p, data.ω, data.Gp, markersize = 5, color = :blue, label = "Gp data")
 scatter!(p, data.ω, data.Gpp, markersize = 5, color = :red, label = "Gpp data")
-
-# Plot model predictions
+## Plot model predictions
 plot!(p, fractKV_predict.ω, fractKV_predict.Gp, linestyle = :dash, color = :blue, label = "Gp model")
 plot!(p, fractKV_predict.ω, fractKV_predict.Gpp, linestyle = :dash, color = :red, label = "Gpp model")
-
 #!nb p #hide
 
 # #### Simulate Different Model Behaviours
@@ -96,13 +92,12 @@ dσ = stressfunction(dσ, hstep())
 FractKV_creepPredict = modelsteppredict(dσ, FractKV_model)
 ## Visualisation of the simulated response
 using Plots
-
 p = plot(size = (700, 500) )
 plot!(p, FractKV_creepPredict.t,
     FractKV_creepPredict.ϵ,
     xlabel = "Time",
     ylabel = "Strain",
-    legend = false,
+    legend = false, linewidth=4, framestyle = :box
 )
 #!nb p #hide
 

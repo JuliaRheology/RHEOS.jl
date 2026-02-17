@@ -82,19 +82,17 @@ using Plots
 p = plot(size = (700, 500))
 plot!(p , data.t, data.σ,
     seriestype = :scatter,      # "o" markers
-    markersize = 5,
+    markersize = 6,
     label = "Data",
     xlabel = "Time",
     ylabel = "Stress",
-    legend = :topright
-)
-
-# Overlay the model prediction
+    legend = :topright,
+    framestyle = :box)
+## Overlay the model prediction
 plot!(p, maxwell_predict.t, maxwell_predict.σ,
     color = :red,
-    label = "Maxwell Model"
-)
-
+    label = "Maxwell Model", 
+    linewidth=4, framestyle = :box)
 #!nb p #hide
 
 # #### Simulate different model behaviours
@@ -120,14 +118,14 @@ plot!(p, maxwell_creepPredict.t,
     linestyle = :dash,
     label = "Applied Stress",
     xlabel = "Time",
-    ylabel = "Strain"
-)
+    ylabel = "Strain", 
+    linewidth=4, framestyle = :box)
 ## Visualisation of the simulated response
 plot!(p, maxwell_creepPredict.t,
     maxwell_creepPredict.ϵ,
     linestyle = :solid,
-    label = "Simulated Strain"
-)
+    label = "Simulated Strain", 
+    linewidth=4, framestyle = :box)
 #!nb p #hide
 
 #md # !!! warning "Important"
@@ -150,12 +148,9 @@ plot!(p, maxwell_creepPredict.t, maxwell_creepPredict.σ,
     linestyle = :dash,
     label = "Applied Stress",
     xlabel = "Time",
-    ylabel = "Strain"
-)
-
-# Overlay the simulated strain response
+    ylabel = "Strain", linewidth=4, framestyle = :box)
+## Overlay the simulated strain response
 plot!(p, maxwell_creepPredict.t, maxwell_creepPredict.ϵ,
     linestyle = :solid,
-    label = "Simulated Strain"
-)
+    label = "Simulated Strain", linewidth=4, framestyle = :box)
 #!nb p #hide
