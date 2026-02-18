@@ -17,7 +17,7 @@ p = plot(data.t, data.σ,
     markersize = 4,
     framestyle = :box
 )
-plot!(p, data.t, data.ϵ, color = :blue, label = &quot;Strain&quot;, linewidth = 3)</code></pre><img src="f09b84da.svg" alt="Example block output"/><pre><code class="language-julia hljs"># We now fit a Maxwell model
+plot!(p, data.t, data.ϵ, color = :blue, label = &quot;Strain&quot;, linewidth = 3)</code></pre><img src="8ea9eccc.svg" alt="Example block output"/><pre><code class="language-julia hljs"># We now fit a Maxwell model
 maxwell_model = modelfit(data, Maxwell, strain_imposed)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">
 Model name: maxwell
 
@@ -47,7 +47,7 @@ p = plot(data.t, data.σ,
     framestyle = :box
 )
 
-plot!(p, maxwell_predict.t, maxwell_predict.σ, color = :red, label = &quot;Maxwell fit&quot;, linewidth = 3)</code></pre><img src="a2ba79b3.svg" alt="Example block output"/><h2 id="Example-2"><a class="docs-heading-anchor" href="#Example-2">Example 2</a><a id="Example-2-1"></a><a class="docs-heading-anchor-permalink" href="#Example-2" title="Permalink"></a></h2><p>This script is a slight modification of Example 1 to present to the user the possibility of creating new <a href="../API/#RHEOS.RheoModelClass"><code>RheoModelClass</code></a> from an existing one with some of the parameters frozen to specific values. As an example, we fix the spring constant of the model above (k) to 2 and we let RHEOS fit the viscosity η.</p><pre><code class="language-julia hljs">Maxwell_springFix = freeze_params(Maxwell, k = 2)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">
+plot!(p, maxwell_predict.t, maxwell_predict.σ, color = :red, label = &quot;Maxwell fit&quot;, linewidth = 3)</code></pre><img src="a39d5a5e.svg" alt="Example block output"/><h2 id="Example-2"><a class="docs-heading-anchor" href="#Example-2">Example 2</a><a id="Example-2-1"></a><a class="docs-heading-anchor-permalink" href="#Example-2" title="Permalink"></a></h2><p>This script is a slight modification of Example 1 to present to the user the possibility of creating new <a href="../API/#RHEOS.RheoModelClass"><code>RheoModelClass</code></a> from an existing one with some of the parameters frozen to specific values. As an example, we fix the spring constant of the model above (k) to 2 and we let RHEOS fit the viscosity η.</p><pre><code class="language-julia hljs">Maxwell_springFix = freeze_params(Maxwell, k = 2)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">
 Model name: maxwell
 
 Free parameters: η
@@ -77,7 +77,7 @@ p = plot(data.t, data.σ,
     framestyle = :box
 )
 
-plot!(p, maxwellD_predict.t, maxwellD_predict.σ, color = :red, label = &quot;MaxwellD fit&quot;, linewidth = 3)</code></pre><img src="ac404a97.svg" alt="Example block output"/><h2 id="Example-3"><a class="docs-heading-anchor" href="#Example-3">Example 3</a><a id="Example-3-1"></a><a class="docs-heading-anchor-permalink" href="#Example-3" title="Permalink"></a></h2><p>This script shows how to use RHEOS to explore the behaviour of various models This involves:</p><ul><li>Creating a strain function</li><li>Defining models based on parameter values</li></ul><p>PyPlot needs to be installed to run these examples and display plots of the data.</p><pre><code class="language-julia hljs"># Creates a time only dataset
+plot!(p, maxwellD_predict.t, maxwellD_predict.σ, color = :red, label = &quot;MaxwellD fit&quot;, linewidth = 3)</code></pre><img src="155ba3ae.svg" alt="Example block output"/><h2 id="Example-3"><a class="docs-heading-anchor" href="#Example-3">Example 3</a><a id="Example-3-1"></a><a class="docs-heading-anchor-permalink" href="#Example-3" title="Permalink"></a></h2><p>This script shows how to use RHEOS to explore the behaviour of various models This involves:</p><ul><li>Creating a strain function</li><li>Defining models based on parameter values</li></ul><p>PyPlot needs to be installed to run these examples and display plots of the data.</p><pre><code class="language-julia hljs"># Creates a time only dataset
 dϵ = timeline(t_end = 10)
 # calculates strain data by applying a function of time
 dϵ = strainfunction(dϵ, t -&gt; sin(t))
@@ -101,32 +101,25 @@ for η in [0.1, 0.3, 1, 3, 10]
     d_maxwell = modelpredict(dϵ, maxwell_model)
     plot!(p, d_maxwell.t, d_maxwell.σ, label = &quot;η = $η&quot;, linewidth = 2)
 end
-plot!(p, grid = true)</code></pre><img src="b35d6360.svg" alt="Example block output"/><h2 id="Example-4"><a class="docs-heading-anchor" href="#Example-4">Example 4</a><a id="Example-4-1"></a><a class="docs-heading-anchor-permalink" href="#Example-4" title="Permalink"></a></h2><p>This example demonstrates generating a timeline and stress data, fitting multiple models to the data, calling the <code>extractfitdata</code> function, listing the errors, and determining which model fits the best.</p><p>Generate Timeline</p><pre><code class="language-julia hljs">datat = timeline(t_start = 0, t_end = 20.0, step = 0.02)  # Create a timeline from 0 to 20 seconds with a step size of 0.02 seconds</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"></code></pre><p>Generate Stress Data (Ramp &amp; hold)</p><pre><code class="language-julia hljs">dramp_stress = stressfunction(datat, ramp(offset = 4.0, gradient = 0.8))  # Generate a ramp stress function with offset 4.0 and gradient 0.8
-dhold_stress = dramp_stress - stressfunction(datat, ramp(offset = 5.0, gradient = 0.8))  # Generate a hold stress function by subtracting a shifted ramp</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"></code></pre><p>Define the rheological model and predict</p><pre><code class="language-julia hljs">model = RheoModel(SLS_Zener, (η = 1, kᵦ = 1, kᵧ = 1))
-data = modelpredict(dhold_stress, model)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"></code></pre><p>Fit three models to the data</p><pre><code class="language-julia hljs">SLS_Zener_model = modelfit(data, SLS_Zener, stress_imposed)
+plot!(p, grid = true)</code></pre><img src="c433b7a3.svg" alt="Example block output"/><h2 id="Example-4"><a class="docs-heading-anchor" href="#Example-4">Example 4</a><a id="Example-4-1"></a><a class="docs-heading-anchor-permalink" href="#Example-4" title="Permalink"></a></h2><p>This example demonstrates generating a timeline and stress data, fitting multiple models to the data, calling the <code>extractfitdata</code> function, listing the errors, and determining which model fits the best.</p><p>Generate Timeline</p><pre><code class="language-julia hljs">datat = timeline(t_start = 0, t_end = 20.0, step = 0.02)  # Create a timeline from 0 to 20 seconds with a step size of 0.02 seconds
+# Generate Stress Data (Ramp &amp; hold)
+dramp_stress = stressfunction(datat, ramp(offset = 4.0, gradient = 0.8))  # Generate a ramp stress function with offset 4.0 and gradient 0.8
+dhold_stress = dramp_stress - stressfunction(datat, ramp(offset = 5.0, gradient = 0.8))  # Generate a hold stress function by subtracting a shifted ramp
+
+# Define the rheological model and predict
+model = RheoModel(SLS_Zener, (η = 1, kᵦ = 1, kᵧ = 1))
+data = modelpredict(dhold_stress, model)
+
+# Fit three models to the data
+SLS_Zener_model = modelfit(data, SLS_Zener, stress_imposed)
 Maxwell_model = modelfit(data, Maxwell, stress_imposed)
-BurgersLiquid_model = modelfit(data, BurgersLiquid, stress_imposed)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">
-Model name: burgerliquid
+BurgersLiquid_model = modelfit(data, BurgersLiquid, stress_imposed)
 
-Free parameters: 
+# Call the extractfitdata function to extract fitting data
+extracted_data = extractfitdata(data)
 
-
-Fixed parameters: (η₁ = 2.2791392395938356e16, k₁ = 1.9214746727288188e16, η₂ = 0.765625, k₂ = 1.03125)
-
-
-                                                         ___
-                                                 _________| |________
-                 ___                            |        _|_| η₂     |
-             _____| |________╱╲  ╱╲  ╱╲  _______|                    |____
-                 _|_|          ╲╱  ╲╱  ╲╱       |                    |
-                    η₁                  k₁      |____╱╲  ╱╲  ╱╲  ____|
-                                                       ╲╱  ╲╱  ╲╱
-                                                                 k₂
-
-                </code></pre><p>Call the extractfitdata function to extract fitting data</p><pre><code class="language-julia hljs">extracted_data = extractfitdata(data)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Dict{String, Vector{@NamedTuple{params, info, index::Int64}}} with 3 entries:
-  &quot;SLS_Zener&quot;    =&gt; [@NamedTuple{params, info, index::Int64}(((η = 1.00165, kᵦ …
-  &quot;burgerliquid&quot; =&gt; [@NamedTuple{params, info, index::Int64}(((η₁ = 2.27914e16,…
-  &quot;maxwell&quot;      =&gt; [@NamedTuple{params, info, index::Int64}(((η = 57.064, k = …</code></pre><p>Determine which model fits best by comparing errors</p><pre><code class="language-julia hljs">function find_best_model(extracted_data)
+# Determine which model fits best by comparing errors
+function find_best_model(extracted_data)
     best_model = &quot;&quot;
     min_error = Inf
 
@@ -144,9 +137,18 @@ Fixed parameters: (η₁ = 2.2791392395938356e16, k₁ = 1.9214746727288188e16, 
     return best_model, min_error
 end
 
-best_model, min_error = find_best_model(extracted_data)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(&quot;SLS_Zener&quot;, 7.037654035719165e-6)</code></pre><p>Create strain-only data for model predictions</p><pre><code class="language-julia hljs">stress_only_data = onlystress(data)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"></code></pre><p>Get model predictions for plotting</p><pre><code class="language-julia hljs">SLS_Zener_predict = modelpredict(stress_only_data, SLS_Zener_model)
+best_model, min_error = find_best_model(extracted_data)
+
+# Create strain-only data for model predictions
+stress_only_data = onlystress(data)
+
+# Get model predictions for plotting
+SLS_Zener_predict = modelpredict(stress_only_data, SLS_Zener_model)
 Maxwell_predict = modelpredict(stress_only_data, Maxwell_model)
-BurgersLiquid_predict = modelpredict(stress_only_data, BurgersLiquid_model)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"></code></pre><p>Plot data and fitted models</p><pre><code class="language-julia hljs">p = scatter(data.t, data.ϵ,
+BurgersLiquid_predict = modelpredict(stress_only_data, BurgersLiquid_model)
+
+# Plot data and fitted models
+p = scatter(data.t, data.ϵ,
     color = :green,
     label = &quot;Original Data&quot;,
     xlabel = &quot;Time&quot;,
@@ -157,7 +159,8 @@ BurgersLiquid_predict = modelpredict(stress_only_data, BurgersLiquid_model)</cod
     grid = true,
     framestyle = :box
 )
+
 # Overlay fitted models
 plot!(p, SLS_Zener_predict.t, SLS_Zener_predict.ϵ, color = :red, linestyle = :solid, linewidth = 3, label = &quot;SLS_Zener Model&quot;)
 plot!(p, Maxwell_predict.t, Maxwell_predict.ϵ, color = :blue, linestyle = :dash, linewidth = 3, label = &quot;Maxwell Model&quot;)
-plot!(p, BurgersLiquid_predict.t, BurgersLiquid_predict.ϵ, color = :purple, linestyle = :dot, linewidth = 3, label = &quot;BurgersLiquid Model&quot;)</code></pre><img src="c7b499f9.svg" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../model_create/">« Create Your Model</a><a class="docs-footer-nextpage" href="../API/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Tuesday 17 February 2026 13:58">Tuesday 17 February 2026</span>. Using Julia version 1.12.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+plot!(p, BurgersLiquid_predict.t, BurgersLiquid_predict.ϵ, color = :purple, linestyle = :dot, linewidth = 3, label = &quot;BurgersLiquid Model&quot;)</code></pre><img src="4f3cadcd.svg" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../model_create/">« Create Your Model</a><a class="docs-footer-nextpage" href="../API/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Wednesday 18 February 2026 08:58">Wednesday 18 February 2026</span>. Using Julia version 1.12.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
