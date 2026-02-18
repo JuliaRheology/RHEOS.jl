@@ -132,19 +132,23 @@ plot!(p, grid = true)
 
 # Generate Timeline
 datat = timeline(t_start = 0, t_end = 20.0, step = 0.02)  # Create a timeline from 0 to 20 seconds with a step size of 0.02 seconds
-# Generate Stress Data (Ramp & hold)
+## Generate Stress Data (Ramp & hold)
 dramp_stress = stressfunction(datat, ramp(offset = 4.0, gradient = 0.8))  # Generate a ramp stress function with offset 4.0 and gradient 0.8
 dhold_stress = dramp_stress - stressfunction(datat, ramp(offset = 5.0, gradient = 0.8))  # Generate a hold stress function by subtracting a shifted ramp
-# Define the rheological model and predict
+
+## Define the rheological model and predict
 model = RheoModel(SLS_Zener, (η = 1, kᵦ = 1, kᵧ = 1))
 data = modelpredict(dhold_stress, model)
-# Fit three models to the data
+
+## Fit three models to the data
 SLS_Zener_model = modelfit(data, SLS_Zener, stress_imposed)
 Maxwell_model = modelfit(data, Maxwell, stress_imposed)
 BurgersLiquid_model = modelfit(data, BurgersLiquid, stress_imposed)
-# Call the extractfitdata function to extract fitting data
+
+## Call the extractfitdata function to extract fitting data
 extracted_data = extractfitdata(data)
-# Determine which model fits best by comparing errors
+
+## Determine which model fits best by comparing errors
 function find_best_model(extracted_data)
     best_model = ""
     min_error = Inf
@@ -165,13 +169,15 @@ end
 
 best_model, min_error = find_best_model(extracted_data)
 
-# Create strain-only data for model predictions
+## Create strain-only data for model predictions
 stress_only_data = onlystress(data)
-# Get model predictions for plotting
+
+## Get model predictions for plotting
 SLS_Zener_predict = modelpredict(stress_only_data, SLS_Zener_model)
 Maxwell_predict = modelpredict(stress_only_data, Maxwell_model)
 BurgersLiquid_predict = modelpredict(stress_only_data, BurgersLiquid_model)
-# Plot data and fitted models
+
+## Plot data and fitted models
 p = scatter(data.t, data.ϵ,
     color = :green,
     label = "Original Data",
@@ -183,6 +189,7 @@ p = scatter(data.t, data.ϵ,
     grid = true, 
     framestyle = :box
 )
+
 ## Overlay fitted models
 plot!(p, SLS_Zener_predict.t, SLS_Zener_predict.ϵ, color = :red, linestyle = :solid, linewidth = 3, label = "SLS_Zener Model")
 plot!(p, Maxwell_predict.t, Maxwell_predict.ϵ, color = :blue, linestyle = :dash, linewidth = 3, label = "Maxwell Model")
