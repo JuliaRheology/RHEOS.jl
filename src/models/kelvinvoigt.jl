@@ -21,12 +21,31 @@ Fract_KelvinVoigt =  RheoModelClass(
         Gpp = quote
                 cₐ*ω^a*sin(a*π/2) + cᵦ*ω^β*sin(β*π/2)
               end,
+
+        equation = (ϵ = ((:cₐ, :a), (:cᵦ ,:β)),σ = ((1.0,0.0),)),
+
         # Constraints
-        constraint = quote
-                 all([  (a<1) & (a>0)
-                         (β<1) & (β>0)
-                          -a+β < 0])
-                end,
+        constraint =[quote
+                          -β#<0
+                        end,
+                        quote
+                          -a
+                        end,
+                        quote
+                          β-a
+                        end,
+                        quote
+                          a-1
+                        end,
+                        quote
+                          β-1
+                        end],
+        # Constraints
+        # constraint = quote
+        #          all([  (a<1) & (a>0)
+        #                  (β<1) & (β>0)
+        #                   -a+β < 0])
+        #         end,
         # Network
         info= "
                 ________ ╱╲ ________
@@ -64,10 +83,13 @@ FractS_KelvinVoigt =  RheoModelClass(
         Gpp = quote
                 cₐ*ω^a*sin(a*π/2)
               end,
+
+               #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
         # Constraints
-        constraint = quote
+        constraint = [quote
                  (a<1) & (a>0)
-                end,
+                end],
         # Network
         info= "
                 ________ ╱╲ ________
@@ -107,10 +129,12 @@ FractD_KelvinVoigt =  RheoModelClass(
         Gpp = quote
                 η*ω + cᵦ*ω^β*sin(β*π/2)
               end,
+               #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
         # Constraints
-        constraint = quote
+        constraint = [quote
                  (β<1) & (β>0)
-                end,
+                end],
         # Network
         info= "
                         ___
@@ -144,6 +168,7 @@ KelvinVoigt =  RheoModelClass(
         Gpp = quote
                 η*ω
               end,
+        equation = (ϵ =((:η, 1.0), (:k,0.0)), σ =((1.0,0.0),)),
         # Network
         info= "
                         ___

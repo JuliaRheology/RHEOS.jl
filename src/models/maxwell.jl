@@ -23,12 +23,31 @@ Fract_Maxwell = RheoModelClass(
                 denominator = ( (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2) )
                 ( ((cᵦ*ω^β)^2)*(cₐ*ω^a)*sin(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*sin(β*π/2) ) / denominator
                 end,
+
+            equation = (ϵ =((:cₐ,:a),), σ =((1.0,0.0),(:(cₐ/cᵦ),:(a-β)))),
+
+                # Constraints
+                constraint = [quote
+                                -β#<0
+                              end,
+                              quote
+                                -a
+                              end,
+                              quote
+                                β-a
+                              end,
+                              quote
+                                a-1
+                              end,
+                              quote
+                                β-1
+                              end],
           # Constraints
-          constraint = quote
-                   all([ (a<1) & (a>0)
-                         (β<1) & (β>0)
-                         -a+β < 0     ])
-                  end,
+      #     constraint = quote
+      #              all([ (a<1) & (a>0)
+      #                    (β<1) & (β>0)
+      #                    -a+β < 0     ])
+      #             end,
           # Network
           info= "
              ___╱╲__________╱╲____
@@ -64,10 +83,17 @@ FractS_Maxwell = RheoModelClass(
                 denominator = ( (cₐ*ω^a)^2 + k^2 + 2*(cₐ*ω^a)*k*cos(a*π/2) )
                 ( k^2*(cₐ*ω^a)*sin(a*π/2) ) / denominator
               end,
+
+                  #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
+
         # Constraints
-        constraint = quote
-                 (a<1) & (a>0)
+        constraint = [quote
+                 a-1
                 end,
+                quote
+                  -a
+                end], #0<a<1,
         # Network
         info= "
            ___╱╲_________╱╲  ╱╲  ╱╲  ________
@@ -100,10 +126,14 @@ FractD_Maxwell = RheoModelClass(
                 denominator = ( (η*ω)^2 + (cᵦ*ω^β)^2 + 2*(η*ω)*(cᵦ*ω^β)*cos((1-β)*π/2) )
                 ( ((cᵦ*ω^β)^2)*(η*ω) + ((η*ω)^2)*(cᵦ*ω^β)*sin(β*π/2) ) / denominator
                 end,
+
+                    #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
+
           # Constraints
-          constraint = quote
+          constraint = [quote
                    (β<1) & (β>0)
-                  end,
+                  end],
           # Network
           info= "
                   ___
@@ -135,6 +165,9 @@ Maxwell = RheoModelClass(
         Gpp = quote
                 ( η*ω ) / ( 1 + η^2*ω^2/k^2 )
               end,
+
+        equation = (ϵ =((:η,1.0),), σ =((1.0,0.0),(:(η/k),1.0))),
+
         # Network
         info= "
                 ___

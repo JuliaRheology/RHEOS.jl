@@ -90,14 +90,20 @@ export AFM, Tweezers
 #MittLeffLiteDir = joinpath(@__DIR__, "..", "deps", "MittLeffLite", "MittLeffLite.jl")
 #include(MittLeffLiteDir)
 
+
+
 include("base.jl")
 include("symbols.jl")
 include("rheodata.jl")
+
 include("rheomodel.jl")
+include("DiffEqu.jl")
 include("IO.jl")
 include("modeldatabase.jl")
 include("datagen.jl")
 include("processing.jl")
 include("interface.jl")
+
+
 
 end

@@ -364,8 +364,9 @@ function fill_init_params(model::RheoModelClass, p0::Union{NamedTuple,Nothing})
     else
         p0a = check_and_reorder_parameters(p0, model.freeparams,  err_string="initial guess")
     end
-
-    @assert model._constraint(p0a)  "Initial guess not feasible"
+    # for c in model._constraint
+    #     @assert c(p0a)  "Initial guess not feasible"
+    # end
 
     return p0a
 end

@@ -26,13 +26,38 @@ Fract_Zener = RheoModelClass(
                    numerator = ((cᵦ*ω^β)^2)*(cₐ*ω^a)*sin(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*sin(β*π/2)
                    numerator/denominator + cᵧ*ω^γ*sin(γ*π/2)
                 end,
+
+          equation = (ϵ = ((:cₐ, :a), (:cᵧ , :γ), (:(cₐ * cᵧ / cᵦ) ,:(a+γ-β))),σ = ((1.0,0.0),(:(cₐ/ cᵦ) , :(a-β)))),
+
+                # Constraints
+                constraint =[quote
+                                -β#<0
+                            end,
+                            quote
+                                -a
+                            end,
+                            quote
+                                β-a
+                            end,
+                            quote
+                                a-1
+                            end,
+                            quote
+                                β-1
+                            end,
+                            quote
+                                -γ
+                            end,
+                            quote
+                                γ-1
+                            end],
           # Constraints
-          constraint = quote
-                   all([   (a<1) & (a>0)
-                           (β<1) & (β>0)
-                            -a+β < 0
-                           (γ<1) & (γ>0)] )
-                  end,
+        #   constraint = quote
+        #            all([   (a<1) & (a>0)
+        #                    (β<1) & (β>0)
+        #                     -a+β < 0
+        #                    (γ<1) & (γ>0)] )
+        #           end,
           # Network
           info= "
 
@@ -73,10 +98,13 @@ FractSLS_Zener = RheoModelClass(
                 numerator = kᵦ^2*(cₐ*ω^a)*sin(a*π/2)
                 numerator/denominator
               end,
+
+                  #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
         # Constraints
-        constraint = quote
+        constraint = [quote
                  (a<1) & (a>0)
-                end,
+                end],
         # Network
         info= "
 
@@ -121,6 +149,9 @@ SLS_Zener = RheoModelClass(
                   #numerator = ω*τ*kᵦ
                   ((ω*η/kᵦ)*kᵦ) / (1 + (ω*η/kᵦ)^2)
                 end,
+
+          equation = (ϵ = ((:kᵧ, 0.0), (:(η*(1+ kᵧ/kᵦ)) , 1.0)),σ = ((1.0,0.0),(:(η/kᵦ) , 1.0))),
+
           # Network
           info= "
                       ___
@@ -166,10 +197,13 @@ FractJeffreys_Zener = RheoModelClass(
                             numerator = ((cᵦ*ω^β)^2)*(ηₐ*ω) + ((ηₐ*ω)^2)*(cᵦ*ω^β)*sin(β*π/2)
                             numerator/denominator + ηᵧ*ω
                           end,
+
+                              #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
                     # Constraints
-                    constraint = quote
+                    constraint = [quote
                              (β<1) & (β>0)
-                            end,
+                            end],
                     # Network
                     info= "
 
@@ -212,6 +246,9 @@ Jeffreys_Zener = RheoModelClass(
                         numerator = (k^2)*(ηₐ*ω)
                         numerator/denominator + ηᵧ*ω
                       end,
+
+                          #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
                 # Network
                 info= "
 
@@ -254,10 +291,13 @@ FractSolid = RheoModelClass(
                 numerator = ((cᵦ*ω^β)^2)*(η*ω) + ((η*ω)^2)*(cᵦ*ω^β)*sin(β*π/2)
                 numerator/denominator
               end,
+
+                  #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
         # Constraints
-        constraint = quote
+        constraint = [quote
                  (β<1) & (β>0)
-                end,
+                end],
         # Network
         info= "
                       ___

@@ -39,6 +39,8 @@ BurgersLiquid =  RheoModelClass(
                 denominator = p1^2 * ω^2 + (1-p2*ω^2)^2
                 numerator/denominator
               end,
+            #TODO: Placeholder eq
+            equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
         # Network
         info= "
 

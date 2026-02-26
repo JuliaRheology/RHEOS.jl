@@ -1,7 +1,7 @@
 name = "RHEOS"
 uuid = "728860ae-c896-11e8-0b91-0f38ecad5046"
-authors = ["J Louis Kaplan <jonathanlouiskaplan@outlook.com>", "Alessandra Bonfanti <bonfantiale.ab@gmail.com>", "Alexandre Kabla <ajk61@cam.ac.uk>"]
 version = "0.9.5"
+authors = ["J Louis Kaplan <jonathanlouiskaplan@outlook.com>", "Alessandra Bonfanti <bonfantiale.ab@gmail.com>", "Alexandre Kabla <ajk61@cam.ac.uk>"]
 
 [deps]
 DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
@@ -13,8 +13,10 @@ ImageFiltering = "6a3955dd-da59-5b1f-98d4-e7296123deb5"
 InverseLaplace = "e24f45a5-4790-5a38-8b2c-33d770a4e70f"
 MittagLeffler = "9c257583-4f8f-53fd-abd9-c69d5080dd54"
 NLopt = "76087f3c-5699-56af-9a33-bf431cd00edd"
+NumFracDiff = "aa3e53b5-81b3-45b9-a5b1-5429ac742d4d"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
@@ -28,5 +30,6 @@ ImageFiltering = "0.7"
 InverseLaplace = "0.3"
 MittagLeffler = "1.0"
 NLopt = "1.2"
+Revise = "3.13.2"
 SpecialFunctions = "2.7"
 julia = "1.11"

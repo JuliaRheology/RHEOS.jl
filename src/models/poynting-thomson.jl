@@ -26,13 +26,16 @@ Fract_PT = RheoModelClass(
                   numerator = (cᵧ * ω^γ) * sin(γ*π/2) * ((cₐ * ω^a)^2 + (cᵦ * ω^β)^2) + (cᵧ * ω^γ)^2 * ((cₐ * ω^a)*sin(a*π/2)+(cᵦ * ω^β)*sin(β*π/2)) + (cₐ * ω^a) * (cᵦ * ω^β) * (cᵧ * ω^γ) * (sin((a-β-γ)*π/2)+sin((β-a-γ)*π/2))
                   numerator/denominator
                 end,
+
+                    #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
         # Constraints
-        constraint = quote
+        constraint = [quote
                  all([   (a<1) & (a>0)
                          (β<1) & (β>0)
                           -a+β < 0
                          (γ<1) & (γ>0)] )
-                end,
+                end],
           # Network
           info= "
                      _________╱╲_________
@@ -80,10 +83,12 @@ FractSLS_PT = RheoModelClass(
                   numerator = Zkᵦ^2*(Zcₐ*ω^a)*sin(a*π/2)
                   numerator/denominator
                 end,
+                    #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
         # Constraints
-          constraint = quote
+          constraint = [quote
                  (a<1) & (a>0)
-                end,
+                end],
           # Network
           info= "
                      _________╱╲_________
@@ -133,6 +138,9 @@ SLS_PT = RheoModelClass(
                   numerator = ω*τ*Zkᵦ
                   numerator/denominator
                 end,
+                    #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
+
           # Network
           info= "
                              ___
@@ -187,10 +195,12 @@ FractJeffreys_PT = RheoModelClass(
                       numerator = ((Zcᵦ*ω^β)^2)*(Zηₐ*ω) + ((Zηₐ*ω)^2)*(Zcᵦ*ω^β)*sin(β*π/2)
                       numerator/denominator + Zηᵧ*ω
                     end,
+                        #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
               # Constraints
-              constraint = quote
+              constraint = [quote
                        (β<1) & (β>0)
-                      end,
+                      end],
               # Network
               info= "
                                       ___
@@ -239,6 +249,9 @@ Jeffreys_PT = RheoModelClass(
                   numerator = (Zk^2)*(Zηₐ*ω)
                   numerator/denominator + Zηᵧ*ω
                 end,
+
+                    #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
           # Network
           info= "
                              ___

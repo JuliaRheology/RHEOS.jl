@@ -21,10 +21,23 @@ Springpot =  RheoModelClass(
         Gpp = quote
                 cᵦ*(ω^β)*sin(π*β/2)
               end,
+
+        #Differential equation
+        equation = (ϵ =((:cᵦ,:β),), σ =((1.0,0.0),)),
+        
         # Constraints
-        constraint = quote
-                (0<β<1)
+        constraint = [quote
+                        β-1
                 end,
+                quote
+                        -β
+                end
+                ],
+
+        # constraint = quote
+        #         (0<β<1)
+        #         end,
+
         # Network
         info= "
                 ____ ╱╲ ____
@@ -53,6 +66,11 @@ Spring =  RheoModelClass(
         Gpp = quote
                 0.0
               end,
+        
+              #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
+
+        
         # Network
         info= "
                 ___╱╲  ╱╲  ╱╲  ________
@@ -77,6 +95,8 @@ Dashpot =  RheoModelClass(
         Gpp = quote
                 η*ω
               end,
+        equation = (ϵ =((:η,1.0),), σ =((1.0,0.0),)),
+
         # Network
         info= "
                  ___

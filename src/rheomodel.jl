@@ -22,11 +22,13 @@ Model related functionality
 # Function types for the moduli with free params
 const FWScaFree = FunctionWrapper{RheoFloat,Tuple{RheoFloat,Vector{RheoFloat}}}
 const FWVecFree = FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat},Vector{RheoFloat}}}
+# Function type for the differential equation
+const DiffScaFree= FunctionWrapper{RheoFloat,Tuple{Vector{RheoFloat}}}
 # Function types for the moduli with fixed params
 const FWScaFixed = FunctionWrapper{RheoFloat,Tuple{RheoFloat}}
 const FWVecFixed = FunctionWrapper{Vector{RheoFloat},Tuple{Vector{RheoFloat}}}
 # Function types for the constraint function
-const FWConstraint = FunctionWrapper{Bool,Tuple{Vector{RheoFloat}}}
+const FWConstraint = FunctionWrapper{RheoFloat,Tuple{Vector{RheoFloat}}}
 
 
 
@@ -37,8 +39,21 @@ const fwscafixedNaN = (t->NaN) |> FWScaFixed
 const fwvecfixedNaN = (t->fill(RheoFloat(NaN), length(t))) |> FWVecFixed
 
 
+struct DETerm{T}
+    coef::T
+    order::T
+end
 
-struct _RheoModel{TSca,TVec}
+struct DiffEqu{T}
+    leftvar::Symbol     #ϵ
+    rightvar::Symbol    #σ
+    leftde::Set{DETerm{T}}
+    rightde::Set{DETerm{T}}
+end
+
+
+
+struct _RheoModel{TSca,TVec,DiffSca}
 
 	name::String
 	freeparams::Tuple{Vararg{Symbol, N}} where N
@@ -54,7 +69,9 @@ struct _RheoModel{TSca,TVec}
 	_Gpp::TSca
 	_Gppa::TVec
 
-	_constraint::FWConstraint
+    C::DiffEqu{DiffSca}
+
+	_constraint::Union{Vector{FWConstraint}, Nothing}
 	_Gramp::Bool
 
 	info::String
@@ -69,9 +86,9 @@ end
 #
 
 
-const RheoModelClass = _RheoModel{FWScaFree,FWVecFree}
+const RheoModelClass = _RheoModel{FWScaFree,FWVecFree,DiffScaFree}
 
-const RheoModel = _RheoModel{FWScaFixed,FWVecFixed}
+const RheoModel = _RheoModel{FWScaFixed,FWVecFixed,RheoFloat}
 
 
 function Base.show(io::IO, m::_RheoModel)
@@ -282,14 +299,23 @@ end
 
 
 
-function _buildconstraint(constraint::Expr, psymbs::Tuple)
-    # Replace symbols by elements in array
-	constraint_e = expr_replace(constraint,NamedTuple{psymbs}([Meta.parse(":(p_arr[$i])").args[1] for i in 1:length(psymbs)]) )
-	@eval return( (     (p_arr -> $constraint_e)      |> FWConstraint ) )
+function _buildconstraint(constraint::Vector{Expr}, psymbs::Tuple)
+    replacements = NamedTuple{psymbs}([Meta.parse(":(p_arr[$i])").args[1] for i in 1:length(psymbs)]) 
+    const_arr = Vector{FWConstraint}(undef,length(constraint))
+    for c in eachindex(constraint)
+	    constraint_e = expr_replace(constraint[c],replacements)
+        const_arr[c] = eval(:( (p_arr -> $constraint_e)  |> FWConstraint ))
+    end
+	return const_arr
 end
 
-function _buildconstraint(constraint::Expr)
-	@eval return( (     (p_arr -> $constraint)      |> FWConstraint ) )
+function _buildconstraint(constraint::Vector{Expr},nt::NamedTuple)        
+    const_arr = Vector{FunctionWrapper}(undef,length(constraint))
+    for c in eachindex(constraint)
+        constraint_e = expr_replace(constraint[c], nt)
+        const_arr[c] = eval(:(     (p_arr -> $constraint_e)      |> FWConstraint ))
+    end
+	return const_arr
 end
 
 
@@ -327,7 +353,8 @@ function RheoModelClass(;name::String,
         J = nothing,
         Gp = nothing,
         Gpp = nothing,
-        constraint::Expr = quote true end,
+        equation::NamedTuple,
+        constraint::Union{Vector{Expr},Nothing} = nothing,
         info="", 
         # flag to indicate use of integral forms of the relaxation modulus.
                # using the ramp response instead of the step response helps avoid singularities
@@ -336,11 +363,15 @@ function RheoModelClass(;name::String,
 
     # Building expressions tuple to store data provided to constructor
     expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint)
-
+    built=nothing
+    if constraint ≠ nothing
+        built = _buildconstraint(constraint,p)
+    end
     return(RheoModelClass(name, p, NamedTuple{}(),
         _buildmoduli_t(G,p)..., _buildmoduli_t(J,p)...,
         _buildmoduli_ω(Gp,p)..., _buildmoduli_ω(Gpp,p)...,
-        _buildconstraint(constraint,p),
+         builddiffequation(equation,p),
+        built,
         G_ramp, info, expressions) )
 end
 
@@ -382,9 +413,13 @@ function _freeze_params(m::RheoModelClass, nt0::NamedTuple)
 	J = expr_replace(m.expressions.J, nt)
 	Gp = expr_replace(m.expressions.Gp, nt)
 	Gpp = expr_replace(m.expressions.Gpp, nt)
-	constraint = expr_replace(m.expressions.constraint, nt)
+    constraints = []
+    for c in m.expressions.constraint
+        constraints = [constraints, expr_replace(c, nt)]
+    end
+	
 
-	return( (freeparams=freeparams, fixedparams=fixedparams, G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint) )
+	return( (freeparams=freeparams, fixedparams=fixedparams, G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraints) )
 
 end
 
@@ -470,13 +505,19 @@ function RheoModel(m::RheoModelClass, nt0::NamedTuple)
 	# Check all free params are set
 	@assert length(freeparams) == 0  "Some parameters need to be set: $freeparams"
 
+    built=nothing
+    constraint = nothing
+    if m._constraint ≠ nothing
+        built = _buildconstraint(m.expressions.constraint,nt0)
+    end
 	# Building expressions tuple to store data provided to constructor
 	expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint)
 
 	return(RheoModel(m.name, freeparams, fixedparams,
 		_buildmoduli_t(G)..., _buildmoduli_t(J)..., 
         _buildmoduli_ω(Gp)..., _buildmoduli_ω(Gpp)...,
-		_buildconstraint(constraint),
+        _builddiffequation(m.C,[i for i in nt0]),
+		built,
 		m._Gramp, m.info, expressions) )
 end
 
@@ -1004,4 +1045,79 @@ end
 dynamicmod(m::RheoModelClass, params::Vector{T}) where T <: Number =  x -> dynamicmod(m, x, params)
 dynamicmod(m::RheoModelClass, params::NamedTuple) =  x -> dynamicmod(m, x, params)
 dynamicmod(m::RheoModelClass; kwargs...) =  x -> dynamicmod(m, x, symbol_to_unicode(values(kwargs)))
+
+
+
+
+
+function builddiffequation(equation::NamedTuple, p::Tuple)
+    vars = keys(equation)
+    l= Set{DETerm{DiffScaFree}}()
+    for t in equation[1]
+        if t[1] isa Symbol            
+            te1 = _replace_symbols_with_array(Expr(:ref,t[1]), p)
+            # @eval expr1 = ( (p_arr -> $te1) |> DiffScaFree )
+        elseif t[1] isa Expr
+            te1 = _replace_symbols_with_array(t[1], p)
+            # @eval expr1 = ( (p_arr -> $te1) |> DiffScaFree )
+        else    
+            te1 = t[1]
+            # @eval expr1 = ( (p_arr -> $te1) |> DiffScaFree )
+        end
+        if t[2] isa Symbol
+            te2 = _replace_symbols_with_array(Expr(:ref,t[2]), p)
+            # @eval expr2 = ( (p_arr -> $te2) |> DiffScaFree )
+        elseif t[2] isa Expr
+            te2 = _replace_symbols_with_array(t[2], p)
+            # @eval expr2 = ( (p_arr -> $te2) |> DiffScaFree )
+        else
+            te2 = t[2]
+            # @eval expr2 = ( (p_arr -> $te2) |> DiffScaFree )
+        end
+        f1 = eval(:( (p_arr -> $te1) |> DiffScaFree ))
+        f2 = eval(:( (p_arr -> $te2) |> DiffScaFree ))
+        push!(l,DETerm{DiffScaFree}(f1,f2))
+    end 
+    r= Set{DETerm{DiffScaFree}}()
+    for t in equation[2]
+        if t[1] isa Symbol
+            te1 = _replace_symbols_with_array(Expr(:call,t[1]), p)
+            # @eval expr1 = ( (p_arr -> $te1) |> DiffScaFree )
+        elseif t[1] isa Expr
+            te1 = _replace_symbols_with_array(t[1], p)
+            # @eval expr1 = ( (p_arr -> $te1) |> DiffScaFree )
+        else
+            te1 = t[1]
+            # @eval expr1 = ( (p_arr -> $te1) |> DiffScaFree )
+        end
+        if t[2] isa Symbol
+            te2 = _replace_symbols_with_array(Expr(:call,t[2]), p)
+            # @eval expr2 = ( (p_arr -> $te2) |> DiffScaFree )
+        elseif t[2] isa Expr
+            te2 = _replace_symbols_with_array(t[2], p)
+            # @eval expr2 = ( (p_arr -> $te2) |> DiffScaFree )
+        else
+            te2 = t[2]
+            # @eval expr2 = ( (p_arr -> $te2) |> DiffScaFree )
+        end
+        f1 = eval(:( (p_arr -> $te1) |> DiffScaFree ))
+        f2 = eval(:( (p_arr -> $te2) |> DiffScaFree ))
+        push!(r,DETerm{DiffScaFree}(f1,f2))
+        #push!(r,DETerm(t[1],t[2]))
+    end 
+    return DiffEqu(vars...,l,r)
+    
+end
+
+function _builddiffequation(e::DiffEqu,p::Vector)
+    l = Set{DETerm{RheoFloat}}()
+    r = Set{DETerm{RheoFloat}}()
+    for t in e.leftde
+        push!(l,DETerm{RheoFloat}(t.coef(p),t.order(p)))
+    end
+    for t in e.rightde
+        push!(r,DETerm{RheoFloat}(t.coef(p),t.order(p)))
+    end
+    return DiffEqu(e.leftvar,e.rightvar,l,r)
+end
 
