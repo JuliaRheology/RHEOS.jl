@@ -99,8 +99,8 @@ FractSLS_Zener = RheoModelClass(
                 numerator/denominator
               end,
 
-                  #TODO: Placeholder eq
-        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
+      # Differential equation
+        equation = (ϵ = ((:cₐ, :a), (:kᵧ , 0.0), (:(cₐ * kᵧ / kᵦ) ,:a)),σ = ((1.0,0.0),(:(cₐ/ kᵦ) , :a))),
         # Constraints
         constraint = [quote
                  (a<1) & (a>0)
@@ -292,12 +292,16 @@ FractSolid = RheoModelClass(
                 numerator/denominator
               end,
 
-                  #TODO: Placeholder eq
-        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
+      # Differential equation
+        equation = (ϵ = ((:η, 1.0), (:k , 0.0), (:(η * k / cᵦ) ,:(1.0-β))),σ = ((1.0,0.0),(:(η/cᵦ) , :(1.0-β)))),
+        
         # Constraints
         constraint = [quote
-                 (β<1) & (β>0)
-                end],
+                        -β#<0
+                    end,
+                    quote
+                        β-1
+                    end],
         # Network
         info= "
                       ___

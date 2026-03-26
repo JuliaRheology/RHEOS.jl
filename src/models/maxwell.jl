@@ -23,8 +23,8 @@ Fract_Maxwell = RheoModelClass(
                 denominator = ( (cₐ*ω^a)^2 + (cᵦ*ω^β)^2 + 2*(cₐ*ω^a)*(cᵦ*ω^β)*cos((a-β)*π/2) )
                 ( ((cᵦ*ω^β)^2)*(cₐ*ω^a)*sin(a*π/2) + ((cₐ*ω^a)^2)*(cᵦ*ω^β)*sin(β*π/2) ) / denominator
                 end,
-
-            equation = (ϵ =((:cₐ,:a),), σ =((1.0,0.0),(:(cₐ/cᵦ),:(a-β)))),
+         # Differential equation
+          equation = (ϵ =((:cₐ,:a),), σ =((1.0,0.0),(:(cₐ/cᵦ),:(a-β)))),
 
                 # Constraints
                 constraint = [quote
@@ -83,9 +83,8 @@ FractS_Maxwell = RheoModelClass(
                 denominator = ( (cₐ*ω^a)^2 + k^2 + 2*(cₐ*ω^a)*k*cos(a*π/2) )
                 ( k^2*(cₐ*ω^a)*sin(a*π/2) ) / denominator
               end,
-
-                  #TODO: Placeholder eq
-        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
+       # Differential equation
+        equation = (ϵ =((:cₐ,:a),), σ =((1.0,0.0),(:(cₐ/k),:a))),
 
         # Constraints
         constraint = [quote
@@ -127,8 +126,8 @@ FractD_Maxwell = RheoModelClass(
                 ( ((cᵦ*ω^β)^2)*(η*ω) + ((η*ω)^2)*(cᵦ*ω^β)*sin(β*π/2) ) / denominator
                 end,
 
-                    #TODO: Placeholder eq
-        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
+         # Differential equation
+          equation = (ϵ =((:η,1.0),), σ =((1.0,0.0),(:(η/cᵦ),:(1-β)))),
 
           # Constraints
           constraint = [quote

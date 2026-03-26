@@ -69,7 +69,7 @@ end
                             strain_deriv,
                             data.σ,
                             stress_deriv,
-                            model._constraint;
+                            nothing;
                             method= method,
                             insight = verbose,
                             constant_sampling = is_constant,
@@ -94,7 +94,7 @@ keywords=(p0=p0, lo=lo, hi=hi, rel_tol_x=rel_tol_x, diff_method=diff_method)
 push!(data.log, RheoLogItem( (type=:analysis, funct=:modelfit, params=params, keywords=keywords), info))
 end
 
-return (RheoModel(model, nt), minf);
+return RheoModel(model, nt);
 end 
 
 
