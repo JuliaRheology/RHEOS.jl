@@ -15,7 +15,8 @@ function modelfitDiff(data::RheoTimeData,
     weights::Union{Nothing,Vector{T}} = nothing,
     optmethod::Union{Symbol,String}= :LN_SBPLX, 
     opttimeout::Union{Real,Nothing} = nothing,
-    optmaxeval::Union{Integer,Nothing} = nothing) where T <: Integer
+    optmaxeval::Union{Integer,Nothing} = nothing,
+    allowconstraints=true) where T <: Integer
 
 p0a = fill_init_params(model, symbol_to_unicode(p0))
 loa = fill_lower_bounds(model, symbol_to_unicode(lo))
@@ -79,7 +80,8 @@ end
                             indweights = weights,
                             optmethod = Symbol(optmethod),
                             opttimeout = opttimeout,
-                            optmaxeval = optmaxeval)
+                            optmaxeval = optmaxeval,
+                            allowconstraints=allowconstraints)
 
 println("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
 
@@ -120,91 +122,92 @@ function leastsquares_initLHSRHS_parallel(params_init::Vector{RheoFloat},
     indweights = nothing,
     optmethod::Symbol = :LN_SBPLX,
     opttimeout::Union{Real,Nothing} = nothing,
-    optmaxeval::Union{Integer,Nothing} = nothing)
+    optmaxeval::Union{Integer,Nothing} = nothing,
+    allowconstraints= true)
 
 
-# initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
-if !(optmethod in [:LN_AUGLAG, :LN_COBYLA]) && constraint ≠ nothing
-optmethod = :LN_COBYLA
-end
-println(optmethod)
-opt = Opt(optmethod, length(params_init))
-# opt = Opt(:LN_BOBYQA, length(params_init))    # Passing tests
-# opt = Opt(:LN_COBYLA, length(params_init))    # Failing test - not precise enough?
+    # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
+    if !(optmethod in [:LN_AUGLAG, :LN_COBYLA]) && constraint ≠ nothing && allowconstraints
+        optmethod = :LN_COBYLA
+    end
+    println(optmethod)
+    opt = Opt(optmethod, length(params_init))
+    # opt = Opt(:LN_BOBYQA, length(params_init))    # Passing tests
+    # opt = Opt(:LN_COBYLA, length(params_init))    # Failing test - not precise enough?
 
-# set optimiser stopping criteria
+    # set optimiser stopping criteria
 
-# wall clock timeout
-if !isnothing(opttimeout)
-opttimeout = convert(Float64, opttimeout)
-maxtime!(opt, opttimeout)
-end
+    # wall clock timeout
+    if !isnothing(opttimeout)
+        opttimeout = convert(Float64, opttimeout)
+        maxtime!(opt, opttimeout)
+    end
 
-# evaluation cycle ceiling
-if !isnothing(optmaxeval)
-maxeval!(opt, optmaxeval)
-end
+    # evaluation cycle ceiling
+    if !isnothing(optmaxeval)
+        maxeval!(opt, optmaxeval)
+    end
 
-# input parameter change tolerance
-if !isnothing(rel_tol_x)
-rel_tol_x = convert(Float64, rel_tol_x)
-xtol_rel!(opt, rel_tol_x)
-end
+    # input parameter change tolerance
+    if !isnothing(rel_tol_x)
+        rel_tol_x = convert(Float64, rel_tol_x)
+        xtol_rel!(opt, rel_tol_x)
+    end
 
-# objective function change tolerance 
-if !isnothing(rel_tol_f)
-rel_tol_f = convert(Float64, rel_tol_f)
-ftol_rel!(opt, rel_tol_f)
-end
+    # objective function change tolerance 
+    if !isnothing(rel_tol_f)
+        rel_tol_f = convert(Float64, rel_tol_f)
+        ftol_rel!(opt, rel_tol_f)
+    end
 
-# set lower bounds and upper bounds unless they take null value
-if !isnothing(low_bounds)
-low_bounds = convert(Vector{Float64},low_bounds)
-lower_bounds!(opt, low_bounds)
-end
+    # set lower bounds and upper bounds unless they take null value
+    if !isnothing(low_bounds)
+        low_bounds = convert(Vector{Float64},low_bounds)
+        lower_bounds!(opt, low_bounds)
+    end
 
-if !isnothing(hi_bounds)
-hi_bounds = convert(Vector{Float64}, hi_bounds)
-upper_bounds!(opt, hi_bounds)
-end
+    if !isnothing(hi_bounds)
+        hi_bounds = convert(Vector{Float64}, hi_bounds)
+        upper_bounds!(opt, hi_bounds)
+    end
 
-# Convert to float64 to avoid conversion by NLOpt
-params_init = convert(Vector{Float64},params_init)
-time_series = convert(Vector{Float64},time_series)
-strain_deriv = convert(Vector{Float64},strain_deriv)
-stress_deriv = convert(Vector{Float64},stress_deriv)
-dt = convert(Float64, dt)
-
-
-data_struct = SupportVectors(
-zeros(length(time_series)),
-zeros(length(time_series)),
-)
-
-prob = NumDiffProblem(dt=dt,order=0.5,n=length(time_series),method=method)
-# ws = NumDiffWorkspace(zeros(RheoFloat,length(time_series)),zeros(RheoFloat,length(time_series)))
-ws = init_workspace(prob)
-min_objective!(opt, (params, grad) -> obj_const(params, equation,
-                            time_series, dt, 
-                            strain, strain_deriv, 
-                            stress, stress_deriv,data_struct, prob, ws;
-                            _insight = insight))
+    # Convert to float64 to avoid conversion by NLOpt
+    params_init = convert(Vector{Float64},params_init)
+    time_series = convert(Vector{Float64},time_series)
+    strain_deriv = convert(Vector{Float64},strain_deriv)
+    stress_deriv = convert(Vector{Float64},stress_deriv)
+    dt = convert(Float64, dt)
 
 
-if constraint ≠ nothing
-for c in eachindex(constraint)
-inequality_constraint!(opt,nlopt_constraint_wrapper(constraint[c]), 1e-8)
-end
-end
+    data_struct = SupportVectors(
+        zeros(length(time_series)),
+        zeros(length(time_series)),
+    )
+
+    prob = NumDiffProblem(dt=dt,order=0.5,n=length(time_series),method=method)
+    # ws = NumDiffWorkspace(zeros(RheoFloat,length(time_series)),zeros(RheoFloat,length(time_series)))
+    ws = init_workspace(prob)
+    min_objective!(opt, (params, grad) -> obj_const(params, equation,
+                                time_series, dt, 
+                                strain, strain_deriv, 
+                                stress, stress_deriv,data_struct, prob, ws;
+                                _insight = insight))
 
 
-# minimise objective func, minx are the parameters resulting in minimum
-(minf, minx, ret) = NLopt.optimize(opt, params_init)
+    if constraint ≠ nothing && allowconstraints
+        for c in eachindex(constraint)
+            inequality_constraint!(opt,nlopt_constraint_wrapper(constraint[c]), 1e-8)
+        end
+    end
 
-# return all
-return (convert(RheoFloat,minf), convert(Vector{RheoFloat},minx), ret)
 
-end
+    # minimise objective func, minx are the parameters resulting in minimum
+    (minf, minx, ret) = NLopt.optimize(opt, params_init)
+
+    # return all
+    return (convert(RheoFloat,minf), convert(Vector{RheoFloat},minx), ret)
+
+    end
 
 
 #=
