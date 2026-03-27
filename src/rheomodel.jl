@@ -1081,7 +1081,7 @@ function builddiffequation(equation::NamedTuple, p::Tuple)
     r= Set{DETerm{DiffScaFree}}()
     for t in equation[2]
         if t[1] isa Symbol
-            te1 = _replace_symbols_with_array(Expr(:call,t[1]), p)
+            te1 = _replace_symbols_with_array(Expr(:ref,t[1]), p)
             # @eval expr1 = ( (p_arr -> $te1) |> DiffScaFree )
         elseif t[1] isa Expr
             te1 = _replace_symbols_with_array(t[1], p)
@@ -1091,7 +1091,7 @@ function builddiffequation(equation::NamedTuple, p::Tuple)
             # @eval expr1 = ( (p_arr -> $te1) |> DiffScaFree )
         end
         if t[2] isa Symbol
-            te2 = _replace_symbols_with_array(Expr(:call,t[2]), p)
+            te2 = _replace_symbols_with_array(Expr(:ref,t[2]), p)
             # @eval expr2 = ( (p_arr -> $te2) |> DiffScaFree )
         elseif t[2] isa Expr
             te2 = _replace_symbols_with_array(t[2], p)
