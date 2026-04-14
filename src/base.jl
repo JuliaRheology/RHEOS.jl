@@ -505,7 +505,9 @@ function leastsquares_init(params_init::Vector{RheoFloat},
                             time_series::Vector{RheoFloat},
                             dt::RheoFloat,
                             prescribed_dot::Vector{RheoFloat},
-                            measured::Vector{RheoFloat};
+                            measured::Vector{RheoFloat},
+                            constraint::Union{Vector{FWConstraint},Nothing},
+                            fittype::Convolution;
                             insight::Bool = false,
                             constant_sampling::Bool=true,
                             singularity::Bool = false,
@@ -514,10 +516,15 @@ function leastsquares_init(params_init::Vector{RheoFloat},
                             indweights = nothing,
                             optmethod::Symbol = :LN_SBPLX,
                             opttimeout::Union{Real,Nothing} = nothing,
-                            optmaxeval::Union{Integer,Nothing} = nothing)
+                            optmaxeval::Union{Integer,Nothing} = nothing,
+                            allowconstraints=true)
                            
 
-    # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm
+    # initialise NLOpt.Opt object with :LN_SBPLX Subplex algorithm, or COBYLA if constrained
+    if !(optmethod in [:LN_AUGLAG, :LN_COBYLA]) && constraint ≠ nothing && allowconstraints
+        optmethod = :LN_COBYLA
+    end
+    println(optmethod)
     opt = Opt(optmethod, length(params_init))
     # opt = Opt(:LN_BOBYQA, length(params_init))    # Passing tests
     # opt = Opt(:LN_COBYLA, length(params_init))    # Failing test - not precise enough?
@@ -612,6 +619,12 @@ function leastsquares_init(params_init::Vector{RheoFloat},
                                                         time_series, prescribed_dot,
                                                         measured; _insight = insight))
 
+    end
+
+    if constraint ≠ nothing && allowconstraints
+        for c in eachindex(constraint)
+            inequality_constraint!(opt,nlopt_constraint_wrapper(constraint[c]), 1e-8)
+        end
     end
 
     # minimise objective func, minx are the parameters resulting in minimum

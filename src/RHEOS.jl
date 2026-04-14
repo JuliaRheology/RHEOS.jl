@@ -80,6 +80,7 @@ export resample, indexweight, cutting, smooth
 export onlytime, onlystrain, onlystress, onlyfreq, extract
 export modelfit, modelpredict, modelstepfit, modelsteppredict
 export dynamicmodelfit, dynamicmodelpredict
+export Differential, Convolution, FFT
 
 #interface.jl
 export Interface
@@ -92,11 +93,13 @@ export AFM, Tweezers
 
 
 
-include("base.jl")
+
 include("symbols.jl")
 include("rheodata.jl")
 
+
 include("rheomodel.jl")
+include("base.jl")
 include("DiffEqu.jl")
 include("IO.jl")
 include("modeldatabase.jl")

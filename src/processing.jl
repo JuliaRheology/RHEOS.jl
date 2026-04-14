@@ -434,7 +434,8 @@ Suitable options include `:LN_SBPLX` (default),  `:LN_COBYLA`, `:LN_BOBYQA` for 
 """
 function modelfit(data::RheoTimeData,
                     model::RheoModelClass,
-                    modloading::LoadingType;
+                    modloading::LoadingType,
+                    fittype::Convolution;
                     p0::Union{NamedTuple,Nothing,Dict} = nothing,
                     lo::Union{NamedTuple,Nothing,Dict} = nothing,
                     hi::Union{NamedTuple,Nothing,Dict} = nothing,
@@ -445,7 +446,8 @@ function modelfit(data::RheoTimeData,
                     weights::Union{Nothing,Vector{T}} = nothing,
                     optmethod::Union{Symbol,String}= :LN_SBPLX, 
                     opttimeout::Union{Real,Nothing} = nothing,
-                    optmaxeval::Union{Integer,Nothing} = nothing) where T <: Integer
+                    optmaxeval::Union{Integer,Nothing} = nothing,
+                    allowconstraints=true) where T <: Integer
 
     p0a = fill_init_params(model, symbol_to_unicode(p0))
     loa = fill_lower_bounds(model, symbol_to_unicode(lo))
@@ -507,7 +509,9 @@ function modelfit(data::RheoTimeData,
                                                 t_zeroed,
                                                 dt,
                                                 dcontrolled,
-                                                measured;
+                                                measured,
+                                                model._constraint,
+                                                fittype;
                                                 insight = verbose,
                                                 constant_sampling = is_constant,
                                                 singularity = sing,
@@ -516,7 +520,8 @@ function modelfit(data::RheoTimeData,
                                                 indweights = weights,
                                                 optmethod = Symbol(optmethod),
                                                 opttimeout = opttimeout,
-                                                optmaxeval = optmaxeval)
+                                                optmaxeval = optmaxeval,
+                                                allowconstraints=allowconstraints)
 
     println("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
 
@@ -595,7 +600,7 @@ A complete `RheoTimeData` of type `strain_and_stress` is returned.
 `diff_method` sets finite difference for calculating the derivative used in the hereditary integral and
 can be either backwards difference (`"BD"`) or central difference (`"CD"`).
 """
-function modelpredict(data::RheoTimeData, model::RheoModel; diff_method="BD")
+function modelpredict(data::RheoTimeData, model::RheoModel,predtype::Convolution; diff_method="BD")
 
     check = rheotimedatatype(data)
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
@@ -622,7 +627,7 @@ end
 
 Variation of `modelpredict` that takes a `RheoModelClass` and parameter values rather than an already created model. This speeds up the analysis when a large number of different parameter values need to be screened, as only the relevant modulus function is created for the purpose of model prediction.
 """
-function modelpredict(data::RheoTimeData, model::RheoModelClass; diff_method="BD", kwargs...)
+function modelpredict(data::RheoTimeData, model::RheoModelClass,predtype::Convolution; diff_method="BD", kwargs...)
 
     check = rheotimedatatype(data)
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)

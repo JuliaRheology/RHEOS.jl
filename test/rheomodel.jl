@@ -6,7 +6,8 @@ println("===============================================")
 
 
 function _freezeparams()
-    SLS2_mod = freezeparams( SLS2, G₀=2, η₂=3.5)
+    # SLS2_mod = freezeparams( SLS2, G₀=2, η₂=3.5)
+    SLS2_mod = freezeparams( SLS2,(G₀=2,η₂=3.5))
 
     relaxmod(SLS2, 1, [2,1,2,3,3.5]) == relaxmod(SLS2_mod, 1, [1,2,3])
 end
@@ -44,3 +45,37 @@ function _scalar_moduli()
         (dynamicmod(m))(1) == dynamicmod(m, 1) == dynamicmod(Spring, k=2, 1) == 2.0 + 0.0*im 
 end
 @test _scalar_moduli()
+
+
+function _builddiffequation()
+    equation = (ϵ =((:cₐ,:a),), σ =((1.0,0.0),(:(cₐ/cᵦ),:(a-β))))
+    p = (:cₐ, :a, :cᵦ, :β)
+    built= RHEOS.builddiffequation(equation,p)
+    @test isa(built, RHEOS.DiffEqu)
+    @test built.leftvar == :ϵ
+    @test built.rightvar == :σ
+
+    @test built.leftde isa Set{RHEOS.DETerm{RHEOS.DiffScaFree}}
+    @test built.rightde isa Set{RHEOS.DETerm{RHEOS.DiffScaFree}}
+    @test length(built.leftde) == 1
+    @test length(built.rightde) == 2
+
+    p_fixed = [0.5, 0.6, 0.5, 0.35]
+
+    built_fixed = RHEOS._builddiffequation(built, p_fixed)
+
+    left = Set{RHEOS.DETerm{RheoFloat}}()
+    push!(left, RHEOS.DETerm{RheoFloat}(0.5,0.6))
+
+    right = Set{RHEOS.DETerm{RheoFloat}}()
+    push!(right, RHEOS.DETerm{RheoFloat}(1.0,0.0))
+    push!(right, RHEOS.DETerm{RheoFloat}(1.0,0.25))
+    
+    
+
+
+    @test left == built_fixed.leftde
+    @test right == built_fixed.rightde
+end
+
+_builddiffequation()

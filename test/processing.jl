@@ -334,7 +334,7 @@ function _modelfit_const_ramp_relax(tol)
     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.0, β=1.0)
-    modelout = modelfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.9, β=0.9), hi=(α=1.1, β=1.1))
+    modelout = modelfit(data0, model, strain_imposed,Convolution(), p0=init_params, lo=(α=0.9, β=0.9), hi=(α=1.1, β=1.1))
 
     found_params = modelout.fixedparams
     
@@ -354,7 +354,7 @@ function _modelfit_const_ramp_creep(tol)
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.0, β=1.0)
-    modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.9, β=0.9), hi=(α=1.1, β=1.1))
+    modelout = modelfit(data0, model, stress_imposed,Convolution(), p0=init_params, lo=(α=0.9, β=0.9), hi=(α=1.1, β=1.1))
 
     found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
@@ -373,7 +373,7 @@ function _modelfit_const_ramp_nobounds_relax(tol)
     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.0, β=1.0)
-    modelout = modelfit(data0, model, strain_imposed, p0=init_params)
+    modelout = modelfit(data0, model, strain_imposed,Convolution(), p0=init_params)
 
     found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
@@ -392,7 +392,7 @@ function _modelfit_const_ramp_nobounds_creep(tol)
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.0, β=1.0)
-    modelout = modelfit(data0, model, stress_imposed, p0=init_params)
+    modelout = modelfit(data0, model, stress_imposed,Convolution(), p0=init_params)
 
     found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
@@ -411,7 +411,7 @@ function _modelfit_const_ramp_nobounds_singleparam_relax(tol)
     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.0,)
-    modelout = modelfit(data0, model, strain_imposed, p0=init_params)
+    modelout = modelfit(data0, model, strain_imposed,Convolution(), p0=init_params)
 
     found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
@@ -430,7 +430,7 @@ function _modelfit_const_ramp_nobounds_singleparam_creep(tol)
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.0,)
-    modelout = modelfit(data0, model, stress_imposed, p0=init_params)
+    modelout = modelfit(data0, model, stress_imposed,Convolution(), p0=init_params)
 
     found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
@@ -449,7 +449,7 @@ function _modelfit_const_ramp_nobounds_relax(tol)
     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.0, β=1.0)
-    modelout = modelfit(data0, model, strain_imposed, p0=init_params)
+    modelout = modelfit(data0, model, strain_imposed,Convolution(), p0=init_params)
 
     found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
@@ -468,7 +468,7 @@ function _modelfit_const_ramp_nobounds_creep(tol)
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.0, β=1.0)
-    modelout = modelfit(data0, model, stress_imposed, p0=init_params)
+    modelout = modelfit(data0, model, stress_imposed,Convolution(), p0=init_params)
 
     found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(init_params)), atol = tol)
@@ -487,7 +487,7 @@ function _modelfit_var_ramp_nonsing_relax(tol)
     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.3, β=0.7)
-    modelout = modelfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.5, β=0.5), hi=(α=1.5, β=1.5))
+    modelout = modelfit(data0, model, strain_imposed,Convolution(), p0=init_params, lo=(α=0.5, β=0.5), hi=(α=1.5, β=1.5))
 
     found_params = modelout.fixedparams
     actual_params = (α=1.0, β=1.0)
@@ -508,7 +508,7 @@ function _modelfit_var_ramp_nonsing_creep(tol)
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.3, β=0.7)
-    modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.5), hi=(α=1.5, β=1.5))
+    modelout = modelfit(data0, model, stress_imposed,Convolution(), p0=init_params, lo=(α=0.5, β=0.5), hi=(α=1.5, β=1.5))
 
     found_params = modelout.fixedparams
     actual_params = (α=1.0, β=1.0)
@@ -530,7 +530,7 @@ function _modelfit_const_ramp_sing_relax(tol)
     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.3, β=0.7)
-    modelout = modelfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
+    modelout = modelfit(data0, model, strain_imposed,Convolution(), p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
 
     found_params = modelout.fixedparams
 
@@ -551,7 +551,7 @@ function _modelfit_const_ramp_sing_creep(tol)
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.3, β=0.7)
-    modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
+    modelout = modelfit(data0, model, stress_imposed,Convolution(), p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
 
     found_params = modelout.fixedparams
 
@@ -572,7 +572,7 @@ function _modelfit_var_ramp_sing_relax(tol)
     data0 = RheoTimeData(t = t, ϵ = ramp_loading, σ = exact_response)
 
     init_params = (α=1.3, β=0.7)
-    modelout = modelfit(data0, model, strain_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
+    modelout = modelfit(data0, model, strain_imposed,Convolution(), p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
 
     found_params = modelout.fixedparams
 
@@ -593,7 +593,7 @@ function _modelfit_const_ramp_creep_weighted_selftest(tol)
 
     actual_params = (α=1.0, β=1.0)
     init_params = (α=1.2, β=0.8)
-    modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.7, β=0.7), hi=(α=1.5, β=1.5), weights=collect(Integer, 1:length(t)))
+    modelout = modelfit(data0, model, stress_imposed,Convolution(), p0=init_params, lo=(α=0.7, β=0.7), hi=(α=1.5, β=1.5), weights=collect(Integer, 1:length(t)))
 
     found_params = modelout.fixedparams
     isapprox(collect(values(found_params)), collect(values(actual_params)), atol = tol)
@@ -613,7 +613,7 @@ function _modelfit_const_ramp_sing_creep_weighted_selftest(tol)
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.3, β=0.7)
-    modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5), weights=collect(Integer, 1:length(t)))
+    modelout = modelfit(data0, model, stress_imposed,Convolution(), p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5), weights=collect(Integer, 1:length(t)))
 
     found_params = modelout.fixedparams
 
@@ -635,8 +635,8 @@ function _modelfit_const_ramp_creep_weighted_downsampled(tol)
     indices = indexweight(data0; elperiods = [-2, 2], time_boundaries = [0.0, 5.0, 20.0])
 
     init_params = (α=1.2, β=0.8)
-    modelout_weighted = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.7, β=0.7), hi=(α=1.5, β=1.5), weights=indices)
-    modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.7, β=0.7), hi=(α=1.5, β=1.5))
+    modelout_weighted = modelfit(data0, model, stress_imposed,Convolution(), p0=init_params, lo=(α=0.7, β=0.7), hi=(α=1.5, β=1.5), weights=indices)
+    modelout = modelfit(data0, model, stress_imposed,Convolution(), p0=init_params, lo=(α=0.7, β=0.7), hi=(α=1.5, β=1.5))
 
     found_params_weighted = modelout_weighted.fixedparams
     found_params = modelout.fixedparams
@@ -659,8 +659,8 @@ function _modelfit_const_ramp_sing_creep_weighted_downsampled(tol)
     indices = indexweight(data0; elperiods = [-2, 2], time_boundaries = [0.0, 5.0, 20.0])
 
     init_params = (α=1.3, β=0.7)
-    modelout_weighted = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5), weights=indices)
-    modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
+    modelout_weighted = modelfit(data0, model, stress_imposed,Convolution(), p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5), weights=indices)
+    modelout = modelfit(data0, model, stress_imposed,Convolution(), p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
 
     found_params_weighted = modelout_weighted.fixedparams
     found_params = modelout.fixedparams
@@ -681,7 +681,7 @@ function _modelfit_var_ramp_sing_creep(tol)
     data0 = RheoTimeData(t = t, ϵ = exact_response, σ = ramp_loading)
 
     init_params = (α=1.3, β=0.7)
-    modelout = modelfit(data0, model, stress_imposed, p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
+    modelout = modelfit(data0, model, stress_imposed,Convolution(), p0=init_params, lo=(α=0.5, β=0.2), hi=(α=1.5, β=1.5))
 
     found_params = modelout.fixedparams
 
@@ -700,7 +700,7 @@ function _modelpredict_nonsing_const_relax(tol)
     # model = RheoModel(modelclass, α=1.0, β=1.0)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
-    computed_response = modelpredict(data0, modelclass, α=1.0, β=1.0)
+    computed_response = modelpredict(data0, modelclass,Convolution(), α=1.0, β=1.0)
 
     all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), eachindex(exact_response))
 end
@@ -717,7 +717,7 @@ function _modelpredict_nonsing_const_creep(tol)
     # model = RheoModel(modelclass, α=1.0, β=1.0)
     data0 = RheoTimeData(t = t, σ = loading)
 
-    computed_response = modelpredict(data0, modelclass, α=1.0, β=1.0)
+    computed_response = modelpredict(data0, modelclass,Convolution(), α=1.0, β=1.0)
 
     all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), eachindex(exact_response))
 end
@@ -734,7 +734,7 @@ function _modelpredict_nonsing_var_relax(tol)
     model = RheoModel(modelclass, α=1.0, β=1.0)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
-    computed_response = modelpredict(data0, model)
+    computed_response = modelpredict(data0, model,Convolution())
 
     all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=tol), eachindex(exact_response))
 end
@@ -751,7 +751,7 @@ function _modelpredict_nonsing_var_creep(tol)
     model = RheoModel(modelclass, α=1.0, β=1.0)
     data0 = RheoTimeData(t = t, σ = loading)
 
-    computed_response = modelpredict(data0, model)
+    computed_response = modelpredict(data0, model,Convolution())
 
     all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=tol), eachindex(exact_response))
 end
@@ -768,7 +768,7 @@ function _modelpredict_sing_const_relax(tol)
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
-    computed_response = modelpredict(data0, model)
+    computed_response = modelpredict(data0, model,Convolution())
 
     all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=5*tol), eachindex(exact_response))
 end
@@ -785,7 +785,7 @@ function _modelpredict_sing_const_creep(tol)
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, σ = loading)
 
-    computed_response = modelpredict(data0, model)
+    computed_response = modelpredict(data0, model,Convolution())
 
     all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=5*tol), eachindex(exact_response))
 end
@@ -802,7 +802,7 @@ function _modelpredict_sing_var_relax(tol)
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, ϵ = loading)
 
-    computed_response = modelpredict(data0, model)
+    computed_response = modelpredict(data0, model,Convolution())
 
     all(i -> isapprox(exact_response[i], computed_response.σ[i], atol=5*tol), eachindex(exact_response))
 end
@@ -819,7 +819,7 @@ function _modelpredict_sing_var_creep(tol)
     model = RheoModel(modelclass, α=1.0, β=0.5)
     data0 = RheoTimeData(t = t, σ = loading)
 
-    computed_response = modelpredict(data0, model)
+    computed_response = modelpredict(data0, model,Convolution())
 
     all(i -> isapprox(exact_response[i], computed_response.ϵ[i], atol=5*tol), eachindex(exact_response))
 end
