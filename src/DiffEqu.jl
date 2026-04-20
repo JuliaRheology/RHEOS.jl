@@ -590,204 +590,213 @@ function _modelpredictGL(data::RheoTimeData, equation ,diff_method)
     return(computed, input, t)
 end
 
-# function _modelpredictFFT_stress(data::RheoTimeData, equation)
+function _modelpredictFFT_stress(data::RheoTimeData, equation)
 
-#     # Define the input data based on the type of data provided
-#     unknown = equation.rightde
-#     dependency = equation.leftde
-#     input = data.ϵ
+    # Define the input data based on the type of data provided
+    unknown = equation.rightde
+    dependency = equation.leftde
+    input = data.ϵ
 
-#     n  = length(data.t)
-#     dt = data.t[2] - data.t[1]
-#     L  = nextpow(2, 2n - 1)
+    n  = length(data.t)
+    dt = data.t[2] - data.t[1]
+    L  = nextpow(2, 2n - 1)
 
-#     # Pre-allocate each buffer
-#     input_padded = zeros(Float64, L)
-#     weights_padded = zeros(Float64, L)
-#     input_padded[1:n] .= input
+    prob = NumDiffProblem(dt=dt,order=0.5,n=length(data.t),method=GL())
+    ws = init_workspace(prob) #TODO: Create a init_fft_workspace(prob) function to pre-allocate the buffers for the FFT method.
 
-#     fft_size = L ÷ 2 + 1
-#     input_fft = zeros(Complex{Float64}, fft_size)
-#     weights_fft = zeros(Complex{Float64}, fft_size)
-#     rhs_fft = zeros(Complex{Float64}, fft_size)
-#     lhs_fft = zeros(Complex{Float64}, fft_size)
-#     ifft_buf = zeros(Float64, L)
+    # Pre-allocate each buffer
+    input_padded = zeros(Float64, L)
+    input_padded[1:n] .= input
 
-#     # Prepare FFTW plans using MEASURE as flag. Since the input is real, we can use rfft and irfft.
-#     forward_plan = plan_rfft(input_padded; flags=FFTW.MEASURE)
-#     inverse_plan = plan_irfft(rhs_fft, L; flags=FFTW.MEASURE)
+    fft_size = L ÷ 2 + 1
+    input_fft = zeros(Complex{Float64}, fft_size)
+    weights_fft = zeros(Complex{Float64}, fft_size)
+    rhs_fft = zeros(Complex{Float64}, fft_size)
+    lhs_fft = zeros(Complex{Float64}, fft_size)
+    ifft_buf = zeros(Float64, L)
 
-#     # Transform input to frequency domain
-#     mul!(input_fft, forward_plan, input_padded)
+    # Prepare FFTW plans using MEASURE as flag. Since the input is real, we can use rfft and irfft.
+    forward_plan = plan_rfft(input_padded; flags=FFTW.ESTIMATE)
+    inverse_plan = plan_irfft(rhs_fft, L; flags=FFTW.ESTIMATE)
 
-#     # Compute RHS in frequency domain (dependency terms)
-#     fill!(rhs_fft, 0.0)
-#     for c in dependency
-#         inv_dt_pow = 1.0 / (dt^c.order)
+    # Transform input to frequency domain
+    mul!(input_fft, forward_plan, input_padded)
 
-#         # Prepare the weights buffer, which will vary for each term, based on the order of the derivative.
-#         fill!(weights_padded, 0.0)
-#         if c.order == 0.0
-#             @inbounds @simd for i in 1:fft_size
-#                 rhs_fft[i] += c.coef * input_fft[i]
-#             end
-#             continue
-#         elseif c.order == 1.0
-#             weights_padded[1] =  1.0
-#             weights_padded[2] = -1.0
-#         else
-#             generate_GL_weights(c.order, n, weights_padded)
-#         end
+    # Compute RHS in frequency domain (dependency terms)
+    fill!(rhs_fft, 0.0)
+    for c in dependency
+        inv_dt_pow = 1.0 / (dt^c.order)
 
-#         # Trasform weights to frequency domain
-#         mul!(weights_fft, forward_plan, weights_padded)
+        # Prepare the weights buffer, which will vary for each term, based on the order of the derivative.
+        fill!(ws.weights, 0.0)
+        if c.order == 0.0
+            @inbounds @simd for i in 1:fft_size
+                rhs_fft[i] += c.coef * input_fft[i]
+            end
+            continue
+        elseif c.order == 1.0
+            ws.weights[1] =  1.0
+            ws.weights[2] = -1.0
+        else
+            update_order!(prob,ws,c.order)
+            generate_weights!(prob.method,prob,ws)
+        end
 
-#         # Update RHS in frequency domain using input and weights
-#         @inbounds @simd for i in 1:fft_size
-#             rhs_fft[i] += (c.coef * inv_dt_pow) * weights_fft[i] * input_fft[i]
-#         end
-#     end
+        # Trasform weights to frequency domain
+        mul!(weights_fft, forward_plan, ws.weights)
 
-#     # Compute LHS in frequency domain (unknown terms)
-#     fill!(lhs_fft, 0.0)
-#     for c in unknown
-#         inv_dt_pow = 1.0 / (dt^c.order)
+        # Update RHS in frequency domain using input and weights
+        @inbounds @simd for i in 1:fft_size
+            rhs_fft[i] += (c.coef * inv_dt_pow) * weights_fft[i] * input_fft[i]
+        end
+    end
 
-#         # Prepare the weights buffer, which will vary for each term, based on the order of the derivative.
-#         fill!(weights_padded, 0.0)
-#         if c.order == 0.0
-#             @inbounds @simd for i in 1:fft_size
-#                 lhs_fft[i] += c.coef
-#             end
-#             continue
-#         elseif c.order == 1.0
-#             weights_padded[1] =  1.0
-#             weights_padded[2] = -1.0
-#         else
-#             generate_GL_weights(c.order, n, weights_padded)
-#         end
+    # Compute LHS in frequency domain (unknown terms)
+    fill!(lhs_fft, 0.0)
+    for c in unknown
+        inv_dt_pow = 1.0 / (dt^c.order)
 
-#         # Trasform weights to frequency domain
-#         mul!(weights_fft, forward_plan, weights_padded)
+        # Prepare the weights buffer, which will vary for each term, based on the order of the derivative.
+        fill!(ws.weights, 0.0)
+        if c.order == 0.0
+            @inbounds @simd for i in 1:fft_size
+                lhs_fft[i] += c.coef
+            end
+            continue
+        elseif c.order == 1.0
+            ws.weights[1] =  1.0
+            ws.weights[2] = -1.0
+        else
+            update_order!(prob,ws,c.order)
+            generate_weights!(prob.method,prob,ws)
+        end
 
-#         @inbounds @simd for i in 1:fft_size
-#             lhs_fft[i] += (c.coef * inv_dt_pow) * weights_fft[i]
-#         end
-#     end
+        # Trasform weights to frequency domain
+        mul!(weights_fft, forward_plan, ws.weights)
 
-#     # Solve in frequency domain: output_fft = rhs_fft / lhs_fft
-#     output_fft = zeros(Complex{Float64}, fft_size)
-#     @inbounds @simd for i in 1:fft_size
-#         output_fft[i] = rhs_fft[i] / lhs_fft[i]
-#     end
+        @inbounds @simd for i in 1:fft_size
+            lhs_fft[i] += (c.coef * inv_dt_pow) * weights_fft[i]
+        end
+    end
 
-#     # Return to time domain
-#     mul!(ifft_buf, inverse_plan, output_fft)
+    # Solve in frequency domain: output_fft = rhs_fft / lhs_fft
+    output_fft = zeros(Complex{Float64}, fft_size)
+    @inbounds @simd for i in 1:fft_size
+        output_fft[i] = rhs_fft[i] / lhs_fft[i]
+    end
 
-#     return (ifft_buf[1:n], input, "strain")
+    # Return to time domain
+    mul!(ifft_buf, inverse_plan, output_fft)
 
-# end
+    return (ifft_buf[1:n], input, "strain")
+
+end
 
 
-# function _modelpredictFFT_strain(data::RheoTimeData, equation)
+function _modelpredictFFT_strain(data::RheoTimeData, equation)
 
-#     # Define the input data based on the type of data provided
-#     unknown = equation.leftde
-#     dependency = equation.rightde
-#     input = data.σ
+    # Define the input data based on the type of data provided
+    unknown = equation.leftde
+    dependency = equation.rightde
+    input = data.σ
 
-#     n  = length(data.t)
-#     dt = data.t[2] - data.t[1]
-#     L  = nextpow(2, 2n - 1)
+    n  = length(data.t)
+    dt = data.t[2] - data.t[1]
+    L  = nextpow(2, 2n - 1)
 
-#     # Pre-allocate each buffer
-#     input_padded = zeros(Float64, L)
-#     weights_padded = zeros(Float64, L)
-#     input_padded[1:n] .= input
+    prob = NumDiffProblem(dt=dt,order=0.5,n=length(data.t),method=GL())
+    ws = init_workspace(prob) #TODO: Create a init_fft_workspace(prob) function to pre-allocate the buffers for the FFT method.
 
-#     input_padded[1] = 0.0
-#     input_padded[2:n+1] .= input[1:n]   
+    # Pre-allocate each buffer
+    input_padded = zeros(Float64, L)
+    input_padded[1:n] .= input
 
-#     fft_size = L ÷ 2 + 1
-#     input_fft = zeros(Complex{Float64}, fft_size)
-#     weights_fft = zeros(Complex{Float64}, fft_size)
-#     rhs_fft = zeros(Complex{Float64}, fft_size)
-#     lhs_fft = zeros(Complex{Float64}, fft_size)
-#     ifft_buf = zeros(Float64, L)
+    input_padded[1] = 0.0
+    input_padded[2:n+1] .= input[1:n]   
 
-#     min_order = minimum([c.order for c in unknown])
+    fft_size = L ÷ 2 + 1
+    input_fft = zeros(Complex{Float64}, fft_size)
+    weights_fft = zeros(Complex{Float64}, fft_size)
+    rhs_fft = zeros(Complex{Float64}, fft_size)
+    lhs_fft = zeros(Complex{Float64}, fft_size)
+    ifft_buf = zeros(Float64, L)
 
-#     # Prepare FFTW plans using MEASURE as flag. Since the input is real, we can use rfft and irfft.
-#     forward_plan = plan_rfft(input_padded; flags=FFTW.ESTIMATE)
-#     inverse_plan = plan_irfft(rhs_fft, L; flags=FFTW.ESTIMATE)
+    # Find the maximum order of the derivatives of the strain terms to shift each term accordingly. This is done to avoid issues with the FFT.
+    max_order = maximum([c.order for c in unknown])
 
-#     # Transform input to frequency domain
-#     mul!(input_fft, forward_plan, input_padded)
+    # Prepare FFTW plans using MEASURE as flag. Since the input is real, we can use rfft and irfft.
+    forward_plan = plan_rfft(input_padded; flags=FFTW.ESTIMATE)
+    inverse_plan = plan_irfft(rhs_fft, L; flags=FFTW.ESTIMATE)
 
-#     # Compute RHS in frequency domain (dependency terms)
-#     fill!(rhs_fft, 0.0)
-#     for c in dependency
-#         new_order = c.order - min_order
+    # Transform input to frequency domain
+    mul!(input_fft, forward_plan, input_padded)
 
-#         inv_dt_pow = 1.0 / (dt^new_order)
+    # Compute RHS in frequency domain (dependency terms)
+    fill!(rhs_fft, 0.0)
+    for c in dependency
+        new_order = c.order - max_order
 
-#         # Prepare the weights buffer, which will vary for each term, based on the order of the derivative.
-#         fill!(weights_padded, 0.0)
-#         if new_order == 0.0
-#             @inbounds @simd for i in 1:fft_size
-#                 rhs_fft[i] += c.coef * input_fft[i]
-#             end
-#             continue
-#         else
-#             generate_GL_weights(new_order, n, weights_padded)
-#         end
+        inv_dt_pow = 1.0 / (dt^new_order)
 
-#         # Trasform weights to frequency domain
-#         mul!(weights_fft, forward_plan, weights_padded)
+        # Prepare the weights buffer, which will vary for each term, based on the order of the derivative.
+        fill!(ws.weights, 0.0)
+        if new_order == 0.0
+            @inbounds @simd for i in 1:fft_size
+                rhs_fft[i] += c.coef * input_fft[i]
+            end
+            continue
+        else
+            update_order!(prob,ws,c.order)
+            generate_weights!(prob.method,prob,ws)
+        end
 
-#         # Update RHS in frequency domain using input and weights
-#         @inbounds @simd for i in 1:fft_size
-#             rhs_fft[i] += (c.coef * inv_dt_pow) * weights_fft[i] * input_fft[i]
-#         end
-#     end
+        # Trasform weights to frequency domain
+        mul!(weights_fft, forward_plan, ws.weights)
 
-#     # Compute LHS in frequency domain (unknown terms)
-#     fill!(lhs_fft, 0.0)
-#     for c in unknown
-#         new_order = c.order - min_order
+        # Update RHS in frequency domain using input and weights
+        @inbounds @simd for i in 1:fft_size
+            rhs_fft[i] += (c.coef * inv_dt_pow) * weights_fft[i] * input_fft[i]
+        end
+    end
 
-#         inv_dt_pow = 1.0 / (dt^new_order)
+    # Compute LHS in frequency domain (unknown terms)
+    fill!(lhs_fft, 0.0)
+    for c in unknown
+        new_order = c.order - max_order
 
-#         # Prepare the weights buffer, which will vary for each term, based on the order of the derivative.
-#         fill!(weights_padded, 0.0)
-#         if new_order == 0.0
-#             @inbounds @simd for i in 1:fft_size
-#                 lhs_fft[i] += c.coef
-#             end
-#             continue
-#         else
-#             generate_GL_weights(new_order, n, weights_padded)
-#         end
+        inv_dt_pow = 1.0 / (dt^new_order)
 
-#         # Trasform weights to frequency domain
-#         mul!(weights_fft, forward_plan, weights_padded)
+        # Prepare the weights buffer, which will vary for each term, based on the order of the derivative.
+        fill!(ws.weights, 0.0)
+        if new_order == 0.0
+            @inbounds @simd for i in 1:fft_size
+                lhs_fft[i] += c.coef
+            end
+            continue
+        else
+            update_order!(prob,ws,c.order)
+            generate_weights!(prob.method,prob,ws)
+        end
 
-#         @inbounds @simd for i in 1:fft_size
-#             lhs_fft[i] += (c.coef * inv_dt_pow) * weights_fft[i]
-#         end
-#     end
+        # Trasform weights to frequency domain
+        mul!(weights_fft, forward_plan, ws.weights)
 
-#     # Solve in frequency domain: output_fft = rhs_fft / lhs_fft
-#     output_fft = zeros(Complex{Float64}, fft_size)
-#     @inbounds for i in 1:fft_size
-#         output_fft[i] = rhs_fft[i] / lhs_fft[i]
-#     end
+        @inbounds @simd for i in 1:fft_size
+            lhs_fft[i] += (c.coef * inv_dt_pow) * weights_fft[i]
+        end
+    end
 
-#     # Return to time domain
-#     mul!(ifft_buf, inverse_plan, output_fft)
+    # Solve in frequency domain: output_fft = rhs_fft / lhs_fft
+    output_fft = zeros(Complex{Float64}, fft_size)
+    @inbounds for i in 1:fft_size
+        output_fft[i] = rhs_fft[i] / lhs_fft[i]
+    end
 
-#     return (ifft_buf[1:n], input, "stress")
-# end
+    # Return to time domain
+    mul!(ifft_buf, inverse_plan, output_fft)
+
+    return (ifft_buf[1:n], input, "stress")
+end
 
 
 """
