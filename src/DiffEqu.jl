@@ -855,18 +855,18 @@ Given an incomplete data set (only either stress or strain missing) and model wi
 parameters (`RheoModel`), return a new dataset based on the model using the Fast Fourier Transform.
 A complete `RheoTimeData` of type `strain_and_stress` is returned.
 """
-# function modelpredictFFT(data::RheoTimeData, model::RheoModel)
+function modelpredictFFT(data::RheoTimeData, model::RheoModel)
 
-#     check = rheotimedatatype(data)
-#     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
-#     if check == strain_only
-#         sigma, epsilon, pred_mod = _modelpredictFFT_stress(data, model.C)
-#     else check == stress_only
-#         epsilon, sigma, pred_mod = _modelpredictFFT_strain(data, model.C)
-#     end
-#     log = logadd_process(data, :modelpredict, params=(model,), 
-#                          comment="Predicted data - modulus: $pred_mod, parameters:$(model.fixedparams)" ) 
+    check = rheotimedatatype(data)
+    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
+    if check == strain_only
+        sigma, epsilon, pred_mod = _modelpredictFFT_stress(data, model.C)
+    else check == stress_only
+        epsilon, sigma, pred_mod = _modelpredictFFT_strain(data, model.C)
+    end
+    log = logadd_process(data, :modelpredict, params=(model,), 
+                         comment="Predicted data - modulus: $pred_mod, parameters:$(model.fixedparams)" ) 
 
-#     return RheoTimeData(sigma, epsilon, data.t, log)
+    return RheoTimeData(sigma, epsilon, data.t, log)
 
-# end
+end
