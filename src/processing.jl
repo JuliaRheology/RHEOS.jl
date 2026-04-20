@@ -540,6 +540,31 @@ function modelfit(data::RheoTimeData,
 
 end
 
+function modelfit(data::RheoTimeData, 
+    model::RheoModelClass,
+    modloading::LoadingType;
+    fittype = Differential(),
+    method=RL(),
+    p0::Union{NamedTuple,Nothing,Dict} = nothing,
+    lo::Union{NamedTuple,Nothing,Dict} = nothing,
+    hi::Union{NamedTuple,Nothing,Dict} = nothing,
+    verbose::Bool = false,
+    rel_tol_f::Union{Real,Nothing} = nothing,
+    rel_tol_x::Union{Real,Nothing} = isnothing(rel_tol_f) ? 1e-4 : nothing,
+    diff_method="BD",
+    weights::Union{Nothing,Vector{T}} = nothing,
+    optmethod::Union{Symbol,String}= :LN_SBPLX, 
+    opttimeout::Union{Real,Nothing} = nothing,
+    optmaxeval::Union{Integer,Nothing} = nothing,
+    allowconstraints=true) where T <: Integer
+    modelfit(data,model,modloading,fittype, 
+                p0=p0,lo=lo,hi=hi,verbose=verbose,
+                rel_tol_f=rel_tol_f,rel_tol_x=rel_tol_x, diff_method=diff_method,
+                weights=weights,
+                optmethod=optmethod,opttimeout=opttimeout,optmaxeval=optmaxeval,
+                allowconstraints=allowconstraints)
+end
+
 
 function _modelpredict(data::RheoTimeData, modulus, modsing, diff_method, check)
 

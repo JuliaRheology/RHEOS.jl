@@ -1,17 +1,6 @@
 using NumFracDiff
 
 #-----------------------------------------------------
-function generate_GL_weights(order, length, weights)
-    
-    weights[1] = 1.0
-
-    alpha_plus_one = order + 1.0
-    
-    for k in 2:length
-        weights[k] = weights[k-1] * (1.0 - alpha_plus_one/(k - 1.0)) 
-    end
-end
-
 
 struct SupportVectorsExt
     rhs::Vector{Float64}
@@ -41,7 +30,7 @@ end
 function modelfit(data::RheoTimeData, 
     model::RheoModelClass,
     modloading::LoadingType,
-    fittype::Differential = Differential();
+    fittype::Differential;
     method=RL(),
     p0::Union{NamedTuple,Nothing,Dict} = nothing,
     lo::Union{NamedTuple,Nothing,Dict} = nothing,
@@ -558,7 +547,10 @@ function _modelpredictGL(data::RheoTimeData, equation ,diff_method)
         elseif round(c.order) != c.order && !haskey(bin_coeffs, c.order)
             denominator += c.coef / (dt^c.order)
             bin_coeffs[c.order] = zeros(n)
-            generate_GL_weights(c.order, n, bin_coeffs[c.order])
+
+            update_order!(prob,ws,c.order)
+            NumFracDiff.generate_weights!(prob.method,prob,ws)
+            bin_coeffs[c.order] = ws.weights
         else
             denominator += c.coef / (dt^c.order)
         end
@@ -805,7 +797,7 @@ Given an incomplete data set (only either stress or strain missing) and model wi
 parameters (`RheoModel`), return a new dataset based on the model using the Grunwald-Letnikov algorithm for the fractional derivatives.
 A complete `RheoTimeData` of type `strain_and_stress` is returned.
 """
-function modelpredict(data::RheoTimeData, model::RheoModel,predtype::Differential = Differential())
+function modelpredict(data::RheoTimeData, model::RheoModel,predtype::Differential;diffmethod="BD")
 
     check = rheotimedatatype(data)
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
@@ -819,6 +811,32 @@ function modelpredict(data::RheoTimeData, model::RheoModel,predtype::Differentia
 
     return RheoTimeData(sigma, epsilon, data.t, log)
 
+end
+
+function modelpredict(data::RheoTimeData, model::RheoModelClass,predtype::Differential;diffmethod="BD",kwargs...)
+
+    check = rheotimedatatype(data)
+    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
+
+    model = RheoModel(model,NamedTuple(kwargs))
+    if check == strain_only
+        sigma, epsilon, pred_mod = _modelpredictGL(data, model.C, "BD")
+    else check == stress_only
+        epsilon, sigma, pred_mod = _modelpredictGL(data, model.C, "BD")
+    end
+    log = logadd_process(data, :modelpredict, params=(model,), 
+                         comment="Predicted data - modulus: $pred_mod, parameters:$(model.fixedparams)" ) 
+
+    return RheoTimeData(sigma, epsilon, data.t, log)
+
+end
+
+function modelpredict(data::RheoTimeData,model::RheoModel;predtype= Differential(), diffmethod="BD")
+    modelpredict(data,model,predtype,diffmethod=diffmethod)
+end
+
+function modelpredict(data::RheoTimeData,model::RheoModelClass;predtype= Differential(), diffmethod="BD", kwargs...)
+    modelpredict(data,model,predtype,diffmethod=diffmethod,kwargs...)
 end
 
 """

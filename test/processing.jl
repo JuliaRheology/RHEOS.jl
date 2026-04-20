@@ -1471,3 +1471,38 @@ function _dynamicmodelpredict(tol)
     test1 && test2 && test3
 end
 @test _dynamicmodelpredict(tol)
+
+
+# Differential 
+
+function _modelpredict(tol)
+    dt=0.01
+    t=Vector{RheoFloat}(0.0:dt:20.0)
+    strain = t
+    σ_1 = 0 .- RHEOS.derivBD(strain,t)
+
+    model = RheoModelClass(name="testmodel", p = (:α, :β), equation = (ϵ = ((:(-α),:(β)),), σ_ = ((1.0,0.0),)))
+    data_1 = RheoTimeData(t=t,ϵ = strain)
+
+    computed_1 = modelpredict(data_1,model,Differential(), α = 1.0, β = 1.0)
+    
+    σ_2 = (0.6*0.1) .* (t .^ (1 - 0.3)) ./ RHEOS.gamma(2 - 0.3)
+
+    strain_2 = t* 0.1
+    data_2 = RheoTimeData(t=t,ϵ = strain_2)
+    computed_2 = modelpredict(data_2,Springpot,Differential(),cᵦ = 0.6,β = 0.3)
+
+    # println(σ_2)
+    # println(computed_2.σ)
+
+    data_3 = RheoTimeData(t=t,stress=σ_2)
+    computed_3 = modelpredict(data_3,Springpot,Differential(),cᵦ = 0.6,β = 0.3)
+
+    all(i -> isapprox(σ_1[i], computed_1.σ[i],atol=tol),eachindex(σ_1) ) &&
+    all(i -> isapprox(σ_2[i], computed_2.σ[i],atol=tol),eachindex(σ_2) ) &&
+    all(i -> isapprox(strain_2[i], computed_3.ϵ[i],atol=tol),eachindex(strain_2) )
+
+
+    
+end
+@test _modelpredict(tol)

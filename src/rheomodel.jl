@@ -60,7 +60,7 @@ struct _RheoModel{TSca,TVec,DiffSca}
 	fixedparams::NamedTuple
 
 	# Moduli functions specialised for scalar and array values
-	_G::TSca
+	_G::TSca 
 	_Ga::TVec
 	_J::TSca
 	_Ja::TVec
@@ -69,7 +69,7 @@ struct _RheoModel{TSca,TVec,DiffSca}
 	_Gpp::TSca
 	_Gppa::TVec
 
-    C::Union{DiffEqu{DiffSca},Nothing}
+    C::DiffEqu{DiffSca}
 
 	_constraint::Union{Vector{FWConstraint}, Nothing}
 	_Gramp::Bool
@@ -380,7 +380,7 @@ function RheoModelClass(;name::String,
         J = nothing,
         Gp = nothing,
         Gpp = nothing,
-        equation::Union{NamedTuple,Nothing} = nothing,
+        equation::NamedTuple= (ϵ =(), σ =(())),
         constraint::Union{Vector{Expr},Nothing} = nothing,
         info="", 
         # flag to indicate use of integral forms of the relaxation modulus.
@@ -1147,11 +1147,11 @@ function _builddiffequation(e::DiffEqu,p::Vector)
     return DiffEqu(e.leftvar,e.rightvar,l,r)
 end
 
-function builddiffequation(equation::Nothing, p::Tuple)
-    return nothing
-end
+# function builddiffequation(equation::Nothing, p::Tuple)
+#     return nothing
+# end
 
-function _builddiffequation(equation::Nothing, p::Vector)
-    return nothing
-end
+# function _builddiffequation(equation::Nothing, p::Vector)
+#     return nothing
+# end
 
