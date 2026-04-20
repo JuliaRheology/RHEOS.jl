@@ -1,32 +1,8 @@
 using NumFracDiff
-
-#-----------------------------------------------------
-
-struct SupportVectorsExt
-    rhs::Vector{Float64}
-    lhs::Vector{Float64}
-    weights::Vector{Float64}
-    deriv::Vector{Float64}
-end
-
 using FFTW
 using DSP
 
-"""
-    compute_GL_frac_deriv_fftfilt(data, weights, order, dt)
-Compute the vector of the fractional derivatives using the FFT-based filtering method and the GL weigths.
-This method is generally faster than the FDM, since it has a complexity of O(N log N) instead of O(N^2), but works only on serial.
-"""
-function compute_GL_frac_deriv_fftfilt(data, weights, order, dt)
-    
-    deriv_res = fftfilt(weights, data)
-    
-    inv_dt_pow = 1.0 / (dt^order)
-    deriv_res .*= inv_dt_pow
-    
-    return deriv_res
-end
-#-------------------------------------------------------
+
 function modelfit(data::RheoTimeData, 
     model::RheoModelClass,
     modloading::LoadingType,
@@ -386,49 +362,6 @@ function obj_const(params, equation, time_series, dt, strain, strain_deriv, stre
             update_order!(prob,ws,order)
             compute!(prob.method,ws,stress,prob)
             @. data_struct.lhs += coeff * ws.deriv
-        end
-    end
-
-    cost = sum((data_struct.lhs - data_struct.rhs).^2)
-    return cost
-end
-
-"""
-    obj_const_fft(params, equation, time_series, dt, strain, strain_deriv, stress, stress_deriv, data_struct; _insight::Bool = false)
-
-Compute the cost function to minimize during parameter fitting, using the GL method with FFT.
-"""
-function obj_const_fft(params, equation, time_series, dt, strain, strain_deriv, stress, stress_deriv, data_struct; _insight::Bool = false)
-
-    numerical_coeffs = get_coeffs(equation, params)
-    @. data_struct.rhs = 0
-    @. data_struct.lhs = 0
-    
-    L=length(strain)
-    # Compute the rhs of the equation
-    for term in numerical_coeffs.strain
-        order = term[1]
-        coeff = term[2]
-        if order == 0.0
-            data_struct.rhs .+= coeff * strain
-        elseif order == 1.0
-            data_struct.rhs .+= coeff * strain_deriv
-        else
-            generate_GL_weights(order, L, data_struct.weights)
-            data_struct.rhs .+= coeff * compute_GL_frac_deriv_fftfilt(strain, data_struct.weights, order, dt)
-        end
-    end
-    
-    for term in numerical_coeffs.stress
-        order = term[1]
-        coeff = term[2]
-        if order == 0.0
-            data_struct.lhs .+= coeff * stress
-        elseif order == 1.0
-            data_struct.lhs .+= coeff * stress_deriv
-        else
-            generate_GL_weights(order, L, data_struct.weights)
-            data_struct.lhs .+= coeff * compute_GL_frac_deriv_fftfilt(stress, data_struct.weights, order, dt)
         end
     end
 

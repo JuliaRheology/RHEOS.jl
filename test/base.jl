@@ -712,49 +712,27 @@ end
         strain_deriv = deriv(modelpred.ϵ, modelpred.t)
         stress = modelpred.σ
         stress_deriv = deriv(modelpred.σ, modelpred.t)
-        data_struct = RHEOS.SupportVectors(
+        data_struct_GL = RHEOS.SupportVectors(
             zeros(length(time_series)),
             zeros(length(time_series))
         )
         
-        prob = RHEOS.NumDiffProblem(dt=dt,order=0.5,n=length(time_series),method=RHEOS.GL())
-        ws = RHEOS.init_workspace(prob)
-        return RHEOS.obj_const([0.27,0.8, 0.56,0.35], Fract_Maxwell.C, time_series,dt,strain,strain_deriv,stress,stress_deriv,data_struct,prob,ws) < tol
+        prob_GL = RHEOS.NumDiffProblem(dt=dt,order=0.5,n=length(time_series),method=RHEOS.GL())
+        ws_GL = RHEOS.init_workspace(prob_GL)
+
+        data_struct_GLFFT = RHEOS.SupportVectors(
+            zeros(length(time_series)),
+            zeros(length(time_series))
+        )
+        
+        prob_GLFFT = RHEOS.NumDiffProblem(dt=dt,order=0.5,n=length(time_series),method=RHEOS.GLFFT())
+        ws_GLFFT = RHEOS.init_workspace(prob_GLFFT)
+        return RHEOS.obj_const([0.27,0.8, 0.56,0.35], Fract_Maxwell.C, time_series,dt,strain,strain_deriv,stress,stress_deriv,data_struct_GL,prob_GL,ws_GL) < tol &&
+               RHEOS.obj_const([0.27,0.8, 0.56,0.35], Fract_Maxwell.C, time_series,dt,strain,strain_deriv,stress,stress_deriv,data_struct_GLFFT,prob_GLFFT,ws_GLFFT) < tol
+
     end
 
     @test _obj_const(tol)
-
-    function _obj_const_fft(tol)
-        #Test that the cost function of a certain Fract_Maxwell model 
-        #    with correct parameters is lower than tol
-        
-        params = (cₐ=0.27, a=0.8, cᵦ=0.56, β=0.35)
-        data = timeline(t_start=0.0, t_end=10.0,step=0.05)
-        data = strainfunction(data, ramp(offset=0.0,gradient=1.0))
-        model= RheoModel(Fract_Maxwell,params)
-        modelpred = modelpredict(data,model)
-
-
-        t_zeroed = data.t .- minimum(data.t)
-        time_series = convert(Vector{Float64},t_zeroed)
-        dt = data.t[2] - data.t[1]
-        deriv = RHEOS.derivBD
-        strain = modelpred.ϵ
-        strain_deriv = deriv(modelpred.ϵ, modelpred.t)
-        stress = modelpred.σ
-        stress_deriv = deriv(modelpred.σ, modelpred.t)
-        data_struct = RHEOS.SupportVectorsExt(
-            zeros(length(time_series)),
-            zeros(length(time_series)),
-            zeros(length(time_series)),
-            zeros(length(time_series))
-        )
-
-
-        return RHEOS.obj_const_fft([0.27,0.8, 0.56,0.35], Fract_Maxwell.C, time_series,dt,strain,strain_deriv,stress,stress_deriv,data_struct) < tol
-    end
-
-    @test _obj_const_fft(tol)
 
 
     function _leastsquare_init(tol)
