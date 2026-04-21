@@ -21,6 +21,10 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
+
+[sources]
+NumFracDiff = {url = "git@github.com:JuliaRheology/NumFracDiff.git", rev = "master"}
+
 [compat]
 DSP = "0.8"
 DelimitedFiles = "1.8"
