@@ -1485,18 +1485,17 @@ function _modelpredict(tol)
     data_1 = RheoTimeData(t=t,ϵ = strain)
 
     computed_1 = modelpredict(data_1,model,Differential(), α = 1.0, β = 1.0)
-    
-    σ_2 = (0.6*0.1) .* (t .^ (1 - 0.3)) ./ RHEOS.gamma(2 - 0.3)
+    slope=0.1
+    cᵦ = 0.6
+    β = 0.3
+    σ_2 = (cᵦ*slope) .* (t .^ (1 - β)) ./ RHEOS.gamma(2 - β)
 
-    strain_2 = t* 0.1
+    strain_2 = t* slope
     data_2 = RheoTimeData(t=t,ϵ = strain_2)
-    computed_2 = modelpredict(data_2,Springpot,Differential(),cᵦ = 0.6,β = 0.3)
-
-    # println(σ_2)
-    # println(computed_2.σ)
+    computed_2 = modelpredict(data_2,Springpot,Differential(),cᵦ = cᵦ,β = β)
 
     data_3 = RheoTimeData(t=t,stress=σ_2)
-    computed_3 = modelpredict(data_3,Springpot,Differential(),cᵦ = 0.6,β = 0.3)
+    computed_3 = modelpredict(data_3,Springpot,Differential(),cᵦ = cᵦ,β = β)
 
     all(i -> isapprox(σ_1[i], computed_1.σ[i],atol=tol),eachindex(σ_1) ) &&
     all(i -> isapprox(σ_2[i], computed_2.σ[i],atol=tol),eachindex(σ_2) ) &&

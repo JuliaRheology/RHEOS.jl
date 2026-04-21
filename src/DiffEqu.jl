@@ -733,7 +733,7 @@ end
 
 
 """
-    modelpredictGL(data::RheoTimeData, model::RheoModel)
+    modelpredict(data::RheoTimeData, model::RheoModel)
 
 Given an incomplete data set (only either stress or strain missing) and model with values substituted into
 parameters (`RheoModel`), return a new dataset based on the model using the Grunwald-Letnikov algorithm for the fractional derivatives.
@@ -760,35 +760,27 @@ function modelpredict(data::RheoTimeData, model::RheoModelClass,predtype::Differ
     check = rheotimedatatype(data)
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
 
-    model = RheoModel(model,NamedTuple(kwargs))
+    fixed_model = RheoModel(model,NamedTuple(kwargs))
     if check == strain_only
-        sigma, epsilon, pred_mod = _modelpredictGL(data, model.C, "BD")
+        sigma, epsilon, pred_mod = _modelpredictGL(data, fixed_model.C, "BD")
     else check == stress_only
-        epsilon, sigma, pred_mod = _modelpredictGL(data, model.C, "BD")
+        epsilon, sigma, pred_mod = _modelpredictGL(data, fixed_model.C, "BD")
     end
-    log = logadd_process(data, :modelpredict, params=(model,), 
-                         comment="Predicted data - modulus: $pred_mod, parameters:$(model.fixedparams)" ) 
+    log = logadd_process(data, :modelpredict, params=(fixed_model,), 
+                         comment="Predicted data - modulus: $pred_mod, parameters:$(fixed_model.fixedparams)" ) 
 
     return RheoTimeData(sigma, epsilon, data.t, log)
 
 end
 
-function modelpredict(data::RheoTimeData,model::RheoModel;predtype= Differential(), diffmethod="BD")
-    modelpredict(data,model,predtype,diffmethod=diffmethod)
-end
-
-function modelpredict(data::RheoTimeData,model::RheoModelClass;predtype= Differential(), diffmethod="BD", kwargs...)
-    modelpredict(data,model,predtype,diffmethod=diffmethod,kwargs...)
-end
-
 """
-    modelpredictFFT(data::RheoTimeData, model::RheoModelDiff)
+    modelpredict(data::RheoTimeData, model::RheoModelDiff)
 
 Given an incomplete data set (only either stress or strain missing) and model with values substituted into
 parameters (`RheoModel`), return a new dataset based on the model using the Fast Fourier Transform.
 A complete `RheoTimeData` of type `strain_and_stress` is returned.
 """
-function modelpredictFFT(data::RheoTimeData, model::RheoModel)
+function modelpredict(data::RheoTimeData, model::RheoModel, predtype::FFT;diffmethod="BD")
 
     check = rheotimedatatype(data)
     @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
@@ -802,4 +794,31 @@ function modelpredictFFT(data::RheoTimeData, model::RheoModel)
 
     return RheoTimeData(sigma, epsilon, data.t, log)
 
+end
+
+function modelpredict(data::RheoTimeData, model::RheoModelClass, predtype::FFT;diffmethod="BD",kwargs...)
+
+    check = rheotimedatatype(data)
+    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
+
+    fixed_model = RheoModel(model,NamedTuple(kwargs))
+    if check == strain_only
+        sigma, epsilon, pred_mod = _modelpredictFFT_stress(data, fixed_model.C)
+    else check == stress_only
+        epsilon, sigma, pred_mod = _modelpredictFFT_strain(data, fixed_model.C)
+    end
+    log = logadd_process(data, :modelpredict, params=(fixed_model,), 
+                         comment="Predicted data - modulus: $pred_mod, parameters:$(fixed_model.fixedparams)" ) 
+
+    return RheoTimeData(sigma, epsilon, data.t, log)
+
+end
+
+#Dispatch function
+function modelpredict(data::RheoTimeData,model::RheoModel;predtype= Differential(), diffmethod="BD")
+    modelpredict(data,model,predtype,diffmethod=diffmethod)
+end
+
+function modelpredict(data::RheoTimeData,model::RheoModelClass;predtype= Differential(), diffmethod="BD", kwargs...)
+    modelpredict(data,model,predtype,diffmethod=diffmethod,kwargs...)
 end
