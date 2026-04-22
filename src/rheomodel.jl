@@ -441,15 +441,14 @@ function _freeze_params(m::RheoModelClass, nt0::NamedTuple)
 	Gp = expr_replace(m.expressions.Gp, nt)
 	Gpp = expr_replace(m.expressions.Gpp, nt)
     equation = nothing
-    if m.expressions.equation ≠ nothing
-        tl = Tuple(
-            (expr_replace(e[1], nt), expr_replace(e[2], nt)) 
-            for e in values(m.expressions.equation[1]))
-        tr = Tuple(
-            (expr_replace(e[1], nt), expr_replace(e[2], nt)) 
-            for e in values(m.expressions.equation[2]))
-        equation = NamedTuple{keys(m.expressions.equation)}([tl,tr])
-            end
+    tl = Tuple(
+        (expr_replace(e[1], nt), expr_replace(e[2], nt)) 
+        for e in values(m.expressions.equation[1]))
+    tr = Tuple(
+        (expr_replace(e[1], nt), expr_replace(e[2], nt)) 
+        for e in values(m.expressions.equation[2]))
+    equation = NamedTuple{keys(m.expressions.equation)}([tl,tr])
+    
 	built=nothing
     constraint = nothing
     if m._constraint ≠ nothing
@@ -492,7 +491,7 @@ function freezeparams(m::RheoModelClass, nt0::NamedTuple)
 	@assert length(freeparams) > 0  "All parameters are set. Build a RheoModel instead."
 
 	# Building expressions tuple to store data provided to constructor
-	expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,constraint=constraint)
+	expressions = (G=G,J=J,Gp=Gp,Gpp=Gpp,equation=equation,constraint=constraint)
 
 	return(RheoModelClass(m.name, freeparams, fixedparams,
 		_buildmoduli_t(G,freeparams)..., _buildmoduli_t(J,freeparams)...,
