@@ -84,12 +84,15 @@ FractS_KelvinVoigt =  RheoModelClass(
                 cₐ*ω^a*sin(a*π/2)
               end,
 
-               #TODO: Placeholder eq
-        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
+        equation = (ϵ = ((:cₐ, :a), (:k ,0.0)),σ = ((1.0,0.0),)),
         # Constraints
-        constraint = [quote
-                 (a<1) & (a>0)
-                end],
+        constraint = [
+          quote
+            a-1
+          end,
+          quote
+            -a
+          end],
         # Network
         info= "
                 ________ ╱╲ ________
@@ -129,12 +132,14 @@ FractD_KelvinVoigt =  RheoModelClass(
         Gpp = quote
                 η*ω + cᵦ*ω^β*sin(β*π/2)
               end,
-               #TODO: Placeholder eq
-        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
+        equation = (ϵ = ((:η, 1.0), (:cᵦ ,:β)),σ = ((1.0,0.0),)),
         # Constraints
         constraint = [quote
-                 (β<1) & (β>0)
-                end],
+          β-1
+        end,
+        quote
+          -β
+        end],
         # Network
         info= "
                         ___

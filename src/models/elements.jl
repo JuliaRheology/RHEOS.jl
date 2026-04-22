@@ -67,8 +67,7 @@ Spring =  RheoModelClass(
                 0.0
               end,
         
-              #TODO: Placeholder eq
-        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
+        equation = (ϵ =((:k,0.0),), σ =((1.0,0.0),)),
 
         
         # Network

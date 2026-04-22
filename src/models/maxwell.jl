@@ -131,7 +131,10 @@ FractD_Maxwell = RheoModelClass(
 
           # Constraints
           constraint = [quote
-                   (β<1) & (β>0)
+                   β-1
+                  end,
+                  quote
+                    -β
                   end],
           # Network
           info= "
