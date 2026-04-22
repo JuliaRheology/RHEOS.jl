@@ -1,6 +1,7 @@
 using NumFracDiff
 using FFTW
 using DSP
+using LinearAlgebra
 
 
 function modelfit(data::RheoTimeData, 
@@ -535,7 +536,7 @@ function _modelpredictFFT_stress(data::RheoTimeData, equation)
     L  = nextpow(2, 2n - 1)
 
     prob = NumDiffProblem(dt=dt,order=0.5,n=length(data.t),method=GL())
-    ws = init_workspace(prob) #TODO: Create a init_fft_workspace(prob) function to pre-allocate the buffers for the FFT method.
+    ws = init_workspace(prob, L=L)
 
     # Pre-allocate each buffer
     input_padded = zeros(Float64, L)
@@ -601,7 +602,7 @@ function _modelpredictFFT_stress(data::RheoTimeData, equation)
             ws.weights[2] = -1.0
         else
             update_order!(prob,ws,c.order)
-            generate_weights!(prob.method,prob,ws)
+            generate_weights!(prob.method,prob,ws,L=L)
         end
 
         # Trasform weights to frequency domain
@@ -638,7 +639,7 @@ function _modelpredictFFT_strain(data::RheoTimeData, equation)
     L  = nextpow(2, 2n - 1)
 
     prob = NumDiffProblem(dt=dt,order=0.5,n=length(data.t),method=GL())
-    ws = init_workspace(prob) #TODO: Create a init_fft_workspace(prob) function to pre-allocate the buffers for the FFT method.
+    ws = init_workspace(prob,L=L) #TODO: Create a init_fft_workspace(prob) function to pre-allocate the buffers for the FFT method.
 
     # Pre-allocate each buffer
     input_padded = zeros(Float64, L)
@@ -708,7 +709,7 @@ function _modelpredictFFT_strain(data::RheoTimeData, equation)
             continue
         else
             update_order!(prob,ws,c.order)
-            generate_weights!(prob.method,prob,ws)
+            generate_weights!(prob.method,prob,ws,L=L)
         end
 
         # Trasform weights to frequency domain

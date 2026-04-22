@@ -12,6 +12,7 @@ FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 FunctionWrappers = "069b7b12-0de2-55c6-9aab-29f3d0a68a2e"
 ImageFiltering = "6a3955dd-da59-5b1f-98d4-e7296123deb5"
 InverseLaplace = "e24f45a5-4790-5a38-8b2c-33d770a4e70f"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MittagLeffler = "9c257583-4f8f-53fd-abd9-c69d5080dd54"
 NLopt = "76087f3c-5699-56af-9a33-bf431cd00edd"
 NumFracDiff = "aa3e53b5-81b3-45b9-a5b1-5429ac742d4d"
@@ -21,9 +22,8 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
-
 [sources]
-NumFracDiff = {url = "https://github.com/JuliaRheology/NumFracDiff.git", rev = "main"}
+NumFracDiff = {rev = "main", url = "https://github.com/JuliaRheology/NumFracDiff.git"}
 
 [compat]
 DSP = "0.8"
@@ -34,6 +34,7 @@ FFTW = "1.10.0"
 FunctionWrappers = "1.1"
 ImageFiltering = "0.7"
 InverseLaplace = "0.3"
+LinearAlgebra = "1.12.0"
 MittagLeffler = "1.0"
 NLopt = "1.2"
 NumFracDiff = "1.0.0"

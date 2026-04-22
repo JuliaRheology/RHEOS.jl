@@ -34,7 +34,7 @@ plot!(p, data.t, data.ϵ, color = :blue, label = "Strain", linewidth = 3)
 #-
 
 ## We now fit a Maxwell model
-maxwell_model = modelfit(data, Maxwell, strain_imposed)
+maxwell_model = modelfit(data, Maxwell, strain_imposed,Convolution())
 
 # Note that the fitting function requires guidance regarding the type of testing used. It helps optimise the fitting process.
 
@@ -44,7 +44,7 @@ maxwell_model = modelfit(data, Maxwell, strain_imposed)
 
 maxwell_predict = onlystrain(data)
 ## and calculate the stress based on the model
-maxwell_predict = modelpredict(maxwell_predict, maxwell_model)
+maxwell_predict = modelpredict(maxwell_predict, maxwell_model,Convolution())
 ## Now we can plot data and model together for comparison
 
 ## Plot data
@@ -69,10 +69,10 @@ plot!(p, maxwell_predict.t, maxwell_predict.σ, color = :red, label = "Maxwell f
 Maxwell_springFix = freeze_params(Maxwell, k = 2)
 #-
 
-maxwellD_model = modelfit(data, Maxwell_springFix, strain_imposed)
+maxwellD_model = modelfit(data, Maxwell_springFix, strain_imposed,Convolution())
 maxwellD_predict = onlystrain(data)
 ## and calculate the stress based on the model
-maxwellD_predict = modelpredict(maxwellD_predict, maxwellD_model)
+maxwellD_predict = modelpredict(maxwellD_predict, maxwellD_model,Convolution())
 ## Now we can plot data and model together for comparison
 
 ## Plot data
@@ -118,7 +118,7 @@ p = plot(dϵ.t, dϵ.ϵ,
 ## Let's study the role of the dashpot strength in the MAxwell model
 for η in [0.1, 0.3, 1, 3, 10]
     maxwell_model = RheoModel(Maxwell, k = 2.0, η = η)
-    d_maxwell = modelpredict(dϵ, maxwell_model)
+    d_maxwell = modelpredict(dϵ, maxwell_model,Convolution())
     plot!(p, d_maxwell.t, d_maxwell.σ, label = "η = $η", linewidth = 2)
 end
 plot!(p, grid = true)
@@ -138,12 +138,12 @@ dhold_stress = dramp_stress - stressfunction(datat, ramp(offset = 5.0, gradient 
 
 ## Define the rheological model and predict
 model = RheoModel(SLS_Zener, (η = 1, kᵦ = 1, kᵧ = 1))
-data = modelpredict(dhold_stress, model)
+data = modelpredict(dhold_stress, model,Convolution())
 
 ## Fit three models to the data
-SLS_Zener_model = modelfit(data, SLS_Zener, stress_imposed)
-Maxwell_model = modelfit(data, Maxwell, stress_imposed)
-BurgersLiquid_model = modelfit(data, BurgersLiquid, stress_imposed)
+SLS_Zener_model = modelfit(data, SLS_Zener, stress_imposed,Convolution())
+Maxwell_model = modelfit(data, Maxwell, stress_imposed,Convolution())
+BurgersLiquid_model = modelfit(data, BurgersLiquid, stress_imposed,Convolution())
 
 ## Call the extractfitdata function to extract fitting data
 extracted_data = extractfitdata(data)
@@ -173,9 +173,9 @@ best_model, min_error = find_best_model(extracted_data)
 stress_only_data = onlystress(data)
 
 ## Get model predictions for plotting
-SLS_Zener_predict = modelpredict(stress_only_data, SLS_Zener_model)
-Maxwell_predict = modelpredict(stress_only_data, Maxwell_model)
-BurgersLiquid_predict = modelpredict(stress_only_data, BurgersLiquid_model)
+SLS_Zener_predict = modelpredict(stress_only_data, SLS_Zener_model,Convolution())
+Maxwell_predict = modelpredict(stress_only_data, Maxwell_model,Convolution())
+BurgersLiquid_predict = modelpredict(stress_only_data, BurgersLiquid_model,Convolution())
 
 ## Plot data and fitted models
 p = scatter(data.t, data.ϵ,
