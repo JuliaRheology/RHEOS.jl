@@ -78,7 +78,7 @@ export modulusfunction, modulusfunction!
 # processing.jl
 export resample, indexweight, cutting, smooth
 export onlytime, onlystrain, onlystress, onlyfreq, extract
-export modelfit, modelpredict, modelstepfit, modelsteppredict
+export modelfit, modelpredict, modelstepfit, modelsteppredict!
 export dynamicmodelfit, dynamicmodelpredict
 export Differential, Convolution, FFT
 

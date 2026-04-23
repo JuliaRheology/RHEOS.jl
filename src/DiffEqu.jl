@@ -524,102 +524,6 @@ function _modelpredictGL(data::RheoTimeData, equation ,diff_method)
     return(computed, input, t)
 end
 
-function _modelpredictGL_step!(data::RheoTimeData, equation, diff_method, controlled, new_element, n)
-
-    # Define the derivative function and the input data based on the type of data provided
-    if diff_method=="BD"
-        deriv = derivBD
-    elseif diff_method=="CD"
-        deriv = derivCD
-    end
-
-    if (controlled == "strain")
-        unknown = equation.rightde
-        dependency = equation.leftde
-        data.ϵ[n] = new_element
-        input = data.ϵ
-        history = data.σ[1:(n-1)]
-    elseif (controlled == "stress")
-        unknown = equation.leftde
-        dependency = equation.rightde
-        data.σ[n] = new_element
-        input = data.σ
-        history = data.ϵ[1:(n-1)]
-    end
-
-    input_tmp = input[1:n]    # Cut the input up to n, since we are only computing one time step
-
-    dt = data.t[2] - data.t[1]
-    deriv_data = deriv(input_tmp, data.t[1:n])   # First derivative of the input data
-
-    prob = NumDiffProblem(dt=dt, order=0.5, n=n, method=GL())
-    ws = init_workspace(prob)
-
-    denominator = 0.0
-    rhs = 0.0
-
-    # Compute the right-hand side of the equation based on the known terms
-    for c in dependency
-        if c.order == 0.0
-            rhs += c.coef * input_tmp[n]
-        elseif c.order == 1.0
-            rhs += c.coef * deriv_data[n]
-        else
-            update_order!(prob, ws, c.order)
-            compute!(prob.method, ws, input_tmp, prob)
-            rhs += c.coef * (ws.deriv)[n]
-        end
-    end
-
-    # Compute the denominator and the binomial coefficient weights for non-integer orders
-    # Store the binomial coefficients in a dictionary to avoid redundant calculations for repeated orders
-    bin_coeffs = Dict{Float64, Vector{Float64}}()
-    for c in unknown
-        if c.order == 0.0
-            denominator += c.coef
-        elseif c.order == 1.0
-            denominator += c.coef / dt
-        elseif round(c.order) != c.order && !haskey(bin_coeffs, c.order)
-            denominator += c.coef / (dt^c.order)
-            bin_coeffs[c.order] = zeros(n)
-            
-            update_order!(prob, ws, c.order)
-            generate_weights!(prob.method, prob, ws)
-            bin_coeffs[c.order] = ws.weights
-        else
-            denominator += c.coef / (dt^c.order)
-        end
-    end
-
-    # Compute the first value of the computed array
-    inv_denominator = 1.0 / denominator
-
-    # Compute the rest of the values by updating the rhs with previous computed values for the unknown terms and dividing by the denominator
-    for c in unknown
-        if c.order == 1.0
-            rhs += history[n-1] * c.coef / dt
-
-        elseif round(c.order) != c.order
-            weights = bin_coeffs[c.order]
-            coef_over_dt = c.coef / (dt^c.order) 
-
-            conv_sum = 0.0
-            @inbounds @simd for k in 1:(n-1)
-                conv_sum += weights[k+1] * history[n-k]
-            end
-
-            rhs -= coef_over_dt * conv_sum
-
-        elseif c.order != 0.0
-            println("Order not implemented yet: $c")
-        end
-    end
-
-    new_value = rhs * inv_denominator
-
-    return new_value
-end
-
 
 function _modelpredictFFT_stress(data::RheoTimeData, equation)
 
@@ -830,6 +734,98 @@ function _modelpredictFFT_strain(data::RheoTimeData, equation)
 end
 
 
+function _modelsteppredict!(data::RheoTimeData, equation, controlled, new_element, n)
+
+    # Define the derivative function and the input data based on the type of data provided
+    deriv = derivBD
+    if (controlled == "strain")
+        unknown = equation.rightde
+        dependency = equation.leftde
+        data.ϵ[n] = new_element
+        input = data.ϵ
+        history = data.σ[1:(n-1)]
+    elseif (controlled == "stress")
+        unknown = equation.leftde
+        dependency = equation.rightde
+        data.σ[n] = new_element
+        input = data.σ
+        history = data.ϵ[1:(n-1)]
+    end
+
+    input_tmp = input[1:n]    # Cut the input up to n, since we are only computing one time step
+
+    dt = data.t[2] - data.t[1]
+    deriv_data = deriv(input_tmp, data.t[1:n])   # First derivative of the input data
+
+    prob = NumDiffProblem(dt=dt, order=0.5, n=n, method=GL())
+    ws = init_workspace(prob)
+
+    denominator = 0.0
+    rhs = 0.0
+
+    # Compute the right-hand side of the equation based on the known terms
+    for c in dependency
+        if c.order == 0.0
+            rhs += c.coef * input_tmp[n]
+        elseif c.order == 1.0
+            rhs += c.coef * deriv_data[n]
+        else
+            update_order!(prob, ws, c.order)
+            compute!(prob.method, ws, input_tmp, prob)
+            rhs += c.coef * (ws.deriv)[n]
+        end
+    end
+
+    # Compute the denominator and the binomial coefficient weights for non-integer orders
+    # Store the binomial coefficients in a dictionary to avoid redundant calculations for repeated orders
+    bin_coeffs = Dict{Float64, Vector{Float64}}()
+    for c in unknown
+        if c.order == 0.0
+            denominator += c.coef
+        elseif c.order == 1.0
+            denominator += c.coef / dt
+        elseif round(c.order) != c.order && !haskey(bin_coeffs, c.order)
+            denominator += c.coef / (dt^c.order)
+            bin_coeffs[c.order] = zeros(n)
+            
+            update_order!(prob, ws, c.order)
+            generate_weights!(prob.method, prob, ws)
+            bin_coeffs[c.order] = ws.weights
+        else
+            denominator += c.coef / (dt^c.order)
+        end
+    end
+
+    # Compute the first value of the computed array
+    inv_denominator = 1.0 / denominator
+
+    # Compute the rest of the values by updating the rhs with previous computed values for the unknown terms and dividing by the denominator
+    for c in unknown
+        if c.order == 1.0
+            rhs += history[n-1] * c.coef / dt
+
+        elseif round(c.order) != c.order
+            weights = bin_coeffs[c.order]
+            coef_over_dt = c.coef / (dt^c.order) 
+
+            conv_sum = 0.0
+            @inbounds @simd for k in 1:(n-1)
+                conv_sum += weights[k+1] * history[n-k]
+            end
+
+            rhs -= coef_over_dt * conv_sum
+
+        elseif c.order != 0.0
+            println("Order not implemented yet: $c")
+        end
+    end
+
+    new_value = rhs * inv_denominator
+
+    return new_value
+end
+
+
 """
     modelpredict(data::RheoTimeData, model::RheoModel)
 
@@ -909,6 +905,49 @@ function modelpredict(data::RheoTimeData, model::RheoModelClass, predtype::FFT;d
                          comment="Predicted data - modulus: $pred_mod, parameters:$(fixed_model.fixedparams)" ) 
 
     return RheoTimeData(sigma, epsilon, data.t, log)
+
+end
+
+"""
+    modelsteppredict!(data::RheoTimeData, model::RheoModel, new_element, index; controlled="stress")
+
+Given a data set with σ and ϵ incomplete, the function writes the new element in the provided index of the controlled variable
+and then computes and returns the element in the same position of the unknown one.
+"""
+function modelsteppredict!(data::RheoTimeData, model::RheoModel, new_element::Float64, index; controlled="strain")
+    
+    check = rheotimedatatype(data)
+    @assert check == strain_and_stress "Data must contain both stress and strain. Data provided: " * string(check)
+    @assert index > 0 && index <= length(data.t) "Index out of bounds. Provided index: $index, data length: $(length(data.t))"
+    @assert index > 1 "Index must be greater than 1, since the first value is needed as a strating point for the derivative. Provided index: $index."
+    computed_value = _modelsteppredict!(data, model.C, controlled, new_element, index)
+
+    if controlled == "strain"
+        data.σ[index] = computed_value
+    elseif controlled == "stress"
+        data.ϵ[index] = computed_value
+    end
+
+    return computed_value
+
+end
+
+function modelsteppredict!(data::RheoTimeData, model::RheoModelClass, new_element::Float64, index; controlled="strain", kwargs...)
+    
+    check = rheotimedatatype(data)
+    @assert check == strain_and_stress "Data must contain both stress and strain. Data provided: " * string(check)
+    @assert index > 0 && index <= length(data.t) "Index out of bounds. Provided index: $index, data length: $(length(data.t))"
+    @assert index > 1 "Index must be greater than 1, since the first value is needed as a strating point for the derivative. Provided index: $index."
+    fixed_model = RheoModel(model, NamedTuple(kwargs))
+    computed_value = _modelsteppredict!(data, fixed_model.C, controlled, new_element, index)
+
+    if controlled == "strain"
+        data.σ[index] = computed_value
+    elseif controlled == "stress"
+        data.ϵ[index] = computed_value
+    end
+
+    return computed_value
 
 end
 

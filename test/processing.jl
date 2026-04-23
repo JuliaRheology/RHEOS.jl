@@ -1499,12 +1499,28 @@ function _modelpredict(tol)
     data_3 = RheoTimeData(t=t,stress=σ_2)
     computed_3 = modelpredict(data_3,Springpot,Differential(),cᵦ = cᵦ,β = β)
 
+    model_step = RheoModel(Springpot, cᵦ = cᵦ, β = β)
+
+    data_step = deepcopy(computed_2)
+    data_step.ϵ .= 0.0
+    data_step.σ .= 0.0
+    for i in 2:length(t)
+        value = modelsteppredict!(data_step, model_step, strain_2[i], i; controlled="strain")
+    end
+
+    data_step_inv = deepcopy(computed_3)
+    data_step_inv.ϵ .= 0.0
+    data_step_inv.σ .= 0.0
+    for i in 2:length(t)
+        value = modelsteppredict!(data_step_inv, model_step, σ_2[i], i; controlled="stress")
+    end
+
     all(i -> isapprox(σ_1[i], computed_1.σ[i],atol=tol),eachindex(σ_1) ) &&
     all(i -> isapprox(σ_2[i], computed_2.σ[i],atol=tol),eachindex(σ_2) ) &&
     all(i -> isapprox(σ_2[i], computed_2_FFT.σ[i],atol=tol),eachindex(σ_2) ) &&
-    all(i -> isapprox(strain_2[i], computed_3.ϵ[i],atol=tol),eachindex(strain_2) )
-
-
+    all(i -> isapprox(strain_2[i], computed_3.ϵ[i],atol=tol),eachindex(strain_2) ) &&
+    all(i -> isapprox(computed_2.σ[i], data_step.σ[i],atol=tol), 2:length(t)) &&
+    all(i -> isapprox(computed_3.ϵ[i], data_step_inv.ϵ[i],atol=tol), 2:length(t))
     
 end
 @test _modelpredict(tol)
