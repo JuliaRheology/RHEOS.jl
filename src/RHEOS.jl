@@ -7,13 +7,15 @@ module RHEOS
 using NLopt
 using FunctionWrappers: FunctionWrapper
 using Dierckx
+using NumFracDiff
 
 # useful for the various model functions
 using InverseLaplace
+using FFTW
 import MittagLeffler: mittleff as mittlefforiginal
 import SpecialFunctions: gamma
 
-import DSP: conv, filtfilt, Windows
+import DSP: conv, filtfilt, Windows, mul!
 
 # Base and stdlib imports
 import Base: +, -, *,|
@@ -78,9 +80,12 @@ export modulusfunction, modulusfunction!
 # processing.jl
 export resample, indexweight, cutting, smooth
 export onlytime, onlystrain, onlystress, onlyfreq, extract
-export modelfit, modelpredict, modelstepfit, modelsteppredict!
+export modelfit, modelpredict, modelstepfit, modelsteppredict, modelpredict_singlestep!
 export dynamicmodelfit, dynamicmodelpredict
 export Differential, Convolution, FFT
+export Caputo, CaputoThreads
+export GL, GLThreads, GLShortMem, GLShortMemThreads, GLShortMemCorr, GLShortMemCorrThreads, GLFFT
+export RL, RLThreads, RLShortMem, RLShortMemThreads, RLShortMemCorr, RLShortMemCorrThreads
 
 #interface.jl
 export Interface
@@ -100,7 +105,6 @@ include("rheodata.jl")
 
 include("rheomodel.jl")
 include("base.jl")
-include("DiffEqu.jl")
 include("IO.jl")
 include("modeldatabase.jl")
 include("datagen.jl")

@@ -1505,14 +1505,14 @@ function _modelpredict(tol)
     data_step.ϵ .= 0.0
     data_step.σ .= 0.0
     for i in 2:length(t)
-        value = modelsteppredict!(data_step, model_step, strain_2[i], i; controlled="strain")
+        value = modelpredict_singlestep!(data_step, model_step, strain_2[i], i; controlled="strain")
     end
 
     data_step_inv = deepcopy(computed_3)
     data_step_inv.ϵ .= 0.0
     data_step_inv.σ .= 0.0
     for i in 2:length(t)
-        value = modelsteppredict!(data_step_inv, model_step, σ_2[i], i; controlled="stress")
+        value = modelpredict_singlestep!(data_step_inv, model_step, σ_2[i], i; controlled="stress")
     end
 
     all(i -> isapprox(σ_1[i], computed_1.σ[i],atol=tol),eachindex(σ_1) ) &&

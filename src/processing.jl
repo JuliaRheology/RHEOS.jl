@@ -539,12 +539,106 @@ function modelfit(data::RheoTimeData,
     return RheoModel(model, nt);
 
 end
+"""
+    Differential approach
+"""
+function modelfit(data::RheoTimeData, 
+        model::RheoModelClass,
+        modloading::LoadingType,
+        fittype::Union{Differential,FFT};
+        method=RL(),
+        p0::Union{NamedTuple,Nothing,Dict} = nothing,
+        lo::Union{NamedTuple,Nothing,Dict} = nothing,
+        hi::Union{NamedTuple,Nothing,Dict} = nothing,
+        verbose::Bool = false,
+        rel_tol_f::Union{Real,Nothing} = nothing,
+        rel_tol_x::Union{Real,Nothing} = isnothing(rel_tol_f) ? 1e-4 : nothing,
+        diff_method="BD",
+        weights::Union{Nothing,Vector{T}} = nothing,
+        optmethod::Union{Symbol,String}= :LN_SBPLX, 
+        opttimeout::Union{Real,Nothing} = nothing,
+        optmaxeval::Union{Integer,Nothing} = nothing,
+        allowconstraints=true) where T <: Integer
 
+    p0a = fill_init_params(model, symbol_to_unicode(p0))
+    loa = fill_lower_bounds(model, symbol_to_unicode(lo))
+    hia = fill_upper_bounds(model, symbol_to_unicode(hi))
+
+    check = rheotimedatatype(data)
+    @assert (check == strain_and_stress) "Both stress and strain are required"
+
+    # check provided weights are all valid
+    if !isnothing(weights)
+    @assert isempty(weights[weights.<1]) "Invalid weighting indices provided"
+    end
+
+    equation = model.C
+
+    # get time step (only needed for convolution, which requires constant dt so t[2]-t[1] is sufficient)
+    dt = data.t[2] - data.t[1]
+
+    # time must start at 0 for convolution to work properly!
+    t_zeroed = data.t .- minimum(data.t)
+
+    # fit
+    is_constant = constantcheck(data.t)
+
+    # indices weighting only used for constant sample-rate data
+    if !is_constant && !isnothing(weights)
+    @warn "Indices weighting not used as variable sample-rate data has been provided"
+    end
+
+    # Perform fitting
+    (minf, minx, ret), timetaken, bytes, gctime, memalloc =
+    @timed leastsquares_init(   p0a,
+                                loa,
+                                hia,
+                                equation,
+                                modloading,
+                                t_zeroed,
+                                dt,
+                                data.ϵ,
+                                data.σ,
+                                model._constraint,
+                                fittype;
+                                method= method,
+                                insight = verbose,
+                                constant_sampling = is_constant,
+                                singularity = false,
+                                rel_tol_x = rel_tol_x,
+                                rel_tol_f = rel_tol_f,
+                                indweights = weights,
+                                optmethod = Symbol(optmethod),
+                                opttimeout = opttimeout,
+                                optmaxeval = optmaxeval,
+                                allowconstraints=allowconstraints)
+
+    println("Time: $timetaken s, Why: $ret, Parameters: $minx, Error: $minf")
+
+    nt = NamedTuple{Tuple(model.freeparams)}(minx)
+
+    if data.log !== nothing
+    # Preparation of data for log item
+    info=(comment="Fiting rheological model to data", model_name=model.name, model_params=nt, time_taken=timetaken, stop_reason=ret, error=minf)
+    params=(model=model, modloading=modloading)
+    keywords=(p0=p0, lo=lo, hi=hi, rel_tol_x=rel_tol_x, diff_method=diff_method)
+    # Add data to the log
+    push!(data.log, RheoLogItem( (type=:analysis, funct=:modelfit, params=params, keywords=keywords), info))
+    end
+
+    return RheoModel(model, nt);
+end 
+
+
+"""
+    Dispatch function between the 2 fit methods, Convolution, Differential
+        TODO: FFT fitting is now shifted onto numFracDiff so to use it you have to specify derivate "method" as GLFFT
+"""
 function modelfit(data::RheoTimeData, 
     model::RheoModelClass,
     modloading::LoadingType;
     fittype = Differential(),
-    method=RL(),
+    method=GL(),
     p0::Union{NamedTuple,Nothing,Dict} = nothing,
     lo::Union{NamedTuple,Nothing,Dict} = nothing,
     hi::Union{NamedTuple,Nothing,Dict} = nothing,
@@ -1074,5 +1168,557 @@ function dynamicmodelpredict(data::RheoFreqData, model::RheoModel)
 
     return RheoFreqData(predGp, predGpp, data.ω, log)
 
+end
+
+
+
+
+#=
+--------------------------------
+Predicting functions
+--------------------------------
+=#
+
+function _modelpredictGL(data::RheoTimeData, equation ,diff_method)
+
+    # Create the data structure to contain the right and left hand side of the equation, as well as the weights for the GL derivative
+    data_struct = SupportVectors(
+        zeros(length(data.t)),
+        zeros(length(data.t))
+    )
+
+    # Define the derivative function and the input data based on the type of data provided
+    if diff_method=="BD"
+        deriv = derivBD
+    elseif diff_method=="CD"
+        deriv = derivCD
+    end
+
+    check = rheotimedatatype(data)
+    if (check == strain_only)
+        unknown = equation.rightde
+        dependency = equation.leftde
+        input = data.ϵ
+        t = "strain"
+    elseif (check == stress_only)
+        unknown = equation.leftde
+        dependency = equation.rightde
+        input = data.σ
+        t="stress"
+    end
+
+    n = length(data.t)
+    dt = data.t[2] - data.t[1]
+    deriv_data = deriv(input, data.t)   # First derivative of the input data
+
+    prob = NumDiffProblem(dt=dt,order=0.5,n=length(data.t),method=GL())
+    ws = init_workspace(prob)
+
+    computed = zeros(n)
+    denominator = 0.0
+
+    # Compute the right-hand side of the equation based on the known terms
+    for c in dependency
+        if c.order == 0.0
+            data_struct.rhs .+= c.coef * input
+        elseif c.order == 1.0
+            data_struct.rhs .+= c.coef * deriv_data
+        else
+            # generate_GL_weights(c.order, n, data_struct.weights)
+            # data_struct.rhs .+= c.coef * compute_GL_frac_deriv(input, data_struct.deriv, data_struct.weights, c.order, dt)
+            update_order!(prob,ws,c.order)
+            compute!(prob.method,ws,input,prob)
+            @. data_struct.rhs += c.coef * ws.deriv
+        end
+    end
+
+    # Compute the denominator and the binomial coefficient weights for non-integer orders
+    # Store the binomial coefficients in a dictionary to avoid redundant calculations for repeated orders
+    bin_coeffs = Dict{Float64, Vector{Float64}}()
+    for c in unknown
+        if c.order == 0.0
+            denominator += c.coef
+        elseif c.order == 1.0
+            denominator += c.coef / dt
+        elseif round(c.order) != c.order && !haskey(bin_coeffs, c.order)
+            denominator += c.coef / (dt^c.order)
+            bin_coeffs[c.order] = zeros(n)
+
+            update_order!(prob,ws,c.order)
+            NumFracDiff.generate_weights!(prob.method,prob,ws)
+            bin_coeffs[c.order] = ws.weights
+        else
+            denominator += c.coef / (dt^c.order)
+        end
+    end
+
+    # Compute the first value of the computed array
+    inv_denominator = 1.0 / denominator
+    computed[1] = data_struct.rhs[1] * inv_denominator
+
+    # Compute the rest of the values by updating the rhs with previous computed values for the unknown terms and dividing by the denominator
+    for i in 2:n
+        val = data_struct.rhs[i]
+
+        for c in unknown
+            if c.order == 1.0
+                val += computed[i-1] * c.coef / dt
+
+            elseif round(c.order) != c.order
+                weights = bin_coeffs[c.order]
+                coef_over_dt = c.coef / (dt^c.order) 
+
+                conv_sum = 0.0
+                @inbounds @simd for k in 1:(i-1)
+                    conv_sum += weights[k+1] * computed[i-k]
+                end
+
+                val -= coef_over_dt * conv_sum
+
+            elseif c.order != 0.0
+                println("Order not implemented yet: $c")
+            end
+        end
+
+        computed[i] = val * inv_denominator
+    end
+
+    return(computed, input, t)
+end
+
+
+function _modelpredictFFT_stress(data::RheoTimeData, equation)
+
+    # Define the input data based on the type of data provided
+    unknown = equation.rightde
+    dependency = equation.leftde
+    input = data.ϵ
+
+    n  = length(data.t)
+    dt = data.t[2] - data.t[1]
+    L  = nextpow(2, 2n - 1)
+
+    prob = NumDiffProblem(dt=dt,order=0.5,n=length(data.t),method=GL())
+    ws = init_workspace(prob, L=L)
+
+    # Pre-allocate each buffer
+    input_padded = zeros(Float64, L)
+    input_padded[1:n] .= input
+
+    fft_size = L ÷ 2 + 1
+    input_fft = zeros(Complex{Float64}, fft_size)
+    weights_fft = zeros(Complex{Float64}, fft_size)
+    rhs_fft = zeros(Complex{Float64}, fft_size)
+    lhs_fft = zeros(Complex{Float64}, fft_size)
+    ifft_buf = zeros(Float64, L)
+
+    # Prepare FFTW plans using MEASURE as flag. Since the input is real, we can use rfft and irfft.
+    forward_plan = plan_rfft(input_padded; flags=FFTW.ESTIMATE)
+    inverse_plan = plan_irfft(rhs_fft, L; flags=FFTW.ESTIMATE)
+
+    # Transform input to frequency domain
+    mul!(input_fft, forward_plan, input_padded)
+
+    # Compute RHS in frequency domain (dependency terms)
+    fill!(rhs_fft, 0.0)
+    for c in dependency
+        inv_dt_pow = 1.0 / (dt^c.order)
+
+        # Prepare the weights buffer, which will vary for each term, based on the order of the derivative.
+        fill!(ws.weights, 0.0)
+        if c.order == 0.0
+            @inbounds @simd for i in 1:fft_size
+                rhs_fft[i] += c.coef * input_fft[i]
+            end
+            continue
+        elseif c.order == 1.0
+            ws.weights[1] =  1.0
+            ws.weights[2] = -1.0
+        else
+            update_order!(prob,ws,c.order)
+            generate_weights!(prob.method,prob,ws)
+        end
+
+        # Trasform weights to frequency domain
+        mul!(weights_fft, forward_plan, ws.weights)
+
+        # Update RHS in frequency domain using input and weights
+        @inbounds @simd for i in 1:fft_size
+            rhs_fft[i] += (c.coef * inv_dt_pow) * weights_fft[i] * input_fft[i]
+        end
+    end
+
+    # Compute LHS in frequency domain (unknown terms)
+    fill!(lhs_fft, 0.0)
+    for c in unknown
+        inv_dt_pow = 1.0 / (dt^c.order)
+
+        # Prepare the weights buffer, which will vary for each term, based on the order of the derivative.
+        fill!(ws.weights, 0.0)
+        if c.order == 0.0
+            @inbounds @simd for i in 1:fft_size
+                lhs_fft[i] += c.coef
+            end
+            continue
+        elseif c.order == 1.0
+            ws.weights[1] =  1.0
+            ws.weights[2] = -1.0
+        else
+            update_order!(prob,ws,c.order)
+            generate_weights!(prob.method,prob,ws,L=L)
+        end
+
+        # Trasform weights to frequency domain
+        mul!(weights_fft, forward_plan, ws.weights)
+
+        @inbounds @simd for i in 1:fft_size
+            lhs_fft[i] += (c.coef * inv_dt_pow) * weights_fft[i]
+        end
+    end
+
+    # Solve in frequency domain: output_fft = rhs_fft / lhs_fft
+    output_fft = zeros(Complex{Float64}, fft_size)
+    @inbounds @simd for i in 1:fft_size
+        output_fft[i] = rhs_fft[i] / lhs_fft[i]
+    end
+
+    # Return to time domain
+    mul!(ifft_buf, inverse_plan, output_fft)
+
+    return (ifft_buf[1:n], input, "strain")
+
+end
+
+
+function _modelpredictFFT_strain(data::RheoTimeData, equation)
+
+    # Define the input data based on the type of data provided
+    unknown = equation.leftde
+    dependency = equation.rightde
+    input = data.σ
+
+    n  = length(data.t)
+    dt = data.t[2] - data.t[1]
+    L  = nextpow(2, 2n - 1)
+
+    prob = NumDiffProblem(dt=dt,order=0.5,n=length(data.t),method=GL())
+    ws = init_workspace(prob,L=L) #TODO: Create a init_fft_workspace(prob) function to pre-allocate the buffers for the FFT method.
+
+    # Pre-allocate each buffer
+    input_padded = zeros(Float64, L)
+    input_padded[1:n] .= input
+
+    input_padded[1] = 0.0
+    input_padded[2:n+1] .= input[1:n]   
+
+    fft_size = L ÷ 2 + 1
+    input_fft = zeros(Complex{Float64}, fft_size)
+    weights_fft = zeros(Complex{Float64}, fft_size)
+    rhs_fft = zeros(Complex{Float64}, fft_size)
+    lhs_fft = zeros(Complex{Float64}, fft_size)
+    ifft_buf = zeros(Float64, L)
+
+    # Find the maximum order of the derivatives of the strain terms to shift each term accordingly. This is done to avoid issues with the FFT.
+    max_order = maximum([c.order for c in unknown])
+
+    # Prepare FFTW plans using MEASURE as flag. Since the input is real, we can use rfft and irfft.
+    forward_plan = plan_rfft(input_padded; flags=FFTW.ESTIMATE)
+    inverse_plan = plan_irfft(rhs_fft, L; flags=FFTW.ESTIMATE)
+
+    # Transform input to frequency domain
+    mul!(input_fft, forward_plan, input_padded)
+
+    # Compute RHS in frequency domain (dependency terms)
+    fill!(rhs_fft, 0.0)
+    for c in dependency
+        new_order = c.order - max_order
+
+        inv_dt_pow = 1.0 / (dt^new_order)
+
+        # Prepare the weights buffer, which will vary for each term, based on the order of the derivative.
+        fill!(ws.weights, 0.0)
+        if new_order == 0.0
+            @inbounds @simd for i in 1:fft_size
+                rhs_fft[i] += c.coef * input_fft[i]
+            end
+            continue
+        else
+            update_order!(prob,ws,c.order)
+            generate_weights!(prob.method,prob,ws)
+        end
+
+        # Trasform weights to frequency domain
+        mul!(weights_fft, forward_plan, ws.weights)
+
+        # Update RHS in frequency domain using input and weights
+        @inbounds @simd for i in 1:fft_size
+            rhs_fft[i] += (c.coef * inv_dt_pow) * weights_fft[i] * input_fft[i]
+        end
+    end
+
+    # Compute LHS in frequency domain (unknown terms)
+    fill!(lhs_fft, 0.0)
+    for c in unknown
+        new_order = c.order - max_order
+
+        inv_dt_pow = 1.0 / (dt^new_order)
+
+        # Prepare the weights buffer, which will vary for each term, based on the order of the derivative.
+        fill!(ws.weights, 0.0)
+        if new_order == 0.0
+            @inbounds @simd for i in 1:fft_size
+                lhs_fft[i] += c.coef
+            end
+            continue
+        else
+            update_order!(prob,ws,c.order)
+            generate_weights!(prob.method,prob,ws,L=L)
+        end
+
+        # Trasform weights to frequency domain
+        mul!(weights_fft, forward_plan, ws.weights)
+
+        @inbounds @simd for i in 1:fft_size
+            lhs_fft[i] += (c.coef * inv_dt_pow) * weights_fft[i]
+        end
+    end
+
+    # Solve in frequency domain: output_fft = rhs_fft / lhs_fft
+    output_fft = zeros(Complex{Float64}, fft_size)
+    @inbounds for i in 1:fft_size
+        output_fft[i] = rhs_fft[i] / lhs_fft[i]
+    end
+
+    # Return to time domain
+    mul!(ifft_buf, inverse_plan, output_fft)
+
+    return (ifft_buf[1:n], input, "stress")
+end
+
+
+function _modelpredict_singlestep!(data::RheoTimeData, equation, controlled, new_element, n)
+
+    # Define the derivative function and the input data based on the type of data provided
+    deriv = derivBD
+    if (controlled == "strain")
+        unknown = equation.rightde
+        dependency = equation.leftde
+        data.ϵ[n] = new_element
+        input = data.ϵ
+        history = data.σ[1:(n-1)]
+    elseif (controlled == "stress")
+        unknown = equation.leftde
+        dependency = equation.rightde
+        data.σ[n] = new_element
+        input = data.σ
+        history = data.ϵ[1:(n-1)]
+    end
+
+    input_tmp = input[1:n]    # Cut the input up to n, since we are only computing one time step
+
+    dt = data.t[2] - data.t[1]
+    deriv_data = deriv(input_tmp, data.t[1:n])   # First derivative of the input data
+
+    prob = NumDiffProblem(dt=dt, order=0.5, n=n, method=GL())
+    ws = init_workspace(prob)
+
+    denominator = 0.0
+    rhs = 0.0
+
+    # Compute the right-hand side of the equation based on the known terms
+    for c in dependency
+        if c.order == 0.0
+            rhs += c.coef * input_tmp[n]
+        elseif c.order == 1.0
+            rhs += c.coef * deriv_data[n]
+        else
+            update_order!(prob, ws, c.order)
+            compute!(prob.method, ws, input_tmp, prob)
+            rhs += c.coef * (ws.deriv)[n]
+        end
+    end
+
+    # Compute the denominator and the binomial coefficient weights for non-integer orders
+    # Store the binomial coefficients in a dictionary to avoid redundant calculations for repeated orders
+    bin_coeffs = Dict{Float64, Vector{Float64}}()
+    for c in unknown
+        if c.order == 0.0
+            denominator += c.coef
+        elseif c.order == 1.0
+            denominator += c.coef / dt
+        elseif round(c.order) != c.order && !haskey(bin_coeffs, c.order)
+            denominator += c.coef / (dt^c.order)
+            bin_coeffs[c.order] = zeros(n)
+            
+            update_order!(prob, ws, c.order)
+            generate_weights!(prob.method, prob, ws)
+            bin_coeffs[c.order] = ws.weights
+        else
+            denominator += c.coef / (dt^c.order)
+        end
+    end
+
+    # Compute the first value of the computed array
+    inv_denominator = 1.0 / denominator
+
+    # Compute the rest of the values by updating the rhs with previous computed values for the unknown terms and dividing by the denominator
+    for c in unknown
+        if c.order == 1.0
+            rhs += history[n-1] * c.coef / dt
+
+        elseif round(c.order) != c.order
+            weights = bin_coeffs[c.order]
+            coef_over_dt = c.coef / (dt^c.order) 
+
+            conv_sum = 0.0
+            @inbounds @simd for k in 1:(n-1)
+                conv_sum += weights[k+1] * history[n-k]
+            end
+
+            rhs -= coef_over_dt * conv_sum
+
+        elseif c.order != 0.0
+            println("Order not implemented yet: $c")
+        end
+    end
+
+    new_value = rhs * inv_denominator
+
+    return new_value
+end
+
+
+"""
+    modelpredict(data::RheoTimeData, model::RheoModel)
+
+Given an incomplete data set (only either stress or strain missing) and model with values substituted into
+parameters (`RheoModel`), return a new dataset based on the model using the Grunwald-Letnikov algorithm for the fractional derivatives.
+A complete `RheoTimeData` of type `strain_and_stress` is returned.
+"""
+function modelpredict(data::RheoTimeData, model::RheoModel,predtype::Differential;diffmethod="BD")
+
+    check = rheotimedatatype(data)
+    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
+    if check == strain_only
+        sigma, epsilon, pred_mod = _modelpredictGL(data, model.C, "BD")
+    else check == stress_only
+        epsilon, sigma, pred_mod = _modelpredictGL(data, model.C, "BD")
+    end
+    log = logadd_process(data, :modelpredict, params=(model,), 
+                         comment="Predicted data - modulus: $pred_mod, parameters:$(model.fixedparams)" ) 
+
+    return RheoTimeData(sigma, epsilon, data.t, log)
+
+end
+
+function modelpredict(data::RheoTimeData, model::RheoModelClass,predtype::Differential;diffmethod="BD",kwargs...)
+
+    check = rheotimedatatype(data)
+    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
+
+    fixed_model = RheoModel(model,NamedTuple(kwargs))
+    if check == strain_only
+        sigma, epsilon, pred_mod = _modelpredictGL(data, fixed_model.C, "BD")
+    else check == stress_only
+        epsilon, sigma, pred_mod = _modelpredictGL(data, fixed_model.C, "BD")
+    end
+    log = logadd_process(data, :modelpredict, params=(fixed_model,), 
+                         comment="Predicted data - modulus: $pred_mod, parameters:$(fixed_model.fixedparams)" ) 
+
+    return RheoTimeData(sigma, epsilon, data.t, log)
+
+end
+
+"""
+    modelpredict(data::RheoTimeData, model::RheoModelDiff)
+
+Given an incomplete data set (only either stress or strain missing) and model with values substituted into
+parameters (`RheoModel`), return a new dataset based on the model using the Fast Fourier Transform.
+A complete `RheoTimeData` of type `strain_and_stress` is returned.
+"""
+function modelpredict(data::RheoTimeData, model::RheoModel, predtype::FFT;diffmethod="BD")
+
+    check = rheotimedatatype(data)
+    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
+    if check == strain_only
+        sigma, epsilon, pred_mod = _modelpredictFFT_stress(data, model.C)
+    else check == stress_only
+        epsilon, sigma, pred_mod = _modelpredictFFT_strain(data, model.C)
+    end
+    log = logadd_process(data, :modelpredict, params=(model,), 
+                         comment="Predicted data - modulus: $pred_mod, parameters:$(model.fixedparams)" ) 
+
+    return RheoTimeData(sigma, epsilon, data.t, log)
+
+end
+
+function modelpredict(data::RheoTimeData, model::RheoModelClass, predtype::FFT;diffmethod="BD",kwargs...)
+
+    check = rheotimedatatype(data)
+    @assert (check == strain_only)||(check == stress_only) "Need either strain only or stress only data. Data provided: " * string(check)
+
+    fixed_model = RheoModel(model,NamedTuple(kwargs))
+    if check == strain_only
+        sigma, epsilon, pred_mod = _modelpredictFFT_stress(data, fixed_model.C)
+    else check == stress_only
+        epsilon, sigma, pred_mod = _modelpredictFFT_strain(data, fixed_model.C)
+    end
+    log = logadd_process(data, :modelpredict, params=(fixed_model,), 
+                         comment="Predicted data - modulus: $pred_mod, parameters:$(fixed_model.fixedparams)" ) 
+
+    return RheoTimeData(sigma, epsilon, data.t, log)
+
+end
+
+"""
+    modelpredict_singlestep!(data::RheoTimeData, model::RheoModel, new_element, index; controlled="stress")
+
+Given a data set with σ and ϵ incomplete, the function writes the new element in the provided index of the controlled variable
+and then computes and returns the element in the same position of the unknown one.
+"""
+function modelpredict_singlestep!(data::RheoTimeData, model::RheoModel, new_element::Float64, index; controlled="strain")
+    
+    check = rheotimedatatype(data)
+    @assert check == strain_and_stress "Data must contain both stress and strain. Data provided: " * string(check)
+    @assert index > 0 && index <= length(data.t) "Index out of bounds. Provided index: $index, data length: $(length(data.t))"
+    @assert index > 1 "Index must be greater than 1, since the first value is needed as a strating point for the derivative. Provided index: $index."
+    computed_value = _modelpredict_singlestep!(data, model.C, controlled, new_element, index)
+
+    if controlled == "strain"
+        data.σ[index] = computed_value
+    elseif controlled == "stress"
+        data.ϵ[index] = computed_value
+    end
+
+    return computed_value
+
+end
+
+function modelpredict_singlestep!(data::RheoTimeData, model::RheoModelClass, new_element::Float64, index; controlled="strain", kwargs...)
+    
+    check = rheotimedatatype(data)
+    @assert check == strain_and_stress "Data must contain both stress and strain. Data provided: " * string(check)
+    @assert index > 0 && index <= length(data.t) "Index out of bounds. Provided index: $index, data length: $(length(data.t))"
+    @assert index > 1 "Index must be greater than 1, since the first value is needed as a strating point for the derivative. Provided index: $index."
+    fixed_model = RheoModel(model, NamedTuple(kwargs))
+    computed_value = _modelpredict_singlestep!(data, fixed_model.C, controlled, new_element, index)
+
+    if controlled == "strain"
+        data.σ[index] = computed_value
+    elseif controlled == "stress"
+        data.ϵ[index] = computed_value
+    end
+
+    return computed_value
+
+end
+
+#Dispatch function
+function modelpredict(data::RheoTimeData,model::RheoModel;predtype= Differential(), diffmethod="BD")
+    modelpredict(data,model,predtype,diffmethod=diffmethod)
+end
+
+function modelpredict(data::RheoTimeData,model::RheoModelClass;predtype= Differential(), diffmethod="BD", kwargs...)
+    modelpredict(data,model,predtype,diffmethod=diffmethod,kwargs...)
 end
 

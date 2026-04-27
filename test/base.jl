@@ -717,7 +717,7 @@ end
             zeros(length(time_series))
         )
         
-        prob_GL = RHEOS.NumDiffProblem(dt=dt,order=0.5,n=length(time_series),method=RHEOS.GL())
+        prob_GL = RHEOS.NumDiffProblem(dt=dt,order=0.5,n=length(time_series),method=GL())
         ws_GL = RHEOS.init_workspace(prob_GL)
 
         data_struct_GLFFT = RHEOS.SupportVectors(
@@ -725,10 +725,10 @@ end
             zeros(length(time_series))
         )
         
-        prob_GLFFT = RHEOS.NumDiffProblem(dt=dt,order=0.5,n=length(time_series),method=RHEOS.GLFFT())
+        prob_GLFFT = RHEOS.NumDiffProblem(dt=dt,order=0.5,n=length(time_series),method=GLFFT())
         ws_GLFFT = RHEOS.init_workspace(prob_GLFFT)
-        return RHEOS.obj_const([0.27,0.8, 0.56,0.35], Fract_Maxwell.C, time_series,dt,strain,strain_deriv,stress,stress_deriv,data_struct_GL,prob_GL,ws_GL) < tol &&
-               RHEOS.obj_const([0.27,0.8, 0.56,0.35], Fract_Maxwell.C, time_series,dt,strain,strain_deriv,stress,stress_deriv,data_struct_GLFFT,prob_GLFFT,ws_GLFFT) < tol
+        return RHEOS.obj_const([0.27,0.8, 0.56,0.35], Fract_Maxwell.C, time_series,dt,strain,stress,data_struct_GL,prob_GL,ws_GL, Differential()) < tol &&
+               RHEOS.obj_const([0.27,0.8, 0.56,0.35], Fract_Maxwell.C, time_series,dt,strain,stress,data_struct_GLFFT,prob_GLFFT,ws_GLFFT, Differential()) < tol
 
     end
 
@@ -742,9 +742,6 @@ end
         data = strainfunction(data, ramp(offset=0.0,gradient=1.0))
         model= RheoModel(Fract_Maxwell,params)
         modelpred = modelpredict(data,model)
-
-        strain_deriv = RHEOS.derivBD(modelpred.ϵ, modelpred.t)
-        stress_deriv = RHEOS.derivBD(modelpred.σ, modelpred.t)
 
         t_zeroed = data.t .- minimum(data.t)
 
@@ -762,15 +759,13 @@ end
                                 t_zeroed,
                                 dt,
                                 modelpred.ϵ,
-                                strain_deriv,
                                 modelpred.σ,
-                                stress_deriv,
                                 model._constraint,
                                 Differential();
                                 opttimeout=60)
         @test all(@. isapprox(minx, [0.27,0.8, 0.56,0.35];atol = 10*tol))
 
-        (minf, minx, ret) = RHEOS.leastsquares_init_fft(p0a,
+        (minf, minx, ret) = RHEOS.leastsquares_init(p0a,
                                 loa,
                                 hia,
                                 equation,
@@ -778,11 +773,10 @@ end
                                 t_zeroed,
                                 dt,
                                 modelpred.ϵ,
-                                strain_deriv,
                                 modelpred.σ,
-                                stress_deriv,
                                 model._constraint,
                                 Differential();
+                                method=GLFFT(),
                                 opttimeout=60)
         @test all(@. isapprox(minx, [0.27,0.8, 0.56,0.35];atol = 10*tol))
 
@@ -797,9 +791,7 @@ end
                                 t_zeroed,
                                 dt,
                                 modelpred.ϵ,
-                                strain_deriv,
                                 modelpred.σ,
-                                stress_deriv,
                                 model._constraint,
                                 Differential();
                                 opttimeout=60,
@@ -820,9 +812,6 @@ end
 
         σ = response_ramp_SP(data.t, 1.0)
 
-        strain_deriv = RHEOS.derivBD(strain.ϵ, data.t)
-        stress_deriv = RHEOS.derivBD(σ, data.t)
-
         t_zeroed = data.t .- minimum(data.t)
 
         equation = Springpot.C
@@ -839,9 +828,7 @@ end
                                 t_zeroed,
                                 dt,
                                 strain.ϵ,
-                                strain_deriv,
                                 σ,
-                                stress_deriv,
                                 nothing,
                                 Differential();
                                 opttimeout=60)
@@ -853,9 +840,6 @@ end
         σ .= cᵦ * 1.0 * data.t.^(-β) / RHEOS.gamma(1 - β)
         σ[1] = cᵦ * (1.0 / (dt^β))
 
-        strain_deriv = RHEOS.derivBD(strain.ϵ, data.t)
-        stress_deriv = RHEOS.derivBD(σ, data.t)
-
         t_zeroed = data.t .- minimum(data.t)
 
         equation = Springpot.C
@@ -872,9 +856,7 @@ end
                                 t_zeroed,
                                 dt,
                                 strain.ϵ,
-                                strain_deriv,
                                 σ,
-                                stress_deriv,
                                 nothing,
                                 Differential();
                                 opttimeout=60)

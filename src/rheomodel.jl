@@ -85,6 +85,10 @@ struct Differential <: type end
 struct FFT <: type end
 struct Convolution <: type end
 
+struct SupportVectors
+    rhs::Vector{Float64}
+    lhs::Vector{Float64}
+end
 
 #
 #  Specialised forms of _RheoModel
