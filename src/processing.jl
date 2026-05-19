@@ -1388,7 +1388,7 @@ function _modelpredictFFT_strain(data::RheoTimeData, equation)
 
     n  = length(data.t)
     dt = data.t[2] - data.t[1]
-    padding_factor = 8
+    padding_factor = 4
     L  = nextpow(2, padding_factor * n)
 
     prob = NumDiffProblem(dt=dt,order=0.5,n=length(data.t),method=GL())
