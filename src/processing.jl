@@ -1388,7 +1388,8 @@ function _modelpredictFFT_strain(data::RheoTimeData, equation)
 
     n  = length(data.t)
     dt = data.t[2] - data.t[1]
-    L  = nextpow(2, 2n - 1)
+    padding_factor = 4
+    L  = nextpow(2, padding_factor * n)
 
     prob = NumDiffProblem(dt=dt,order=0.5,n=length(data.t),method=GL())
     ws = init_workspace(prob,L=L)
@@ -1461,7 +1462,7 @@ function _modelpredictFFT_strain(data::RheoTimeData, equation)
             continue
         else
             update_order!(prob,ws,new_order)
-            generate_weights!(prob.method,prob,ws,L=L)
+            generate_weights!(prob.method,prob,ws)
         end
 
         # Trasform weights to frequency domain
