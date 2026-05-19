@@ -1432,7 +1432,7 @@ function _modelpredictFFT_strain(data::RheoTimeData, equation)
             end
             continue
         else
-            update_order!(prob,ws,c.order)
+            update_order!(prob,ws,new_order)
             generate_weights!(prob.method,prob,ws)
         end
 
@@ -1460,7 +1460,7 @@ function _modelpredictFFT_strain(data::RheoTimeData, equation)
             end
             continue
         else
-            update_order!(prob,ws,c.order)
+            update_order!(prob,ws,new_order)
             generate_weights!(prob.method,prob,ws,L=L)
         end
 
