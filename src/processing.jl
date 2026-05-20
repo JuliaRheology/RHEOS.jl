@@ -1235,7 +1235,8 @@ function _modelpredict(data::RheoTimeData, equation;deriv_method=GL())
 
             update_order!(prob,ws,c.order)
             generate_weights!(prob.method,prob,ws)
-            bin_coeffs[c.order] = ws.weights
+            
+            bin_coeffs[c.order] .= ws.weights
         else
             denominator += c.coef / (dt^c.order)
         end
@@ -1396,7 +1397,6 @@ function _modelpredictFFT_strain(data::RheoTimeData, equation)
 
     # Pre-allocate each buffer
     input_padded = zeros(Float64, L)
-    input_padded[1:n] .= input
 
     input_padded[1] = 0.0
     input_padded[2:n+1] .= input[1:n]   
