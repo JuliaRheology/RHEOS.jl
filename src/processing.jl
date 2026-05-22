@@ -1389,8 +1389,7 @@ function _modelpredictFFT_strain(data::RheoTimeData, equation)
 
     n  = length(data.t)
     dt = data.t[2] - data.t[1]
-    padding_factor = 4
-    L  = nextpow(2, padding_factor * n)
+    L  = nextpow(2, 2n - 1)
 
     prob = NumDiffProblem(dt=dt,order=0.5,n=length(data.t),method=GL())
     ws = init_workspace(prob,L=L)
@@ -1409,7 +1408,11 @@ function _modelpredictFFT_strain(data::RheoTimeData, equation)
     ifft_buf = zeros(Float64, L)
 
     # Find the maximum order of the derivatives of the strain terms to shift each term accordingly. This is done to avoid issues with the FFT.
-    max_order = maximum([c.order for c in unknown])
+    if any(c -> c.order == 0.0, unknown)
+        max_order = 0.0
+    else
+        max_order = maximum([c.order for c in unknown])
+    end
 
     # Prepare FFTW plans using MEASURE as flag. Since the input is real, we can use rfft and irfft.
     forward_plan = plan_rfft(input_padded; flags=FFTW.ESTIMATE)
