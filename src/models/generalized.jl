@@ -15,6 +15,8 @@ SLS2 = RheoModelClass(
               Jbar(s) = (1/s^2)*(G₀/s+G₁*1/(s+tau1)+G₂*1/(s+tau2))
               invLaplace(s -> Jbar(s), t)
             end,
+                #TODO: Placeholder eq
+        equation = (ϵ =((1.0,1.0),), σ =((1.0,1.0),)),
         # Network
         info= "
                                        ___

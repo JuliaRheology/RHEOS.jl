@@ -139,7 +139,7 @@ function _extractfitdata()
 
     # Define the rheological model
     model = RheoModel(SLS_Zener, (η = 1, kᵦ = 1, kᵧ = 1))
-    SLS_predict = modelpredict(dhold_stress, model)
+    SLS_predict = modelpredict(dhold_stress, model,Convolution())
     data = SLS_predict
 
     # Fit the model to the data

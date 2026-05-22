@@ -26,13 +26,33 @@ Fract_PT = RheoModelClass(
                   numerator = (cᵧ * ω^γ) * sin(γ*π/2) * ((cₐ * ω^a)^2 + (cᵦ * ω^β)^2) + (cᵧ * ω^γ)^2 * ((cₐ * ω^a)*sin(a*π/2)+(cᵦ * ω^β)*sin(β*π/2)) + (cₐ * ω^a) * (cᵦ * ω^β) * (cᵧ * ω^γ) * (sin((a-β-γ)*π/2)+sin((β-a-γ)*π/2))
                   numerator/denominator
                 end,
+
+        # equation = (ϵ =((:cᵧ,:a),(:((cₐ * cᵧ)/ cᵦ),:(2a-β))), σ =((1.0,0.0),(:((cₐ + cᵧ)/ cᵦ),:(a-β)))),
+        equation = (ϵ =((:cₐ,:a),(:cᵦ,:β)), σ =((1.0,0.0),(:(cₐ/cᵧ),:(a-γ)),(:(cᵦ/cᵧ),:(β-γ)))),
+
         # Constraints
-        constraint = quote
-                 all([   (a<1) & (a>0)
-                         (β<1) & (β>0)
-                          -a+β < 0
-                         (γ<1) & (γ>0)] )
-                end,
+        constraint = [
+            quote
+                a-1
+            end,
+            quote
+                -a
+            end,
+            quote
+                β-1
+            end,
+            quote
+                -β
+            end,
+            quote
+                -a+β
+            end,
+            quote
+                γ-1
+            end,
+            quote
+                -γ
+            end],
           # Network
           info= "
                      _________╱╲_________
@@ -80,10 +100,15 @@ FractSLS_PT = RheoModelClass(
                   numerator = Zkᵦ^2*(Zcₐ*ω^a)*sin(a*π/2)
                   numerator/denominator
                 end,
+
+          equation = (ϵ =((:cₐ,:a),(:kᵦ,0.0)), σ =((1.0,0.0),(:(cₐ/kᵧ),:a),(:(kᵦ/kᵧ),0.0))),
         # Constraints
-          constraint = quote
-                 (a<1) & (a>0)
+          constraint = [quote
+                 a-1
                 end,
+                quote
+                    -a
+                end],
           # Network
           info= "
                      _________╱╲_________
@@ -133,6 +158,9 @@ SLS_PT = RheoModelClass(
                   numerator = ω*τ*Zkᵦ
                   numerator/denominator
                 end,
+
+          equation = (ϵ =((:η,1.0),(:kᵦ,0.0)), σ =((1.0,0.0),(:(η/kᵧ),:(1.0)),(:(kᵦ/kᵧ),0.0))),
+
           # Network
           info= "
                              ___
@@ -187,10 +215,15 @@ FractJeffreys_PT = RheoModelClass(
                       numerator = ((Zcᵦ*ω^β)^2)*(Zηₐ*ω) + ((Zηₐ*ω)^2)*(Zcᵦ*ω^β)*sin(β*π/2)
                       numerator/denominator + Zηᵧ*ω
                     end,
+                        
+              equation = (ϵ =((:ηₐ,1.0),(:cᵦ,:β)), σ =((1.0,0.0),(:(ηₐ/ηᵧ),0.0),(:(cᵦ/ηᵧ),:(β-1.0)))),
               # Constraints
-              constraint = quote
-                       (β<1) & (β>0)
+              constraint = [quote
+                       β-1
                       end,
+                      quote
+                        -β
+                      end],
               # Network
               info= "
                                       ___
@@ -239,6 +272,8 @@ Jeffreys_PT = RheoModelClass(
                   numerator = (Zk^2)*(Zηₐ*ω)
                   numerator/denominator + Zηᵧ*ω
                 end,
+
+        equation = (ϵ =((:ηₐ,1.0),(:k,0.0)), σ =((1.0,0.0),(:(ηₐ/ηᵧ),0.0),(:(k/ηᵧ),:(-1.0)))),
           # Network
           info= "
                              ___

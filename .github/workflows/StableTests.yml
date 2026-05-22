@@ -5,6 +5,7 @@ on:
     branches: # add more branches as necessary
       - master
       - dev
+      - DiffEqu
     tags: "*"
   pull_request:
 

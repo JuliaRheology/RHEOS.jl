@@ -563,7 +563,7 @@ function _leastsquares_init_const_nonsing_ramp(tol)
     modulus = (t, params)->(params[1]*exp.(-t/params[2]))
 
     init_params = [1.0, 1.0]
-    results = RHEOS.leastsquares_init(init_params, [0.90, 0.90], [1.1, 1.1], modulus, t, dt, ramp_loading_derivative, exact_response; constant_sampling = true)
+    results = RHEOS.leastsquares_init(init_params, [0.90, 0.90], [1.1, 1.1], modulus, t, dt, ramp_loading_derivative, exact_response,nothing,Convolution(); constant_sampling = true)
 
     found_params = results[2]
 
@@ -581,7 +581,7 @@ function _leastsquares_init_var_nonsing_ramp(tol)
     modulus = (t, params)->(params[1]*exp.(-t/params[2]))
 
     init_params = [1.0, 1.0]
-    results = RHEOS.leastsquares_init(init_params, [0.90, 0.90], [1.1, 1.1], modulus, t, dt, ramp_loading_derivative, exact_response; constant_sampling = false)
+    results = RHEOS.leastsquares_init(init_params, [0.90, 0.90], [1.1, 1.1], modulus, t, dt, ramp_loading_derivative, exact_response,nothing,Convolution(); constant_sampling = false)
 
     found_params = results[2]
 
@@ -603,7 +603,7 @@ function _leastsquares_init_const_sing_ramp(tol)
 
     modulus = (t, params)->t.^(-params[1])
     init_params = [0.5]
-    results = RHEOS.leastsquares_init(init_params, [0.3], [0.7], modulus, t, dt, loading_derivative, exact_response; constant_sampling = true, singularity=true)
+    results = RHEOS.leastsquares_init(init_params, [0.3], [0.7], modulus, t, dt, loading_derivative, exact_response,nothing,Convolution(); constant_sampling = true, singularity=true)
     found_params = results[2]
 
     isapprox(found_params, init_params, atol=tol)
@@ -624,7 +624,7 @@ function _leastsquares_init_var_sing_ramp(tol)
 
     modulus = (t, params)->t.^(-params[1])
     init_params = [0.5]
-    results = RHEOS.leastsquares_init(init_params, [0.3], [0.7], modulus, t, dt, loading_derivative, exact_response; constant_sampling = false, singularity=true)
+    results = RHEOS.leastsquares_init(init_params, [0.3], [0.7], modulus, t, dt, loading_derivative, exact_response,nothing,Convolution(); constant_sampling = false, singularity=true)
     found_params = results[2]
 
     isapprox(found_params, init_params, atol=tol)
@@ -688,3 +688,185 @@ function _leastsquares_stepinit_sing_ramp(tol)
     isapprox(params, found_params, atol=tol)
 end
 @test _leastsquares_stepinit_sing_ramp(tol)
+
+
+@testset "Differential const_functions" begin
+    
+
+    function _obj_const(tol)
+        #Test that the cost function of a certain Fract_Maxwell model 
+        #    with correct parameters is lower than tol
+        
+        params = (cₐ=0.27, a=0.8, cᵦ=0.56, β=0.35)
+        data = timeline(t_start=0.0, t_end=10.0,step=0.05)
+        data = strainfunction(data, ramp(offset=0.0,gradient=1.0))
+        model= RheoModel(Fract_Maxwell,params)
+        modelpred = modelpredict(data,model)
+
+        
+        t_zeroed = data.t .- minimum(data.t)
+        time_series = convert(Vector{Float64},t_zeroed)
+        dt = data.t[2] - data.t[1]
+        deriv = RHEOS.derivBD
+        strain = modelpred.ϵ
+        strain_deriv = deriv(modelpred.ϵ, modelpred.t)
+        stress = modelpred.σ
+        stress_deriv = deriv(modelpred.σ, modelpred.t)
+        data_struct_GL = RHEOS.SupportVectors(
+            zeros(length(time_series)),
+            zeros(length(time_series))
+        )
+        
+        prob_GL = RHEOS.NumDiffProblem(dt=dt,order=0.5,n=length(time_series),method=GL())
+        ws_GL = RHEOS.init_workspace(prob_GL)
+
+        data_struct_GLFFT = RHEOS.SupportVectors(
+            zeros(length(time_series)),
+            zeros(length(time_series))
+        )
+        
+        prob_GLFFT = RHEOS.NumDiffProblem(dt=dt,order=0.5,n=length(time_series),method=GLFFT())
+        ws_GLFFT = RHEOS.init_workspace(prob_GLFFT)
+        return RHEOS.obj_const([0.27,0.8, 0.56,0.35], Fract_Maxwell.C, time_series,dt,strain,stress,data_struct_GL,prob_GL,ws_GL, Differential()) < tol &&
+               RHEOS.obj_const([0.27,0.8, 0.56,0.35], Fract_Maxwell.C, time_series,dt,strain,stress,data_struct_GLFFT,prob_GLFFT,ws_GLFFT, Differential()) < tol
+
+    end
+
+    @test _obj_const(tol)
+
+
+    function _leastsquare_init(tol)
+        params = (cₐ=0.27, a=0.8, cᵦ=0.56, β=0.35)
+        dt=0.05
+        data = timeline(t_start=0.0, t_end=10.0,step=dt)
+        data = strainfunction(data, ramp(offset=0.0,gradient=1.0))
+        model= RheoModel(Fract_Maxwell,params)
+        modelpred = modelpredict(data,model)
+
+        t_zeroed = data.t .- minimum(data.t)
+
+        equation = Fract_Maxwell.C
+
+        p0a = RHEOS.fill_init_params(Fract_Maxwell, RHEOS.symbol_to_unicode((cₐ=0.35, a=0.6, cᵦ=0.7, β=0.25)))
+        loa = RHEOS.fill_lower_bounds(Fract_Maxwell, RHEOS.symbol_to_unicode(nothing))
+        hia = RHEOS.fill_upper_bounds(Fract_Maxwell, RHEOS.symbol_to_unicode(nothing))
+
+        (minf, minx, ret) = RHEOS.leastsquares_init(p0a,
+                                loa,
+                                hia,
+                                equation,
+                                strain_imposed,
+                                t_zeroed,
+                                dt,
+                                modelpred.ϵ,
+                                modelpred.σ,
+                                model._constraint,
+                                Differential();
+                                opttimeout=60)
+        @test all(@. isapprox(minx, [0.27,0.8, 0.56,0.35];atol = 10*tol))
+
+        (minf, minx, ret) = RHEOS.leastsquares_init(p0a,
+                                loa,
+                                hia,
+                                equation,
+                                strain_imposed,
+                                t_zeroed,
+                                dt,
+                                modelpred.ϵ,
+                                modelpred.σ,
+                                model._constraint,
+                                Differential();
+                                method=GLFFT(),
+                                opttimeout=60)
+        @test all(@. isapprox(minx, [0.27,0.8, 0.56,0.35];atol = 10*tol))
+
+        loa = RHEOS.fill_lower_bounds(Fract_Maxwell, RHEOS.symbol_to_unicode((cₐ=0, a=0, cᵦ=0, β=0)))
+        hia = RHEOS.fill_upper_bounds(Fract_Maxwell, RHEOS.symbol_to_unicode((a=1.0, β=1.0)))
+
+        (minf, minx, ret) = RHEOS.leastsquares_init(p0a,
+                                loa,
+                                hia,
+                                equation,
+                                strain_imposed,
+                                t_zeroed,
+                                dt,
+                                modelpred.ϵ,
+                                modelpred.σ,
+                                model._constraint,
+                                Differential();
+                                opttimeout=60,
+                                allowconstraints=false)
+        @test all(@. isapprox(minx, [0.27,0.8, 0.56,0.35];atol = 10*tol))
+    end
+
+    function _leastsquare_init_exact(tol)
+        cᵦ = 0.2
+        β = 0.6
+        params = (cᵦ=cᵦ, β=β)
+        dt=0.05
+        data = timeline(t_start=0.0, t_end=10.0,step=dt)
+        strain = strainfunction(data, ramp(offset=0.0,gradient=1.0))
+        
+        #Ramp
+        response_ramp_SP(t_vec, gradient) = (cᵦ * gradient) .* (t_vec .^ (1 - β)) ./ RHEOS.gamma(2 - β)
+
+        σ = response_ramp_SP(data.t, 1.0)
+
+        t_zeroed = data.t .- minimum(data.t)
+
+        equation = Springpot.C
+
+        p0a = RHEOS.fill_init_params(Springpot, RHEOS.symbol_to_unicode(nothing))
+        loa = RHEOS.fill_lower_bounds(Springpot, RHEOS.symbol_to_unicode(nothing))
+        hia = RHEOS.fill_upper_bounds(Springpot, RHEOS.symbol_to_unicode(nothing))
+
+        (minf, minx, ret) = RHEOS.leastsquares_init(p0a,
+                                loa,
+                                hia,
+                                equation,
+                                strain_imposed,
+                                t_zeroed,
+                                dt,
+                                strain.ϵ,
+                                σ,
+                                nothing,
+                                Differential();
+                                opttimeout=60)
+        println(minx)
+        @test all(@. isapprox(minx, [cᵦ,β];atol = 10*tol))
+
+        #Step
+        strain = strainfunction(data, hstep(offset=0.0,amp=1.0))
+        σ .= cᵦ * 1.0 * data.t.^(-β) / RHEOS.gamma(1 - β)
+        σ[1] = cᵦ * (1.0 / (dt^β))
+
+        t_zeroed = data.t .- minimum(data.t)
+
+        equation = Springpot.C
+
+        p0a = RHEOS.fill_init_params(Springpot, RHEOS.symbol_to_unicode(nothing))
+        loa = RHEOS.fill_lower_bounds(Springpot, RHEOS.symbol_to_unicode(nothing))
+        hia = RHEOS.fill_upper_bounds(Springpot, RHEOS.symbol_to_unicode(nothing))
+
+        (minf, minx, ret) = RHEOS.leastsquares_init(p0a,
+                                loa,
+                                hia,
+                                equation,
+                                strain_imposed,
+                                t_zeroed,
+                                dt,
+                                strain.ϵ,
+                                σ,
+                                nothing,
+                                Differential();
+                                opttimeout=60)
+        println(minx)
+        @test all(@. isapprox(minx, [cᵦ,β];atol = 10*tol))
+    end
+
+    _leastsquare_init(tol)
+    _leastsquare_init_exact(tol)
+end
+
+
+
